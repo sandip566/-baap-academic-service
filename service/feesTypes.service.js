@@ -1,25 +1,26 @@
 const { default: mongoose } = require("mongoose");
-const FeesModel = require("../schema/fees.schema");
+const FeesTypesModel = require("../schema/feesTypes.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service")
 
-class FeesService extends BaseService {
+class FeesTypesService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    async getFeesByParams(groupId, memberId, feesType) {
+    async createFeesType(feesTypeData) {
+        return this.create(feesTypeData);
+    }
+
+    async getFeesTypesByParams(groupId, feesType) {
         const query = {
-            groupId: groupId,
-            memberId: memberId
+            groupId: groupId
         };
     
         if (feesType) {
             query.feesType = feesType;
         }
-        console.log(query);
         return this.getAllByCriteria(query);
     }
-
 }
 
-module.exports = new FeesService(FeesModel, "fees");
+module.exports = new FeesTypesService(FeesTypesModel, "feesTypes");
