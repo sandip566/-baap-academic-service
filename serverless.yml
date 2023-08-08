@@ -1,0 +1,18 @@
+service: baap-academic-service
+frameworkVersion: "3"
+
+plugins:
+    - serverless-offline
+
+provider:
+    name: aws
+    runtime: nodejs16.x
+    stage: ${opt:stage, 'dev'}
+    region: us-east-2
+    memorySize: 128
+
+functions:
+    api:
+        handler: app.handler
+        events:
+            - httpApi: "*"
