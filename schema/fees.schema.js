@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const feesSchema = new mongoose.Schema({
-  groupId: { type: String, required: true },
-  // memberId: { type: String, required: true },
+  groupId: { type: Number, required: true },
+  memberId: { type: String, required: true },
   userId: { type: String, required: true },
   feesType: { type: String, enum: ['BCA'], required: true },
   amount: { type: Number, required: true },
