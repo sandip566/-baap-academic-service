@@ -14,10 +14,10 @@ const verifyToken = async (req, res, next) => {
             req.user = decodedUser;
             next();
         } catch (error) {
-            res.status(401).send({ status: "Failed", erroMessage: "UnAuthorized - Invalid token" });
+            res.status(401).send({ status: "Failed", message: "UnAuthorized - Invalid token" });
         }
     } else {
-        res.status(401).send({ status: "Failed", erroMessage: "UnAuthorized - Token Not found" });
+        res.status(401).send({ status: "Failed", message: "UnAuthorized - Token Not found" });
     }
 };
 module.exports = verifyToken;
