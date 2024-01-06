@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const feesSchema = new mongoose.Schema({
   groupId: { type: Number, required: true },
-  memberId: { type: String, required: true },
+  empId: { type: Number, required: true },
   userId: { type: String, required: true },
   feesType: { type: String, enum: ['BCA'], required: true },
   amount: { type: Number, required: true },
