@@ -14,7 +14,7 @@ app.use(cors());
 require('./routes')(app);
 
 app.get("/", async (req, res) => {
-  return res.json({ message: "Auth API" });
+  return res.json({ message: "baap academics api dev" });
 });
 
 // TODO :: Need to check if there is a better way to handled global exceptions to avoid app crashing issues
