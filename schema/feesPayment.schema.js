@@ -46,7 +46,7 @@ const feesPaymentSchema = new mongoose.Schema(
         },
         studentId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "Student",
+            ref: "student",
             autopopulate: true,
         },
     },

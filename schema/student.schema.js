@@ -87,5 +87,5 @@ const student = new mongoose.Schema(
   { strict: false, timestamps: true }
 );
 student.plugin(require('mongoose-autopopulate'))
-const studentModel = mongoose.model('Student', student);
+const studentModel = mongoose.model('student', student);
 module.exports = studentModel;
