@@ -48,7 +48,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
-
 });
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {

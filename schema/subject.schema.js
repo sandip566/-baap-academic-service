@@ -22,7 +22,6 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             //required: true
         },
-
     },
     { strict: false, timestamps: true }
 );

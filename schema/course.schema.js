@@ -56,7 +56,6 @@ const courseSchema = new mongoose.Schema(
             autopopulate: true,
             ref: 'subject'
         },
-
     },
     { strict: false, timestamps: true }
 );

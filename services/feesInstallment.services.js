@@ -12,7 +12,7 @@ class feesInstallmentService extends BaseService {
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.installmentId) query.installmentId = criteria.installmentId;
         if (criteria.memberId) query.memberId = criteria.memberId;
-        if(criteria.installmentNo)query.installmentNo=criteria.installmentNo
+        if (criteria.installmentNo) query.installmentNo = criteria.installmentNo
 
         return this.preparePaginationAndReturnData(query, criteria,);
     }

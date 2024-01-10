@@ -15,9 +15,9 @@ class VisitorService extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteVisitor(vendorId, groupId) { 
+    async deleteVisitor(vendorId, groupId) {
         try {
-            return await this.dbModel.deleteOne({ visitorId: vendorId, groupId: groupId }); 
+            return await this.dbModel.deleteOne({ visitorId: vendorId, groupId: groupId });
         } catch (error) {
             throw error;
         }
@@ -36,5 +36,4 @@ class VisitorService extends BaseService {
         }
     }
 }
-
 module.exports = new VisitorService(VisitorModel, 'visitor');

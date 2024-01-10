@@ -25,14 +25,14 @@ const feesInstallmentSchema = new mongoose.Schema(
         installmentAmount: {
             type: Number,
         },
-        isPaid:{
-            type:Boolean,
-            default:false
+        isPaid: {
+            type: Boolean,
+            default: false
         },
-        installmentNo:{
-            type:Number,
-            require:true
-        }, 
+        installmentNo: {
+            type: Number,
+            require: true
+        },
         reciptNo: {
             type: Number,
         },

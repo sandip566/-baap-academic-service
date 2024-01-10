@@ -14,6 +14,7 @@ class feesPaymentService extends BaseService {
     if (criteria.installmentId) query.installmentId = criteria.installmentId;
     return this.preparePaginationAndReturnData(query, criteria)
   }
+
   async deleteFeesPaymentById(feesPaymentId, groupId) {
     try {
       return await feesPaymentModel.deleteOne(feesPaymentId, groupId);
@@ -21,6 +22,7 @@ class feesPaymentService extends BaseService {
       throw error;
     }
   }
+
   async updateFeesPaymentById(feesPaymentId, groupId, newData) {
     try {
       const updateFee = await feesPaymentModel.findOneAndUpdate(
