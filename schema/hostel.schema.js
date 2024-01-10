@@ -12,8 +12,9 @@ const HostelSchema = new mongoose.Schema(
         },
         student: {
             type: mongoose.Schema.Types.ObjectId,
+            autopopulate:true,
             ref: 'student',
-            required: true
+            required:true
         },
         admissionDate: {
             type: Date,
@@ -31,5 +32,6 @@ const HostelSchema = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
+HostelSchema.plugin(require("mongoose-autopopulate"));
 const HostelModel = mongoose.model("hostel", HostelSchema);
 module.exports = HostelModel;
