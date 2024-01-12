@@ -1,6 +1,5 @@
 const feesPaymentModel = require("../schema/feesPayment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-
 class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
@@ -32,6 +31,13 @@ class feesPaymentService extends BaseService {
     } catch (error) {
       throw error;
     }
+  }
+  getAllFeesPaymentByStudentId(studentId, criteria) {
+    const query = {
+      studentId: studentId,
+      // Add other criteria if needed
+    };
+    return this.preparePaginationAndReturnData(query, criteria);
   }
 }
 module.exports = new feesPaymentService(feesPaymentModel, "Fee");
