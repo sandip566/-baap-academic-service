@@ -52,10 +52,38 @@ const courseSchema = new mongoose.Schema(
             ref: 'division'
         },
         subjects: {
-            type: [mongoose.Schema.Types.ObjectId],
-            autopopulate: true,
-            ref: 'subject'
-        },
+            sem1: {
+                type: [mongoose.Schema.Types.ObjectId],
+                autopopulate: true,
+                ref: 'subject'
+            },
+            sem2: {
+                type: [mongoose.Schema.Types.ObjectId],
+                autopopulate: true,
+                ref: 'subject'
+            },
+            sem3: {
+                type: [mongoose.Schema.Types.ObjectId],
+                autopopulate: true,
+                ref: 'subject'
+            },
+            sem4: {
+                type: [mongoose.Schema.Types.ObjectId],
+                autopopulate: true,
+                ref: 'subject'
+            },
+            sem5: {
+                type: [mongoose.Schema.Types.ObjectId],
+                autopopulate: true,
+                ref: 'subject'
+            },
+            sem6: {
+                type: [mongoose.Schema.Types.ObjectId],
+                autopopulate: true,
+                ref: 'subject'
+            }
+        }
+
     },
     { strict: false, timestamps: true }
 );
