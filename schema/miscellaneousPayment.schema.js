@@ -50,7 +50,7 @@ const miscellaneousPaymentSchema = new mongoose.Schema(
         },
         studentId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "student",
+            ref: "Student",
             autopopulate: true
         },
     },
