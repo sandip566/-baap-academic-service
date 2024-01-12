@@ -15,7 +15,7 @@ const feesPaymentSchema = new mongoose.Schema(
         installmentId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "feesInstallment",
-            autopopulate: true,
+            //autopopulate: true,
         },
         paymentDate: {
             type: Date,
@@ -34,10 +34,10 @@ const feesPaymentSchema = new mongoose.Schema(
                 autopopulate: true,
             },
         },
-        feesTempletId: {
+        feesTemplateId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "feesTemplate",
-            autopopulate: true,
+            //autopopulate: true,
         },
         academicYearsId: {
             type: mongoose.Schema.Types.ObjectId,

@@ -24,7 +24,6 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-
     async updateFeesInstallmentById(installmentId, groupId, newData) {
         try {
             const updateFee = await feesInstallmentModel.findOneAndUpdate(
@@ -37,7 +36,6 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-
     async getStudentById(studentId) {
         try {
             const student = await Student.findOne({ _id: studentId });
