@@ -120,9 +120,12 @@ router.get("/fees-summary/:studentId", async (req, res) => {
       feesSummary.installmentDetails.push({
         installmentId: installment._id,
         installmentNumber: installment.installmentNo,
+        reciptNo: installment.reciptNo,
         installmentAmount: installment.installmentAmount,
         paidAmount: paidAmountForInstallment,
-        remainingAmount: remainingAmountForInstallment
+        remainingAmount: remainingAmountForInstallment,
+        dueDate: installment.dueDate,
+        isPaid: installment.isPaid,
       });
     }
     res.json(feesSummary);
