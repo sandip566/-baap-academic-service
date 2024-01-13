@@ -19,27 +19,22 @@ router.post(
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
-
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.put("/:id", async (req, res) => {
   const serviceResponse = await service.updateById(req.params.id, req.body);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.get("/:id", async (req, res) => {
   const serviceResponse = await service.getById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.get("/all/FeesPayment", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponsehelper.sendResponse(res, serviceResponse);
-});
-
+});  
 router.get("/getAllFeesPayment/groupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
@@ -125,9 +120,12 @@ router.get("/fees-summary/:studentId", async (req, res) => {
       feesSummary.installmentDetails.push({
         installmentId: installment._id,
         installmentNumber: installment.installmentNo,
+        reciptNo: installment.reciptNo,
         installmentAmount: installment.installmentAmount,
         paidAmount: paidAmountForInstallment,
-        remainingAmount: remainingAmountForInstallment
+        remainingAmount: remainingAmountForInstallment,
+        dueDate: installment.dueDate,
+        isPaid: installment.isPaid,
       });
     }
     res.json(feesSummary);
