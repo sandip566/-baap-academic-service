@@ -37,7 +37,7 @@ const feesPaymentSchema = new mongoose.Schema(
         feesTemplateId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "feesTemplate",
-            //autopopulate: true,
+            autopopulate: true,
         },
         academicYearsId: {
             type: mongoose.Schema.Types.ObjectId,
