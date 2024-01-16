@@ -98,7 +98,6 @@ router.put("/groupId/:groupId/installmentId/:installmentId", async (req, res) =>
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 router.get('/installments/:studentId', async (req, res) => {
     try {
         const studentId = req.params.studentId;
