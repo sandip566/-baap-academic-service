@@ -35,5 +35,13 @@ class feesPaymentService extends BaseService {
       throw error;
     }
   }
+
+  getAllFeesPaymentByStudentId(studentId, criteria) {
+    const query = {
+      studentId: studentId,
+      // Add other criteria if needed
+    };
+    return this.preparePaginationAndReturnData(query, criteria);
+  }
 }
 module.exports = new feesPaymentService(feesPaymentModel, "Fee");

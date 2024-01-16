@@ -1,6 +1,7 @@
 const feesInstallmentModel = require("../schema/feesInstallment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const Student = require("../schema/student.schema")
+const Student = require("../schema/student.schema");
+
 class feesInstallmentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -37,7 +38,6 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-
     async getStudentById(studentId) {
         try {
             const student = await Student.findOne({ _id: studentId });

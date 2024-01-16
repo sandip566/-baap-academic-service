@@ -1,14 +1,13 @@
 const mongoose = require('mongoose');
-
 const miscellaneousPaymentSchema = new mongoose.Schema(
     {
-        groupId: {
-            type: Number,
-            default: 1
-        },
         miscellaneousPaymentId: {
             type: Number,
             require: true
+        },
+        groupId: {
+            type: Number,
+            default: 1
         },
         amount: {
             type: Number,
