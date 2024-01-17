@@ -4,7 +4,12 @@ const noticeBoardSchema = new mongoose.Schema(
     {
         noticeBoardNo: {
             type: Number,
-            require: true
+            require: true,
+            default:1
+        },
+        groupId:{
+         type:Number,
+         require:true
         },
         title: {
             type: String
