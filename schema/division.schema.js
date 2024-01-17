@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
@@ -11,20 +10,33 @@ const DivisionSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
-        divisionName: {
+        Name: {
             type: String,
             required: true
         },
-        startTime: {
+        Class:{
+            type:mongoose.Schema.Types.ObjectId,
+            autopopulate:true,
+            ref: 'class'
+        },
+        StartTime: {
             type: String,
             required: true
         },
-        endTime: {
+        EndTime: {
             type: String,
             required: true
+        },
+        Classroom: {
+            type: String,
+            required: true
+        },
+        Incharge: {
+            type: String
         }
     },
     { strict: false, timestamps: true }
 );
+DivisionSchema.plugin(require("mongoose-autopopulate"));
 const DivisionModel = mongoose.model("division", DivisionSchema);
 module.exports = DivisionModel;
