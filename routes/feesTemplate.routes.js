@@ -14,9 +14,6 @@ router.post(
         }
         const feesTemplateId = +Date.now();
         req.body.feesTemplateId = feesTemplateId;
-        const { tutionFees, libraryFees, examFees, hostelFees, messFees, admissionFees } = req.body;
-        const totalFees = tutionFees + libraryFees + examFees + hostelFees + messFees + admissionFees;
-        req.body.totalFees = totalFees;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
