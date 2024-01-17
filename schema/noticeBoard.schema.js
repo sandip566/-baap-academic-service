@@ -9,7 +9,8 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         groupId:{
          type:Number,
-         require:true
+         require:true,
+         default:1
         },
         title: {
             type: String
