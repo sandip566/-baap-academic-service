@@ -4,12 +4,14 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+
 //create reciptNo sequential
 let receiptCounter = 1;
 function generateReceiptNumber() {
     const sequentialPart = receiptCounter++;
     return `${sequentialPart.toString().padStart(0, "0")}`;
 }
+
 //create installmentNo sequential
 let installmentCounter = 1;
 function generateInstallmentNumber() {
