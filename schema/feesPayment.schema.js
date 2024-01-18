@@ -22,7 +22,7 @@ const feesPaymentSchema = new mongoose.Schema(
         },
         mode: {
             type: String,
-            enum: ["ONLINE", "CASH","creditCard","bank transfer"],
+            enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
         },
         // transactionId: {
         //     type:Number

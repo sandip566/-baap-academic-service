@@ -47,11 +47,9 @@ router.post('/issue-book', async (req, res) => {
             issuedDate: issuedDate
         };
         const createdReservation = await service.create(newReservation);
-
         await Book.findOneAndUpdate({ title: title, availableCount: { $gt: 0 } },
             { $inc: { availableCount: -1 } },
             { new: true });
-
         res.status(201).json({ success: true, reservation: createdReservation });
     } catch (error) {
         console.error(error);
@@ -62,25 +60,19 @@ router.post('/issue-book', async (req, res) => {
 router.post('/return-book', async (req, res) => {
     try {
         const { groupId, bookId, title, returnDate } = req.body;
-
         const existingReservation = await bookIssueLogModel.findOne({ groupId, bookId });
-
         if (!existingReservation) {
             return res.status(400).json({ success: false, error: 'The book is not currently issued to the specified group.' });
         }
-
         const updatedReservation = await service.updateBookIssueLogById(existingReservation._id, groupId, { returned: true, returnDate: new Date() });
-
         await Book.findOneAndUpdate({ title: title, availableCount: { $gt: 0 } },
             { $inc: { availableCount: 1 } });
-
         res.status(200).json({ success: true, reservation: updatedReservation });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, error: 'Internal Server Error' });
     }
 });
-
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);

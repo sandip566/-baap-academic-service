@@ -53,6 +53,7 @@ router.get("/all/FeesInstallment", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getFeesInstallment/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -84,6 +85,7 @@ router.delete("/groupId/:groupId/installmentId/:installmentId", async (req, res)
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 router.put("/groupId/:groupId/installmentId/:installmentId", async (req, res) => {
     try {
         const installmentId = req.params.installmentId;
@@ -128,5 +130,4 @@ router.get('/installments/:studentId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-  
 module.exports = router;

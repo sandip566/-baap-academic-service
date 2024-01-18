@@ -1,5 +1,6 @@
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const studentModel = require("../schema/student.schema");
+
 class Service extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -35,6 +36,5 @@ class Service extends BaseService {
             throw error;
         }
     }
-
-  }
+}
 module.exports = new Service(studentModel, "student");
