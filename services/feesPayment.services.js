@@ -22,12 +22,12 @@ class feesPaymentService extends BaseService {
   }
   async updateFeesPaymentById(feesPaymentId, groupId, newData) {
     try {
-      const updateFee = await feesPaymentModel.findOneAndUpdate(
+      const updateFeesPayment = await feesPaymentModel.findOneAndUpdate(
         { feesPaymentId: feesPaymentId, groupId: groupId },
         newData,
         { new: true }
       );
-      return updateFee;
+      return updateFeesPayment;
     } catch (error) {
       throw error;
     }
@@ -40,4 +40,4 @@ class feesPaymentService extends BaseService {
     return this.preparePaginationAndReturnData(query, criteria);
   }
 }
-module.exports = new feesPaymentService(feesPaymentModel, "Fee");
+module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");

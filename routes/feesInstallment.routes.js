@@ -4,7 +4,8 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const { MongoClient } = require('mongodb');
+const mongoURI = 'mongodb://127.0.0.1:27017/baap-acadamic-local';
 //create reciptNo sequential
 let receiptCounter = 1;
 function generateReceiptNumber() {
@@ -128,5 +129,33 @@ router.get('/installments/:studentId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.get('/ph',async (req, res) => {
+    try {
+      const client = new MongoClient(mongoURI);
+      await client.connect();
+      const usersCollection = client.db().collection('feesinstallments');
+      const pipeline = [
+        {
+          $group: {
+            _id: null,
+            abc:{
+             $sum:"$installmentAmount"
+            }
+          }
+        }
+      ];
+      const result = await usersCollection.aggregate(pipeline, { maxTimeMS: 60000, allowDiskUse: true }).toArray();
+      res.json(result)
+      await client.close();
+  
+      // Extract the totalFees field from the first element of the result array
+      
+    } catch (error) {
+      console.error(error);
+      res.status(500).send('Internal Server Error');
+    }
+  });
+  
   
 module.exports = router;

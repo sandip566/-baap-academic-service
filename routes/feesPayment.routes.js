@@ -68,6 +68,23 @@ router.delete("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res)
   }
 });
 
+router.put("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res) => {
+  try {
+      const feesPaymentId = req.params.feesPaymentId;
+      const groupId = req.params.groupId;
+      const newData = req.body;
+      const updatefeesPaymentId = await service.updateFeesPaymentById(feesPaymentId, groupId, newData);
+      if (!updatefeesPaymentId) {
+          res.status(404).json({ error: 'updatefeesPaymentId data not found to update' });
+      } else {
+          res.status(200).json(updatefeesPaymentId);
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 router.get("/fees-summary/:studentId", async (req, res) => {
   try {
     const studentId = req.params.studentId;
