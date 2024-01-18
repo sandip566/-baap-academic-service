@@ -1,4 +1,4 @@
-const SubjectModel = require("../schema/subject.schema");
+const SubjectModel = require("../schema/subjects.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
 class SubjectService extends BaseService {

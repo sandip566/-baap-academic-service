@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/course.services");
+const service = require("../services/courses.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
     "/",
-    checkSchema(require("../dto/course.dto")),
+    checkSchema(require('../dto/courses.dto')),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -42,9 +42,9 @@ router.get("/all/course", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        location: req.query.location,
-        name: req.query.name,
-        phone: req.query.phone,
+        courseId: req.query.courseId,
+        CourseName: req.query.CourseName,
+        University: req.query.University,
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

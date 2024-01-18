@@ -4,8 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/feesPayment.services");
 const Service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
-const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper")
 router.post(
   "/",
   checkSchema(require("../dto/feesPayment.dto")),
@@ -70,30 +69,12 @@ router.delete("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res)
   }
 });
 
-router.put("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res) => {
-  try {
-    const feesPaymentId = req.params.feesPaymentId;
-    const groupId = req.params.groupId;
-    const newData = req.body;
-    const updateFeesPayment = await service.updateFeesPaymentById(feesPaymentId, groupId, newData);
-    if (!updateFeesPayment) {
-      res.status(404).json({ error: 'FeesPayment data not found to update' });
-    } else {
-      res.status(200).json(updateFeesPayment);
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
 router.get("/fees-summary/:studentId", async (req, res) => {
   try {
     const studentId = req.params.studentId;
     const installments = await Service.getInstallmentsByStudentId(studentId);
     const paymentsResponse = await service.getAllFeesPaymentByStudentId(studentId, {});
     const payments = paymentsResponse.data.items;
-    //console.log(payments)
     if (!Array.isArray(payments)) {
       console.error("Error: Payments is not an array");
       return res.status(500).json({ error: "Internal Server Error" });
@@ -110,18 +91,18 @@ router.get("/fees-summary/:studentId", async (req, res) => {
       const paidAmountForInstallment = payments
         .filter(payment => {
           if (payment && payment.installmentId && payment.installmentId._id) {
-            //console.log("payment.installmentId:", payment.installmentId._id);
-            // console.log(installment._id)
             return payment.installmentId._id.equals(installment._id);
           } else {
             console.error('payment, payment.installmentId, or payment.installmentId._id is null or undefined.');
             return false;
           }
-        }).reduce((total, payment) => total + payment.paidAmount, 0);
-      feesSummary.totalPaidAmount += paidAmountForInstallment;
+        })
+        .reduce((total, payment) => total + payment.paidAmount, 0);
       const remainingAmountForInstallment = installment.installmentAmount - paidAmountForInstallment;
+      feesSummary.totalPaidAmount += paidAmountForInstallment;
       feesSummary.remainingAmount += remainingAmountForInstallment;
-      feesSummary.installmentDetails.push({
+
+      const installmentDetails = {
         installmentId: installment._id,
         installmentNumber: installment.installmentNo,
         reciptNo: installment.reciptNo,
@@ -129,8 +110,9 @@ router.get("/fees-summary/:studentId", async (req, res) => {
         paidAmount: paidAmountForInstallment,
         remainingAmount: remainingAmountForInstallment,
         dueDate: installment.dueDate,
-        isPaid: installment.isPaid,
-      });
+        isPaid: remainingAmountForInstallment === 0,
+      };
+      feesSummary.installmentDetails.push(installmentDetails);
     }
     res.json(feesSummary);
   } catch (error) {

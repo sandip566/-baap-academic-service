@@ -5,37 +5,19 @@ const service = require("../services/books.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
-router.post('/', async (req, res) => {
-    const { title, author, genre, ISBN, RFID, shelfId, status, availableCount, totalCopies } = req.body;
-    try {
-      const existingBook = await Book.findOne({ title });
-      if (existingBook) {
-        // If the book exists, update the document
-        existingBook.totalCopies += totalCopies; 
-        existingBook.availableCount += availableCount; 
-        const updatedBook = await existingBook.save();
-        res.json(updatedBook);
-      } else {
-        // If the book doesn't exist, create a new document
-        const newBook = new Book({
-          title,
-          author,
-          genre,
-          ISBN,
-          RFID,
-          shelfId,
-          status,
-          availableCount,
-          totalCopies,
-        });
-        const savedBook = await newBook.save();
-        res.json(savedBook);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+router.post(
+    "/",
+    checkSchema(require("../dto/books.dto")),
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        const bookId = +Date.now();
+        req.body.bookId = bookId;
+        const serviceResponse = await service.create(req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
     }
-});
+);
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);

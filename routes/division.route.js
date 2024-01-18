@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/subject.services");
+const service = require("../services/division.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
   "/",
-  checkSchema(require("../dto/subject.dto")),
+  checkSchema(require("../dto/division.dto")),
   async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const subjectId = +Date.now();
-    req.body.subjectId = subjectId;
+    const divisionId = +Date.now();
+    req.body.divisionId = divisionId;
     const serviceResponse = await service.create(req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
@@ -34,20 +34,20 @@ router.get("/:id", async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/subjects", async (req, res) => {
+router.get("/all/divisions", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/subjectId/:subjectId", async (req, res) => {
+router.delete("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
   try {
-    const subjectId = req.params.subjectId
+    const divisionId = req.params.divisionId
     const groupId = req.params.groupId
-    const subjectData = await service.deleteBySubjectId({ subjectId: subjectId, groupId: groupId })
-    if (!subjectData) {
-      res.status(404).json({ error: 'Subject data not found to delete' })
+    const divisionData = await service.deleteByDivisionId({ divisionId: divisionId, groupId: groupId })
+    if (!divisionData) {
+      res.status(404).json({ error: 'Division data not found to delete' })
     } else {
-      res.status(201).json(subjectData)
+      res.status(201).json(divisionData)
     }
   } catch (error) {
     console.error(error);
@@ -55,14 +55,14 @@ router.delete("/groupId/:groupId/subjectId/:subjectId", async (req, res) => {
   }
 });
 
-router.put("/groupId/:groupId/subjectId/:subjectId", async (req, res) => {
+router.put("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
   try {
-    const subjectId = req.params.subjectId;
+    const divisionId = req.params.divisionId;
     const groupId = req.params.groupId;
     const newData = req.body;
-    const updatedData = await service.updateSubjectById(subjectId, groupId, newData);
+    const updatedData = await service.updateDivisionById(divisionId, groupId, newData);
     if (!updatedData) {
-      res.status(404).json({ error: 'Subject not found to update' });
+      res.status(404).json({ error: 'Division not found to update' });
     } else {
       res.status(201).json(updatedData);
     }
@@ -75,10 +75,9 @@ router.put("/groupId/:groupId/subjectId/:subjectId", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
-    subjectName: req.query.subjectName,
-    subjectId: req.query.subjectId,
-    // semesterId: req.query.semesterId,
-    // courseId: req.query.courseId,
+    Name: req.query.Name,
+    divisionId: req.query.divisionId,
+    Incharge:req.query.Incharge
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,
