@@ -1,13 +1,13 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/divisions.services");
+const service = require("../services/division.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
   "/",
-  checkSchema(require("../dto/divisions.dto")),
+  checkSchema(require("../dto/division.dto")),
   async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
@@ -76,8 +76,9 @@ router.put("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
-    divisionName: req.query.divisionName,
+    Name: req.query.Name,
     divisionId: req.query.divisionId,
+    Incharge:req.query.Incharge
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,

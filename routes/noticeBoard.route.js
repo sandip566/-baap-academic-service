@@ -1,82 +1,82 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/feesTemplate.services");
+const service = require("../services/noticeBoard.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+//create noticeBoardNo sequential
+let noticeCounter = 1;
+function generateNoticeNumber() {
+    const sequentialPart = noticeCounter++;
+    return `${sequentialPart.toString().padStart(0, "0")}`;
+}
 router.post(
     "/",
-    checkSchema(require("../dto/feesTemplate.dto")),
+    checkSchema(require("../dto/noticeBoard.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const feesTemplateId = +Date.now();
-        req.body.feesTemplateId = feesTemplateId;
+        req.body.noticeBoardNo = generateNoticeNumber();
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-router.get("/all/feesTemplate", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
+router.get("/all/notice", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        feesTemplateId: req.query.feesTemplateId,
+        noticeBoardNo: req.params.noticeBoardNo,
+        studentId: req.query.studentId,
+        memberId: req.query.memberId,
+        title: req.query.title
     };
-    const serviceResponse = await service.getAllDataByGroupId(
+    const serviceResponse = await service.getAllNoticeByGroupId(
         groupId,
         criteria
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId", async (req, res) => {
+router.delete("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res) => {
     try {
-        const feesTemplateId = req.params.feesTemplateId
-        const groupId = req.params.groupId
-        const Data = await service.deletefeesTemplateById({ feesTemplateId: feesTemplateId, groupId: groupId });
-        if (!Data) {
-            res.status(404).json({ error: ' data not found to delete' });
+        const noticeBoardNo = req.params.noticeBoardNo;
+        const groupId = req.params.groupId;
+        const deletenoticeBoardNo = await service.deleteNoticeBoardByNo({ noticeBoardNo: noticeBoardNo, groupId: groupId });
+        if (!deletenoticeBoardNo) {
+            res.status(404).json({ error: 'delete noticeBoard data not found to delete' });
         } else {
-            res.status(201).json(Data);
+            res.status(201).json(deletenoticeBoardNo);
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-router.put("/groupId/:groupId/feesTemplateId/:feesTemplateId", async (req, res) => {
+router.put("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res) => {
     try {
-        const feesTemplateId = req.params.feesTemplateId;
+        const noticeBoardNo = req.params.noticeBoardNo;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updatefeesTemplateById(feesTemplateId, groupId, newData);
-        if (!updateData) {
-            res.status(404).json({ error: 'data not found to update' });
+        const updateNoticeBoard = await service.updateNoticeBoardByNo(noticeBoardNo, groupId, newData);
+        if (!updateNoticeBoard) {
+            res.status(404).json({ error: 'update noticeBoard data not found to update' });
         } else {
-            res.status(200).json(updateData);
+            res.status(200).json(updateNoticeBoard);
         }
     } catch (error) {
         console.error(error);
