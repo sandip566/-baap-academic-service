@@ -1,18 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/miscellaneousPayment.services");
+const service = require("../services/noticeBoard.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+//create noticeBoardNo sequential
+let noticeCounter = 1;
+function generateNoticeNumber() {
+    const sequentialPart = noticeCounter++;
+    return `${sequentialPart.toString().padStart(0, "0")}`;
+}
 router.post(
     "/",
-    checkSchema(require("../dto/miscellaneousPayment.dto")),
+    checkSchema(require("../dto/noticeBoard.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const miscellaneousPaymentId = Date.now();
-        req.body.miscellaneousPaymentId = miscellaneousPaymentId
+        req.body.noticeBoardNo = generateNoticeNumber();
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -29,49 +34,49 @@ router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/all/miscellaneousPayment", async (req, res) => {
+router.get("/all/notice", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
+router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        miscellaneousPaymentId: req.params.miscellaneousPaymentId,
+        noticeBoardNo: req.params.noticeBoardNo,
         studentId: req.query.studentId,
         memberId: req.query.memberId,
-        installmentId: req.query.installmentId
+        title: req.query.title
     };
-    const serviceResponse = await service.getAllMiscellaneousPaymentByGroupId(
+    const serviceResponse = await service.getAllNoticeByGroupId(
         groupId,
         criteria
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.delete("/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId", async (req, res) => {
+router.delete("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res) => {
     try {
-        const miscellaneousPaymentId = req.params.miscellaneousPaymentId;
+        const noticeBoardNo = req.params.noticeBoardNo;
         const groupId = req.params.groupId;
-        const deleteMiscellaneousPayment = await service.deleteMiscellaneousPaymentById({ miscellaneousPaymentId: miscellaneousPaymentId, groupId: groupId });
-        if (!deleteMiscellaneousPayment) {
-            res.status(404).json({ error: 'deleteMiscellaneousPayment data not found to delete' });
+        const deletenoticeBoardNo = await service.deleteNoticeBoardByNo({ noticeBoardNo: noticeBoardNo, groupId: groupId });
+        if (!deletenoticeBoardNo) {
+            res.status(404).json({ error: 'delete noticeBoard data not found to delete' });
         } else {
-            res.status(201).json(deleteMiscellaneousPayment);
+            res.status(201).json(deletenoticeBoardNo);
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.put("/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId", async (req, res) => {
+router.put("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res) => {
     try {
-        const miscellaneousPaymentId = req.params.miscellaneousPaymentId;
+        const noticeBoardNo = req.params.noticeBoardNo;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateMiscellaneousPayment = await service.updateMiscellaneousPaymentById(miscellaneousPaymentId, groupId, newData);
-        if (!updateMiscellaneousPayment) {
-            res.status(404).json({ error: 'updateMiscellaneousPayment data not found to update' });
+        const updateNoticeBoard = await service.updateNoticeBoardByNo(noticeBoardNo, groupId, newData);
+        if (!updateNoticeBoard) {
+            res.status(404).json({ error: 'update noticeBoard data not found to update' });
         } else {
-            res.status(200).json(updateMiscellaneousPayment);
+            res.status(200).json(updateNoticeBoard);
         }
     } catch (error) {
         console.error(error);
