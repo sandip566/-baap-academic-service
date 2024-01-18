@@ -1,21 +1,13 @@
 const mongoose = require('mongoose');
-
 const classSchema = new mongoose.Schema({
     name: {
         type: String,
         required: true,
     },
-    location: {
-        type: String,
-        required: true,
-    },
-    phone: {
-        type: String,
-        required: true,
-    },
     courseId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Course' 
+        ref: 'course' ,
+        autopopulate:true
     },
     groupId: {
         type: Number,
@@ -23,9 +15,26 @@ const classSchema = new mongoose.Schema({
     },
     classId: {
         type: Number,
-        required: true,
-        unique: true
+        required: true
     },
+    duration:{
+        type:String
+    },
+    mode:{
+        type:String
+    },
+    university:{
+        type:String
+    },
+    fees:{
+        type:Number
+    },
+    intakeCapacity:{
+        type:Number
+    },
+    managementIntake:{
+        type:Number
+    }
 });
 classSchema.plugin(require('mongoose-autopopulate'))
 const ClassModel = mongoose.model('Class', classSchema);
