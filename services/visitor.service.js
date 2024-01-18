@@ -10,14 +10,14 @@ class VisitorService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.vendorName) query.vendorName = new RegExp(criteria.vendorName, "i");
+        if (criteria.visitorId) query.visitorId = criteria.visitorId;
+        if (criteria.visitorName) query.visitorName = new RegExp(criteria.visitorName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteVisitor(vendorId, groupId) { 
         try {
-            return await this.dbModel.deleteOne({ visitorId: vendorId, groupId: groupId }); 
+            return await this.dbModel.deleteOne({ visitorId: visitorId, groupId: groupId }); 
         } catch (error) {
             throw error;
         }
