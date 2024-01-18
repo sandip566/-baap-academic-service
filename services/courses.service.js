@@ -1,4 +1,4 @@
-const courseModel = require("../schema/course.schema");
+const courseModel = require("../schema/courses.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
 class CourseService extends BaseService {
@@ -10,22 +10,11 @@ class CourseService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        if (criteria.location) query.location = new RegExp(criteria.location, "i");
-        if (criteria.phone) query.phone = new RegExp(criteria.phone);
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
+        if (criteria.CourseName) query.CourseName = new RegExp(criteria.CourseName, "i");
+        if (criteria.University) query.University = new RegExp(criteria.University, "i");
+        if (criteria.courseId) query.courseId = new RegExp(criteria.courseId);
         return this.preparePaginationAndReturnData(query, criteria);
     }
-
-    getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.location) query.location = new RegExp(criteria.location, "i");
-        if (criteria.phone) query.phone = criteria.phone;
-        return this.preparePaginationAndReturnData(query, criteria);
-    }
-
     async deleteCourseById(courseId, groupId) {
         try {
             return await courseModel.deleteOne(courseId, groupId);
