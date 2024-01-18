@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/student.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+
 router.post(
   "/",
   checkSchema(require("../dto/student.dto")),
@@ -17,6 +18,7 @@ router.post(
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
+
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);

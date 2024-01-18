@@ -60,7 +60,6 @@ router.put("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
     const divisionId = req.params.divisionId;
     const groupId = req.params.groupId;
     const newData = req.body;
-
     const updatedData = await service.updateDivisionById(divisionId, groupId, newData);
     if (!updatedData) {
       res.status(404).json({ error: 'Division not found to update' });
