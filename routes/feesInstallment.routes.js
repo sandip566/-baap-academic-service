@@ -54,6 +54,7 @@ router.get("/all/FeesInstallment", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getFeesInstallment/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -85,6 +86,7 @@ router.delete("/groupId/:groupId/installmentId/:installmentId", async (req, res)
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 router.put("/groupId/:groupId/installmentId/:installmentId", async (req, res) => {
     try {
         const installmentId = req.params.installmentId;
@@ -130,7 +132,7 @@ router.get('/installments/:studentId', async (req, res) => {
     }
 });
 
-router.get('/ph',async (req, res) => {
+router.get('/',async (req, res) => {
     try {
       const client = new MongoClient(mongoURI);
       await client.connect();
@@ -156,6 +158,5 @@ router.get('/ph',async (req, res) => {
       res.status(500).send('Internal Server Error');
     }
   });
-  
-  
 module.exports = router;
+

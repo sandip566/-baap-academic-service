@@ -12,9 +12,9 @@ const HostelSchema = new mongoose.Schema(
         },
         student: {
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate:true,
+            autopopulate: true,
             ref: 'student',
-            required:true
+            required: true
         },
         admissionDate: {
             type: Date,

@@ -21,6 +21,7 @@ router.post(
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
+
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);

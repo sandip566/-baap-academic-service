@@ -1,5 +1,6 @@
 const feesPaymentModel = require("../schema/feesPayment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+
 class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
@@ -13,6 +14,7 @@ class feesPaymentService extends BaseService {
     if (criteria.installmentId) query.installmentId = criteria.installmentId;
     return this.preparePaginationAndReturnData(query, criteria)
   }
+
   async deleteFeesPaymentById(feesPaymentId, groupId) {
     try {
       return await feesPaymentModel.deleteOne(feesPaymentId, groupId);
@@ -20,6 +22,7 @@ class feesPaymentService extends BaseService {
       throw error;
     }
   }
+
   async updateFeesPaymentById(feesPaymentId, groupId, newData) {
     try {
       const updateFeesPayment = await feesPaymentModel.findOneAndUpdate(
@@ -32,6 +35,7 @@ class feesPaymentService extends BaseService {
       throw error;
     }
   }
+
   getAllFeesPaymentByStudentId(studentId, criteria) {
     const query = {
       studentId: studentId,

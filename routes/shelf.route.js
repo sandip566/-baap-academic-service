@@ -1,4 +1,3 @@
-
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
@@ -37,7 +36,6 @@ router.delete("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
     const shelfId = req.params.shelfId;
     const groupId = req.params.groupId;
     const data = await shelfService.deleteShelfById({ shelfId, groupId });
-
     if (!data) {
       res.status(404).json({ error: 'Data not found to delete' });
     } else {
@@ -65,7 +63,6 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await shelfService.deleteById(req.params.id);
