@@ -5,7 +5,7 @@ const service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { MongoClient } = require('mongodb');
-const mongoURI = 'mongodb://127.0.0.1:27017/baap-acadamic-local';
+const mongoURI = 'mongodb://127.0.0.1:27017/baap-acadamic-dev';
 let totalAmount=0;
 let collectedAmount=0;
 //create reciptNo sequential
