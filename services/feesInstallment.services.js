@@ -54,5 +54,17 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+    async  updateInstallmentAsPaid(installmentId) {
+        try {
+          const updateResult = await feesInstallmentModel.findOneAndUpdate(
+            { _id: installmentId },
+            { $set: { isPaid: true ,status:"paid"} },
+            { new: true }
+          );
+          return updateResult;
+        } catch (error) {
+          throw error;
+        }
+    }
 }
 module.exports = new feesInstallmentService(feesInstallmentModel, "FeesInstallation");
