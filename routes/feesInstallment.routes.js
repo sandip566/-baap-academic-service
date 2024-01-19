@@ -4,7 +4,10 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const { MongoClient } = require('mongodb');
+const mongoURI = 'mongodb://127.0.0.1:27017/baap-acadamic-dev';
+let totalAmount=0;
+let collectedAmount=0;
 //create reciptNo sequential
 let receiptCounter = 1;
 function generateReceiptNumber() {
@@ -44,10 +47,10 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
-    const serviceResponse = await service.getById(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+// router.get("/:id", async (req, res) => {
+//     const serviceResponse = await service.getById(req.params.id);
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+// });
 
 router.get("/all/FeesInstallment", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
@@ -130,4 +133,70 @@ router.get('/installments/:studentId', async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
+router.get('/get-total-amount', async (req, res) => {
+    try {
+        const client = new MongoClient(mongoURI);
+        await client.connect();
+        const Collection = client.db().collection('feesinstallments');
+        const pipeline = [
+            {
+                $group: {
+                    _id: null,
+                    abc: {
+                        $sum: "$installmentAmount"
+                    }
+                }
+            }
+        ];
+        totalAmount = await Collection.aggregate(pipeline, { maxTimeMS: 60000, allowDiskUse: true }).toArray();
+        res.json(totalAmount)
+        await client.close();
+
+        // Extract the totalFees field from the first element of the result array
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+router.get('/get-collected-amount', async (req, res) => {
+    try {
+        const client = new MongoClient(mongoURI);
+        await client.connect();
+        const Collection = client.db().collection('feesinstallments');
+        const pipeline = [
+            {
+                '$match': {
+                    'isPaid': true
+                }
+            }, 
+            {
+                '$group': {
+                    '_id': '$isPaid',
+                    'fieldN': {
+                        '$sum': '$installmentAmount'
+                    }
+                }
+            }
+        ];
+
+        collectedAmount= await Collection.aggregate(pipeline, { maxTimeMS: 60000, allowDiskUse: true }).toArray();
+        res.json(collectedAmount)
+        await client.close();
+        // Extract the totalFees field from the first element of the result array
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+router.get("/get-remainingFees", async (req, res) => {
+    const remainingFees=totalAmount-collectedAmount;
+    res.json(remainingFees)
+});
+
 module.exports = router;
+

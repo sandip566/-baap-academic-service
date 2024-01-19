@@ -5,6 +5,7 @@ const service = require("../services/feesPayment.services");
 const Service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper")
+const feesInstallmentService=require("../services/feesInstallment.services")
 router.post(
   "/",
   checkSchema(require("../dto/feesPayment.dto")),
@@ -14,7 +15,10 @@ router.post(
     }
     const feesPaymentId = +Date.now();
     req.body.feesPaymentId = feesPaymentId;
-    const serviceResponse = await service.create(req.body);
+    const installmentId = req.body.installmentId;
+    const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
+
+    const serviceResponse = await service.create(req.body,updateResult);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
@@ -66,6 +70,23 @@ router.delete("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res)
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.put("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res) => {
+  try {
+      const feesPaymentId = req.params.feesPaymentId;
+      const groupId = req.params.groupId;
+      const newData = req.body;
+      const updatefeesPaymentId = await service.updateFeesPaymentById(feesPaymentId, groupId, newData);
+      if (!updatefeesPaymentId) {
+          res.status(404).json({ error: 'updatefeesPaymentId data not found to update' });
+      } else {
+          res.status(200).json(updatefeesPaymentId);
+      }
+  } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
