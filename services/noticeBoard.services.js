@@ -10,25 +10,25 @@ class noticeBoardService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.noticeBoardNo) query.noticeBoardNo = criteria.noticeBoardNo;
+        if (criteria.noticeBoardId) query.noticeBoardId = criteria.noticeBoardId;
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.memberId) query.memberId = criteria.memberId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
         return this.preparePaginationAndReturnData(query, criteria)
     }
 
-    async deleteNoticeBoardByNo(noticeBoardNo, groupId) {
+    async deleteNoticeBoardByNo(noticeBoardId, groupId) {
         try {
-            return await noticeBoardModel.deleteOne(noticeBoardNo, groupId);
+            return await noticeBoardModel.deleteOne(noticeBoardId, groupId);
         } catch (error) {
             throw error;
         }
     }
 
-    async updateNoticeBoardByNo(noticeBoardNo, groupId, newData) {
+    async updateNoticeBoardByNo(noticeBoardId, groupId, newData) {
         try {
             const updateNoticeBoard = await noticeBoardModel.findOneAndUpdate(
-                { noticeBoardNo: noticeBoardNo, groupId: groupId },
+                { noticeBoardId: noticeBoardId, groupId: groupId },
                 newData,
                 { new: true }
             );

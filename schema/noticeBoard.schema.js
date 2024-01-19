@@ -2,10 +2,8 @@ const mongoose = require('mongoose');
 const moment = require("moment");
 const noticeBoardSchema = new mongoose.Schema(
     {
-        noticeBoardNo: {
+        noticeBoardId: {
             type: Number,
-            require: true,
-            default:1
         },
         groupId:{
          type:Number,
