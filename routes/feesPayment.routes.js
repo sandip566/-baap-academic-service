@@ -5,6 +5,7 @@ const service = require("../services/feesPayment.services");
 const Service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper")
+const feesInstallmentService=require("../services/feesInstallment.services")
 router.post(
   "/",
   checkSchema(require("../dto/feesPayment.dto")),
@@ -14,7 +15,10 @@ router.post(
     }
     const feesPaymentId = +Date.now();
     req.body.feesPaymentId = feesPaymentId;
-    const serviceResponse = await service.create(req.body);
+    const installmentId = req.body.installmentId;
+    const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
+
+    const serviceResponse = await service.create(req.body,updateResult);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
