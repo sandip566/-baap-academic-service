@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const claassId = +Date.now();
-        req.body.claassId = claassId;
+        const classId = +Date.now();
+        req.body.classId = classId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -42,16 +42,10 @@ router.get("/all/classes", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        title: req.query.title,
-        author: req.query.author,
-        publicationDate: req.query.publicationDate,
+       classId:req.query.classId
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 
 });
-
-
-
-
 module.exports = router;

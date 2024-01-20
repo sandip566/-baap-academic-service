@@ -5,9 +5,9 @@ const service = require("../services/noticeBoard.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 //create noticeBoardNo sequential
-let noticeCounter = 1;
+let noticeBoardId = 1;
 function generateNoticeNumber() {
-    const sequentialPart = noticeCounter++;
+    const sequentialPart = noticeBoardId++;
     return `${sequentialPart.toString().padStart(0, "0")}`;
 }
 router.post(
@@ -17,7 +17,7 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        req.body.noticeBoardNo = generateNoticeNumber();
+        req.body.noticeBoardId = generateNoticeNumber();
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -41,7 +41,7 @@ router.get("/all/notice", async (req, res) => {
 router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        noticeBoardNo: req.params.noticeBoardNo,
+        noticeBoardId: req.query.noticeBoardId,
         studentId: req.query.studentId,
         memberId: req.query.memberId,
         title: req.query.title
@@ -52,11 +52,11 @@ router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.delete("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res) => {
+router.delete("/groupId/:groupId/noticeBoardId/:noticeBoardId", async (req, res) => {
     try {
-        const noticeBoardNo = req.params.noticeBoardNo;
+        const noticeBoardId = req.params.noticeBoardId;
         const groupId = req.params.groupId;
-        const deletenoticeBoardNo = await service.deleteNoticeBoardByNo({ noticeBoardNo: noticeBoardNo, groupId: groupId });
+        const deletenoticeBoardNo = await service.deleteNoticeBoardByNo({ noticeBoardId: noticeBoardId, groupId: groupId });
         if (!deletenoticeBoardNo) {
             res.status(404).json({ error: 'delete noticeBoard data not found to delete' });
         } else {
@@ -67,12 +67,12 @@ router.delete("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res)
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.put("/groupId/:groupId/noticeBoardNo/:noticeBoardNo", async (req, res) => {
+router.put("/groupId/:groupId/noticeBoardId/:noticeBoardId", async (req, res) => {
     try {
-        const noticeBoardNo = req.params.noticeBoardNo;
+        const noticeBoardId = req.params.noticeBoardId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateNoticeBoard = await service.updateNoticeBoardByNo(noticeBoardNo, groupId, newData);
+        const updateNoticeBoard = await service.updateNoticeBoardByNo(noticeBoardId, groupId, newData);
         if (!updateNoticeBoard) {
             res.status(404).json({ error: 'update noticeBoard data not found to update' });
         } else {
