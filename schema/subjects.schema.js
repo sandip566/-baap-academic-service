@@ -18,36 +18,36 @@ const SubjectSchema = new mongoose.Schema(
         Course: {
             type: mongoose.Schema.Types.ObjectId,
             autopopulate: true,
-            ref:'course'
+            ref: 'course'
         },
         Class: {
             type: mongoose.Schema.Types.ObjectId,
             autopopulate: true,
-            ref:'class'
+            ref: 'class'
         },
-        TotalMarks:{
-            type:Number,
-            required:true
+        TotalMarks: {
+            type: Number,
+            required: true
         },
-        PassingMarks:{
-            type:Number,
-            required:true
+        PassingMarks: {
+            type: Number,
+            required: true
         },
-        Theory:{
-            type:Number,
-            required:true
+        Theory: {
+            type: Number,
+            required: true
         },
-        Practical:{
-            type:Number,
-            required:true
+        Practical: {
+            type: Number,
+            required: true
         },
-        Tutor:{
-            type:String,
-            required:true
+        Tutor: {
+            type: String,
+            required: true
         }
     },
     { strict: false, timestamps: true }
 );
-SubjectSchema.plugin(require('mongoose-autopopulate'))
+SubjectSchema.plugin(require('mongoose-autopopulate'));
 const SubjectModel = mongoose.model("subject", SubjectSchema);
 module.exports = SubjectModel;

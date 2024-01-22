@@ -23,7 +23,6 @@ class LatefeepaymentService extends BaseService {
         if (criteria.lateFeeAmount) query.lateFeeAmount = criteria.lateFeeAmount;
         if (criteria.paymentStatus) query.paymentStatus = new RegExp(criteria.paymentStatus, "i");
         if (criteria.lateFeePaymentId) query.lateFeePaymentId = criteria.lateFeePaymentId;
-
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -44,6 +43,5 @@ class LatefeepaymentService extends BaseService {
             throw error;
         }
     }
-
 }
 module.exports = new LatefeepaymentService(LatefeepaymentModel, 'latefeepayment');

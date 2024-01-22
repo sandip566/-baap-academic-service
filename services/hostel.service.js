@@ -10,9 +10,9 @@ class HostelService extends BaseService {
         return await HostelModel.create(dataObject);
     }
 
-    async getByDataId(hostelId) {
+    async getByDataId(hostelerId) {
         return this.execute(() => {
-            return HostelModel.findOne({ hostelId: hostelId });
+            return HostelModel.findOne({ hostelerId: hostelerId });
         });
     }
 
@@ -26,18 +26,18 @@ class HostelService extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async updateDataById(hostelId, groupId, newData) {
+    async updateDataById(hostelerId, groupId, newData) {
         try {
-            const updatedData = await HostelModel.findOneAndUpdate({ hostelId: hostelId, groupId: groupId }, newData, { new: true });
+            const updatedData = await HostelModel.findOneAndUpdate({ hostelerId: hostelerId, groupId: groupId }, newData, { new: true });
             return updatedData;
         } catch (error) {
             throw error;
         }
     }
 
-    async deleteByDataId(hostelId, groupId) {
+    async deleteByDataId(hostelerId, groupId) {
         try {
-            const deleteData = await HostelModel.deleteOne({ hostelId: hostelId, groupId: groupId });
+            const deleteData = await HostelModel.deleteOne({ hostelerId: hostelerId, groupId: groupId });
             return deleteData;
         } catch (error) {
             throw error;

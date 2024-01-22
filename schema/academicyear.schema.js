@@ -15,12 +15,10 @@ const AcademicYearSchema = new mongoose.Schema(
             required: true,
         },
         startDate: {
-            type: Date,
-            required: true,
+            type: Date
         },
         endDate: {
-            type: Date,
-            required: true,
+            type: Date
         }
     },
     { strict: false, timestamps: true }

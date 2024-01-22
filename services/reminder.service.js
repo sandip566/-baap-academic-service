@@ -23,7 +23,6 @@ class ReminderService extends BaseService {
         if (criteria.reminderId) query.reminderId = criteria.reminderId;
         if (criteria.reminderName) query.reminderName = new RegExp(criteria.reminderName, "i");
         if (criteria.reminderType) query.reminderType = new RegExp(criteria.reminderType, "i");
-
         return this.preparePaginationAndReturnData(query, criteria);
     }
 

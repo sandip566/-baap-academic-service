@@ -12,18 +12,18 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const hostelId = +Date.now();
-        req.body.hostelId = hostelId;
+        const hostelerId = +Date.now();
+        req.body.hostelerId = hostelerId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
-router.delete("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
+router.delete("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
     try {
-        const hostelId = req.params.hostelId;
+        const hostelerId = req.params.hostelerId;
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(hostelId, groupId);
+        const Data = await service.deleteByDataId(hostelerId, groupId);
         if (!Data) {
             res.status(404).json({ error: 'Data not found to delete' });
         } else {
@@ -35,12 +35,12 @@ router.delete("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
+router.put("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
     try {
-        const hostelId = req.params.hostelId;
+        const hostelerId = req.params.hostelerId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const Data = await service.updateDataById(hostelId, groupId, newData);
+        const Data = await service.updateDataById(hostelerId, groupId, newData);
         if (!Data) {
             res.status(404).json({ error: 'Data not found to update' });
         } else {
@@ -66,8 +66,23 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/hostelerId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/:id", async (req, res) => {
+    const serviceResponse = await service.getById(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.delete("/:id", async (req, res) => {
+    const serviceResponse = await service.deleteById(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.put("/:id", async (req, res) => {
+    const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 

@@ -15,6 +15,7 @@ class CourseService extends BaseService {
         if (criteria.courseId) query.courseId = new RegExp(criteria.courseId);
         return this.preparePaginationAndReturnData(query, criteria);
     }
+    
     async deleteCourseById(courseId, groupId) {
         try {
             return await courseModel.deleteOne(courseId, groupId);

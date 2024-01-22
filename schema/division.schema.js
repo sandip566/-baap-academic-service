@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
@@ -14,9 +15,9 @@ const DivisionSchema = new mongoose.Schema(
             type: String,
             required: true
         },
-        Class:{
-            type:mongoose.Schema.Types.ObjectId,
-            autopopulate:true,
+        Class: {
+            type: mongoose.Schema.Types.ObjectId,
+            autopopulate: true,
             ref: 'class'
         },
         StartTime: {

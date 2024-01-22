@@ -23,6 +23,6 @@ const ReminderSchema = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
-ReminderSchema.plugin(require('mongoose-autopopulate'))
+ReminderSchema.plugin(require('mongoose-autopopulate'));
 const ReminderModel = mongoose.model("reminder", ReminderSchema);
 module.exports = ReminderModel;
