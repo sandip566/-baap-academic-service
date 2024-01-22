@@ -42,6 +42,10 @@ const feesSchema = new mongoose.Schema(
     },
     balance: {
       type: Number
+    },
+    status:{
+      type: String,
+      required: true
     }
   },
   { strict: false, timestamps: true }
