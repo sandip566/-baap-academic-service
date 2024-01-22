@@ -37,5 +37,4 @@ class ClassService extends BaseService {
         }
     }
 }
-
 module.exports = new ClassService(ClassModel, "class");

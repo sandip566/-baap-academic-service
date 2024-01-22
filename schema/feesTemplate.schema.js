@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const checklistOptions = ["Installement Allowed","Show in Accounting","Discount Allowed"];
+const checklistOptions = ["Installement Allowed", "Show in Accounting", "Discount Allowed"];
+
 const feesTemplate = mongoose.Schema(
     {
         groupId: {
@@ -35,14 +36,14 @@ const feesTemplate = mongoose.Schema(
         checklist: [{
             type: String,
             enum: checklistOptions,
-            default: [] 
-          }],
-        components:[
+            default: []
+        }],
+        components: [
             {
-                name:String,
-                tax:Number,
-                scholarship:String,
-                total:Number
+                name: String,
+                tax: Number,
+                scholarship: String,
+                total: Number
             }
         ]
     },

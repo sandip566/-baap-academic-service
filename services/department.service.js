@@ -32,5 +32,4 @@ class DepartmentService extends BaseService {
         }
     }
 }
-
 module.exports = new DepartmentService(DepartmentModel, 'department');

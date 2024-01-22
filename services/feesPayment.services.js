@@ -5,6 +5,7 @@ class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
   }
+  
   getAllFeesPaymentByGroupId(groupId, criteria) {
     const query = {
       groupId: groupId,

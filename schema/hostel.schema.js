@@ -8,6 +8,10 @@ const HostelSchema = new mongoose.Schema(
         },
         hostelId: {
             type: Number,
+            default: 11,
+        },
+        hostelerId: {
+            type: Number,
             required: true
         },
         student: {

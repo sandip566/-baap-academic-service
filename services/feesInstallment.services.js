@@ -6,6 +6,7 @@ class feesInstallmentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     async getAllFeesInstallmentByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
@@ -13,8 +14,7 @@ class feesInstallmentService extends BaseService {
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.installmentId) query.installmentId = criteria.installmentId;
         if (criteria.memberId) query.memberId = criteria.memberId;
-        if (criteria.installmentNo) query.installmentNo = criteria.installmentNo
-
+        if (criteria.installmentNo) query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria,);
     }
 
@@ -38,6 +38,7 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
     async getStudentById(studentId) {
         try {
             const student = await Student.findOne({ _id: studentId });
@@ -46,6 +47,7 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
     async getInstallmentsByStudentId(studentId) {
         try {
             const installments = await feesInstallmentModel.find({ studentId: studentId });
@@ -54,6 +56,7 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
     async  updateInstallmentAsPaid(installmentId) {
         try {
           const updateResult = await feesInstallmentModel.findOneAndUpdate(

@@ -66,8 +66,23 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/lateFeePaymentId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/:id", async (req, res) => {
+    const serviceResponse = await service.getById(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.put("/:id", async (req, res) => {
+    const serviceResponse = await service.updateById(req.params.id, req.body);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.delete("/:id", async (req, res) => {
+    const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
