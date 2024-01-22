@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const relegion = new mongoose.Schema(
+const relegionSchema = new mongoose.Schema(
     {
         relegionId:{
             type:Number,
@@ -13,5 +13,5 @@ const relegion = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
-const relegionModel = mongoose.model("relegion", relegion);
+const relegionModel = mongoose.model("relegion", relegionSchema);
 module.exports = relegionModel;

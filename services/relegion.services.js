@@ -15,17 +15,17 @@ class Service extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteRelegionById(relegionId, groupId) {
+    async deleteRelegionById(relegionId) {
         try {
-            return await relegionModel.deleteOne(relegionId, groupId);
+            return await relegionModel.deleteOne(relegionId);
         } catch (error) {
             throw error;
         }
     }
 
-    async updateVendorById(relegionId, groupId, newData) {
+    async updateRelegionById(relegionId,newData) {
         try {
-            const updateData = await relegionModel.findOneAndUpdate({ relegionId: relegionId, groupId: groupId }, newData, { new: true });
+            const updateData = await relegionModel.findOneAndUpdate({ relegionId: relegionId }, newData, { new: true });
             return updateData;
         } catch (error) {
             throw error;
