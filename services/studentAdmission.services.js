@@ -1,36 +1,27 @@
 const studentAdmissionModel = require("../schema/studentAdmission.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class StudentsAddmisionService extends BaseService {
+class StudentsAdmmisionService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
   }
 
   async updateStudentsAddmisionById(studentAdmissionId, groupId, newData) {
     try {
-      const updatedData = await this.dbModel.findOneAndUpdate(
-        { studentAdmissionId: studentAdmissionId, groupId: groupId },
-        newData,
-        { new: true }
-      );
-      return updatedData;
+        const updatedData = await studentAdmissionModel.findOneAndUpdate({ studentAdmissionId:studentAdmissionId, groupId: groupId }, newData, { new: true });
+        return updatedData;
+    } catch (error) {
+        throw error;
     }
-    catch (error) {
-      throw error;
-    }
-  }
+}
 
-  async deleteByStudentsAddmisionId(studentAdmissionId, groupId) {
-    try {
-      return await this.dbModel.deleteOne({
-        studentAdmissionId: studentAdmissionId,
-        groupId: groupId,
-      });
-    }
-    catch (error) {
+async deleteByStudentsAddmisionId(studentAdmissionId, groupId) {
+  try {
+      return await studentAdmissionModel.deleteOne(studentAdmissionId, groupId);
+  } catch (error) {
       throw error;
-    }
   }
+}
 
   getAllDataByGroupId(groupId, criteria) {
     const query = {
@@ -40,4 +31,4 @@ class StudentsAddmisionService extends BaseService {
     return this.preparePaginationAndReturnData(query, criteria);
   }
 }
-module.exports = new StudentsAddmisionService(studentAdmissionModel, 'studentAdmission');
+module.exports = new StudentsAdmmisionService(studentAdmissionModel, 'studentAdmission');
