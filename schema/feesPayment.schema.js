@@ -15,14 +15,14 @@ const feesPaymentSchema = new mongoose.Schema(
         installmentId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "feesInstallment",
-            //autopopulate: true,
+            autopopulate: true,
         },
         paymentDate: {
             type: Date,
         },
         mode: {
             type: String,
-            enum: ["ONLINE", "CASH","creditCard","bank transfer"],
+            enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
         },
         // transactionId: {
         //     type:Number

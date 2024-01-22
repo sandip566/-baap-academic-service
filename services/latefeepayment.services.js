@@ -35,7 +35,7 @@ class LatefeepaymentService extends BaseService {
             throw error;
         }
     }
-    
+
     async deleteByDataId(lateFeePaymentId, groupId) {
         try {
             const deleteData = await LatefeepaymentModel.deleteOne({ lateFeePaymentId: lateFeePaymentId, groupId: groupId });
@@ -44,6 +44,6 @@ class LatefeepaymentService extends BaseService {
             throw error;
         }
     }
-    
+
 }
 module.exports = new LatefeepaymentService(LatefeepaymentModel, 'latefeepayment');

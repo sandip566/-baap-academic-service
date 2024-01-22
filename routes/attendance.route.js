@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/books.services");
+const service = require("../services/attendance.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
     "/",
-    checkSchema(require("../dto/books.dto")),
+    checkSchema(require("../dto/attendance.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const bookId = +Date.now();
-        req.body.bookId = bookId;
+        const attendanceId = +Date.now();
+        req.body.attendanceId = attendanceId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -34,7 +34,7 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/books", async (req, res) => {
+router.get("/all/attendance", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria(req.query);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -50,20 +50,20 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
+router.delete("/groupId/:groupId/attendanceId/:attendanceId", async (req, res) => {
     try {
-        const bookId = req.params.bookId;
+        const attendanceId = req.params.attendanceId;
         const groupId = req.params.groupId;
-        const bookData = await service.deleteBookById({
-            bookId: bookId,
+        const attendanceData = await service.deleteAttendanceById({
+            attendanceId: attendanceId,
             groupId: groupId,
         });
-        if (!bookData) {
+        if (!attendanceData) {
             res.status(404).json({
-                error: "book data not found to delete",
+                error: "attendance data not found to delete",
             });
         } else {
-            res.status(201).json(bookData);
+            res.status(201).json(attendanceData);
         }
     } catch (error) {
         console.error(error);
@@ -71,22 +71,22 @@ router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
+router.put("/groupId/:groupId/attendanceId/:attendanceId", async (req, res) => {
     try {
-        const bookId = req.params.bookId;
+        const attendanceId = req.params.attendanceId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updatebook = await service.updateBookById(
-            bookId,
+        const updateattendance = await service.updateAttendanceById(
+            attendanceId,
             groupId,
             newData
         );
-        if (!updatebook) {
+        if (!updateattendance) {
             res.status(404).json({
-                error: "book data not found to update",
+                error: "attendance data not found to update",
             });
         } else {
-            res.status(200).json({ updatebook, message: "data update successfully" });
+            res.status(200).json({ updateattendance, message: "data update successfully" });
         }
     } catch (error) {
         console.error(error);
