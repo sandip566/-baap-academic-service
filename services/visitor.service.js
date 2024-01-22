@@ -35,5 +35,30 @@ class VisitorService extends BaseService {
             throw error;
         }
     }
+
+    getAllDataByGroupId(groupId, criteria) {
+        const query = {
+            groupId: groupId,
+        };
+        if (criteria.visitorId) query.visitorId = criteria.visitorId;
+        return this.preparePaginationAndReturnData(query, criteria);
+    }
+
+    async deleteVendorById(visitorId, groupId) {
+        try {
+            return await VisitorModel.deleteOne(visitorId, groupId);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateVisitorById(visitorId, groupId, newData) {
+        try {
+            const updateVisitorData = await VisitorModel.findOneAndUpdate({ visitorId: visitorId, groupId: groupId }, newData, { new: true });
+            return updateVisitorData;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 module.exports = new VisitorService(VisitorModel, 'visitor');

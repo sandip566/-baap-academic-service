@@ -43,4 +43,34 @@ router.get("/all/categories", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.delete("/categoriesId/:categoriesId", async (req, res) => {
+    try {
+      const categoriesId = req.params.categoriesId;
+      const data = await service.deleteCategoriesById({categoriesId});
+      if (!data) {
+        res.status(404).json({ error: 'Data not found to delete' });
+      } else {
+        res.status(201).json(data);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+  
+  router.put("/categoriesId/:categoriesId", async (req, res) => {
+    try {
+      const categoriesId = req.params.categoriesId;
+      const newData = req.body;
+      const updateData = await service.updateCategoriesById(categoriesId,newData);
+      if (!updateData) {
+        res.status(404).json({ error: 'Data not found to update' });
+      } else {
+        res.status(200).json(updateData);
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });  
 module.exports = router;
