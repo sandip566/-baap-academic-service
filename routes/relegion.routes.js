@@ -34,7 +34,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 router.delete("/relegionId/:relegionId", async (req, res) => {
   try {
     const relegionId = req.params.relegionId;
-    const data = await service.deleteRelegionById({relegionId});
+    const data = await service.deleteRelegionById({ relegionId });
     if (!data) {
       res.status(404).json({ error: 'Data not found to delete' });
     } else {
@@ -50,7 +50,7 @@ router.put("/relegionId/:relegionId", async (req, res) => {
   try {
     const relegionId = req.params.relegionId;
     const newData = req.body;
-    const updateData = await service.updateRelegionById(relegionId,newData);
+    const updateData = await service.updateRelegionById(relegionId, newData);
     if (!updateData) {
       res.status(404).json({ error: 'Data not found to update' });
     } else {

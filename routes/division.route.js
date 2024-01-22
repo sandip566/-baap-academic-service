@@ -77,7 +77,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const criteria = {
     Name: req.query.Name,
     divisionId: req.query.divisionId,
-    Incharge:req.query.Incharge
+    Incharge: req.query.Incharge
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,

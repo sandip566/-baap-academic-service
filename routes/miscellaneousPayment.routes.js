@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/miscellaneousPayment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+
 router.post(
     "/",
     checkSchema(require("../dto/miscellaneousPayment.dto")),
@@ -17,22 +18,27 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/all/miscellaneousPayment", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -47,6 +53,7 @@ router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.delete("/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId", async (req, res) => {
     try {
         const miscellaneousPaymentId = req.params.miscellaneousPaymentId;
@@ -62,6 +69,7 @@ router.delete("/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId"
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 router.put("/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId", async (req, res) => {
     try {
         const miscellaneousPaymentId = req.params.miscellaneousPaymentId;
@@ -78,4 +86,5 @@ router.put("/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId", a
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 module.exports = router;
