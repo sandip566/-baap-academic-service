@@ -26,8 +26,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             require: true
         },
         dueDate: {
-            type: Date,
-            require: true
+            type: Date
         },
         returnDate: {
             type: Date,
@@ -37,9 +36,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             default: false,
         },
         bookIssueLogId: {
-            type: Number,
-            //required:true,
-            //unique:true
+            type: Number
         },
     },
     { strict: false, timestamps: true }

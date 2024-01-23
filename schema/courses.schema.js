@@ -1,37 +1,35 @@
-const mongoose=require('mongoose')
+const mongoose = require('mongoose');
+
 const courseSchema = new mongoose.Schema(
     {
         groupId: {
-            type:Number,
-            default:1
+            type: Number,
+            default: 1
         },
         courseId: Number,
-        Code:{
-            type:Number,
-            required:true
+        Code: {
+            type: Number,
+            required: true
         },
         CourseName: {
-            required:true,
-            type:String
+            required: true,
+            type: String
         },
         Duration: {
             type: String,
-            required: true,
+            required: false,
         },
-        Mode:{
-            type:String,
-            required:true
+        Mode: {
+            type: String,
+            required: false
         },
-        University:{
-            type:String,
-            required:true
-         },
+        University: {
+            type: String,
+            required: false
+        },
         Fees: {
-            //  type: mongoose.Schema.Types.ObjectId,
-            //  autopopulate: true,
-            //  ref:'feesTemplate',
-            type:Number
-         }, 
+            type: Number
+        }
     },
     { strict: false, timestamps: true }
 );
