@@ -13,14 +13,12 @@ const SubjectSchema = new mongoose.Schema(
         },
         subjectName: {
             type: String,
-            //required: true
         },
         Description: {
             type: String
         },
         credits: {
             type: Number,
-            //required: true
         },
     },
     { strict: false, timestamps: true }
