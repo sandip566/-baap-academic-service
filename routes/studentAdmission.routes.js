@@ -10,8 +10,8 @@ router.post("/", checkSchema(require("../dto/studentAdmission.dto")), async (req
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const StudentsAddmisionId = +Date.now();
-    req.body.StudentsAddmisionId = StudentsAddmisionId;
+    const studentAdmissionId = +Date.now();
+    req.body.studentAdmissionId = studentAdmissionId;
     const serviceResponse = await service.create(req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
@@ -69,10 +69,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   try {
     const groupId = req.params.groupId;
     const criteria = {
-      studentName: req.query.studentName,
-      StudentsAddmisionId: req.query.StudentsAddmisionId,
-      age: req.query.age,
-      gender: req.query.gender
+      studentsAddmisionId: req.query.studentsAddmisionId,
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
@@ -82,4 +79,38 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+
+router.delete("/groupId/:groupId/studentAdmissionId/:studentAdmissionId", async (req, res) => {
+  try {
+    const studentAdmissionId = req.params.studentAdmissionId
+    const groupId = req.params.groupId
+    const Data = await service.deleteByStudentsAddmisionId({ studentAdmissionId:studentAdmissionId, groupId: groupId })
+    if (!Data) {
+      res.status(404).json({ error: 'data not found to delete' })
+    } else {
+      res.status(201).json(Data)
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.put("/groupId/:groupId/studentAdmissionId/:studentAdmissionId", async (req, res) => {
+  try {
+    const studentAdmissionId = req.params.studentAdmissionId;
+    const groupId = req.params.groupId;
+    const newData = req.body;
+    const updatedData = await service.updateStudentsAddmisionById(studentAdmissionId, groupId, newData);
+    if (!updatedData) {
+      res.status(404).json({ error: ' not found to update' });
+    } else {
+      res.status(201).json(updatedData);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
 module.exports = router;

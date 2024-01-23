@@ -40,7 +40,6 @@ class feesPaymentService extends BaseService {
   getAllFeesPaymentByStudentId(studentId, criteria) {
     const query = {
       studentId: studentId,
-      // Add other criteria if needed
     };
     return this.preparePaginationAndReturnData(query, criteria);
   }

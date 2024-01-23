@@ -49,7 +49,7 @@ router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
         noticeBoardId: req.query.noticeBoardId,
         studentId: req.query.studentId,
         memberId: req.query.memberId,
-        title: req.query.title
+        title: req.query.title,
     };
     const serviceResponse = await service.getAllNoticeByGroupId(
         groupId,
@@ -57,37 +57,52 @@ router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-router.delete("/groupId/:groupId/noticeBoardId/:noticeBoardId", async (req, res) => {
-    try {
-        const noticeBoardId = req.params.noticeBoardId;
-        const groupId = req.params.groupId;
-        const deletenoticeBoardNo = await service.deleteNoticeBoardByNo({ noticeBoardId: noticeBoardId, groupId: groupId });
-        if (!deletenoticeBoardNo) {
-            res.status(404).json({ error: 'delete noticeBoard data not found to delete' });
-        } else {
-            res.status(201).json(deletenoticeBoardNo);
+router.delete(
+    "/groupId/:groupId/noticeBoardId/:noticeBoardId",
+    async (req, res) => {
+        try {
+            const noticeBoardId = req.params.noticeBoardId;
+            const groupId = req.params.groupId;
+            const deletenoticeBoardNo = await service.deleteNoticeBoardByNo({
+                noticeBoardId: noticeBoardId,
+                groupId: groupId,
+            });
+            if (!deletenoticeBoardNo) {
+                res.status(404).json({
+                    error: "delete noticeBoard data not found to delete",
+                });
+            } else {
+                res.status(201).json(deletenoticeBoardNo);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
     }
-});
-
-router.put("/groupId/:groupId/noticeBoardId/:noticeBoardId", async (req, res) => {
-    try {
-        const noticeBoardId = req.params.noticeBoardId;
-        const groupId = req.params.groupId;
-        const newData = req.body;
-        const updateNoticeBoard = await service.updateNoticeBoardByNo(noticeBoardId, groupId, newData);
-        if (!updateNoticeBoard) {
-            res.status(404).json({ error: 'update noticeBoard data not found to update' });
-        } else {
-            res.status(200).json(updateNoticeBoard);
+);
+router.put(
+    "/groupId/:groupId/noticeBoardId/:noticeBoardId",
+    async (req, res) => {
+        try {
+            const noticeBoardId = req.params.noticeBoardId;
+            const groupId = req.params.groupId;
+            const newData = req.body;
+            const updateNoticeBoard = await service.updateNoticeBoardByNo(
+                noticeBoardId,
+                groupId,
+                newData
+            );
+            if (!updateNoticeBoard) {
+                res.status(404).json({
+                    error: "update noticeBoard data not found to update",
+                });
+            } else {
+                res.status(200).json(updateNoticeBoard);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+);
 module.exports = router;

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const vendor = new mongoose.Schema(
     {
         groupId: {

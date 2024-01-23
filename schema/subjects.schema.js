@@ -11,37 +11,37 @@ const SubjectSchema = new mongoose.Schema(
             required: true,
             unique: true
         },
-        Name: {
+        name: {
             type: String,
             required: true
         },
-        Course: {
+        course: {
             type: mongoose.Schema.Types.ObjectId,
             autopopulate: true,
             ref: 'course'
         },
-        Class: {
+        class: {
             type: mongoose.Schema.Types.ObjectId,
             autopopulate: true,
             ref: 'class'
         },
-        TotalMarks: {
+        totalMarks: {
             type: Number,
             required: true
         },
-        PassingMarks: {
+        passingMarks: {
             type: Number,
             required: true
         },
-        Theory: {
+        theory: {
             type: Number,
             required: true
         },
-        Practical: {
+        practical: {
             type: Number,
             required: true
         },
-        Tutor: {
+        tutor: {
             type: String,
             required: true
         }

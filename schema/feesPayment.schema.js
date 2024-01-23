@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const feesPaymentSchema = new mongoose.Schema(
     {
         groupId: {
@@ -24,9 +23,6 @@ const feesPaymentSchema = new mongoose.Schema(
             type: String,
             enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
         },
-        // transactionId: {
-        //     type:Number
-        // },
         receivedBy: {
             memberId: {
                 type: mongoose.Schema.Types.ObjectId,

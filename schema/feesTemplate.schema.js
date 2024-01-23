@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const checklistOptions = ["Installement Allowed", "Show in Accounting", "Discount Allowed"];
-
 const feesTemplate = mongoose.Schema(
     {
         groupId: {

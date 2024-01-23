@@ -29,8 +29,6 @@ class SubjectService extends BaseService {
         };
         if (criteria.subjectName) query.subjectName = new RegExp(criteria.subjectName, "i");
         if (criteria.subjectId) query.subjectId = criteria.subjectId;
-        // if (criteria.semesterId) query.semesterId = criteria.semesterId;
-        // if (criteria.courseId) query.courseId =  criteria.courseId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }

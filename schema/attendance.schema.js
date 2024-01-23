@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const attendanceSchema = new mongoose.Schema(
     {
         attendanceId: Number,
@@ -40,6 +39,23 @@ const attendanceSchema = new mongoose.Schema(
             type: Date,
             required: true
         },
+        reasonOfAbsent:{
+            type:String,
+            require:true
+        },
+        lateArrival:{
+            type:Boolean,
+            require:true
+        },
+        reasonOfLateArrival:{
+            type:String,
+            require:true
+        },
+        isPreInformedOfAbsent:{
+            type:Boolean,
+            require:true
+        },
+        
         Remark: {
             type: String,
             require: true

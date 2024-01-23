@@ -15,11 +15,6 @@ const bookIssueLogSchema = new mongoose.Schema(
             autopopulate: true,
             ref: 'student'
         },
-        // bookId:{
-        //     type:mongoose.Schema.Types.ObjectId,
-        //     autopopulate:true,
-        //     ref:'books'
-        // },
         issueDate: {
             type: Date,
             default: Date.now(),
