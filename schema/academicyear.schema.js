@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const AcademicYearSchema = new mongoose.Schema(
     {
         groupId: {

@@ -52,7 +52,6 @@ class CategoriesService extends BaseService {
             throw error;
         }
     }
-
 }
 
 module.exports = new CategoriesService(CategoriesModel, 'categories');

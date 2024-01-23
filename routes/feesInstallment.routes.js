@@ -47,11 +47,6 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-// router.get("/:id", async (req, res) => {
-//     const serviceResponse = await service.getById(req.params.id);
-//     requestResponsehelper.sendResponse(res, serviceResponse);
-// });
-
 router.get("/all/FeesInstallment", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
@@ -152,9 +147,7 @@ router.get('/get-total-amount', async (req, res) => {
         totalAmount = await Collection.aggregate(pipeline, { maxTimeMS: 60000, allowDiskUse: true }).toArray();
         res.json(totalAmount)
         await client.close();
-
         // Extract the totalFees field from the first element of the result array
-
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -186,7 +179,6 @@ router.get('/get-collected-amount', async (req, res) => {
         res.json(collectedAmount)
         await client.close();
         // Extract the totalFees field from the first element of the result array
-
     } catch (error) {
         console.error(error);
         res.status(500).send('Internal Server Error');

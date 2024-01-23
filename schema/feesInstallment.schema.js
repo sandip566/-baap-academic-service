@@ -1,6 +1,5 @@
 
 const mongoose = require("mongoose");
-
 const feesInstallmentSchema = new mongoose.Schema(
     {
         groupId: {

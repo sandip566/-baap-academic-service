@@ -1,9 +1,7 @@
 const mongoose = require('mongoose');
-
 const attendanceSchema = new mongoose.Schema(
     {
         attendanceId: Number,
-
         groupId: {
             type: Number,
             default: 1
@@ -13,15 +11,10 @@ const attendanceSchema = new mongoose.Schema(
             autopopulate:true,
             ref:'student'
         },
-
-
         startDate: {
             type:Date,
             required: true,
         },
-        
-
-    
         endDate: {
             type:Date,
             required: true,
@@ -51,8 +44,6 @@ const attendanceSchema = new mongoose.Schema(
             type:String,
             require:true
         },
-
-        
     },
     { strict: false, timestamps: true }
 );
