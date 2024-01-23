@@ -23,7 +23,7 @@ class Service extends BaseService {
         }
     }
 
-    async updateRelegionById(relegionId,newData) {
+    async updateRelegionById(relegionId, newData) {
         try {
             const updateData = await relegionModel.findOneAndUpdate({ relegionId: relegionId }, newData, { new: true });
             return updateData;

@@ -12,7 +12,7 @@ class BookIssueLogService extends BaseService {
             groupId: groupId,
         };
         if (criteria.bookIssueLogId) query.phone = criteria.bookIssueLogId;
-        if (criteria.studentId) query.studentId = new RegExp(criteria.studentId, "i");
+        if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.returned) query.returned = new RegExp(criteria.returned, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }

@@ -23,6 +23,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     relegionId: req.query.relegionId,
+    name: req.query.name
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,

@@ -43,7 +43,7 @@ const feesSchema = new mongoose.Schema(
     balance: {
       type: Number
     },
-    status:{
+    status: {
       type: String,
       required: true
     }

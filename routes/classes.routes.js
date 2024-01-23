@@ -46,6 +46,5 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
-
 });
 module.exports = router;

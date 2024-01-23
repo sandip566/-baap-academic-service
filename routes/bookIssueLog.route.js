@@ -24,13 +24,11 @@ router.post(
 router.post('/issue-book', async (req, res) => {
     try {
         const { groupId, bookId, title, studentId, dueDate, issuedDate } = req.body;
-
         const isBookAvailable = await service.isBookAvailableForIssuing(bookId);
         console.log(isBookAvailable)
         if (!isBookAvailable) {
             return res.status(400).json({ success: false, error: 'The book is not available for issuing.' });
         }
-
         const book = await Book.findOne({ title: title });
         console.log(book)
         console.log(book.availableCount)

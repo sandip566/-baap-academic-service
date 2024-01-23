@@ -27,7 +27,6 @@ const courseSchema = new mongoose.Schema(
             type: String,
             required: false
         }
-
         // numberOfSemister: {
         //     type: Number,
         //     require: true
@@ -91,7 +90,6 @@ const courseSchema = new mongoose.Schema(
         //         ref: 'subject'
         //     }
         // }
-
     },
     { strict: false, timestamps: true }
 );

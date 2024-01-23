@@ -3,27 +3,21 @@ const mongoose = require('mongoose');
 const attendanceSchema = new mongoose.Schema(
     {
         attendanceId: Number,
-
         groupId: {
             type: Number,
             default: 1
         },
-        studentName:{
-            type:mongoose.Schema.Types.ObjectId,
-            autopopulate:true,
-            ref:'student'
+        studentName: {
+            type: mongoose.Schema.Types.ObjectId,
+            autopopulate: true,
+            ref: 'student'
         },
-
-
         startDate: {
-            type:Date,
+            type: Date,
             required: true,
         },
-        
-
-    
         endDate: {
-            type:Date,
+            type: Date,
             required: true,
         },
         timeIn: {
@@ -35,24 +29,21 @@ const attendanceSchema = new mongoose.Schema(
             require: true
         },
         present: {
-            type:Boolean,
-            require:true
+            type: Boolean,
+            require: true
         },
-    
         absent: {
-            type:Boolean,
+            type: Boolean,
             require: true
         },
         dateOfleave: {
-            type:Date,
+            type: Date,
             required: true
         },
         Remark: {
-            type:String,
-            require:true
+            type: String,
+            require: true
         },
-
-        
     },
     { strict: false, timestamps: true }
 );

@@ -12,13 +12,13 @@ class ClassService extends BaseService {
         };
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         if (criteria.location) query.location = new RegExp(criteria.location, "i");
-        if (criteria.phone) query.phone = new RegExp(criteria.phone);
+        if (criteria.phone) query.phone = criteria.phone;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteClassById(classId, groupId) {
         try {
-            return await ClassModel.deleteOne({ _id: classId, groupId: groupId });
+            return await ClassModel.deleteOne({ classId: classId, groupId: groupId });
         } catch (error) {
             throw error;
         }
@@ -27,7 +27,7 @@ class ClassService extends BaseService {
     async updateClassById(classId, groupId, newData) {
         try {
             const updateClass = await ClassModel.findOneAndUpdate(
-                { _id: classId, groupId: groupId },
+                { classId: classId, groupId: groupId },
                 newData,
                 { new: true }
             );

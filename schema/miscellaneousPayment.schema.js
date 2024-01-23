@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const miscellaneousPaymentSchema = new mongoose.Schema(
     {
         miscellaneousPaymentId: {
