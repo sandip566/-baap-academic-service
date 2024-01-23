@@ -35,6 +35,24 @@ class CategoriesService extends BaseService {
             throw error;
         }
     }
+
+    async deleteCategoriesById(categoriesId) {
+        try {
+            return await CategoriesModel.deleteOne(categoriesId);
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateCategoriesById(categoriesId,newData) {
+        try {
+            const updateData = await CategoriesModel.findOneAndUpdate({ categoriesId: categoriesId }, newData, { new: true });
+            return updateData;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 }
 
 module.exports = new CategoriesService(CategoriesModel, 'categories');

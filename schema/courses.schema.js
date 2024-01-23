@@ -17,21 +17,16 @@ const courseSchema = new mongoose.Schema(
         },
         Duration: {
             type: String,
-            required: true,
+            required: false,
         },
         Mode: {
             type: String,
-            required: true
+            required: false
         },
         University: {
             type: String,
-            required: true
-        },
-        Fees: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: 'feesTemplate',
-        },
+            required: false
+        }
 
         // numberOfSemister: {
         //     type: Number,
