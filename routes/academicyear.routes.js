@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/academicyear.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const TokenService = require("../services/token.services");
 
 router.post(
     "/",
@@ -19,7 +20,7 @@ router.post(
     }
 );
 
-router.delete("/groupId/:groupId/academicYearId/:academicYearId", async (req, res) => {
+router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;
         const groupId = req.params.groupId;
@@ -35,7 +36,7 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId", async (req, re
     }
 });
 
-router.put("/groupId/:groupId/academicYearId/:academicYearId", async (req, res) => {
+router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;
         const groupId = req.params.groupId;
@@ -72,7 +73,7 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getByYear/:year", async (req, res) => {
+router.get("/getByYear/:year",TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const serviceResponse = await service.getByYear(req.params.year);
         requestResponsehelper.sendResponse(res, serviceResponse);

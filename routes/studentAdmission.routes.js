@@ -20,7 +20,55 @@ router.post("/", checkSchema(require("../dto/studentAdmission.dto")), async (req
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
+router.post(
+  "/studentAdmission", async (req, res, next) => {
+      if (ValidationHelper.requestValidationErrors(req, res)) {
+          return;
+      }
+        const addmissionId = +Date.now();
+        req.body.addmissionId = addmissionId;
 
+      if (req.body.addmissionId) {
+          const existingDocument = await service.getByaddmissionId(req.body.addmissionId);
+          console.log(existingDocument);
+
+          if (existingDocument) {
+              if (!req.body.documents || req.body.documents.length === 0) {
+                  req.body.documents = [];
+              } else {
+                  req.body.documents = req.body.documents.map((addressData) => {
+                      const documentId = +Date.now() + Math.floor(Math.random() * 1000);
+                      return {
+                          _id: new mongoose.Types.ObjectId(),
+                          documentId: documentId,
+                          documents: addressData,
+                      };
+                  });
+              }
+              if (!req.body.accountDetails || req.body.accountDetails.length === 0) {
+                  req.body.accountDetails = [];
+              } else {
+                  req.body.contactDetails = req.body.contactDetails.map((paymentDetailsData) => {
+                      const contactId = +Date.now();
+                      return {
+                          _id: new mongoose.Types.ObjectId(),
+                          contactId: contactId,
+                          contactDetails: paymentDetailsData,
+                      };
+                  });
+              }
+
+              const serviceResponse = await service.updateUser(req.body.addmissionId, req.body);
+              console.log(serviceResponse);
+              requestResponsehelper.sendResponse(res, serviceResponse);
+          } else {
+              const serviceResponse = await service.create(req.body);
+              console.log(serviceResponse);
+              requestResponsehelper.sendResponse(res, serviceResponse);
+          }
+      }
+  }
+);
 router.delete("/:id", async (req, res) => {
   try {
     const serviceResponse = await service.deleteById(req.params.id);

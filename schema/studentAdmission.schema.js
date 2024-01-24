@@ -9,6 +9,10 @@ const studentsAdmissionSchema = new mongoose.Schema(
         studentAdmissionId: {
             type: Number,
         },
+        addmissionId:{
+            type: Number,
+            required: false,
+        },
         academicYear: {
             type: mongoose.Schema.Types.ObjectId,
             autopopulate: true,

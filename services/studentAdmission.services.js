@@ -29,6 +29,11 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+    async getByaddmissionId(addmissionId) {
+        return this.execute(() => {
+            return this.model.findOne({ addmissionId: addmissionId });
+        });
+    }
 
     getAllDataByGroupId(groupId, criteria) {
         const query = {
