@@ -52,18 +52,18 @@ router.post("/data/save", async (req, res, next) => {
                 });
             }
             if (
-                !req.body.accountDetails ||
-                req.body.accountDetails.length === 0
+                !req.body.feesDetails ||
+                req.body.feesDetails.length === 0
             ) {
-                req.body.accountDetails = [];
+                req.body.feesDetails = [];
             } else {
-                req.body.contactDetails = req.body.contactDetails.map(
+                req.body.feesDetails = req.body.feesDetails.map(
                     (paymentDetailsData) => {
-                        const contactId = +Date.now();
+                        const feesDetailsId = +Date.now();
                         return {
                             _id: new mongoose.Types.ObjectId(),
-                            contactId: contactId,
-                            contactDetails: paymentDetailsData,
+                            feesDetailsId: feesDetailsId,
+                            feesDetails: paymentDetailsData,
                         };
                     }
                 );
