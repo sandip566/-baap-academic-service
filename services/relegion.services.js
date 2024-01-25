@@ -1,5 +1,5 @@
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const relegionModel = require("../schema/relegion.schema");
+const religionModel = require("../schema/religion.schema");
 
 class Service extends BaseService {
     constructor(dbModel, entityName) {
@@ -10,26 +10,26 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.relegionId) query.relegionId = criteria.relegionId;
+        if (criteria.religionId) query.religionId = criteria.religionId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteRelegionById(relegionId) {
+    async deleteReligionById(religionId) {
         try {
-            return await relegionModel.deleteOne(relegionId);
+            return await religionModel.deleteOne(religionId);
         } catch (error) {
             throw error;
         }
     }
 
-    async updateRelegionById(relegionId, newData) {
+    async updateReligionById(religionId, newData) {
         try {
-            const updateData = await relegionModel.findOneAndUpdate({ relegionId: relegionId }, newData, { new: true });
+            const updateData = await religionModel.findOneAndUpdate({religionId: religionId }, newData, { new: true });
             return updateData;
         } catch (error) {
             throw error;
         }
     }
 }
-module.exports = new Service(relegionModel, "relegion");
+module.exports = new Service(religionModel, "religion");
