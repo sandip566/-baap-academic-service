@@ -7,13 +7,13 @@ const validationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 
 router.post(
   "/",
-  checkSchema(require("../dto/relegion.dto")),
+  checkSchema(require("../dto/religion.dto")),
   async (req, res, next) => {
     if (validationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const relegionId = +Date.now();
-    req.body.relegionId = relegionId;
+    const religionId = +Date.now();
+    req.body.religionId = religionId;
     const serviceResponse = await service.create(req.body);
     requestResponseHelper.sendResponse(res, serviceResponse);
   }
@@ -22,7 +22,7 @@ router.post(
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
-    relegionId: req.query.relegionId,
+    religionId: req.query.religionId,
     name: req.query.name
   };
   const serviceResponse = await service.getAllDataByGroupId(
@@ -32,10 +32,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/relegionId/:relegionId", async (req, res) => {
+router.delete("/religionId/:religionId", async (req, res) => {
   try {
-    const relegionId = req.params.relegionId;
-    const data = await service.deleteRelegionById({ relegionId });
+    const religionId = req.params.religionId;
+    const data = await service.deleteReligionById({ religionId });
     if (!data) {
       res.status(404).json({ error: 'Data not found to delete' });
     } else {
@@ -47,11 +47,11 @@ router.delete("/relegionId/:relegionId", async (req, res) => {
   }
 });
 
-router.put("/relegionId/:relegionId", async (req, res) => {
+router.put("/religionId/:religionId", async (req, res) => {
   try {
-    const relegionId = req.params.relegionId;
+    const religionId = req.params.religionId;
     const newData = req.body;
-    const updateData = await service.updateRelegionById(relegionId, newData);
+    const updateData = await service.updateReligionById(religionId, newData);
     if (!updateData) {
       res.status(404).json({ error: 'Data not found to update' });
     } else {
@@ -78,7 +78,7 @@ router.get("/:id", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/relegions", async (req, res) => {
+router.get("/all/religion", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponseHelper.sendResponse(res, serviceResponse);
 });

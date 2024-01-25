@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
 
-const relegionSchema = new mongoose.Schema(
+const religionSchema = new mongoose.Schema(
     {
-        relegionId:{
+        religionId:{
             type:Number,
             required:false
         },
@@ -13,5 +13,5 @@ const relegionSchema = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
-const relegionModel = mongoose.model("relegion", relegionSchema);
-module.exports = relegionModel;
+const religionModel = mongoose.model("religion", religionSchema);
+module.exports = religionModel;
