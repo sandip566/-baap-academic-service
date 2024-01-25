@@ -5,7 +5,7 @@ const booksSchema = new mongoose.Schema(
         bookId: Number,
         title: {
             type: String,
-            required: true,
+            required: false,
         },
         groupId: {
             type: Number,
@@ -17,26 +17,27 @@ const booksSchema = new mongoose.Schema(
         },
         genre: {
             type: Number,
-            require: true
+            require: false
         },
         ISBN: {
             type: Number,
-            require: true
+            require: false
         },
         availableCount: {
             type: Number,
         },
         totalCopies: {
             type: Number,
-            require: true
+            require: false
         },
         RFID: {
             type: String,
-            required: true
+            required: false
         },
         shelfId: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
+            autopopulate: false,
             ref: 'shelf'
         },
         status: {

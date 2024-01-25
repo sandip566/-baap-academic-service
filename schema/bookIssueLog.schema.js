@@ -8,11 +8,12 @@ const bookIssueLogSchema = new mongoose.Schema(
         },
         labmembershipNumber: {
             type: Number,
-            require: true
+            require: false
         },
         studentId: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
+            autopopulate: false,
             ref: 'student'
         },
         issueDate: {

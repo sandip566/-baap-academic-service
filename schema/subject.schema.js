@@ -7,9 +7,10 @@ const SubjectSchema = new mongoose.Schema(
             default: 1
         },
         subjectId: {
+            
             type: Number,
-            required: true,
-            unique: true
+            required: false,
+            unique: false
         },
         subjectName: {
             type: String,

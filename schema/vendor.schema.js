@@ -4,7 +4,7 @@ const vendor = new mongoose.Schema(
         groupId: {
             type: Number,
             default: 1,
-            required: true
+            required: false
         },
         vendorId: {
             type: Number

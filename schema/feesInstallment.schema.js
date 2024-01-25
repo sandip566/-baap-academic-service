@@ -7,17 +7,19 @@ const feesInstallmentSchema = new mongoose.Schema(
             default: 1,
         },
         studentId: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
             ref: "student",
-            autopopulate: true,
+            autopopulate: false,
         },
         installmentId: {
             type: Number,
         },
         courseId: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
             ref: "course",
-            autopopulate: true,
+            autopopulate: false,
         },
         dueDate: {
             type: Date,
@@ -31,7 +33,7 @@ const feesInstallmentSchema = new mongoose.Schema(
         },
         installmentNo: {
             type: Number,
-            require: true
+            require: false
         },
         reciptNo: {
             type: Number,

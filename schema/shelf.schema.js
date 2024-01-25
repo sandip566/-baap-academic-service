@@ -5,7 +5,7 @@ const shelf = new mongoose.Schema(
     shelfId: Number,
     locationIdentifier: {
       type: String,
-      required: true
+      required: false
     },
     groupId: {
       type: Number,

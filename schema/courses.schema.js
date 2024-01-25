@@ -9,10 +9,10 @@ const courseSchema = new mongoose.Schema(
         courseId: Number,
         Code: {
             type: Number,
-            required: true
+            
         },
         CourseName: {
-            required: true,
+            required: false,
             type: String
         },
         Duration: {

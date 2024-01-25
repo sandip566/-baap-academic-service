@@ -12,13 +12,14 @@ const HostelSchema = new mongoose.Schema(
         },
         hostelerId: {
             type: Number,
-            required: true
+            required: false
         },
         student: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
+            autopopulate: false,
             ref: 'student',
-            required: true
+            required: false
         },
         admissionDate: {
             type: Date,
@@ -26,7 +27,7 @@ const HostelSchema = new mongoose.Schema(
         },
         bedNumber: {
             type: String,
-            required: true
+            required: false
         },
         admissionStatus: {
             type: String,
