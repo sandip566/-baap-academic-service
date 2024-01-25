@@ -4,11 +4,11 @@ const relegionSchema = new mongoose.Schema(
     {
         relegionId:{
             type:Number,
-            required:true
+            required:false
         },
         name:{
             type:String,
-            required:true
+            required:false
         }
     },
     { strict: false, timestamps: true }

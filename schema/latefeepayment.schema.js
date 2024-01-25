@@ -8,20 +8,21 @@ const LatefeepaymentSchema = new mongoose.Schema(
         },
         lateFeePaymentId: {
             type: Number,
-            required: true,
+            required: false,
         },
-        // studentId: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'student',
-        //     required: true
-        // },
+        studentId: {
+            type:Number,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'student',
+            required: false
+        },
         lateFeeAmount: {
             type: Number,
-            required: true
+            required: false
         },
         paymentDate: {
             type: Date,
-            required: true
+            required: false
         },
         paymentStatus: {
             type: String,

@@ -7,43 +7,46 @@ const SubjectSchema = new mongoose.Schema(
             default: 1
         },
         subjectId: {
+            type:Number,
             type: Number,
-            required: true,
-            unique: true
+            required: false,
+            unique: false
         },
         name: {
             type: String,
-            required: true
+            required: false
         },
         course: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
+            autopopulate: false,
             ref: 'course'
         },
         class: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
+            autopopulate: false,
             ref: 'class'
         },
         totalMarks: {
             type: Number,
-            required: true
+            required: false
         },
         passingMarks: {
             type: Number,
-            required: true
+            required: false
         },
         theory: {
             type: Number,
-            required: true
+            required: false
         },
         practical: {
             type: Number,
-            required: true
+            required: false
         },
         tutor: {
             type: String,
-            required: true
+            required: false
         }
     },
     { strict: false, timestamps: true }

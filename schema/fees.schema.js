@@ -4,38 +4,38 @@ const feesSchema = new mongoose.Schema(
   {
     groupId: {
       type: Number,
-      required: true
+      required: false
     },
     empId: {
       type: Number,
-      required: true
+      required: false
     },
     userId: {
 
       type: String,
-      required: true
+      required: false
     },
     feesType: {
       type: String,
       enum: ['BCA'],
-      required: true
+      required: false
     },
     amount: {
       type: Number,
-      required: true
+      required: false
     },
     date_paid: {
       type: Date,
-      required: true
+      required: false
     },
     mode: {
       type: String,
       enum: ['ONLINE', 'CASH'],
-      required: true
+      required: false
     },
     transactionId: {
       type: String,
-      required: true
+      required: false
     },
     desc: {
       type: String
@@ -45,7 +45,7 @@ const feesSchema = new mongoose.Schema(
     },
     status:{
       type: String,
-      required: true
+      required: false
     }
   },
   { strict: false, timestamps: true }

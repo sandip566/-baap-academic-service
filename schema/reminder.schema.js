@@ -8,21 +8,23 @@ const ReminderSchema = new mongoose.Schema(
         },
         reminderId: {
             type: Number,
-            required: true
+            required: false
         },
         reminderName: {
             type: String,
-            required: true,
+            required: false,
         },
         reminderType: {
             type: String
         },
         courseId: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate:true
+            ref:"course",
+            autopopulate:false
         }
     },
-    { strict: false, timestamps: true }
+    { strict: false, timestamps: false }
 );
 ReminderSchema.plugin(require('mongoose-autopopulate'));
 const ReminderModel = mongoose.model("reminder", ReminderSchema);

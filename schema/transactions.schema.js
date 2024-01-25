@@ -8,17 +8,18 @@ const transactionSchema = new mongoose.Schema(
         },
         transactionId: {
             type: Number,
-            unique: true,
+            unique: false,
         },
         vendorId: {
+            type:Number,
             type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            required: true,
+            autopopulate: false,
+            required: false,
             ref: 'vendor'
         },
         customerId: {
             type: Number,
-            required: true
+            required: false
         },
         transactionDate: {
             type: Date,
@@ -37,11 +38,11 @@ const transactionSchema = new mongoose.Schema(
             },
             quantity: {
                 type: Number,
-                required: true
+                required: false
             },
             unitPrice: {
                 type: Number,
-                required: true
+                required: false
             }
         }],
     },

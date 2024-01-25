@@ -5,7 +5,7 @@ const VisitorSchema = new mongoose.Schema(
         groupId: {
             type: Number,
             default: 1,
-            required: true
+            required: false
         },
         visitorId: {
             type: Number

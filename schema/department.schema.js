@@ -8,21 +8,21 @@ const departmentSchema = new mongoose.Schema(
         },
         departmentName: {
             type: String,
-            required: true,
+            required: false,
         },
         departmentId: {
             type: Number,
-            required: true,
-            unique: true,
+            required: false,
+            unique: false,
         },
         departmentHead: {
             firstName: {
                 type: String,
-                required: true,
+                required: false,
             },
             code: {
                 type: String,
-                required: true,
+                required: false,
             },
         },
     },

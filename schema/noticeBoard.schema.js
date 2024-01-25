@@ -8,7 +8,7 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            require: true,
+            require: false,
             default: 1
         },
         title: {
@@ -16,7 +16,7 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         content: {
             type: String,
-            required: true
+            required: false
         },
         noticePostDate: {
             type: Date,
@@ -31,16 +31,18 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         noticePostByStudent: {
             studentId: {
+                type:Number,
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "student",
-                autopopulate: true
+                autopopulate: false
             }
         },
         noticePostByMember: {
             memberId: {
+                type:Number,
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "member",
-                autopopulate: true
+                autopopulate: false
             }
         },
     },

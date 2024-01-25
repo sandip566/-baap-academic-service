@@ -8,17 +8,17 @@ const DivisionSchema = new mongoose.Schema(
         },
         divisionId: {
             type: Number,
-            required: true,
+            required: false,
           
         },
         courseId: {
             type: Number,
-            required: true,
+            required: false,
           
         },
         Name: {
             type: String,
-            required: true
+            required: false
         },
         classId: {
             type: Number,
@@ -26,15 +26,15 @@ const DivisionSchema = new mongoose.Schema(
         },
         StartTime: {
             type: String,
-            required: true
+            required: false
         },
         EndTime: {
             type: String,
-            required: true
+            required: false
         },
         Classroom: {
             type: String,
-            required: true
+            required: false
         },
         Incharge: {
             type: String
