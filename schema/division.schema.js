@@ -9,16 +9,20 @@ const DivisionSchema = new mongoose.Schema(
         divisionId: {
             type: Number,
             required: true,
-            unique: true
+          
+        },
+        courseId: {
+            type: Number,
+            required: true,
+          
         },
         Name: {
             type: String,
             required: true
         },
-        Class: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: 'class'
+        classId: {
+            type: Number,
+            required: false
         },
         StartTime: {
             type: String,

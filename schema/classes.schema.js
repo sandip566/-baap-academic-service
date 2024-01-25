@@ -7,9 +7,8 @@ const classSchema = new mongoose.Schema(
             required: true,
         },
         courseId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'course',
-            autopopulate: true
+            type:Number,
+            required: false,
         },
         groupId: {
             type: Number,
