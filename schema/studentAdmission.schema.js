@@ -4,34 +4,34 @@ const studentsAdmissionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
+            required : false
         },
         studentAdmissionId: {
             type: Number,
         },
-        addmissionId:{
+        addmissionId: {
             type: Number,
             required: false,
         },
         academicYear: {
-            type:Number,
+            type: Number,
             required: false
         },
         studentId: {
-            type:Number,
+            type: Number,
             required: false
         },
         courseId: {
-            type:Number,
+            type: Number,
             required: false
         },
         divisionId: {
-            type:Number,
+            type: Number,
             required: false
         },
         feesTemplate: {
-            type:Number,
-           required: false
+            type: Number,
+            required: false
         },
     },
     { strict: false, timestamps: true }

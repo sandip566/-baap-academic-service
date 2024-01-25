@@ -4,12 +4,10 @@ const classSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            
         },
         courseId: {
-            type:Number,
+            type: Number,
             required: false
-          
         },
         groupId: {
             type: Number,
@@ -18,7 +16,6 @@ const classSchema = new mongoose.Schema(
         classId: {
             type: Number,
             required: false
-         
         },
         duration: {
             type: String

@@ -4,7 +4,7 @@ const ReminderSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         reminderId: {
             type: Number,
@@ -18,7 +18,7 @@ const ReminderSchema = new mongoose.Schema(
             type: String
         },
         courseId: {
-            type:Number,
+            type: Number,
             required: false
         }
     },

@@ -4,14 +4,14 @@ const transactionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         transactionId: {
             type: Number,
             unique: false,
         },
         vendorId: {
-            type:Number,
+            type: Number,
             required: false
         },
         customerId: {

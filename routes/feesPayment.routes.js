@@ -18,8 +18,7 @@ router.post(
     req.body.feesPaymentId = feesPaymentId;
     const installmentId = req.body.installmentId;
     const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
-
-    const serviceResponse = await service.create(req.body,updateResult);
+    const serviceResponse = await service.create(req.body, updateResult);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
@@ -48,7 +47,7 @@ router.get("/getAllFeesPayment/groupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     feesPaymentId: req.query.feesPaymentId,
-    memberId: req.query.memberId,
+    empId: req.query.empId,
     installmentId: req.query.installmentId
   };
   const serviceResponse = await service.getAllFeesPaymentByGroupId(
@@ -76,18 +75,18 @@ router.delete("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res)
 
 router.put("/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res) => {
   try {
-      const feesPaymentId = req.params.feesPaymentId;
-      const groupId = req.params.groupId;
-      const newData = req.body;
-      const updatefeesPaymentId = await service.updateFeesPaymentById(feesPaymentId, groupId, newData);
-      if (!updatefeesPaymentId) {
-          res.status(404).json({ error: 'updatefeesPaymentId data not found to update' });
-      } else {
-          res.status(200).json(updatefeesPaymentId);
-      }
+    const feesPaymentId = req.params.feesPaymentId;
+    const groupId = req.params.groupId;
+    const newData = req.body;
+    const updatefeesPaymentId = await service.updateFeesPaymentById(feesPaymentId, groupId, newData);
+    if (!updatefeesPaymentId) {
+      res.status(404).json({ error: 'updatefeesPaymentId data not found to update' });
+    } else {
+      res.status(200).json(updatefeesPaymentId);
+    }
   } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
@@ -123,7 +122,6 @@ router.get("/fees-summary/:studentId", async (req, res) => {
       const remainingAmountForInstallment = installment.installmentAmount - paidAmountForInstallment;
       feesSummary.totalPaidAmount += paidAmountForInstallment;
       feesSummary.remainingAmount += remainingAmountForInstallment;
-
       const installmentDetails = {
         installmentId: installment._id,
         installmentNumber: installment.installmentNo,

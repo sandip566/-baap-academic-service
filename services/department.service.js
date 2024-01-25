@@ -15,9 +15,9 @@ class DepartmentService extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteByDataId(departmentId, groupId) { 
+    async deleteByDataId(departmentId, groupId) {
         try {
-            return await DepartmentModel.deleteOne({ departmentId: departmentId, groupId: groupId }); 
+            return await DepartmentModel.deleteOne({ departmentId: departmentId, groupId: groupId });
         } catch (error) {
             throw error;
         }

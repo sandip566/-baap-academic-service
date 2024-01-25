@@ -9,7 +9,7 @@ const shelf = new mongoose.Schema(
     },
     groupId: {
       type: Number,
-      default: 1
+      required : false
     }
   },
   { strict: false, timestamps: true }

@@ -4,14 +4,14 @@ const LatefeepaymentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         lateFeePaymentId: {
             type: Number,
             required: false,
         },
         empId: {
-            type:Number,
+            type: Number,
             required: false
         },
         lateFeeAmount: {

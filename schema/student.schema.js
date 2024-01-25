@@ -7,7 +7,7 @@ const student = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            default: 1,
+            required : false,
         },
         title: {
             type: String,
@@ -30,11 +30,11 @@ const student = new mongoose.Schema(
         },
         location: String,
         relegionId: {
-            type:Number,
+            type: Number,
             required: false
         },
         categoryId: {
-            type:Number,
+            type: Number,
             required: false
         },
         gender: {

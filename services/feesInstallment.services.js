@@ -13,7 +13,7 @@ class feesInstallmentService extends BaseService {
         };
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.installmentId) query.installmentId = criteria.installmentId;
-        if (criteria.memberId) query.memberId = criteria.memberId;
+        if (criteria.empId) query.empId = criteria.empId;
         if (criteria.installmentNo) query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria,);
     }
@@ -57,16 +57,16 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async  updateInstallmentAsPaid(installmentId) {
+    async updateInstallmentAsPaid(installmentId) {
         try {
-          const updateResult = await feesInstallmentModel.findOneAndUpdate(
-            { _id: installmentId },
-            { $set: { isPaid: true ,status:"paid"} },
-            { new: true }
-          );
-          return updateResult;
+            const updateResult = await feesInstallmentModel.findOneAndUpdate(
+                { _id: installmentId },
+                { $set: { isPaid: true, status: "paid" } },
+                { new: true }
+            );
+            return updateResult;
         } catch (error) {
-          throw error;
+            throw error;
         }
     }
 }

@@ -6,15 +6,14 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { MongoClient } = require('mongodb');
 const mongoURI = 'mongodb://127.0.0.1:27017/baap-acadamic-dev';
-let totalAmount=0;
-let collectedAmount=0;
+let totalAmount = 0;
+let collectedAmount = 0;
 //create reciptNo sequential
 let receiptCounter = 1;
 function generateReceiptNumber() {
     const sequentialPart = receiptCounter++;
     return `${sequentialPart.toString().padStart(0, "0")}`;
 }
-
 //create installmentNo sequential
 let installmentCounter = 1;
 function generateInstallmentNumber() {
@@ -58,7 +57,7 @@ router.get("/getFeesInstallment/:groupId", async (req, res) => {
         groupId: req.query.groupId,
         installmentId: req.query.installmentId,
         studentId: req.query.studentId,
-        feeCategory: req.query.feeCategory,
+        empId: req.query.empId,
         installmentNo: req.query.installmentNo
     };
     const serviceResponse = await service.getAllFeesInstallmentByGroupId(
@@ -100,6 +99,7 @@ router.put("/groupId/:groupId/installmentId/:installmentId", async (req, res) =>
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
+
 router.get('/installments/:studentId', async (req, res) => {
     try {
         const studentId = req.params.studentId;
@@ -164,7 +164,7 @@ router.get('/get-collected-amount', async (req, res) => {
                 '$match': {
                     'isPaid': true
                 }
-            }, 
+            },
             {
                 '$group': {
                     '_id': '$isPaid',
@@ -174,8 +174,7 @@ router.get('/get-collected-amount', async (req, res) => {
                 }
             }
         ];
-
-        collectedAmount= await Collection.aggregate(pipeline, { maxTimeMS: 60000, allowDiskUse: true }).toArray();
+        collectedAmount = await Collection.aggregate(pipeline, { maxTimeMS: 60000, allowDiskUse: true }).toArray();
         res.json(collectedAmount)
         await client.close();
         // Extract the totalFees field from the first element of the result array
@@ -186,9 +185,7 @@ router.get('/get-collected-amount', async (req, res) => {
 });
 
 router.get("/get-remainingFees", async (req, res) => {
-    const remainingFees=totalAmount-collectedAmount;
+    const remainingFees = totalAmount - collectedAmount;
     res.json(remainingFees)
 });
-
 module.exports = router;
-

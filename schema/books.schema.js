@@ -35,7 +35,7 @@ const booksSchema = new mongoose.Schema(
             required: false
         },
         shelfId: {
-            type:Number,
+            type: Number,
             required: false
         },
         status: {

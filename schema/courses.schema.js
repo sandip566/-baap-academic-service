@@ -7,27 +7,23 @@ const courseSchema = new mongoose.Schema(
             required: false
         },
         courseId: Number,
-        Code: {
-            type: Number,
-            
-        },
-        CourseName: {
+        name: {
             required: false,
             type: String
         },
-        Duration: {
+        duration: {
             type: String,
             required: false,
         },
-        Mode: {
+        mode: {
             type: String,
             required: false
         },
-        University: {
+        university: {
             type: String,
             required: false
         },
-        Fees: {
+        fees: {
             type: Number
         }
     },

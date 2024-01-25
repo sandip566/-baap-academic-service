@@ -4,7 +4,7 @@ const HostelSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         hostelId: {
             type: Number,
@@ -15,7 +15,7 @@ const HostelSchema = new mongoose.Schema(
             required: false
         },
         empId: {
-            type:Number,
+            type: Number,
             required: false
         },
         admissionDate: {

@@ -5,13 +5,13 @@ class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
   }
-  
+
   getAllFeesPaymentByGroupId(groupId, criteria) {
     const query = {
       groupId: groupId,
     };
     if (criteria.feesPaymentId) query.feesPaymentId = criteria.feesPaymentId;
-    if (criteria.memberId) query.memberId = criteria.memberId;
+    if (criteria.empId) query.empId = criteria.empId;
     if (criteria.installmentId) query.installmentId = criteria.installmentId;
     return this.preparePaginationAndReturnData(query, criteria)
   }

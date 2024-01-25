@@ -9,7 +9,6 @@ const noticeBoardSchema = new mongoose.Schema(
         groupId: {
             type: Number,
             require: false,
-            default: 1
         },
         title: {
             type: String
@@ -31,13 +30,13 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         noticePostByStudent: {
             studentId: {
-                type:Number,
+                type: Number,
                 required: false
             }
         },
         noticePostByMember: {
             memberId: {
-                type:Number,
+                type: Number,
                 required: false
             }
         },

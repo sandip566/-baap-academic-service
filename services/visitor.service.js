@@ -17,7 +17,7 @@ class VisitorService extends BaseService {
 
     async deleteVisitor(vendorId, groupId) {
         try {
-            return await this.dbModel.deleteOne({ visitorId: visitorId, groupId: groupId }); 
+            return await this.dbModel.deleteOne({ visitorId: visitorId, groupId: groupId });
         } catch (error) {
             throw error;
         }

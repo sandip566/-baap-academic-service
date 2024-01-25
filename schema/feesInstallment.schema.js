@@ -4,7 +4,7 @@ const feesInstallmentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
+            required : false,
         },
         empId: {
             type:Number,

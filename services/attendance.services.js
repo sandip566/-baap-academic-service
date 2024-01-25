@@ -10,9 +10,9 @@ class AttendanceService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.startDate) query.startDate = new RegExp(criteria.startDate, "i");
-        if (criteria.endDate) query.endDate = new RegExp(criteria.endDate, "i");
-        if (criteria.dateOfleave) query.dateOfleave = new RegExp(criteria.dateOfleave);
+        if (criteria.reasonOfLateArrival) query.reasonOfLateArrival = new RegExp(criteria.reasonOfLateArrival, "i");
+        if (criteria.name) query.name = new RegExp(criteria.name, "i");
+        if (criteria.attendanceId) query.attendanceId = criteria.attendanceId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 

@@ -44,7 +44,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         title: req.query.title,
         author: req.query.author,
-        publicationDate: req.query.publicationDate,
+        availableCount: req.query.availableCount,
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

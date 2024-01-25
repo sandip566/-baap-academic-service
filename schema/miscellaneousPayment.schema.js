@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const miscellaneousPaymentSchema = new mongoose.Schema(
     {
         miscellaneousPaymentId: {
@@ -7,13 +8,13 @@ const miscellaneousPaymentSchema = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         amount: {
             type: Number,
         },
         installmentId: {
-            type:Number,
+            type: Number,
             required: false
         },
         paymentDate: {
@@ -25,25 +26,25 @@ const miscellaneousPaymentSchema = new mongoose.Schema(
             enum: ['online', 'cash', 'creditCard', 'bank transfer'],
         },
         transactionId: {
-            type:Number,
+            type: Number,
             required: false
         },
         receivedBy: {
-            memberId: {
-                type:Number,
+            empId: {
+                type: Number,
                 required: false
             }
         },
         feesTemplateId: {
-            type:Number,
+            type: Number,
             required: false
         },
         academicYearsId: {
-            type:Number,
+            type: Number,
             required: false
         },
         studentId: {
-            type:Number,
+            type: Number,
             required: false
         },
     },

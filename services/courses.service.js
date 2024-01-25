@@ -12,10 +12,10 @@ class CourseService extends BaseService {
         };
         if (criteria.CourseName) query.CourseName = new RegExp(criteria.CourseName, "i");
         if (criteria.University) query.University = new RegExp(criteria.University, "i");
-        if (criteria.courseId) query.courseId = new RegExp(criteria.courseId);
+        if (criteria.courseId) query.courseId = criteria.courseId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    
+
     async deleteCourseById(courseId, groupId) {
         try {
             return await courseModel.deleteOne(courseId, groupId);

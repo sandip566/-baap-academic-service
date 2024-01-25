@@ -7,7 +7,6 @@ const feesTemplate = mongoose.Schema(
             required: false
         },
         feesTemplateId: {
-            
             type: Number,
             required: false
         },
@@ -22,11 +21,11 @@ const feesTemplate = mongoose.Schema(
             type: Number
         },
         classId: {
-            type:Number,
+            type: Number,
             required: false
         },
         academicYearId: {
-            type:Number,
+            type: Number,
             required: false
         },
         checklist: [{

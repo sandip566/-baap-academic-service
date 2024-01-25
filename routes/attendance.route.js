@@ -43,9 +43,9 @@ router.get("/all/attendance", async (req, res) => {
 router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["PATML1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        title: req.query.title,
-        author: req.query.author,
-        publicationDate: req.query.publicationDate,
+        name: req.query.name,
+        reasonOfLateArrival: req.query.reasonOfLateArrival,
+        attendanceId: req.query.attendanceId,
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

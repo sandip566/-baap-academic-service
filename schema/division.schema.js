@@ -4,7 +4,7 @@ const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
+            required : false,
         },
         divisionId: {
             type: Number,
@@ -22,19 +22,11 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        StartTime: {
-            type: String,
-            required: false,
-        },
-        EndTime: {
-            type: String,
-            required: false,
-        },
         classroom: {
             type: String,
             required: false,
         },
-        Incharge: {
+        incharge: {
             type: String,
         },
     },

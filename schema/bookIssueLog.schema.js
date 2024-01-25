@@ -11,7 +11,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             require: false
         },
         studentId: {
-            type:Number,
+            type: Number,
             required: false
         },
         issueDate: {

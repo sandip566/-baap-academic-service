@@ -4,13 +4,12 @@ const VisitorSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
             required: false
         },
         visitorId: {
             type: Number
         },
-        visitorName: {
+        name: {
             type: String
         },
         visitorAddress: {
