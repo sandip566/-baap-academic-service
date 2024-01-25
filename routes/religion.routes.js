@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/relegion.services");
+const service = require("../services/religion.services");
 const requestResponseHelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const validationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
