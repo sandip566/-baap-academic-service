@@ -10,10 +10,8 @@ const LatefeepaymentSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        studentId: {
+        empId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'student',
             required: false
         },
         lateFeeAmount: {

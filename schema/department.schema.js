@@ -4,7 +4,7 @@ const departmentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         departmentName: {
             type: String,
@@ -13,7 +13,6 @@ const departmentSchema = new mongoose.Schema(
         departmentId: {
             type: Number,
             required: false,
-            unique: false,
         },
         departmentHead: {
             firstName: {

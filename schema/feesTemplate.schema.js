@@ -4,14 +4,12 @@ const feesTemplate = mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
             required: false
         },
         feesTemplateId: {
             
             type: Number,
-            required: false,
-            unique: false
+            required: false
         },
         cast: {
             type: String,
@@ -23,17 +21,13 @@ const feesTemplate = mongoose.Schema(
         originalFees: {
             type: Number
         },
-        class: {
+        classId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'class',
-            autopopulate: false
+            required: false
         },
-        academicYear: {
+        academicYearId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: false,
-            ref: 'academicyear'
+            required: false
         },
         checklist: [{
             type: String,

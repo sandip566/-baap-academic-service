@@ -32,17 +32,13 @@ const noticeBoardSchema = new mongoose.Schema(
         noticePostByStudent: {
             studentId: {
                 type:Number,
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "student",
-                autopopulate: false
+                required: false
             }
         },
         noticePostByMember: {
             memberId: {
                 type:Number,
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "member",
-                autopopulate: false
+                required: false
             }
         },
     },

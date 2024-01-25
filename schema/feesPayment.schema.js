@@ -13,9 +13,7 @@ const feesPaymentSchema = new mongoose.Schema(
         },
         installmentId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "feesInstallment",
-            autopopulate: false,
+            required: false
         },
         paymentDate: {
             type: Date,
@@ -25,31 +23,20 @@ const feesPaymentSchema = new mongoose.Schema(
             enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
         },
         receivedBy: {
-            memberId: {
+            empId: {
                 type:Number,
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "member",
-                autopopulate: false,
+                required: false
             },
         },
         feesTemplateId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "feesTemplate",
-            autopopulate: false,
+            required: false
         },
         academicYearsId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "academicyear",
-            autopopulate: false,
-        },
-        studentId: {
-            type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "student",
-            autopopulate: false,
-        },
+            required: false
+        }
+       
     },
     { strict: false, timestamps: true }
 );

@@ -6,11 +6,13 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             default: 1
         },
-        subjectId: {
-            
+        courseId: {
             type: Number,
             required: false,
-            unique: false
+        },
+        classId: {
+            type: Number,
+            required: false,
         },
         subjectName: {
             type: String,

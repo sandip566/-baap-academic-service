@@ -8,14 +8,16 @@ const classSchema = new mongoose.Schema(
         },
         courseId: {
             type:Number,
+            required: false
           
         },
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         classId: {
             type: Number,
+            required: false
          
         },
         duration: {

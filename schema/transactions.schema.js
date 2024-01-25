@@ -12,10 +12,7 @@ const transactionSchema = new mongoose.Schema(
         },
         vendorId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: false,
-            required: false,
-            ref: 'vendor'
+            required: false
         },
         customerId: {
             type: Number,

@@ -4,7 +4,7 @@ const courseSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         courseId: Number,
         Code: {

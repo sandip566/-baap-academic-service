@@ -19,9 +19,7 @@ const ReminderSchema = new mongoose.Schema(
         },
         courseId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref:"course",
-            autopopulate:false
+            required: false
         }
     },
     { strict: false, timestamps: false }

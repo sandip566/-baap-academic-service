@@ -4,13 +4,11 @@ const attendanceSchema = new mongoose.Schema(
         attendanceId: Number,
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         studentName:{
             type:Number,
-            type:mongoose.Schema.Types.ObjectId,
-            autopopulate:false,
-            ref:'student'
+            required: false
         },
         startDate: {
             type:Date,

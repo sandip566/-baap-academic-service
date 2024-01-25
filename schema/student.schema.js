@@ -29,17 +29,13 @@ const student = new mongoose.Schema(
             required: false,
         },
         location: String,
-        relegion: {
+        relegionId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "relegions",
-            autopopulate: false,
+            required: false
         },
-        category: {
+        categoryId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "categories",
-            autopopulate: false,
+            required: false
         },
         gender: {
             type: String,

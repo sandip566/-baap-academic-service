@@ -4,41 +4,39 @@ const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            default: 1,
         },
         divisionId: {
             type: Number,
             required: false,
-          
         },
         courseId: {
             type: Number,
             required: false,
-          
         },
         Name: {
             type: String,
-            required: false
+            required: false,
         },
         classId: {
             type: Number,
-            required: false
+            required: false,
         },
         StartTime: {
             type: String,
-            required: false
+            required: false,
         },
         EndTime: {
             type: String,
-            required: false
+            required: false,
         },
         Classroom: {
             type: String,
-            required: false
+            required: false,
         },
         Incharge: {
-            type: String
-        }
+            type: String,
+        },
     },
     { strict: false, timestamps: true }
 );

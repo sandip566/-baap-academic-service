@@ -3,7 +3,7 @@ const AcademicYearSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         academicYearId: {
             type: Number,

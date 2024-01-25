@@ -9,7 +9,7 @@ const booksSchema = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         author: {
             type: String,
@@ -36,9 +36,7 @@ const booksSchema = new mongoose.Schema(
         },
         shelfId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: false,
-            ref: 'shelf'
+            required: false
         },
         status: {
             type: String,

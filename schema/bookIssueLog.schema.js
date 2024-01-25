@@ -4,7 +4,7 @@ const bookIssueLogSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         labmembershipNumber: {
             type: Number,
@@ -12,9 +12,7 @@ const bookIssueLogSchema = new mongoose.Schema(
         },
         studentId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: false,
-            ref: 'student'
+            required: false
         },
         issueDate: {
             type: Date,

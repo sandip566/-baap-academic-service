@@ -14,11 +14,8 @@ const HostelSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        student: {
+        empId: {
             type:Number,
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: false,
-            ref: 'student',
             required: false
         },
         admissionDate: {
