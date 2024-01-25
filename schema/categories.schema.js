@@ -3,14 +3,15 @@ const CategoriesSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
-            required: true
+            required: false
         },
         categoriesId: {
-            type: Number
+            type: Number,
+            required: false
         },
         name: {
-            type: String
+            type: String,
+            required: false
         }
     },
     { strict: false, timestamps: true }

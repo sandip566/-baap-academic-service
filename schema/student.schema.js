@@ -7,64 +7,62 @@ const student = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            default: 1,
+            required : false,
         },
         title: {
             type: String,
         },
         firstName: {
             type: String,
-            required: true,
+            required: false,
         },
         middleName: {
             type: String,
-            required: true,
+            required: false,
         },
         lastName: {
             type: String,
-            required: true,
+            required: false,
         },
         dob: {
             type: Date,
-            required: true,
+            required: false,
         },
         location: String,
-        relegion: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "relegions",
-            autopopulate: true,
+        relegionId: {
+            type: Number,
+            required: false
         },
-        category: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: "categories",
-            autopopulate: true,
+        categoryId: {
+            type: Number,
+            required: false
         },
         gender: {
             type: String,
             enum: ["Male", "Female", "Other"],
-            required: true,
+            required: false,
         },
         email: {
             type: String,
-            required: true,
+            required: false,
         },
         phoneNo: {
             type: String,
-            required: true,
+            required: false,
         },
         aadharCard: {
             type: String,
-            unique: true,
-            required: true,
+            unique: false,
+            required: false,
         },
         address: {
             city: {
                 type: String,
-                required: true,
+                required: false,
             },
             state: {
                 type: String,
-                required: true,
+                required: false,
             },
         },
         marks: {

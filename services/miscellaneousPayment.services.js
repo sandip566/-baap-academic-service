@@ -12,7 +12,7 @@ class miscellaneousPaymentService extends BaseService {
         };
         if (criteria.miscellaneousPaymentId) query.miscellaneousPaymentId = criteria.miscellaneousPaymentId;
         if (criteria.studentId) query.studentId = criteria.studentId;
-        if (criteria.memberId) query.memberId = criteria.memberId;
+        if (criteria.empId) query.empId = criteria.empId;
         if (criteria.installmentId) query.installmentId = criteria.installmentId;
         return this.preparePaginationAndReturnData(query, criteria)
     }

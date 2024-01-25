@@ -4,30 +4,26 @@ const courseSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         courseId: Number,
-        Code: {
-            type: Number,
-            required: true
-        },
-        CourseName: {
-            required: true,
+        name: {
+            required: false,
             type: String
         },
-        Duration: {
+        duration: {
             type: String,
             required: false,
         },
-        Mode: {
+        mode: {
             type: String,
             required: false
         },
-        University: {
+        university: {
             type: String,
             required: false
         },
-        Fees: {
+        fees: {
             type: Number
         }
     },

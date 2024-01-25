@@ -3,21 +3,15 @@ const AcademicYearSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         academicYearId: {
             type: Number,
-            required: true
+            required: false
         },
         year: {
             type: String,
-            required: true,
-        },
-        startDate: {
-            type: Date
-        },
-        endDate: {
-            type: Date
+            required: false,
         }
     },
     { strict: false, timestamps: true }

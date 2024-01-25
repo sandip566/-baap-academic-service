@@ -4,35 +4,34 @@ const studentsAdmissionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1,
+            required : false
         },
         studentAdmissionId: {
             type: Number,
         },
+        addmissionId: {
+            type: Number,
+            required: false,
+        },
         academicYear: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: "academicyear",
+            type: Number,
+            required: false
         },
         studentId: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: "student",
+            type: Number,
+            required: false
         },
-        course: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: "course",
+        courseId: {
+            type: Number,
+            required: false
         },
-        division: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: "division",
+        divisionId: {
+            type: Number,
+            required: false
         },
         feesTemplate: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: "feesTemplate",
+            type: Number,
+            required: false
         },
     },
     { strict: false, timestamps: true }

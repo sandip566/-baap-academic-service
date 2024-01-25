@@ -4,37 +4,31 @@ const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false,
         },
         divisionId: {
             type: Number,
-            required: true,
-            unique: true
+            required: false,
         },
-        Name: {
+        courseId: {
+            type: Number,
+            required: false,
+        },
+        name: {
             type: String,
-            required: true
+            required: false,
         },
-        Class: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: 'class'
+        classId: {
+            type: Number,
+            required: false,
         },
-        StartTime: {
+        classroom: {
             type: String,
-            required: true
+            required: false,
         },
-        EndTime: {
+        incharge: {
             type: String,
-            required: true
         },
-        Classroom: {
-            type: String,
-            required: true
-        },
-        Incharge: {
-            type: String
-        }
     },
     { strict: false, timestamps: true }
 );

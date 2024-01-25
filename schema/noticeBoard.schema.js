@@ -8,15 +8,14 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            require: true,
-            default: 1
+            require: false,
         },
         title: {
             type: String
         },
         content: {
             type: String,
-            required: true
+            required: false
         },
         noticePostDate: {
             type: Date,
@@ -31,16 +30,14 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         noticePostByStudent: {
             studentId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "student",
-                autopopulate: true
+                type: Number,
+                required: false
             }
         },
         noticePostByMember: {
             memberId: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "member",
-                autopopulate: true
+                type: Number,
+                required: false
             }
         },
     },

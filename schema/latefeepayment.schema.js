@@ -4,24 +4,23 @@ const LatefeepaymentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         lateFeePaymentId: {
             type: Number,
-            required: true,
+            required: false,
         },
-        // studentId: {
-        //     type: mongoose.Schema.Types.ObjectId,
-        //     ref: 'student',
-        //     required: true
-        // },
+        empId: {
+            type: Number,
+            required: false
+        },
         lateFeeAmount: {
             type: Number,
-            required: true
+            required: false
         },
         paymentDate: {
             type: Date,
-            required: true
+            required: false
         },
         paymentStatus: {
             type: String,

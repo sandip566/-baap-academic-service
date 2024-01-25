@@ -4,21 +4,19 @@ const transactionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required : false
         },
         transactionId: {
             type: Number,
-            unique: true,
+            unique: false,
         },
         vendorId: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            required: true,
-            ref: 'vendor'
+            type: Number,
+            required: false
         },
         customerId: {
             type: Number,
-            required: true
+            required: false
         },
         transactionDate: {
             type: Date,
@@ -37,11 +35,11 @@ const transactionSchema = new mongoose.Schema(
             },
             quantity: {
                 type: Number,
-                required: true
+                required: false
             },
             unitPrice: {
                 type: Number,
-                required: true
+                required: false
             }
         }],
     },

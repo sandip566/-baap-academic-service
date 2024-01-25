@@ -76,8 +76,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     Name: req.query.Name,
+    courseId: req.query.courseId,
+    classId: req.query.classId,
     divisionId: req.query.divisionId,
-    Incharge: req.query.Incharge
+    incharge: req.query.incharge
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,

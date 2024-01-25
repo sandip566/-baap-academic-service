@@ -57,7 +57,7 @@ router.get("/getFeesInstallment/:groupId", async (req, res) => {
         groupId: req.query.groupId,
         installmentId: req.query.installmentId,
         studentId: req.query.studentId,
-        feeCategory: req.query.feeCategory,
+        empId: req.query.empId,
         installmentNo: req.query.installmentNo
     };
     const serviceResponse = await service.getAllFeesInstallmentByGroupId(

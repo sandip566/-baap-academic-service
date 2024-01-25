@@ -4,61 +4,41 @@ const attendanceSchema = new mongoose.Schema(
         attendanceId: Number,
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
-        studentName: {
-            type: mongoose.Schema.Types.ObjectId,
-            autopopulate: true,
-            ref: 'student'
-        },
-        startDate: {
-            type: Date,
-            required: true,
-        },
-        endDate: {
-            type: Date,
-            required: true,
+        name: {
+            type: Number,
+            required: false
         },
         timeIn: {
             type: Number,
-            require: true
         },
         timeOut: {
             type: Number,
-            require: true
         },
         present: {
             type: Boolean,
-            require: true
         },
         absent: {
             type: Boolean,
-            require: true
         },
         dateOfleave: {
             type: Date,
-            required: true
         },
-        reasonOfAbsent:{
-            type:String,
-            require:true
-        },
-        lateArrival:{
-            type:Boolean,
-            require:true
-        },
-        reasonOfLateArrival:{
-            type:String,
-            require:true
-        },
-        isPreInformedOfAbsent:{
-            type:Boolean,
-            require:true
-        },
-        
-        Remark: {
+        reasonOfAbsent: {
             type: String,
-            require: true
+        },
+        lateArrival: {
+            type: Boolean,
+        },
+        reasonOfLateArrival: {
+            type: String,
+        },
+        isPreInformedOfAbsent: {
+            type: Boolean,
+        },
+        remark: {
+            type: String,
         },
     },
     { strict: false, timestamps: true }

@@ -4,17 +4,20 @@ const SubjectSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
-        subjectId: {
+        courseId: {
             type: Number,
-            required: true,
-            unique: true
+            required: false,
         },
-        subjectName: {
+        classId: {
+            type: Number,
+            required: false,
+        },
+        name: {
             type: String,
         },
-        Description: {
+        description: {
             type: String
         },
         credits: {

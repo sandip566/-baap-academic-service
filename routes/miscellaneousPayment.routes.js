@@ -44,7 +44,7 @@ router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
     const criteria = {
         miscellaneousPaymentId: req.query.miscellaneousPaymentId,
         studentId: req.query.studentId,
-        memberId: req.query.memberId,
+        empId: req.query.empId,
         installmentId: req.query.installmentId,
     };
     const serviceResponse = await service.getAllMiscellaneousPaymentByGroupId(

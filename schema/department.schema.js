@@ -4,26 +4,15 @@ const departmentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         departmentName: {
             type: String,
-            required: true,
+            required: false,
         },
         departmentId: {
             type: Number,
-            required: true,
-            unique: true,
-        },
-        departmentHead: {
-            firstName: {
-                type: String,
-                required: true,
-            },
-            code: {
-                type: String,
-                required: true,
-            },
+            required: false,
         },
     },
     { strict: false, timestamps: true }

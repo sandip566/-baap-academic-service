@@ -4,20 +4,18 @@ const classSchema = new mongoose.Schema(
     {
         name: {
             type: String,
-            required: true,
         },
         courseId: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'course',
-            autopopulate: true
+            type: Number,
+            required: false
         },
         groupId: {
             type: Number,
-            default: 1
+            required: false
         },
         classId: {
             type: Number,
-            required: true
+            required: false
         },
         duration: {
             type: String
