@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const studentAdmissionModel = require("../schema/studentAdmission.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -18,7 +19,25 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+    async updateUser(addmissionId, data) {
+        try {
+            const resp = await studentAdmissionModel.findOneAndUpdate(
+                { addmissionId: addmissionId },
 
+                data,
+                { upsert: true, new: true }
+            );
+
+            return new ServiceResponse({
+                data: resp,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
     async deleteByStudentsAddmisionId(studentAdmissionId, groupId) {
         try {
             return await studentAdmissionModel.deleteOne(
