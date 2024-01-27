@@ -79,7 +79,7 @@ router.get("/:id", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/shelfes", async (req, res) => {
+router.get("/all", async (req, res) => {
   const serviceResponse = await shelfService.getAllByCriteria({});
   requestResponseHelper.sendResponse(res, serviceResponse);
 });

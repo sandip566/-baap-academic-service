@@ -113,7 +113,7 @@ router.get("/:id", async (req, res) => {
     }
 });
 
-router.get("/all/studentsAddmision", async (req, res) => {
+router.get("/all", async (req, res) => {
     try {
         const serviceResponse = await service.getAllByCriteria({});
         requestResponsehelper.sendResponse(res, serviceResponse);

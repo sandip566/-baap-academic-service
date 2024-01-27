@@ -83,7 +83,7 @@ router.get("/getByYear/:year",TokenService.checkPermission(["OSR"]), async (req,
     }
 });
 
-router.get("/all/academicYears", async (req, res) => {
+router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
