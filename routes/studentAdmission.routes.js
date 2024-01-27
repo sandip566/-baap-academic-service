@@ -25,63 +25,61 @@ router.post(
     }
 );
 router.post("/data/save", async (req, res, next) => {
-    if (ValidationHelper.requestValidationErrors(req, res)) {
-        return;
-    }
-    // const addmissionId = +Date.now();
-    // req.body.addmissionId = addmissionId;
-
-    if (req.body.addmissionId) {
-        const existingDocument = await service.getByaddmissionId(
-            req.body.addmissionId
-        );
-        console.log(existingDocument);
-
-        if (existingDocument) {
-            if (!req.body.documents || req.body.documents.length === 0) {
-                req.body.documents = [];
-            } else {
-                req.body.documents = req.body.documents.map((addressData) => {
-                    const documentId =
-                        +Date.now() + Math.floor(Math.random() * 1000);
-                    return {
-                        _id: new mongoose.Types.ObjectId(),
-                        documentId: documentId,
-                        documents: addressData,
-                    };
-                });
-            }
-            if (
-                !req.body.feesDetails ||
-                req.body.feesDetails.length === 0
-            ) {
-                req.body.feesDetails = [];
-            } else {
-                req.body.feesDetails = req.body.feesDetails.map(
-                    (paymentDetailsData) => {
-                        const feesDetailsId = +Date.now();
-                        return {
-                            _id: new mongoose.Types.ObjectId(),
-                            feesDetailsId: feesDetailsId,
-                            feesDetails: paymentDetailsData,
-                        };
-                    }
-                );
-            }
-
-            const serviceResponse = await service.updateUser(
-                req.body.addmissionId,
-                req.body
-            );
-            console.log("serviceResponse", serviceResponse);
-            requestResponsehelper.sendResponse(res, serviceResponse);
-        } else {
-            const serviceResponse = await service.create(req.body);
-            console.log(serviceResponse);
-            requestResponsehelper.sendResponse(res, serviceResponse);
+    try {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
         }
+
+        if (req.body.addmissionId) {
+            const existingDocument = await service.getByaddmissionId(
+                req.body.addmissionId
+            );
+
+            if (existingDocument) {
+             
+                req.body.documents = req.body.documents
+                    ? req.body.documents.map((documentData) => {
+                          const documentId =
+                              +Date.now() + Math.floor(Math.random() * 1000);
+                          return {
+                              _id: new mongoose.Types.ObjectId(),
+                              documentId: documentId,
+                              documents: documentData,
+                          };
+                      })
+                    : existingDocument.data?.documents || [];
+
+        
+                req.body.feesDetails = req.body.feesDetails
+                    ? req.body.feesDetails.map((feesDetailsData) => {
+                          const feesDetailsId = +Date.now();
+                          return {
+                              _id: new mongoose.Types.ObjectId(),
+                              feesDetailsId: feesDetailsId,
+                              feesDetails: feesDetailsData,
+                          };
+                      })
+                    : existingDocument.data?.feesDetails || [];
+
+                const serviceResponse = await service.updateUser(
+                    req.body.addmissionId,
+                    req.body
+                );
+
+                console.log("serviceResponse", serviceResponse);
+                requestResponsehelper.sendResponse(res, serviceResponse);
+            } else {
+                const serviceResponse = await service.create(req.body);
+                console.log(serviceResponse);
+                requestResponsehelper.sendResponse(res, serviceResponse);
+            }
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
     }
 });
+
 router.delete("/:id", async (req, res) => {
     try {
         const serviceResponse = await service.deleteById(req.params.id);
