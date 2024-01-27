@@ -171,14 +171,16 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.get("/all/getAdmissionListing/:groupId", async (req, res) => {
+router.get("/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear", async (req, res) => {
     try {
         const groupId = req.params.groupId;
+        const academicYear = req.params.academicYear;
         const criteria = {
-            studentsAddmisionId: req.query.studentsAddmisionId,
+         
         };
-        const serviceResponse = await service.getAllDataByGroupId(
+        const serviceResponse = await service.getAdmissionListing(
             groupId,
+            academicYear,
             criteria
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
