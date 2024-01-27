@@ -50,16 +50,16 @@ router.post("/data/save", async (req, res, next) => {
                     : existingDocument.data?.documents || [];
 
         
-                req.body.feesDetails = req.body.feesDetails
-                    ? req.body.feesDetails.map((feesDetailsData) => {
-                          const feesDetailsId = +Date.now();
-                          return {
-                              _id: new mongoose.Types.ObjectId(),
-                              feesDetailsId: feesDetailsId,
-                              feesDetails: feesDetailsData,
-                          };
-                      })
-                    : existingDocument.data?.feesDetails || [];
+                // req.body.feesDetails = req.body.feesDetails
+                //     ? req.body.feesDetails.map((feesDetailsData) => {
+                //           const feesDetailsId = +Date.now();
+                //           return {
+                //               _id: new mongoose.Types.ObjectId(),
+                //               feesDetailsId: feesDetailsId,
+                //               feesDetails: feesDetailsData,
+                //           };
+                //       })
+                //     : existingDocument.data?.feesDetails || [];
 
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
@@ -79,6 +79,38 @@ router.post("/data/save", async (req, res, next) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+// router.post(
+//     "/addInstallment/addmissionId/:addmissionId",
+//     // checkSchema(require("../dto/villageDevelopmentCommitte/village-development-committe.dto")),
+//     async (req, res, next) => {
+//         if (ValidationHelper.requestValidationErrors(req, res)) {
+//             return;
+//         }
+//         const serviceResponse = await service.addInstallment(
+//             // req.params.groupId,
+//             req.params.addmissionId,
+//             req.body
+//         );
+//         console.log(serviceResponse);
+//         requestResponsehelper.sendResponse(res, serviceResponse);
+//     }
+// );
+
+router.delete(
+    "/installmentDetails/addmissionId/:addmissionId/installmentId/:installmentId",
+
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        const serviceResponse = await service.deleteCompanyDetails(
+            req.params.addmissionId,
+            req.params.installmentId
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
+
 
 router.delete("/:id", async (req, res) => {
     try {
@@ -139,7 +171,22 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
+router.get("/all/getAdmissionListing/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            studentsAddmisionId: req.query.studentsAddmisionId,
+        };
+        const serviceResponse = await service.getAllDataByGroupId(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 router.delete(
     "/groupId/:groupId/studentAdmissionId/:studentAdmissionId",
     async (req, res) => {
