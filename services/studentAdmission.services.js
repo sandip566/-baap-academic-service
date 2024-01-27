@@ -163,7 +163,7 @@ class StudentsAdmmisionService extends BaseService {
             // if (query.type) {
             //     searchFilter.type = query.type;
             // }
-            const services = await membersModel.find(searchFilter);
+            const services = await studentAdmissionModel.find(searchFilter);
 
             const response = {
                 status: "Success",
