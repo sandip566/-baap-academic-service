@@ -113,14 +113,73 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.studentAdmissionId)
-            query.studentAdmissionId = criteria.studentAdmissionId;
-        return this.preparePaginationAndReturnData(query, criteria);
+    async getAllDataByGroupId(groupId, query) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { first_name: { $regex: query.search, $options: 'i' } },
+                        { last_name: { $regex: query.search, $options: 'i' } },
+                        { phone_number: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { name: { $regex: query.search, $options: 'i' } },
+                        { email: { $regex: query.search, $options: 'i' } },
+                    ];
+                }
+            }
+
+            if (query.phone_number) {
+                searchFilter.phone_number = query.phone_number;
+            }
+
+            if (query.first_name) {
+                searchFilter.first_name = { $regex: query.first_name, $options: 'i' };
+            }
+
+            if (query.last_name) {
+                searchFilter.last_name = { $regex: query.last_name, $options: 'i' };
+            }
+
+            // if (query.userId) {
+            //     searchFilter.userId = query.userId;
+            // }
+            // if (query.role) {
+            //     searchFilter.role = query.role;
+            // }
+            // if (query.department) {
+            //     searchFilter.department = query.department;
+            // }
+
+            // if (query.location) {
+            //     searchFilter.location = query.location;
+            // }
+            // if (query.type) {
+            //     searchFilter.type = query.type;
+            // }
+            const services = await membersModel.find(searchFilter);
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: services.length
+                }
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
     }
+
     // async getAdmissionListing(groupId, academicYear, criteria) {
     //     const query = {
     //         groupId: groupId,
@@ -144,6 +203,10 @@ class StudentsAdmmisionService extends BaseService {
     //         console.log(courseIds);
       
 
+           
+    
+    //         const courseDetails = await courseModel.find({ courseId: { $in: courseIds } });
+    //         console.log("courseDetails", courseDetails);
     //         const courseCounts = {};
     
     //         courseIds.forEach((courseId) => {
@@ -151,10 +214,6 @@ class StudentsAdmmisionService extends BaseService {
     //         });
     
     //         console.log(courseCounts);
-    
-    //         const courseDetails = await courseModel.find({ courseId: { $in: courseIds } });
-    //         console.log("courseDetails", courseDetails);
-    
     //         admissionData.data.items.forEach((admission) => {
     //             if (admission.courseDetails && admission.courseDetails.length > 0) {
     //                 admission.courseDetails.forEach((courseDetail) => {
@@ -179,6 +238,7 @@ class StudentsAdmmisionService extends BaseService {
     //         return { isError: true, message: 'An error occurred during data retrieval' };
     //     }
     // }
+   
     async getAdmissionListing(groupId, academicYear, criteria) {
         const query = {
             groupId: groupId,
@@ -201,41 +261,48 @@ class StudentsAdmmisionService extends BaseService {
     
             console.log(courseIds);
     
+            const courseCounts = [];
+    
             const courseDetails = await courseModel.find({ courseId: { $in: courseIds } });
             console.log("courseDetails", courseDetails);
-    
-            const courseCounts = {};
     
             admissionData.data.items.forEach((admission) => {
                 if (admission.courseDetails && admission.courseDetails.length > 0) {
                     admission.courseDetails.forEach((courseDetail) => {
-                        const matchingCourse = courseDetails.find((course) => course._id.equals(courseDetail.course_id));
+                        const matchingCourse = courseDetails.find((course) => course.courseId.toString() === courseDetail.course_id.toString());  // Convert to string
                         if (matchingCourse) {
-                            courseDetail.courseName = matchingCourse.CourseName || matchingCourse.name;  // Adjust property name based on your actual data
-                            courseCounts[courseDetail.course_id] = (courseCounts[courseDetail.course_id] || 0) + 1;
+                            const courseId = matchingCourse.courseId.toString();  // Convert to string
+                            const courseName = matchingCourse.CourseName || matchingCourse.name;  // Adjust property name based on your actual data
+                            const existingCourse = courseCounts.find((courseCount) => courseCount.id === courseId);
+                            if (existingCourse) {
+                                existingCourse.count += 1;
+                            } else {
+                                courseCounts.push({ id: courseId, name: courseName, count: 1 });
+                            }
                         }
                     });
                 }
             });
     
-            console.log(courseCounts);
+            console.log("courseCounts", courseCounts);
     
-            admissionData.data.items.forEach((admission) => {
-                if (admission.courseDetails && admission.courseDetails.length > 0) {
-                    admission.courseDetails.forEach((courseDetail) => {
-                        courseDetail.courseCount = courseCounts[courseDetail.course_id] || 0;
-                    });
-                }
-            });
+            let response = {
+                // data: admissionData,
+                // courseData: courseDetails,
+                data: courseCounts
+            };
     
-            return admissionData;
+            console.log("response", response);
+    
+            return response;
         } catch (error) {
             console.error(error);
             // Handle the error accordingly
             return { isError: true, message: 'An error occurred during data retrieval' };
         }
     }
-     
+    
+    
     
 }
 module.exports = new StudentsAdmmisionService(

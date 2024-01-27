@@ -47,7 +47,6 @@ router.post("/data/save", async (req, res, next) => {
             );
 
             if (existingDocument) {
-             
                 req.body.documents = req.body.documents
                     ? req.body.documents.map((documentData) => {
                           const documentId =
@@ -60,7 +59,6 @@ router.post("/data/save", async (req, res, next) => {
                       })
                     : existingDocument.data?.documents || [];
 
-        
                 // req.body.feesDetails = req.body.feesDetails
                 //     ? req.body.feesDetails.map((feesDetailsData) => {
                 //           const feesDetailsId = +Date.now();
@@ -122,7 +120,6 @@ router.delete(
     }
 );
 
-
 router.delete("/:id", async (req, res) => {
     try {
         const serviceResponse = await service.deleteById(req.params.id);
@@ -160,7 +157,11 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
-            studentsAddmisionId: req.query.studentsAddmisionId,
+            // phoneNumber: req.query.phoneNumber,
+            first_name: req.query.first_name,
+            phone_number: req.query.phone_number,
+            last_name: req.query.last_name,
+            search: req.query.search,
         };
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
@@ -172,24 +173,25 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.get("/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear", async (req, res) => {
-    try {
-        const groupId = req.params.groupId;
-        const academicYear = req.params.academicYear;
-        const criteria = {
-         
-        };
-        const serviceResponse = await service.getAdmissionListing(
-            groupId,
-            academicYear,
-            criteria
-        );
-        requestResponsehelper.sendResponse(res, serviceResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+router.get(
+    "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const academicYear = req.params.academicYear;
+            const criteria = {};
+            const serviceResponse = await service.getAdmissionListing(
+                groupId,
+                academicYear,
+                criteria
+            );
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
-});
+);
 router.delete(
     "/groupId/:groupId/studentAdmissionId/:studentAdmissionId",
     async (req, res) => {
