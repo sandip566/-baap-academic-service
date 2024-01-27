@@ -71,7 +71,7 @@ router.get("/reminderId/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/reminders", async (req, res) => {
+router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

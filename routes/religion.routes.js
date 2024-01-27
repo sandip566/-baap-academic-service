@@ -78,7 +78,7 @@ router.get("/:id", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/religion", async (req, res) => {
+router.get("/all", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponseHelper.sendResponse(res, serviceResponse);
 });

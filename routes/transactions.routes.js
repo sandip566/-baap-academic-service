@@ -37,7 +37,7 @@ router.get("/:id", async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/transactions", async (req, res) => {
+router.get("/all", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
