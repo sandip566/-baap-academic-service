@@ -20,6 +20,11 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;
@@ -83,8 +88,4 @@ router.get("/getByYear/:year",TokenService.checkPermission(["OSR"]), async (req,
     }
 });
 
-router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 module.exports = router;

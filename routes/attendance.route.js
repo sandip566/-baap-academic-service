@@ -20,6 +20,11 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria(req.query);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/:id",TokenService.checkPermission(["PATML4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
@@ -35,10 +40,6 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 
 router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["PATML1"]), async (req, res) => {
     const groupId = req.params.groupId;

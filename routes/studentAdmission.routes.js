@@ -24,6 +24,17 @@ router.post(
         }
     }
 );
+
+router.get("/all", async (req, res) => {
+    try {
+        const serviceResponse = await service.getAllByCriteria({});
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.post("/data/save", async (req, res, next) => {
     try {
         if (ValidationHelper.requestValidationErrors(req, res)) {
@@ -138,16 +149,6 @@ router.put("/:id", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const serviceResponse = await service.getById(req.params.id);
-        requestResponsehelper.sendResponse(res, serviceResponse);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-router.get("/all", async (req, res) => {
-    try {
-        const serviceResponse = await service.getAllByCriteria({});
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);
