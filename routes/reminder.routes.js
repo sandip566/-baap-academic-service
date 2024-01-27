@@ -19,6 +19,11 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/groupId/:groupId/reminderId/:reminderId", async (req, res) => {
     try {
         const reminderId = req.params.reminderId;
@@ -68,11 +73,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 
 router.get("/reminderId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
-
-router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 

@@ -21,6 +21,11 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria(req.query);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.post('/issue-book', async (req, res) => {
     try {
         const { groupId, bookId, title, studentId, dueDate, issuedDate } = req.body;
@@ -87,10 +92,6 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;

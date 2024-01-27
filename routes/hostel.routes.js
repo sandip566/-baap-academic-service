@@ -19,6 +19,11 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
     try {
         const hostelerId = req.params.hostelerId;
@@ -86,8 +91,4 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 module.exports = router;
