@@ -3,7 +3,9 @@ const studentAdmissionModel = require("../schema/studentAdmission.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const feesInstallmentServices = require("./feesInstallment.services");
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
-const courseModel=require("../schema/courses.schema")
+const courseModel=require("../schema/courses.schema");
+const ClassModel = require("../schema/classes.schema");
+const DivisionModel = require("../schema/division.schema");
 
 class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -123,28 +125,28 @@ class StudentsAdmmisionService extends BaseService {
                 const numericSearch = parseInt(query.search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { first_name: { $regex: query.search, $options: 'i' } },
-                        { last_name: { $regex: query.search, $options: 'i' } },
-                        { phone_number: numericSearch },
+                        { firstName: { $regex: query.search, $options: 'i' } },
+                        { lastName: { $regex: query.search, $options: 'i' } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { name: { $regex: query.search, $options: 'i' } },
-                        { email: { $regex: query.search, $options: 'i' } },
+                        { firstName: { $regex: query.search, $options: 'i' } },
+                        { lastName: { $regex: query.search, $options: 'i' } },
                     ];
                 }
             }
 
-            if (query.phone_number) {
-                searchFilter.phone_number = query.phone_number;
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = query.phoneNumber;
             }
 
-            if (query.first_name) {
-                searchFilter.first_name = { $regex: query.first_name, $options: 'i' };
+            if (query.firstName) {
+                searchFilter.firstName = { $regex: query.firstName, $options: 'i' };
             }
 
-            if (query.last_name) {
-                searchFilter.last_name = { $regex: query.last_name, $options: 'i' };
+            if (query.lastName) {
+                searchFilter.lastName = { $regex: query.lastName, $options: 'i' };
             }
 
             // if (query.userId) {
@@ -164,11 +166,47 @@ class StudentsAdmmisionService extends BaseService {
             //     searchFilter.type = query.type;
             // }
             const services = await studentAdmissionModel.find(searchFilter);
-
+            const servicesWithData = await Promise.all(
+                services.map(async (service) => {
+                    if (service.courseDetails && service.courseDetails.length > 0) {
+                        const courseDetailsWithAdditionalData = await Promise.all(
+                            service.courseDetails.map(async (courseDetail) => {
+                                let additionalData = {};
+            
+                                if (courseDetail.course_id) {
+                                    const course_id = await courseModel.findOne({
+                                        course_id: courseDetail.courseId,
+                                    });
+                                    additionalData.course_id = course_id;
+                                }
+            
+                                if (courseDetail.class_id) {
+                                    const class_id = await ClassModel.findOne({
+                                        class_id: courseDetail.classId,
+                                    });
+                                    additionalData.class_id = class_id;
+                                }
+            
+                                if (courseDetail.division_id) {
+                                    const division_id = await DivisionModel.findOne({
+                                        division_id: courseDetail.divisionId,
+                                    });
+                                    additionalData.division_id = division_id;
+                                }
+            
+                                return { ...courseDetail, ...additionalData };
+                            })
+                        );
+            
+                        return { ...service._doc, courseDetails: courseDetailsWithAdditionalData };
+                    }
+                    return service;
+                })
+            );
             const response = {
                 status: "Success",
                 data: {
-                    items: services,
+                    items: servicesWithData,
                     totalItemsCount: services.length
                 }
             };

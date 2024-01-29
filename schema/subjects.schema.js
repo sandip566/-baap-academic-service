@@ -22,6 +22,10 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        divisionId: {
+            type: Number,
+            required: false,
+        },
         totalMarks: {
             type: Number,
             required: false,

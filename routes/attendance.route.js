@@ -8,7 +8,7 @@ const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require("../dto/attendance.dto")),TokenService.checkPermission(["PATML2"]),
+    checkSchema(require("../dto/attendance.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;

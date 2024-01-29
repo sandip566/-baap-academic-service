@@ -158,11 +158,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
             // phoneNumber: req.query.phoneNumber,
-            first_name: req.query.first_name,
-            phone_number: req.query.phone_number,
-            last_name: req.query.last_name,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
             search: req.query.search,
         };
+        
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria
