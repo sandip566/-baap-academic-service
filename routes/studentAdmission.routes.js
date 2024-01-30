@@ -5,6 +5,7 @@ const service = require("../services/studentAdmission.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { default: mongoose } = require("mongoose");
+const feesInstallmentServices = require("../services/feesInstallment.services");
 
 router.post(
     "/",
@@ -69,17 +70,30 @@ router.post("/data/save", async (req, res, next) => {
                 //           };
                 //       })
                 //     : existingDocument.data?.feesDetails || [];
-
+                if(req.body.feesDetails){
+                    const installmentId = +Date.now();
+                    req.body.installmentId = installmentId;
+                const feesinstallmentResponse = await feesInstallmentServices.updateUser(
+                    req.body.addmissionId,
+                    req.body
+                );  
+                }    
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
                 );
 
-                console.log("serviceResponse", serviceResponse);
+                // console.log("serviceResponse", serviceResponse);
                 requestResponsehelper.sendResponse(res, serviceResponse);
             } else {
                 const serviceResponse = await service.create(req.body);
-                console.log(serviceResponse);
+                // console.log(serviceResponse);
+                if(req.body.feesDetails){
+                const installmentId = +Date.now();
+                req.body.installmentId = installmentId;
+                const feesinstallment = await feesInstallmentServices.create(req.body);
+                console.log(feesinstallment);
+                }
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
         }
@@ -88,6 +102,7 @@ router.post("/data/save", async (req, res, next) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
 // router.post(
 //     "/addInstallment/addmissionId/:addmissionId",
 //     // checkSchema(require("../dto/villageDevelopmentCommitte/village-development-committe.dto")),

@@ -7,7 +7,7 @@ const classSchema = new mongoose.Schema(
         },
         courseId: {
             type: Number,
-            required: false
+            required: true
         },
         groupId: {
             type: Number,

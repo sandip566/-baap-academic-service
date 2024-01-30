@@ -3,7 +3,11 @@ const feesPaymentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false,
+            required : true,
+        },
+        userId: {
+            type: Number,
+            required : true,
         },
         feesPaymentId: {
             type: Number,
