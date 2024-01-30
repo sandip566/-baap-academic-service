@@ -15,7 +15,12 @@ class CourseService extends BaseService {
         if (criteria.courseId) query.courseId = criteria.courseId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-
+    async getByCourseId(courseId) {
+        const result = await this.model.findOne({ courseId });
+        return new serviceResponse({
+            data: result,
+        });
+    }
     async deleteCourseById(courseId, groupId) {
         try {
             return await courseModel.deleteOne(courseId, groupId);

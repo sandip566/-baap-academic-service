@@ -6,31 +6,31 @@ const feesInstallmentSchema = new mongoose.Schema(
             type: Number,
             required : false,
         },
-        empId: {
+        addmissionId: {
             type:Number,
             required: false
         },
-        userId: {
-            type:Number,
-            required: false
-        },
+        // userId: {
+        //     type:Number,
+        //     required: false
+        // },
         installmentId: {
             type: Number,
         },
-        courseId: {
-            type:Number,
-            required: false
-        },
-        dueDate: {
-            type: Date,
-        },
-        installmentAmount: {
-            type: Number,
-        },
-        isPaid: {
-            type: Boolean,
-            default: false
-        },
+        // courseId: {
+        //     type:Number,
+        //     required: false
+        // },
+        // dueDate: {
+        //     type: Date,
+        // },
+        // installmentAmount: {
+        //     type: Number,
+        // },
+        // isPaid: {
+        //     type: Boolean,
+        //     default: false
+        // },
         installmentNo: {
             type: Number,
             require: false

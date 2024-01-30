@@ -12,7 +12,7 @@ const DivisionSchema = new mongoose.Schema(
         },
         courseId: {
             type: Number,
-            required: false,
+            required: true,
         },
         name: {
             type: String,
@@ -20,7 +20,7 @@ const DivisionSchema = new mongoose.Schema(
         },
         classId: {
             type: Number,
-            required: false,
+            required: true,
         },
         classroom: {
             type: String,

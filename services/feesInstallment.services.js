@@ -1,6 +1,7 @@
 const feesInstallmentModel = require("../schema/feesInstallment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const Student = require("../schema/student.schema");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class feesInstallmentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -17,7 +18,25 @@ class feesInstallmentService extends BaseService {
         if (criteria.installmentNo) query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria,);
     }
+    async updateUser(addmissionId, data) {
+        try {
+            const resp = await feesInstallmentModel.findOneAndUpdate(
+                { addmissionId: addmissionId },
 
+                data,
+                { upsert: true, new: true }
+            );
+
+            return new ServiceResponse({
+                data: resp,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
     async deleteFeesInstallmentById(installmentId, groupId) {
         try {
             return await feesInstallmentModel.deleteOne(installmentId, groupId);

@@ -12,6 +12,7 @@ class feesPaymentService extends BaseService {
     };
     if (criteria.feesPaymentId) query.feesPaymentId = criteria.feesPaymentId;
     if (criteria.empId) query.empId = criteria.empId;
+    if (criteria.userId) query.userId = criteria.userId;
     if (criteria.installmentId) query.installmentId = criteria.installmentId;
     return this.preparePaginationAndReturnData(query, criteria)
   }
