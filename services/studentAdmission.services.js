@@ -325,20 +325,18 @@ class StudentsAdmmisionService extends BaseService {
            // Fetch feesPayment data based on specific IDs
         const feesPaymentData = await FeesPaymentModel.find({
             groupId: groupId,
-            // Add additional conditions based on userId and addmissionId
-            // For example:
-            // userId: criteria.userId,
+            empId:query.empId,
             addmissionId: query.addmissionId,
         });
-
+console.log(feesPaymentData,groupId, query.addmissionId);
         // Filter data based on groupId, userId, addmissionId
         const filteredData = servicesWithData.filter((data) => {
             return (
                 data.groupId === parseInt(groupId) &&
                 // Add additional checks based on userId and addmissionId
                 // For example:
-                // data.userId === criteria.userId &&
-                data.addmissionId === query.addmissionId,
+                data.empId === query.empId &&
+                data.addmissionId == query.addmissionId,
                 true
             );
         });

@@ -205,6 +205,8 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             phoneNumber: req.query.phoneNumber,
             lastName: req.query.lastName,
             search: req.query.search,
+            addmissionId: req.query.addmissionId,
+            empId: req.query.empId
         };
         
         const serviceResponse = await service.getfeesPayment(
