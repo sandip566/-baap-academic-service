@@ -250,6 +250,9 @@ class StudentsAdmmisionService extends BaseService {
             if (query.phoneNumber) {
                 searchFilter.phoneNumber = query.phoneNumber;
             }
+            if (query.addmissionId) {
+                searchFilter.addmissionId = query.addmissionId;
+            }
 
             if (query.firstName) {
                 searchFilter.firstName = { $regex: query.firstName, $options: 'i' };
@@ -337,12 +340,10 @@ class StudentsAdmmisionService extends BaseService {
             addmissionId: query.addmissionId,
         });
 console.log(feesPaymentData,groupId, query.addmissionId);
-        // Filter data based on groupId, userId, addmissionId
+        
         const filteredData = servicesWithData.filter((data) => {
             return (
                 data.groupId === parseInt(groupId) &&
-                // Add additional checks based on userId and addmissionId
-                // For example:
                 data.empId === query.empId &&
                 data.addmissionId == query.addmissionId,
                 true
@@ -353,7 +354,7 @@ console.log(feesPaymentData,groupId, query.addmissionId);
                 status: "Success",
                 data: {
                     items: filteredData,
-                    feesPaymentData: feesPaymentData, // Include feesPaymentData in the response
+                    feesPaymentData: feesPaymentData, 
                     totalItemsCount: filteredData.length,
                 },
             };
