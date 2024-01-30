@@ -117,6 +117,11 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
+    async getByAddmissionId(addmissionId) {
+        return this.execute(() => {
+            return this.model.findOne({ addmissionId: addmissionId });
+        });
+    }
 
     async getAllDataByGroupId(groupId, query) {
         try {
@@ -323,7 +328,7 @@ class StudentsAdmmisionService extends BaseService {
             // Add additional conditions based on userId and addmissionId
             // For example:
             // userId: criteria.userId,
-            // addmissionId: criteria.addmissionId,
+            addmissionId: query.addmissionId,
         });
 
         // Filter data based on groupId, userId, addmissionId
@@ -333,7 +338,7 @@ class StudentsAdmmisionService extends BaseService {
                 // Add additional checks based on userId and addmissionId
                 // For example:
                 // data.userId === criteria.userId &&
-                // data.addmissionId === criteria.addmissionId
+                data.addmissionId === query.addmissionId,
                 true
             );
         });
