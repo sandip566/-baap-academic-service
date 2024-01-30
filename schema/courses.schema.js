@@ -11,6 +11,10 @@ const courseSchema = new mongoose.Schema(
             required: false,
             type: String
         },
+        departmentId:{
+            type:Number,
+            required: false
+        },
         duration: {
             type: String,
             required: false,
