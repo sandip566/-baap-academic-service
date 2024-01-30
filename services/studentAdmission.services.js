@@ -8,6 +8,7 @@ const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
+const FeesPaymentModel=require("../schema/feesPayment.schema")
 
 class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -316,13 +317,34 @@ class StudentsAdmmisionService extends BaseService {
                     return { ...service._doc, ...additionalData };
                 })
             );
+           // Fetch feesPayment data based on specific IDs
+        const feesPaymentData = await FeesPaymentModel.find({
+            groupId: groupId,
+            // Add additional conditions based on userId and addmissionId
+            // For example:
+            // userId: criteria.userId,
+            // addmissionId: criteria.addmissionId,
+        });
+
+        // Filter data based on groupId, userId, addmissionId
+        const filteredData = servicesWithData.filter((data) => {
+            return (
+                data.groupId === parseInt(groupId) &&
+                // Add additional checks based on userId and addmissionId
+                // For example:
+                // data.userId === criteria.userId &&
+                // data.addmissionId === criteria.addmissionId
+                true
+            );
+        });
     
             const response = {
                 status: "Success",
                 data: {
-                    items: servicesWithData,
-                    totalItemsCount: services.length
-                }
+                    items: filteredData,
+                    feesPaymentData: feesPaymentData, // Include feesPaymentData in the response
+                    totalItemsCount: filteredData.length,
+                },
             };
     
             return response;

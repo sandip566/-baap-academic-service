@@ -22,13 +22,7 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        classroom: {
-            type: String,
-            required: false,
-        },
-        incharge: {
-            type: String,
-        },
+     
     },
     { strict: false, timestamps: true }
 );
