@@ -11,37 +11,40 @@ class CourseService extends BaseService {
             const query = {
                 groupId: groupId,
             };
-
+    
             if (criteria.CourseName)
                 query.CourseName = new RegExp(criteria.CourseName, "i");
             if (criteria.University)
                 query.University = new RegExp(criteria.University, "i");
             if (criteria.courseId) query.courseId = criteria.courseId;
-
+    
             const services = await courseModel.find(query);
             // console.log(services);
-
+    
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
                     let additionalData = {};
                     // console.log(additionalData);
                     let departmentDetails;
+    
                     if (service.Department) {
+                        // Assuming service.Department is the departmentId
                         departmentDetails = await DepartmentModel.findOne({
-                            Department: service.departmentId,
+                            departmentId: service.Department,
                         });
-                        console.log(departmentDetails.departmentName);
-                        additionalData.Department = departmentDetails;
+    
+                        if (departmentDetails) {
+                            additionalData.Department = departmentDetails.departmentName
+                        }
                     }
-
+    
                     return {
                         ...service._doc,
                         ...additionalData,
-                        Department: departmentDetails.departmentName,
                     };
                 })
             );
-
+    
             return {
                 status: "Success",
                 data: {
@@ -57,7 +60,7 @@ class CourseService extends BaseService {
             };
         }
     }
-
+    
     async getByCourseId(courseId) {
         const result = await this.model.findOne({ courseId });
         return new serviceResponse({
