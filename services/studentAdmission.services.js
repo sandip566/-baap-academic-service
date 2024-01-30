@@ -270,29 +270,37 @@ class StudentsAdmmisionService extends BaseService {
                         const courseDetailsWithAdditionalData = await Promise.all(
                             service.courseDetails.map(async (courseDetail) => {
                                 let courseAdditionalData = {};
-    
+                                let course_id 
+                                let class_id
+                                let division_id
                                 if (courseDetail.course_id) {
-                                    const course_id = await courseModel.findOne({
+                                     course_id = await courseModel.findOne({
                                         course_id: courseDetail.courseId,
                                     });
+                                    
                                     courseAdditionalData.course_id = course_id;
+                                    // console.log(course_id);
+                                   
                                 }
     
                                 if (courseDetail.class_id) {
-                                    const class_id = await ClassModel.findOne({
+                                     class_id = await ClassModel.findOne({
                                         class_id: courseDetail.classId,
                                     });
                                     courseAdditionalData.class_id = class_id;
                                 }
     
                                 if (courseDetail.division_id) {
-                                    const division_id = await DivisionModel.findOne({
+                               
+                               
+                                     division_id = await DivisionModel.findOne({
                                         division_id: courseDetail.divisionId,
                                     });
+                                    console.log("division_id",division_id.Name);
                                     courseAdditionalData.division_id = division_id;
                                 }
     
-                                return { ...courseDetail, ...courseAdditionalData };
+                                return { courseName:course_id.CourseName ,className:class_id.name,divisionName:division_id.Name};
                             })
                         );
     
