@@ -14,4 +14,4 @@ const religionSchema = new mongoose.Schema(
     { strict: false, timestamps: true }
 );
 const religionModel = mongoose.model("religion", religionSchema);
-module.exports = religionModel;
+module.exports = religionModel;     

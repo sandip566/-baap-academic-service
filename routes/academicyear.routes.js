@@ -20,11 +20,17 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
-        const academicYearId = req.params.academicYearId;
+      
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(academicYearId, groupId);
+        const academicYearId = req.params.academicYearId;
+        const Data = await service.deleteByDataId(groupId,academicYearId);
         if (!Data) {
             res.status(404).json({ error: 'Data not found to delete' });
         } else {
@@ -83,8 +89,4 @@ router.get("/getByYear/:year",TokenService.checkPermission(["OSR"]), async (req,
     }
 });
 
-router.get("/all/academicYears", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 module.exports = router;

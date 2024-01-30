@@ -30,7 +30,7 @@ const feesTemplate = mongoose.Schema(
         },
         checklist: [{
             type: String,
-            enum: checklistOptions,
+            // enum: checklistOptions,
             default: []
         }],
         components: [

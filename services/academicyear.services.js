@@ -30,9 +30,10 @@ class AcademicYearService extends BaseService {
         }
     }
 
-    async deleteByDataId(academicYearId, groupId) {
+    async deleteByDataId(groupId,academicYearId) {
         try {
-            const deleteData = await AcademicYearModel.deleteOne({ academicYearId: academicYearId, groupId: groupId });
+            const deleteData = await AcademicYearModel.deleteOne({ groupId: groupId, academicYearId: academicYearId });
+            console.log(deleteData);
             return deleteData;
         } catch (error) {
             throw error;

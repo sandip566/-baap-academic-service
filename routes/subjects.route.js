@@ -19,6 +19,11 @@ router.post(
   }
 );
 
+router.get("/all", async (req, res) => {
+  const serviceResponse = await service.getAllByCriteria({});
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
@@ -31,11 +36,6 @@ router.put("/:id", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const serviceResponse = await service.getById(req.params.id);
-  requestResponsehelper.sendResponse(res, serviceResponse);
-});
-
-router.get("/all/subjects", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -76,6 +76,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     subjectName: req.query.subjectName,
+    courseId: req.query.courseId,
+    divisionId: req.query.divisionId,
+    classId: req.query.classId,
     subjectId: req.query.subjectId,
   };
   const serviceResponse = await service.getAllDataByGroupId(

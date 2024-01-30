@@ -12,7 +12,7 @@ class ClassService extends BaseService {
         };
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         if (criteria.location) query.location = new RegExp(criteria.location, "i");
-        if (criteria.courseId) query.courseId = new RegExp(criteria.courseId);
+        if (criteria.courseId) query.courseId = criteria.courseId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 

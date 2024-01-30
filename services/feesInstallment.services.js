@@ -47,16 +47,37 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-
+    async getByInstallmentId(installmentId) {
+        return this.execute(() => {
+            return this.model.findOne({ installmentId: installmentId });
+        });
+    }
     async getInstallmentsByStudentId(studentId) {
         try {
+
             const installments = await feesInstallmentModel.find({ studentId: studentId });
             return installments;
         } catch (error) {
             throw error;
         }
     }
-
+    async deleteStudentById(installmentId) {
+        try {
+            let installmentData=await this.getByInstallmentId(installmentId);
+            console.log(installmentData.data);
+            let Data=installmentData.data
+            const result = await feesInstallmentModel.deleteOne({ installmentId: installmentId });
+    
+            if (result.deletedCount === 1) {
+                return { success: true,data:Data, message: 'Student deleted successfully' };
+            } else {
+                return { success: false, message: 'Student not found' };
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+    
     async updateInstallmentAsPaid(installmentId) {
         try {
             const updateResult = await feesInstallmentModel.findOneAndUpdate(

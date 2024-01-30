@@ -19,6 +19,11 @@ router.post(
   }
 );
 
+router.get("/all", async (req, res) => {
+  const serviceResponse = await service.getAllByCriteria({});
+  requestResponseHelper.sendResponse(res, serviceResponse);
+});
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
@@ -78,8 +83,4 @@ router.get("/:id", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/religion", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
-  requestResponseHelper.sendResponse(res, serviceResponse);
-});
 module.exports = router;

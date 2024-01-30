@@ -8,7 +8,7 @@ const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require("../dto/attendance.dto")),TokenService.checkPermission(["PATML2"]),
+    checkSchema(require("../dto/attendance.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -19,6 +19,11 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria(req.query);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 
 router.delete("/:id",TokenService.checkPermission(["PATML4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -35,10 +40,6 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/attendance", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 
 router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["PATML1"]), async (req, res) => {
     const groupId = req.params.groupId;

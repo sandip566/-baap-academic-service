@@ -19,6 +19,11 @@ router.post(
     }
 );
 
+router.get("/all", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/groupId/:groupId/departmentId/:departmentId", async (req, res) => {
     try {
         const departmentId = req.params.departmentId;
@@ -57,8 +62,4 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/department", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 module.exports = router;

@@ -10,6 +10,10 @@ const feesInstallmentSchema = new mongoose.Schema(
             type:Number,
             required: false
         },
+        userId: {
+            type:Number,
+            required: false
+        },
         installmentId: {
             type: Number,
         },
