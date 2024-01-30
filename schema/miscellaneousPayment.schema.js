@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-
 const miscellaneousPaymentSchema = new mongoose.Schema(
     {
         miscellaneousPaymentId: {
@@ -8,7 +7,7 @@ const miscellaneousPaymentSchema = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            required : false
+            required: false
         },
         amount: {
             type: Number,

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const religionSchema = new mongoose.Schema(
     {
         religionId:{

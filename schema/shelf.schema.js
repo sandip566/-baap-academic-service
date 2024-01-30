@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const shelf = new mongoose.Schema(
   {
     shelfId: Number,
@@ -9,7 +8,7 @@ const shelf = new mongoose.Schema(
     },
     groupId: {
       type: Number,
-      required : false
+      required: false
     }
   },
   { strict: false, timestamps: true }

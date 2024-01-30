@@ -1,13 +1,12 @@
-
 const mongoose = require("mongoose");
 const feesInstallmentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false,
+            required: false,
         },
         addmissionId: {
-            type:Number,
+            type: Number,
             required: false
         },
         // userId: {

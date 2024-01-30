@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const student = new mongoose.Schema(
     {
         studentId: {
@@ -7,7 +6,7 @@ const student = new mongoose.Schema(
         },
         groupId: {
             type: Number,
-            required : false,
+            required: false,
         },
         title: {
             type: String,

@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-
 const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false,
+            required: false,
         },
         divisionId: {
             type: Number,

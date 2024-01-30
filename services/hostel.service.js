@@ -6,10 +6,6 @@ class HostelService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async save(dataObject) {
-        return await HostelModel.create(dataObject);
-    }
-
     async getByDataId(hostelerId) {
         return this.execute(() => {
             return HostelModel.findOne({ hostelerId: hostelerId });

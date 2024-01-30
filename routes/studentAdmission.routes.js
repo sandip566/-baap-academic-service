@@ -50,14 +50,14 @@ router.post("/data/save", async (req, res, next) => {
             if (existingDocument) {
                 req.body.documents = req.body.documents
                     ? req.body.documents.map((documentData) => {
-                          const documentId =
-                              +Date.now() + Math.floor(Math.random() * 1000);
-                          return {
-                              _id: new mongoose.Types.ObjectId(),
-                              documentId: documentId,
-                              documents: documentData,
-                          };
-                      })
+                        const documentId =
+                            +Date.now() + Math.floor(Math.random() * 1000);
+                        return {
+                            _id: new mongoose.Types.ObjectId(),
+                            documentId: documentId,
+                            documents: documentData,
+                        };
+                    })
                     : existingDocument.data?.documents || [];
 
                 // req.body.feesDetails = req.body.feesDetails
@@ -70,14 +70,14 @@ router.post("/data/save", async (req, res, next) => {
                 //           };
                 //       })
                 //     : existingDocument.data?.feesDetails || [];
-                if(req.body.feesDetails){
+                if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-                const feesinstallmentResponse = await feesInstallmentServices.updateUser(
-                    req.body.addmissionId,
-                    req.body
-                );  
-                }    
+                    const feesinstallmentResponse = await feesInstallmentServices.updateUser(
+                        req.body.addmissionId,
+                        req.body
+                    );
+                }
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -88,11 +88,11 @@ router.post("/data/save", async (req, res, next) => {
             } else {
                 const serviceResponse = await service.create(req.body);
                 // console.log(serviceResponse);
-                if(req.body.feesDetails){
-                const installmentId = +Date.now();
-                req.body.installmentId = installmentId;
-                const feesinstallment = await feesInstallmentServices.create(req.body);
-                console.log(feesinstallment);
+                if (req.body.feesDetails) {
+                    const installmentId = +Date.now();
+                    req.body.installmentId = installmentId;
+                    const feesinstallment = await feesInstallmentServices.create(req.body);
+                    console.log(feesinstallment);
                 }
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
@@ -178,7 +178,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             lastName: req.query.lastName,
             search: req.query.search,
         };
-        
+
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria
@@ -253,5 +253,4 @@ router.put(
         }
     }
 );
-
 module.exports = router;

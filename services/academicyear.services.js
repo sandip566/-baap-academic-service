@@ -6,10 +6,6 @@ class AcademicYearService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async save(dataObject) {
-        return await AcademicYearModel.create(dataObject);
-    }
-
     async getByDataId(academicYearId) {
         return this.execute(() => {
             return AcademicYearModel.findOne({ academicYearId: academicYearId });

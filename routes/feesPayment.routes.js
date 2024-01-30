@@ -5,7 +5,7 @@ const service = require("../services/feesPayment.services");
 const Service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper")
-const feesInstallmentService=require("../services/feesInstallment.services")
+const feesInstallmentService = require("../services/feesInstallment.services")
 
 router.post(
   "/",
@@ -49,7 +49,7 @@ router.get("/getAllFeesPayment/groupId/:groupId", async (req, res) => {
   const criteria = {
     feesPaymentId: req.query.feesPaymentId,
     empId: req.query.empId,
-    userId:req.query.userId,
+    userId: req.query.userId,
     installmentId: req.query.installmentId
   };
   const serviceResponse = await service.getAllFeesPaymentByGroupId(

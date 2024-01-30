@@ -25,12 +25,12 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.delete("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
-      
+
         const groupId = req.params.groupId;
         const academicYearId = req.params.academicYearId;
-        const Data = await service.deleteByDataId(groupId,academicYearId);
+        const Data = await service.deleteByDataId(groupId, academicYearId);
         if (!Data) {
             res.status(404).json({ error: 'Data not found to delete' });
         } else {
@@ -42,7 +42,7 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.ch
     }
 });
 
-router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.put("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;
         const groupId = req.params.groupId;
@@ -79,7 +79,7 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getByYear/:year",TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.get("/getByYear/:year", TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const serviceResponse = await service.getByYear(req.params.year);
         requestResponsehelper.sendResponse(res, serviceResponse);
