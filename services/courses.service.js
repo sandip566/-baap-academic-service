@@ -23,16 +23,16 @@ class CourseService extends BaseService {
                 services.map(async (service) => {
                     let additionalData = {};
                     // console.log(additionalData);
-    
+    let departmentDetails
                     if (service.Department) {
-                        const departmentDetails = await DepartmentModel.findOne({
+                         departmentDetails = await DepartmentModel.findOne({
                             Department: service.departmentId,
                         });
-                        console.log(departmentDetails);
+                        console.log(departmentDetails.departmentName);
                         additionalData.Department = departmentDetails;
                     }
     
-                    return { ...service._doc, ...additionalData };
+                    return { ...service._doc, ...additionalData,Department:departmentDetails.departmentName };
                 })
             );
     
