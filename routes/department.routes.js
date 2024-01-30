@@ -39,7 +39,16 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", async (req, res) =
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
+router.get("/all/getByGroupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+       classId:req.query.classId,
+       name:req.query.name,
+       courseId:req.query.courseId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.put("/groupId/:groupId/departmentId/:departmentId", async (req, res) => {
     try {
         const departmentId = req.params.departmentId;

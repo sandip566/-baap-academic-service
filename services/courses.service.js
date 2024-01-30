@@ -1,6 +1,6 @@
 const courseModel = require("../schema/courses.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const DepartmentModel=require("../schema/department.schema")
+const DepartmentModel = require("../schema/department.schema");
 class CourseService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -11,31 +11,37 @@ class CourseService extends BaseService {
             const query = {
                 groupId: groupId,
             };
-    
-            if (criteria.CourseName) query.CourseName = new RegExp(criteria.CourseName, "i");
-            if (criteria.University) query.University = new RegExp(criteria.University, "i");
+
+            if (criteria.CourseName)
+                query.CourseName = new RegExp(criteria.CourseName, "i");
+            if (criteria.University)
+                query.University = new RegExp(criteria.University, "i");
             if (criteria.courseId) query.courseId = criteria.courseId;
-    
+
             const services = await courseModel.find(query);
             // console.log(services);
-    
+
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
                     let additionalData = {};
                     // console.log(additionalData);
-    let departmentDetails
+                    let departmentDetails;
                     if (service.Department) {
-                         departmentDetails = await DepartmentModel.findOne({
+                        departmentDetails = await DepartmentModel.findOne({
                             Department: service.departmentId,
                         });
                         console.log(departmentDetails.departmentName);
                         additionalData.Department = departmentDetails;
                     }
-    
-                    return { ...service._doc, ...additionalData,Department:departmentDetails.departmentName };
+
+                    return {
+                        ...service._doc,
+                        ...additionalData,
+                        Department: departmentDetails.departmentName,
+                    };
                 })
             );
-    
+
             return {
                 status: "Success",
                 data: {
@@ -51,9 +57,6 @@ class CourseService extends BaseService {
             };
         }
     }
-    
-    
-    
 
     async getByCourseId(courseId) {
         const result = await this.model.findOne({ courseId });

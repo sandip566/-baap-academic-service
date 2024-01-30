@@ -10,8 +10,8 @@ class DepartmentService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.vendorName) query.vendorName = new RegExp(criteria.vendorName, "i");
+        // if (criteria.vendorId) query.vendorId = criteria.vendorId;
+        if (criteria.departmentName) query.departmentName = new RegExp(criteria.departmentName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
