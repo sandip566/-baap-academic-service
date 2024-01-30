@@ -6,6 +6,8 @@ const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const courseModel=require("../schema/courses.schema");
 const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
+const FeesTemplateModel = require("../schema/feesTemplate.schema");
+const feesTemplateModel = require("../schema/feesTemplate.schema");
 
 class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -217,6 +219,120 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+    async getfeesPayment(groupId, query) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+    
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { firstName: { $regex: query.search, $options: 'i' } },
+                        { lastName: { $regex: query.search, $options: 'i' } },
+                        { phoneNumber: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { firstName: { $regex: query.search, $options: 'i' } },
+                        { lastName: { $regex: query.search, $options: 'i' } },
+                    ];
+                }
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = query.phoneNumber;
+            }
+
+            if (query.firstName) {
+                searchFilter.firstName = { $regex: query.firstName, $options: 'i' };
+            }
+
+            if (query.lastName) {
+                searchFilter.lastName = { $regex: query.lastName, $options: 'i' };
+            }
+
+    
+            const services = await studentAdmissionModel.find(searchFilter);
+            const servicesWithData = await Promise.all(
+                services.map(async (service) => {
+                    let additionalData = {}; 
+    
+                    // Process course details
+                    if (service.courseDetails && service.courseDetails.length > 0) {
+                        const courseDetailsWithAdditionalData = await Promise.all(
+                            service.courseDetails.map(async (courseDetail) => {
+                                let courseAdditionalData = {};
+    
+                                if (courseDetail.course_id) {
+                                    const course_id = await courseModel.findOne({
+                                        course_id: courseDetail.courseId,
+                                    });
+                                    courseAdditionalData.course_id = course_id;
+                                }
+    
+                                if (courseDetail.class_id) {
+                                    const class_id = await ClassModel.findOne({
+                                        class_id: courseDetail.classId,
+                                    });
+                                    courseAdditionalData.class_id = class_id;
+                                }
+    
+                                if (courseDetail.division_id) {
+                                    const division_id = await DivisionModel.findOne({
+                                        division_id: courseDetail.divisionId,
+                                    });
+                                    courseAdditionalData.division_id = division_id;
+                                }
+    
+                                return { ...courseDetail, ...courseAdditionalData };
+                            })
+                        );
+    
+                        additionalData.courseDetails = courseDetailsWithAdditionalData;
+                    }
+    
+                    // Process fees details
+                    if (service.feesDetails && service.feesDetails.length > 0) {
+                        const feesDetailsWithAdditionalData = await Promise.all(
+                            service.feesDetails.map(async (feesDetail) => {
+                                let feesAdditionalData = {};
+    
+                                if (feesDetail.feesTemplateId) {
+                                    const feesTemplateId = await feesTemplateModel.findOne({
+                                        feesTemplateId: feesDetail.feesTemplateId,
+                                    });
+                                    feesAdditionalData.feesTemplateId = feesTemplateId;
+                                }
+    
+                                return { ...feesDetail, ...feesAdditionalData };
+                            })
+                        );
+    
+                        additionalData.feesDetails = feesDetailsWithAdditionalData;
+                    }
+    
+                    return { ...service._doc, ...additionalData };
+                })
+            );
+    
+            const response = {
+                status: "Success",
+                data: {
+                    items: servicesWithData,
+                    totalItemsCount: services.length
+                }
+            };
+    
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
+    
+    
 
     // async getAdmissionListing(groupId, academicYear, criteria) {
     //     const query = {

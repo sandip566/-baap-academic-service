@@ -29,7 +29,7 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        feesTemplate: {
+        feesTemplateId: {
             type: Number,
             required: false
         },

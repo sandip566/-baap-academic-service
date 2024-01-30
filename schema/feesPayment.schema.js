@@ -5,6 +5,10 @@ const feesPaymentSchema = new mongoose.Schema(
             type: Number,
             required : true,
         },
+        addmissionId: {
+            type: Number,
+            required: true,
+        },
         userId: {
             type: Number,
             required : true,

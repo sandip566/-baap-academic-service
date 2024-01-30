@@ -189,6 +189,29 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/all/getfeesPayment/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            // phoneNumber: req.query.phoneNumber,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            search: req.query.search,
+        };
+        
+        const serviceResponse = await service.getfeesPayment(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.get(
     "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",
     async (req, res) => {
