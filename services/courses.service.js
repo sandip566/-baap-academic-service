@@ -28,7 +28,7 @@ class CourseService extends BaseService {
                     let departmentDetails;
     
                     if (service.Department) {
-                        // Assuming service.Department is the departmentId
+                       
                         departmentDetails = await DepartmentModel.findOne({
                             departmentId: service.Department,
                         });
@@ -37,7 +37,6 @@ class CourseService extends BaseService {
                             additionalData.Department = departmentDetails.departmentName
                         }
                     }
-    
                     return {
                         ...service._doc,
                         ...additionalData,
