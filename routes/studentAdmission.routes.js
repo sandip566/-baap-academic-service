@@ -75,15 +75,52 @@ router.post("/data/save", async (req, res, next) => {
                 //               feesDetails: feesDetailsData,
                 //           };
                 //       })
-                //     : existingDocument.data?.feesDetails || [];
-                if(req.body.feesDetails){
+
+
+               
+                if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-                const feesinstallmentResponse = await feesInstallmentServices.updateUser(
-                    req.body.addmissionId,
-                    req.body
-                );  
-                }    
+         
+                    const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
+                        const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+
+                        const updatedInstallments = feesDetail.installment.map((installment) => {
+                            const uniqueInstallNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+                            return {
+                                ...installment,
+                                installmentNo: uniqueInstallNo,
+                            };
+                        });
+                
+                      
+                        return {
+                            ...feesDetail,
+                            installment: updatedInstallments,
+                        };
+                    });
+                
+                   
+                    req.body.feesDetails = updatedFeesDetails;
+                
+                    const feesinstallmentResponse = await feesInstallmentServices.updateUser(
+                        req.body.addmissionId,
+                        req.body
+                    );
+                
+                    console.log(feesinstallmentResponse);
+                }
+                
+
+                // //     : existingDocument.data?.feesDetails || [];
+                // if(req.body.feesDetails){
+                //     const installmentId = +Date.now();
+                //     req.body.installmentId = installmentId;
+                // const feesinstallmentResponse = await feesInstallmentServices.updateUser(
+                //     req.body.addmissionId,
+                //     req.body
+                // );  
+                // }    
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -94,12 +131,28 @@ router.post("/data/save", async (req, res, next) => {
             } else {
                 const serviceResponse = await service.create(req.body);
                 // console.log(serviceResponse);
-                if(req.body.feesDetails){
-                const installmentId = +Date.now();
-                req.body.installmentId = installmentId;
-                const feesinstallment = await feesInstallmentServices.create(req.body);
-                console.log(feesinstallment);
+                if (req.body.feesDetails) {
+                    const installmentId = +Date.now();
+                    req.body.installmentId = installmentId;
+                console.log(req.body.feesDetails);
+                    const feesinstallment = await feesInstallmentServices.create(req.body);
+                    console.log(feesinstallment);
+                
+                 
+                    const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
+                        ...detail,
+                        installNo: index + 1, 
+                    }));
+                console.log(updatedInstallments);
+                    req.body.feesDetails = updatedInstallments;
                 }
+                
+                // if(req.body.feesDetails){
+                // const installmentId = +Date.now();
+                // req.body.installmentId = installmentId;
+                // const feesinstallment = await feesInstallmentServices.create(req.body);
+                // console.log(feesinstallment);
+                // }
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
         }
