@@ -13,6 +13,15 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.year);
+        console.log(existingRecord);
+        if (existingRecord.data) {
+           
+            return res.status(400).json({ error: "Data With The Same GroupId Already Exists." });
+        }
+        if (req.body.startDate > req.body.endDate) {
+            return res.status(400).json({ error: "Start Year must be greater than End Year." });
+        }
         const academicYearId = +Date.now();
         req.body.academicYearId = academicYearId;
         const serviceResponse = await service.create(req.body);

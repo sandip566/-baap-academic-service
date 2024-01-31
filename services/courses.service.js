@@ -1,6 +1,7 @@
 const courseModel = require("../schema/courses.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const DepartmentModel = require("../schema/department.schema");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 class CourseService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -62,7 +63,13 @@ class CourseService extends BaseService {
     
     async getByCourseId(courseId) {
         const result = await this.model.findOne({ courseId });
-        return new serviceResponse({
+        return new ServiceResponse({
+            data: result,
+        });
+    }
+    async getByCourseIdAndGroupId(groupId,Code) {
+        const result = await this.model.findOne({ groupId:groupId,Code:Code });
+        return new ServiceResponse({
             data: result,
         });
     }

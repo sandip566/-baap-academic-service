@@ -438,10 +438,10 @@ class StudentsAdmmisionService extends BaseService {
                                     },
                                     {}
                                 );
-                            response1 = {
+                            response1 = [{
                                 ...feesPayment._doc,
                                 courseName: convertedObject.BCA.course_id,
-                            };
+                            }];
                         }
                     } catch (error) {
                         console.error(
@@ -455,7 +455,6 @@ class StudentsAdmmisionService extends BaseService {
             );
 
             console.log("Modified Fees Payment Data:", modifiedFeesPaymentData);
-
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&

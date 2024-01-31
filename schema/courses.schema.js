@@ -4,7 +4,7 @@ const courseSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: true
         },
         courseId: Number,
         name: {
@@ -14,6 +14,10 @@ const courseSchema = new mongoose.Schema(
         departmentId:{
             type:Number,
             required: false
+        },
+        Code:{
+            type: String,
+            required: false, 
         },
         duration: {
             type: String,
