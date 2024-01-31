@@ -9,10 +9,7 @@ const feesPaymentSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        userId: {
-            type: Number,
-            required : false,
-        },
+        
         empId: {
             type: Number,
             required : true,
@@ -20,9 +17,9 @@ const feesPaymentSchema = new mongoose.Schema(
         feesPaymentId: {
             type: Number,
         },
-        studentId:{
-            type:Number,
-            require:false
+        userId: {
+            type: Number,
+            required : false,
         },
 
         // paidAmount: {
