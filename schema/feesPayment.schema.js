@@ -11,7 +11,7 @@ const feesPaymentSchema = new mongoose.Schema(
         },
         userId: {
             type: Number,
-            required : true,
+            required : false,
         },
         empId: {
             type: Number,

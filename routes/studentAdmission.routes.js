@@ -25,7 +25,13 @@ router.post(
         }
     }
 );
-
+router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByAddmissionId(req.params.addmissionId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all", async (req, res) => {
     try {
         const serviceResponse = await service.getAllByCriteria({});
@@ -199,6 +205,8 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             phoneNumber: req.query.phoneNumber,
             lastName: req.query.lastName,
             search: req.query.search,
+            addmissionId: req.query.addmissionId,
+            empId: req.query.empId
         };
         
         const serviceResponse = await service.getfeesPayment(

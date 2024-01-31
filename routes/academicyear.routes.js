@@ -41,7 +41,16 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.ch
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
+router.get("/all/getByGroupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+    //    classId:req.query.classId,
+       name:req.query.name,
+    //    courseId:req.query.courseId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;

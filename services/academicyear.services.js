@@ -29,6 +29,16 @@ class AcademicYearService extends BaseService {
             throw error;
         }
     }
+    getAllDataByGroupId(groupId, criteria) {
+        const query = {
+            groupId: groupId,
+        };
+        if (criteria.name) query.name = new RegExp(criteria.name, "i");
+        // if (criteria.location) query.location = new RegExp(criteria.location, "i");
+        // if (criteria.courseId) query.courseId = criteria.courseId;
+        return this.preparePaginationAndReturnData(query, criteria);
+    }
+
 
     async deleteByDataId(groupId,academicYearId) {
         try {

@@ -117,6 +117,11 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
+    async getByAddmissionId(addmissionId) {
+        return this.execute(() => {
+            return this.model.findOne({ addmissionId: addmissionId });
+        });
+    }
 
     async getAllDataByGroupId(groupId, query) {
         try {
@@ -245,6 +250,9 @@ class StudentsAdmmisionService extends BaseService {
             if (query.phoneNumber) {
                 searchFilter.phoneNumber = query.phoneNumber;
             }
+            if (query.addmissionId) {
+                searchFilter.addmissionId = query.addmissionId;
+            }
 
             if (query.firstName) {
                 searchFilter.firstName = { $regex: query.firstName, $options: 'i' };
@@ -265,29 +273,37 @@ class StudentsAdmmisionService extends BaseService {
                         const courseDetailsWithAdditionalData = await Promise.all(
                             service.courseDetails.map(async (courseDetail) => {
                                 let courseAdditionalData = {};
-    
+                                let course_id 
+                                let class_id
+                                let division_id
                                 if (courseDetail.course_id) {
-                                    const course_id = await courseModel.findOne({
+                                     course_id = await courseModel.findOne({
                                         course_id: courseDetail.courseId,
                                     });
+                                    
                                     courseAdditionalData.course_id = course_id;
+                                    // console.log(course_id);
+                                   
                                 }
     
                                 if (courseDetail.class_id) {
-                                    const class_id = await ClassModel.findOne({
+                                     class_id = await ClassModel.findOne({
                                         class_id: courseDetail.classId,
                                     });
                                     courseAdditionalData.class_id = class_id;
                                 }
     
                                 if (courseDetail.division_id) {
-                                    const division_id = await DivisionModel.findOne({
+                               
+                               
+                                     division_id = await DivisionModel.findOne({
                                         division_id: courseDetail.divisionId,
                                     });
+                                    console.log("division_id",division_id.Name);
                                     courseAdditionalData.division_id = division_id;
                                 }
     
-                                return { ...courseDetail, ...courseAdditionalData };
+                                return { courseName:course_id.CourseName ,className:class_id.name,divisionName:division_id.Name};
                             })
                         );
     
@@ -320,20 +336,16 @@ class StudentsAdmmisionService extends BaseService {
            // Fetch feesPayment data based on specific IDs
         const feesPaymentData = await FeesPaymentModel.find({
             groupId: groupId,
-            // Add additional conditions based on userId and addmissionId
-            // For example:
-            // userId: criteria.userId,
-            // addmissionId: criteria.addmissionId,
+            empId:query.empId,
+            addmissionId: query.addmissionId,
         });
-
-        // Filter data based on groupId, userId, addmissionId
+console.log(feesPaymentData,groupId, query.addmissionId);
+        
         const filteredData = servicesWithData.filter((data) => {
             return (
                 data.groupId === parseInt(groupId) &&
-                // Add additional checks based on userId and addmissionId
-                // For example:
-                // data.userId === criteria.userId &&
-                // data.addmissionId === criteria.addmissionId
+                data.empId === query.empId &&
+                data.addmissionId == query.addmissionId,
                 true
             );
         });
@@ -342,7 +354,7 @@ class StudentsAdmmisionService extends BaseService {
                 status: "Success",
                 data: {
                     items: filteredData,
-                    feesPaymentData: feesPaymentData, // Include feesPaymentData in the response
+                    feesPaymentData: feesPaymentData, 
                     totalItemsCount: filteredData.length,
                 },
             };
