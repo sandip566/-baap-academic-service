@@ -429,18 +429,19 @@ class StudentsAdmmisionService extends BaseService {
                                         }
                                     )
                                 );
-                            console.log(feesDetailsWithAdditionalData);
+                            console.log("feesDetailsWithAdditionalData",feesDetailsWithAdditionalData);
                             const convertedObject =
                                 feesDetailsWithAdditionalData.reduce(
                                     (acc, course) => {
-                                        acc[course.course_id] = { ...course };
+                                        acc = {courseName:course.course_id}
                                         return acc;
                                     },
                                     {}
                                 );
+                                console.log(convertedObject);
                             response1 = [{
                                 ...feesPayment._doc,
-                                courseName: convertedObject.BCA.course_id,
+                                courseName: convertedObject.courseName,
                             }];
                         }
                     } catch (error) {
