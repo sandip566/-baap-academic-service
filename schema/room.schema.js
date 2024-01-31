@@ -6,6 +6,9 @@ const room = new mongoose.Schema(
         type:Number,
         require:false
       },
+      name:{
+       type:String
+      },
       status:{
         type:String,
         enum:["avilable","notAvilable"]
