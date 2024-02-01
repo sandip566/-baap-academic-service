@@ -13,6 +13,10 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        courseName:{
+            type: String,
+            required: false
+        },
         academicYear: {
             type: Number,
             required: false

@@ -12,8 +12,15 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code);
+        console.log(existingRecord);
+        if (existingRecord.data) {
+           
+            return res.status(400).json({ error: "Code With The Same GroupId Already Exists." });
+        }
         const courseId = +Date.now();
         req.body.courseId = courseId;
+
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
