@@ -61,6 +61,7 @@ router.put("/groupId/:groupId/departmentId/:departmentId", async (req, res) => {
         const groupId = req.params.groupId;
         const newData = req.body;
         const Data = await service.updateDataById(departmentId, groupId, newData);
+        
         if (!Data) {
             res.status(404).json({ error: 'Data not found to update' });
         } else {

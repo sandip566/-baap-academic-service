@@ -64,6 +64,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 });
 
 router.delete("/groupId/:groupId/courseId/:courseId", async (req, res) => {
+   
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
@@ -94,6 +95,7 @@ router.put("/groupId/:groupId/courseId/:courseId", async (req, res) => {
             groupId,
             newData
         );
+
         if (!updatecourse) {
             res.status(404).json({
                 error: "course data not found to update",
