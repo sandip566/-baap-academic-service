@@ -9,16 +9,17 @@ const feesPaymentSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        userId: {
-            type: Number,
-            required : false,
-        },
+        
         empId: {
             type: Number,
             required : true,
         },
         feesPaymentId: {
             type: Number,
+        },
+        userId: {
+            type: Number,
+            required : false,
         },
 
         // paidAmount: {
@@ -35,12 +36,12 @@ const feesPaymentSchema = new mongoose.Schema(
         //     type: String,
         //     enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
         // },
-        // receivedBy: {
-        //     empId: {
-        //         type:Number,
-        //         required: false
-        //     },
-        // },
+        receivedBy: {
+            empId: {
+                type:Number,
+                required: false
+            },
+        },
         // feesTemplateId: {
         //     type:Number,
         //     required: false

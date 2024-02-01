@@ -38,7 +38,6 @@ router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -49,7 +48,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;
@@ -70,7 +68,6 @@ router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;
