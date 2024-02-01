@@ -13,6 +13,14 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId, req.body.year);
+        console.log(existingRecord);
+        if (existingRecord.data) {
+            return res.status(400).json({ error: "Data With The Same GroupId Already Exists." });
+        }
+        if (req.body.startDate > req.body.endDate) {
+            return res.status(400).json({ error: "Start Year must be greater than End Year." });
+        }
         const academicYearId = +Date.now();
         req.body.academicYearId = academicYearId;
         const serviceResponse = await service.create(req.body);
@@ -27,7 +35,6 @@ router.get("/all", async (req, res) => {
 
 router.delete("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["OSR"]), async (req, res) => {
     try {
-
         const groupId = req.params.groupId;
         const academicYearId = req.params.academicYearId;
         const Data = await service.deleteByDataId(groupId, academicYearId);
@@ -40,6 +47,17 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId", TokenService.c
         console.error(error);
         res.status(500).json({ error: 'Internal Server Error' });
     }
+});
+
+router.get("/all/getByGroupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        //    classId:req.query.classId,
+        name: req.query.name,
+        //    courseId:req.query.courseId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.put("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["OSR"]), async (req, res) => {
@@ -88,5 +106,4 @@ router.get("/getByYear/:year", TokenService.checkPermission(["OSR"]), async (req
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 module.exports = router;

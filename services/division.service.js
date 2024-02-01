@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const DivisionModel = require("../schema/division.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -14,7 +15,12 @@ class DivisionService extends BaseService {
             throw error;
         }
     }
-
+    async getByCourseIdAndGroupId(groupId,Name,courseId,classId) {
+        const result = await this.model.findOne({ groupId:groupId,Name:Name,courseId:courseId,classId:classId });
+        return new ServiceResponse({
+            data: result,
+        });
+    }
     async deleteByDivisionId(divisionId, groupId) {
         try {
             return await DivisionModel.deleteOne(divisionId, groupId);

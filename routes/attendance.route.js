@@ -40,7 +40,6 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-
 router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["PATML1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {

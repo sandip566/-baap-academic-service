@@ -25,7 +25,13 @@ router.post(
         }
     }
 );
-
+router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByAddmissionId(req.params.addmissionId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all", async (req, res) => {
     try {
         const serviceResponse = await service.getAllByCriteria({});
@@ -69,15 +75,52 @@ router.post("/data/save", async (req, res, next) => {
                 //               feesDetails: feesDetailsData,
                 //           };
                 //       })
-                //     : existingDocument.data?.feesDetails || [];
+
+
+               
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
+         
+                    const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
+                        const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+
+                        const updatedInstallments = feesDetail.installment.map((installment) => {
+                            const uniqueInstallNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+                            return {
+                                ...installment,
+                                installmentNo: uniqueInstallNo,
+                            };
+                        });
+                
+                      
+                        return {
+                            ...feesDetail,
+                            installment: updatedInstallments,
+                        };
+                    });
+                
+                   
+                    req.body.feesDetails = updatedFeesDetails;
+                
                     const feesinstallmentResponse = await feesInstallmentServices.updateUser(
                         req.body.addmissionId,
                         req.body
                     );
+                
+                    console.log(feesinstallmentResponse);
                 }
+                
+
+                // //     : existingDocument.data?.feesDetails || [];
+                // if(req.body.feesDetails){
+                //     const installmentId = +Date.now();
+                //     req.body.installmentId = installmentId;
+                // const feesinstallmentResponse = await feesInstallmentServices.updateUser(
+                //     req.body.addmissionId,
+                //     req.body
+                // );  
+                // }    
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -91,9 +134,25 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
+                console.log(req.body.feesDetails);
                     const feesinstallment = await feesInstallmentServices.create(req.body);
                     console.log(feesinstallment);
+                
+                 
+                    const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
+                        ...detail,
+                        installNo: index + 1, 
+                    }));
+                console.log(updatedInstallments);
+                    req.body.feesDetails = updatedInstallments;
                 }
+                
+                // if(req.body.feesDetails){
+                // const installmentId = +Date.now();
+                // req.body.installmentId = installmentId;
+                // const feesinstallment = await feesInstallmentServices.create(req.body);
+                // console.log(feesinstallment);
+                // }
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
         }
@@ -189,6 +248,31 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/all/getfeesPayment/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            // phoneNumber: req.query.phoneNumber,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            search: req.query.search,
+            addmissionId: req.query.addmissionId,
+            empId: req.query.empId
+        };
+        
+        const serviceResponse = await service.getfeesPayment(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 router.get(
     "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",
     async (req, res) => {

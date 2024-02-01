@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const AcademicYearModel = require("../schema/academicyear.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -24,6 +25,21 @@ class AcademicYearService extends BaseService {
         } catch (error) {
             throw error;
         }
+    }
+    getAllDataByGroupId(groupId, criteria) {
+        const query = {
+            groupId: groupId,
+        };
+        if (criteria.name) query.name = new RegExp(criteria.name, "i");
+        // if (criteria.location) query.location = new RegExp(criteria.location, "i");
+        // if (criteria.courseId) query.courseId = criteria.courseId;
+        return this.preparePaginationAndReturnData(query, criteria);
+    }
+    async getByCourseIdAndGroupId(groupId,year) {
+        const result = await this.model.findOne({ groupId:groupId,year:year });
+        return new ServiceResponse({
+            data: result,
+        });
     }
 
     async deleteByDataId(groupId,academicYearId) {

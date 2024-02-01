@@ -12,6 +12,12 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.departmentName,req.body.departmentHead.code);
+        console.log(existingRecord);
+        if (existingRecord.data) {
+           
+            return res.status(400).json({ error: "Name,Code With The Same GroupId Already Exists." });
+        }
         const departmentId = +Date.now();
         req.body.departmentId = departmentId;
         const serviceResponse = await service.create(req.body);
@@ -39,7 +45,16 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", async (req, res) =
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
+router.get("/all/getByGroupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+       departmentName:req.query.departmentName,
+    //    name:req.query.name,
+    //    courseId:req.query.courseId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.put("/groupId/:groupId/departmentId/:departmentId", async (req, res) => {
     try {
         const departmentId = req.params.departmentId;

@@ -12,6 +12,10 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        courseName:{
+            type: String,
+            required: false
+        },
         academicYear: {
             type: Number,
             required: false
@@ -28,7 +32,7 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        feesTemplate: {
+        feesTemplateId: {
             type: Number,
             required: false
         },
