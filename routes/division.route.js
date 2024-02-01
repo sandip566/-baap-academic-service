@@ -16,7 +16,7 @@ router.post(
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(400).json({ error: "Data With The Same GroupId Already Exists." });
+            return res.status(404).json({ error: "Data With The Same GroupId Already Exists." });
         }
     const divisionId = +Date.now();
     req.body.divisionId = divisionId;
