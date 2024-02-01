@@ -396,64 +396,64 @@ class StudentsAdmmisionService extends BaseService {
                 addmissionId: query.addmissionId,
             });
 
-            let response1;
-            let modifiedFeesPaymentData = await Promise.all(
-                feesPaymentData.map(async (feesPayment) => {
-                    try {
-                        const addmissionData =
-                            await studentAdmissionModel.findOne({
-                                addmissionId: feesPayment.addmissionId,
-                            });
+            // let response1;
+            let modifiedFeesPaymentData = [];
 
-                        if (addmissionData) {
-                            const feesDetailsWithAdditionalData =
-                                await Promise.all(
-                                    addmissionData.courseDetails.map(
-                                        async (feesDetail) => {
-                                            let feesAdditionalData = {};
+        
+           
+let response1 = []; // Define response1 as an array
 
-                                            if (feesDetail.course_id) {
-                                                const course_id =
-                                                    await courseModel.findOne({
-                                                        course_id:
-                                                            feesDetail.courseId,
-                                                    });
-                                                feesAdditionalData.course_id =
-                                                    course_id.CourseName;
-                                            }
+for (const feesPayment of feesPaymentData) {
+    try {
+        const addmissionData = await studentAdmissionModel.findOne({
+            addmissionId: feesPayment.addmissionId,
+        });
 
-                                            return {
-                                                ...feesDetail,
-                                                ...feesAdditionalData,
-                                            };
-                                        }
-                                    )
-                                );
-                            console.log("feesDetailsWithAdditionalData",feesDetailsWithAdditionalData);
-                            const convertedObject =
-                                feesDetailsWithAdditionalData.reduce(
-                                    (acc, course) => {
-                                        acc = {courseName:course.course_id}
-                                        return acc;
-                                    },
-                                    {}
-                                );
-                                console.log(convertedObject);
-                            response1 = [{
-                                ...feesPayment._doc,
-                                courseName: convertedObject.courseName,
-                            }];
-                        }
-                    } catch (error) {
-                        console.error(
-                            "Error fetching data from studentAdmissionModel:",
-                            error
-                        );
+        if (addmissionData) {
+            const feesDetailsWithAdditionalData = [];
+            for (const feesDetail of addmissionData.courseDetails) {
+                let feesAdditionalData = {};
 
-                        return feesPayment;
-                    }
-                })
+                if (feesDetail.course_id) {
+                    const courseData = await courseModel.findOne({
+                        course_id: feesDetail.courseId,
+                    });
+                    feesAdditionalData.course_id = courseData ? courseData.CourseName : '';
+                }
+
+                feesDetailsWithAdditionalData.push({
+                    ...feesDetail,
+                    ...feesAdditionalData,
+                });
+            }
+
+            const convertedObject =
+            feesDetailsWithAdditionalData.reduce(
+                (acc, course) => {
+                    acc = {courseName:course.course_id}
+                    return acc;
+                },
+                {}
             );
+            console.log(convertedObject);
+// console.log(convertedObject);
+            response1.push({
+                ...feesPayment._doc,
+                courseName: convertedObject.courseName,
+            });
+
+            modifiedFeesPaymentData.push(...feesDetailsWithAdditionalData);
+        }
+    } catch (error) {
+        console.error("Error fetching data from studentAdmissionModel:", error);
+        modifiedFeesPaymentData.push(feesPayment);
+    }
+}
+
+console.log("feesDetailsWithAdditionalData:", modifiedFeesPaymentData);
+console.log("Response1:", response1);
+
+            
 
             console.log("Modified Fees Payment Data:", modifiedFeesPaymentData);
             const filteredData = servicesWithData.filter((data) => {

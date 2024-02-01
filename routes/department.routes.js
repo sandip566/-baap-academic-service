@@ -18,6 +18,10 @@ router.post(
            
             return res.status(400).json({ error: "Name,Code With The Same GroupId Already Exists." });
         }
+        if (existingRecord.data.code) {
+           
+            return res.status(400).json({ error: "Code With The Same GroupId Already Exists." });
+        }
         const departmentId = +Date.now();
         req.body.departmentId = departmentId;
         const serviceResponse = await service.create(req.body);
