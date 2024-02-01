@@ -1,15 +1,32 @@
 const feesPaymentModel = require("../schema/feesPayment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 
 class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
   }
-  async getByfeesPaymentId(groupId,feesPaymentId) {
-    return this.execute(() => {
-        return this.model.findOne({groupId:groupId,feesPaymentId: feesPaymentId });
+
+
+async getByfeesPaymentId(groupId, feesPaymentId) {
+    return this.execute(async () => {
+    let feesdata={}
+        const feesPaymentData = await this.model.findOne({ groupId: groupId, feesPaymentId: feesPaymentId });
+console.log("feesPaymentData",feesPaymentData);
+        if (feesPaymentData) {
+            const addmissionId = feesPaymentData.addmissionId;
+            if (addmissionId) {
+                const addmissionId1 = await StudentsAdmissionModel.findOne({ addmissionId: addmissionId });
+feesdata.addmissionId=addmissionId1
+                return { ...feesPaymentData._doc, ...feesdata };
+            }
+        }
+        return null;
     });
 }
+
+
+
   getAllFeesPaymentByGroupId(groupId, criteria) {
     const query = {
       groupId: groupId,
