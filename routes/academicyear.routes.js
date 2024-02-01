@@ -41,7 +41,7 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.ch
         const academicYearId = req.params.academicYearId;
         const Data = await service.deleteByDataId(groupId,academicYearId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(199).json({ warning: 'Data not found to delete' });
         } else {
             res.status(201).json(Data);
         }
@@ -67,7 +67,7 @@ router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.check
         const newData = req.body;
         const Data = await service.updateDataById(academicYearId, groupId, newData);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to update' });
+            res.status(199).json({ warning: 'Data not found to update' });
         } else {
             res.status(201).json(Data);
         }
