@@ -440,7 +440,6 @@ for (const feesPayment of feesPaymentData) {
                 ...feesPayment._doc,
                 courseName: convertedObject.courseName,
             });
-
             modifiedFeesPaymentData.push(...feesDetailsWithAdditionalData);
         }
     } catch (error) {
