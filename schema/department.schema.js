@@ -14,6 +14,10 @@ const departmentSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        departmentHead: {
+            firstName: String,
+            code:Number
+        }
     },
     { strict: false, timestamps: true }
 );
