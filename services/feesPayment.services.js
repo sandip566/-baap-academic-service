@@ -5,7 +5,11 @@ class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
     super(dbModel, entityName);
   }
-
+  async getByfeesPaymentId(groupId,feesPaymentId) {
+    return this.execute(() => {
+        return this.model.findOne({groupId:groupId,feesPaymentId: feesPaymentId });
+    });
+}
   getAllFeesPaymentByGroupId(groupId, criteria) {
     const query = {
       groupId: groupId,

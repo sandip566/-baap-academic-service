@@ -41,6 +41,7 @@ class AcademicYearService extends BaseService {
     }
     async getByCourseIdAndGroupId(groupId,year) {
         const result = await this.model.findOne({ groupId:groupId,year:year });
+        console.log("aaaaaaaaaaaaaaa",result);
         return new ServiceResponse({
             data: result,
         });
