@@ -436,7 +436,6 @@ for (const feesPayment of feesPaymentData) {
                 {}
             );
             console.log(convertedObject);
-// console.log(convertedObject);
             response1.push({
                 ...feesPayment._doc,
                 courseName: convertedObject.courseName,
