@@ -16,7 +16,7 @@ console.log("feesPaymentData",feesPaymentData);
         if (feesPaymentData) {
             const addmissionId = feesPaymentData.addmissionId;
             if (addmissionId) {
-                const addmissionId1 = await StudentsAdmissionModel.findOne({ addmissionId: addmissionId });
+                const addmissionId1 = await StudentsAdmissionModel.findOne({groupId: groupId, addmissionId: addmissionId });
 feesdata.addmissionId=addmissionId1
                 return { ...feesPaymentData._doc, ...feesdata };
             }
