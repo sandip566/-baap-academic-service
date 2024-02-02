@@ -203,19 +203,21 @@ class StudentsAdmmisionService extends BaseService {
                                         }
 
                                         if (courseDetail.class_id) {
+                                            console.log(courseDetail.class_id);
                                             const class_id =
                                                 await ClassModel.findOne({
-                                                    class_id:
-                                                        courseDetail.classId,
+                                                    classId:
+                                                        courseDetail.class_id,
                                                 });
                                             additionalData.class_id = class_id;
+                                            console.log(class_id);
                                         }
 
                                         if (courseDetail.division_id) {
                                             const division_id =
                                                 await DivisionModel.findOne({
-                                                    division_id:
-                                                        courseDetail.divisionId,
+                                                    divisionId:
+                                                        courseDetail.division_id,
                                                 });
                                             additionalData.division_id =
                                                 division_id;
