@@ -38,7 +38,22 @@ console.log("addd",addmissionId1.courseDetails,courseIds);
     });
 }
 
+async  updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount) {
+  try {
+ 
+    const feesPayment = await feesPaymentModel.findOne({ feesPaymentId:feesPaymentId });
+    if (!feesPayment) {
+      return { success: false, error: "Fees payment record not found." };
+    }
+    feesPayment.paidAmount = totalPaidAmount;
+    await feesPayment.save();
 
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to update paid amount in the database." };
+  }
+}
 
   getAllFeesPaymentByGroupId(groupId, criteria) {
     const query = {
