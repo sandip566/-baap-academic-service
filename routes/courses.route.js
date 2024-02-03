@@ -12,7 +12,7 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code,req.body.name);
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code,req.body.CourseName);
         console.log(existingRecord);
         if (existingRecord.data) {
            
