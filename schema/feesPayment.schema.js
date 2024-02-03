@@ -19,6 +19,10 @@ const feesPaymentSchema = new mongoose.Schema(
             required: false,
             default: "0"
         },
+        remainingAmount:{
+            type: String,
+            required: false,
+        },
         empId: {
             type: Number,
             required: true,

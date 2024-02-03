@@ -45,12 +45,16 @@ router.post(
     }
     totalPaidAmount += otherAmount;
     console.log(totalPaidAmount);
+
+    let remainingAmount=req.body.courseFee-totalPaidAmount
+
     const serviceResponse = await service.create(req.body);
   
-   let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount);
+   let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount,remainingAmount);
 console.log(a);
     
     serviceResponse.data.paidAmount = totalPaidAmount;
+    serviceResponse.data.remainingAmount=remainingAmount
    
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
