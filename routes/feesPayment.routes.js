@@ -7,6 +7,21 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper")
 const feesInstallmentService=require("../services/feesInstallment.services")
 
+// router.post(
+//   "/",
+//   checkSchema(require("../dto/feesPayment.dto")),
+//   async (req, res, next) => {
+//     if (ValidationHelper.requestValidationErrors(req, res)) {
+//       return;
+//     }
+//     const feesPaymentId = +Date.now();
+//     req.body.feesPaymentId = feesPaymentId;
+//     const installmentId = req.body.installmentId;
+//     const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
+//     const serviceResponse = await service.create(req.body, updateResult);
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+//   }
+// );
 router.post(
   "/",
   checkSchema(require("../dto/feesPayment.dto")),
@@ -14,11 +29,24 @@ router.post(
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
+
     const feesPaymentId = +Date.now();
     req.body.feesPaymentId = feesPaymentId;
-    const installmentId = req.body.installmentId;
-    const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
-    const serviceResponse = await service.create(req.body, updateResult);
+
+    const installmentDetails = req.body.installment;
+    const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+    let totalPaidAmount = 0;
+
+    for (const installment of installmentDetails) {
+      if (installment.radio) {
+        totalPaidAmount += parseFloat(installment.amount);
+      }
+    }
+    totalPaidAmount += otherAmount;
+    console.log(totalPaidAmount);
+    const serviceResponse = await service.create(req.body);
+    serviceResponse.data.paidAmount = totalPaidAmount;
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );

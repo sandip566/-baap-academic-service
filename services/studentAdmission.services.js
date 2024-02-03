@@ -353,6 +353,7 @@ class StudentsAdmmisionService extends BaseService {
 
                                         return {
                                             courseName: course_id.CourseName,
+                                            courseFee:course_id.Fees,
                                             className: class_id.name,
                                             divisionName: division_id.Name,
                                         };

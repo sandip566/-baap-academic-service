@@ -3,23 +3,32 @@ const feesPaymentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : true,
+            required: true,
         },
         addmissionId: {
             type: Number,
             required: true,
         },
-        
+        status: {
+            type: String,
+            required: false,
+            default: "paid"
+        },
+        paidAmount: {
+            type: String,
+            required: false,
+            default: "0"
+        },
         empId: {
             type: Number,
-            required : true,
+            required: true,
         },
         feesPaymentId: {
             type: Number,
         },
         userId: {
             type: Number,
-            required : false,
+            required: false,
         },
 
         // paidAmount: {
@@ -38,7 +47,7 @@ const feesPaymentSchema = new mongoose.Schema(
         // },
         receivedBy: {
             empId: {
-                type:Number,
+                type: Number,
                 required: false
             },
         },
