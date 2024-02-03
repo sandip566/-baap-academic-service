@@ -23,8 +23,6 @@ router.post(
       requestResponsehelper.sendResponse(res, serviceResponse);
     }
   );
-  
-  
 
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});

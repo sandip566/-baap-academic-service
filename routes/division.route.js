@@ -51,7 +51,7 @@ router.delete("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
     const groupId = req.params.groupId
     const divisionData = await service.deleteByDivisionId({ divisionId: divisionId, groupId: groupId })
     if (!divisionData) {
-      res.status(199).json({ warning: 'Division data not found to delete' })
+      res.status(404).json({ warning: 'Division data not found to delete' })
     } else {
       res.status(201).json(divisionData)
     }

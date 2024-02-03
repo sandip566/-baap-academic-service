@@ -27,7 +27,13 @@ router.get("/all", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
+router.get("/getByfeesPaymentId/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res, next) => {
+  if (ValidationHelper.requestValidationErrors(req, res)) {
+      return;
+  }
+  const serviceResponse = await service.getByfeesPaymentId(req.params.groupId, req.params.feesPaymentId);
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);

@@ -16,7 +16,7 @@ router.post(
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(199).json({ error: "Code With The Same Name Already Exists." });
+            return res.status(409).json({ error: "Code With The Same Name Already Exists." });
         }
     const religionId = +Date.now();
     req.body.religionId = religionId;
