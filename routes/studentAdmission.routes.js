@@ -242,6 +242,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             groupId,
             criteria
         );
+        
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);

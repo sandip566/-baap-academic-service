@@ -123,7 +123,7 @@ class StudentsAdmmisionService extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, query) {
+    async getAllDataByGroupId(groupId, query, reverseOrder = true) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -239,6 +239,12 @@ class StudentsAdmmisionService extends BaseService {
                     return service;
                 })
             );
+            servicesWithData.sort((a, b) => {
+                const dateA = new Date(a.createdAt);
+                const dateB = new Date(b.createdAt);
+                return reverseOrder ? dateB - dateA : dateA - dateB;
+            });
+    
             const response = {
                 status: "Success",
                 data: {
@@ -246,7 +252,8 @@ class StudentsAdmmisionService extends BaseService {
                     totalItemsCount: services.length,
                 },
             };
-
+           
+            // let results = await studentAdmissionModel.find(servicesWithData).sort({ createdAt: reverseOrder ? -1 : 1 });
             return response;
         } catch (error) {
             console.error("Error:", error);
@@ -537,7 +544,17 @@ console.log("Response1:", response1);
     //         return { isError: true, message: 'An error occurred during data retrieval' };
     //     }
     // }
-
+    async  findLatestAdmission() {
+        try {
+          // Find the latest student admission based on the createdAt field in descending order
+          const latestAdmission = await studentAdmissionModel.findOne().sort({ createdAt: -1 });
+      console.log("latestAdmission",latestAdmission);
+          return latestAdmission;
+        } catch (error) {
+          console.error(error);
+          return { error: "Failed to find the latest admission." };
+        }
+      }
     async getAdmissionListing(groupId, academicYear, criteria) {
         const query = {
             groupId: groupId,
