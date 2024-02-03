@@ -14,8 +14,9 @@ class Service extends BaseService {
           if (criteria && criteria.studentId) {
             query.studentId = criteria.studentId;
           }
-          const data = await studentModel.find(query).sort(sortOptions);
-          return this.preparePaginationAndReturnData(data, criteria);
+          const data = await studentModel.find({groupId:groupId}).sort(sortOptions);
+          // return this.preparePaginationAndReturnData(data, criteria);
+          return (data)
         } catch (error) {
           throw error;
         }
