@@ -26,8 +26,10 @@ class feesPaymentService extends BaseService {
 
         console.log("Total Paid Amount:", totalRemainingAmount);
         let response={
+         
           totalPaidAmount:totalPaidAmount,
-          totalRemainingAmount:totalRemainingAmount
+          totalRemainingAmount:totalRemainingAmount,
+          feesDefaulter:data,
 
         }
         return response; 
