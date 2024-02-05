@@ -12,11 +12,11 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code);
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code,req.body.CourseName);
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(400).json({ error: "Code With The Same GroupId Already Exists." });
+            return res.status(404).json({ error: "Code With The Same GroupId Already Exists." });
         }
         const courseId = +Date.now();
         req.body.courseId = courseId;
@@ -64,6 +64,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 });
 
 router.delete("/groupId/:groupId/courseId/:courseId", async (req, res) => {
+   
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
@@ -94,6 +95,7 @@ router.put("/groupId/:groupId/courseId/:courseId", async (req, res) => {
             groupId,
             newData
         );
+
         if (!updatecourse) {
             res.status(404).json({
                 error: "course data not found to update",

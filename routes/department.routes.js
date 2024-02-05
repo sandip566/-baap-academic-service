@@ -9,21 +9,20 @@ router.post(
     "/",
     checkSchema(require("../dto/department.dto")),
     async (req, res, next) => {
-        if (ValidationHelper.requestValidationErrors(req, res)) {
-            return;
-        }
-        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.departmentName,req.body.departmentHead.code);
-        console.log(existingRecord);
-        if (existingRecord.data) {
-           
-            return res.status(400).json({ error: "Name,Code With The Same GroupId Already Exists." });
-        }
-        const departmentId = +Date.now();
-        req.body.departmentId = departmentId;
-        const serviceResponse = await service.create(req.body);
-        requestResponsehelper.sendResponse(res, serviceResponse);
+      if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+      }
+      const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.departmentName,req.body.departmentHead);
+    console.log(existingRecord);
+    if (existingRecord.data) {
+        return res.status(409).json({ error: "Name,Code With The Same GroupId Already Exists." });
     }
-);
+      const departmentId = +Date.now();
+      req.body.departmentId = departmentId;
+      const serviceResponse = await service.create(req.body);
+      requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+  );
 
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
@@ -61,6 +60,7 @@ router.put("/groupId/:groupId/departmentId/:departmentId", async (req, res) => {
         const groupId = req.params.groupId;
         const newData = req.body;
         const Data = await service.updateDataById(departmentId, groupId, newData);
+        
         if (!Data) {
             res.status(404).json({ error: 'Data not found to update' });
         } else {

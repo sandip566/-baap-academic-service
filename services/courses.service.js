@@ -67,8 +67,8 @@ class CourseService extends BaseService {
             data: result,
         });
     }
-    async getByCourseIdAndGroupId(groupId,Code) {
-        const result = await this.model.findOne({ groupId:groupId,Code:Code });
+    async getByCourseIdAndGroupId(groupId,Code,name) {
+        const result = await this.model.findOne({ groupId:groupId,Code:Code,CourseName:name });
         return new ServiceResponse({
             data: result,
         });

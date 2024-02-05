@@ -28,18 +28,9 @@ const noticeBoardSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-        noticePostByStudent: {
-            studentId: {
-                type: Number,
-                required: false
-            }
-        },
-        noticePostByMember: {
-            memberId: {
-                type: Number,
-                required: false
-            }
-        },
+     createNotice:{
+        type:String
+     }
     },
     { strict: false, timestamps: true }
 );

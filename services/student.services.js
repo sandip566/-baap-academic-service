@@ -6,15 +6,21 @@ class Service extends BaseService {
         super(dbModel, entityName);
     }
 
-    getAllDataByGroupId(groupId, criteria) {
-        const query = {
+    async  getAllDataByGroupId(groupId, criteria, sortOptions) {
+        try {
+          const query = {
             groupId: groupId,
-        };
-        if (criteria && criteria.studentId) {
+          };
+          if (criteria && criteria.studentId) {
             query.studentId = criteria.studentId;
+          }
+          const data = await studentModel.find({groupId:groupId}).sort(sortOptions);
+          // return this.preparePaginationAndReturnData(data, criteria);
+          return (data)
+        } catch (error) {
+          throw error;
         }
-        return this.preparePaginationAndReturnData(query, criteria);
-    }
+      }
 
     async deleteStudentById(studentId, groupId) {
         try {

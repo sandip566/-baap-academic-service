@@ -1,5 +1,7 @@
 const feesPaymentModel = require("../schema/feesPayment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
+const courseModel = require("../schema/courses.schema");
 
 class feesPaymentService extends BaseService {
   constructor(dbModel, entityName) {
@@ -30,6 +32,53 @@ class feesPaymentService extends BaseService {
         }
         return response; 
     });
+}
+
+
+async getByfeesPaymentId(groupId, feesPaymentId) {
+    return this.execute(async () => {
+    let feesdata={}
+    let course_id
+        const feesPaymentData = await this.model.findOne({ groupId: groupId, feesPaymentId: feesPaymentId });
+console.log("feesPaymentData",feesPaymentData);
+        if (feesPaymentData) {
+            const addmissionId = feesPaymentData.addmissionId;
+            if (addmissionId) {
+                const addmissionId1 = await StudentsAdmissionModel.findOne({groupId: groupId, addmissionId: addmissionId });
+feesdata.addmissionId=addmissionId1
+let courseIds=addmissionId1.courseDetails.forEach(element => {
+  course_id=element.course_id
+  console.log(course_id);
+});
+
+let courseAdditionalData={}
+console.log("addd",addmissionId1.courseDetails,courseIds);
+ let courseDetails=await courseModel.findOne({groupId:groupId,courseId:course_id})
+ console.log("aaaaaaaaaaaa",courseDetails);
+ courseAdditionalData.course_id=courseDetails
+
+                return { ...courseAdditionalData,...feesPaymentData._doc, ...feesdata };
+            }
+        }
+        return null;
+    });
+}
+
+async  updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount) {
+  try {
+ 
+    const feesPayment = await feesPaymentModel.findOne({ feesPaymentId:feesPaymentId });
+    if (!feesPayment) {
+      return { success: false, error: "Fees payment record not found." };
+    }
+    feesPayment.paidAmount = totalPaidAmount;
+    await feesPayment.save();
+
+    return { success: true };
+  } catch (error) {
+    console.error(error);
+    return { success: false, error: "Failed to update paid amount in the database." };
+  }
 }
 
   getAllFeesPaymentByGroupId(groupId, criteria) {

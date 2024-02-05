@@ -16,7 +16,7 @@ router.post(
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(400).json({ error: "Data With The Same GroupId Already Exists." });
+            return res.status(404).json({ error: "Data With The Same GroupId Already Exists." });
         }
     const divisionId = +Date.now();
     req.body.divisionId = divisionId;
@@ -51,7 +51,7 @@ router.delete("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
     const groupId = req.params.groupId
     const divisionData = await service.deleteByDivisionId({ divisionId: divisionId, groupId: groupId })
     if (!divisionData) {
-      res.status(404).json({ error: 'Division data not found to delete' })
+      res.status(404).json({ warning: 'Division data not found to delete' })
     } else {
       res.status(201).json(divisionData)
     }
@@ -60,7 +60,6 @@ router.delete("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 router.put("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
   try {
     const divisionId = req.params.divisionId;
@@ -77,7 +76,6 @@ router.put("/groupId/:groupId/divisionId/:divisionId", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {

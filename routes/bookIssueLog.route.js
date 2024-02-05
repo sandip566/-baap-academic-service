@@ -103,7 +103,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.delete("/groupId/:groupId/bookIssueLogId/:bookIssueLogId", async (req, res) => {
     try {
         const bookIssueLogId = req.params.bookIssueLogId;
@@ -124,7 +123,6 @@ router.delete("/groupId/:groupId/bookIssueLogId/:bookIssueLogId", async (req, re
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 router.put("/groupId/:groupId/bookIssueLogId/:bookIssueLogId", async (req, res) => {
     try {
         const bookIssueLogId = req.params.bookIssueLogId;

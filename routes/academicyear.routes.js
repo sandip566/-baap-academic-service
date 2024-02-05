@@ -17,14 +17,15 @@ router.post(
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(400).json({ error: "Data With The Same GroupId Already Exists." });
+            return res.status(409).json({ error: "Data With The Same GroupId Already Exists." });
         }
         if (req.body.startDate > req.body.endDate) {
-            return res.status(400).json({ error: "Start Year must be greater than End Year." });
+            return res.status(404).json({ error: "Start Year must be greater than End Year." });
         }
         const academicYearId = +Date.now();
         req.body.academicYearId = academicYearId;
         const serviceResponse = await service.create(req.body);
+        console.log(serviceResponse);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
@@ -41,7 +42,7 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.ch
         const academicYearId = req.params.academicYearId;
         const Data = await service.deleteByDataId(groupId,academicYearId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(404).json({ warning: 'Data not found to delete' });
         } else {
             res.status(201).json(Data);
         }
@@ -67,7 +68,7 @@ router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.check
         const newData = req.body;
         const Data = await service.updateDataById(academicYearId, groupId, newData);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to update' });
+            res.status(404).json({ warning: 'Data not found to update' });
         } else {
             res.status(201).json(Data);
         }

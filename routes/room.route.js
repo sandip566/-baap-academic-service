@@ -1,25 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/categories.service");
+const service = require("../services/room.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
   "/",
-  checkSchema(require("../dto/categories.dto")),
+  checkSchema(require("../dto/room.dto")),
   async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const existingRecord = await service.getByCourseIdAndGroupId(req.body.name);
-    console.log(existingRecord);
-    if (existingRecord.data) {
-       
-        return res.status(409).json({ error: " Same Name Already Exists." });
-    }
-    const categoriseId = +Date.now();
-    req.body.categoriseId = categoriseId;
+    const roomId = +Date.now();
+    req.body.roomId = roomId;
     const serviceResponse = await service.create(req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
@@ -45,14 +39,31 @@ router.get("/:id", async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/categoriesId/:categoriesId", async (req, res) => {
+router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
   try {
-    const categoriesId = req.params.categoriesId;
-    const data = await service.deleteCategoriesById({ categoriesId });
-    if (!data) {
+    const groupId = req.params.groupId;
+    const criteria = {
+      roomId: req.query.roomId,
+      hostelId: req.query.hostelId,
+      status: req.query.status,
+    }
+    const serviceResponse = await service.getAllRoomDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+});
+
+router.delete("/groupId/:groupId/roomId/:roomId", async (req, res) => {
+  try {
+    const roomId = req.params.roomId;
+    const groupId = req.params.groupId;
+    const roomData = await service.deleteRoomById(roomId, groupId);
+    if (!roomData) {
       res.status(404).json({ error: 'Data not found to delete' });
     } else {
-      res.status(201).json(data);
+      res.status(201).json(roomData);
     }
   } catch (error) {
     console.error(error);
@@ -60,15 +71,16 @@ router.delete("/categoriesId/:categoriesId", async (req, res) => {
   }
 });
 
-router.put("/categoriesId/:categoriesId", async (req, res) => {
+router.put("/groupId/:groupId/roomId/:roomId", async (req, res) => {
   try {
-    const categoriesId = req.params.categoriesId;
+    const roomId = req.params.roomId;
+    const groupId = req.params.groupId;
     const newData = req.body;
-    const updateData = await service.updateCategoriesById(categoriesId, newData);
-    if (!updateData) {
+    const updateRoom = await service.updateRoomById(roomId, groupId, newData);
+    if (!updateRoom) {
       res.status(404).json({ error: 'Data not found to update' });
     } else {
-      res.status(200).json(updateData);
+      res.status(200).json(updateRoom);
     }
   } catch (error) {
     console.error(error);
