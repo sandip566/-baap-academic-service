@@ -50,7 +50,7 @@ router.post("/data/save", async (req, res, next) => {
         }
 
         if (req.body.addmissionId) {
-            const existingDocument = await service.getByaddmissionId(
+            const existingDocument = await service.getByAddmissionId(
                 req.body.addmissionId
             );
 

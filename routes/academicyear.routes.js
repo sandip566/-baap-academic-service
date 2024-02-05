@@ -8,7 +8,7 @@ const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require("../dto/academicyear.dto")),
+    checkSchema(require("../dto/academicyear.dto")),TokenService.checkPermission(["PALSA,ERPSA1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -35,7 +35,7 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR,ERPSA4"]), async (req, res) => {
     try {
       
         const groupId = req.params.groupId;
@@ -51,7 +51,7 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId",TokenService.ch
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["OSR,ERPSA2"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
     //    classId:req.query.classId,
@@ -61,7 +61,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.checkPermission(["OSR,ERPSA3"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;
         const groupId = req.params.groupId;
