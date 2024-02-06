@@ -260,7 +260,7 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-    async getfeesPayment(groupId, query) {
+    async  getfeesPayment(groupId, query) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -287,6 +287,9 @@ class StudentsAdmmisionService extends BaseService {
             }
             if (query.addmissionId) {
                 searchFilter.addmissionId = query.addmissionId;
+            }
+            if (query.empId) {
+                searchFilter.empId = query.empId;
             }
 
             if (query.firstName) {
