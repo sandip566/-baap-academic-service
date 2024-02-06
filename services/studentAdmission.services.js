@@ -288,9 +288,6 @@ class StudentsAdmmisionService extends BaseService {
             if (query.addmissionId) {
                 searchFilter.addmissionId = query.addmissionId;
             }
-            if (query.empId) {
-                searchFilter.empId = query.empId;
-            }
 
             if (query.firstName) {
                 searchFilter.firstName = {
