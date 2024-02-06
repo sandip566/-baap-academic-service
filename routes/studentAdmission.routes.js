@@ -25,6 +25,7 @@ router.post(
         }
     }
 );
+
 router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
@@ -49,7 +50,7 @@ router.post("/data/save", async (req, res, next) => {
         }
 
         if (req.body.addmissionId) {
-            const existingDocument = await service.getByaddmissionId(
+            const existingDocument = await service.getByAddmissionId(
                 req.body.addmissionId
             );
 
@@ -74,10 +75,7 @@ router.post("/data/save", async (req, res, next) => {
                 //               feesDetailsId: feesDetailsId,
                 //               feesDetails: feesDetailsData,
                 //           };
-                //       })
-
-
-               
+                //       })  
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;

@@ -15,7 +15,7 @@ router.post(
       const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.departmentName,req.body.departmentHead);
     console.log(existingRecord);
     if (existingRecord.data) {
-        return res.status(409).json({ error: "Name,Code With The Same GroupId Already Exists." });
+        return res.status(409).json({ error: "Name,Code  Already Exists." });
     }
       const departmentId = +Date.now();
       req.body.departmentId = departmentId;

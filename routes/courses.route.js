@@ -16,7 +16,7 @@ router.post(
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(404).json({ error: "Code With The Same GroupId Already Exists." });
+            return res.status(404).json({ error: "Code with Same Name Already Exists." });
         }
         const courseId = +Date.now();
         req.body.courseId = courseId;

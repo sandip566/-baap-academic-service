@@ -59,6 +59,13 @@ console.log(a);
     requestResponsehelper.sendResponse(res, serviceResponse);
   }
 );
+router.get("/getRecoveryData/:groupId", async (req, res, next) => {
+  if (ValidationHelper.requestValidationErrors(req, res)) {
+      return;
+  }
+  const serviceResponse = await service.getRecoveryData(req.params.groupId);
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
 
 router.get("/all", async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});

@@ -78,9 +78,10 @@ class StudentsAdmmisionService extends BaseService {
 
     //         return response;
     //     }
-    async getByaddmissionId(addmissionId) {
+   
+    async getRecoveryData(groupId) {
         return this.execute(() => {
-            return this.model.findOne({ addmissionId: addmissionId });
+            return this.model.find({ groupId: groupId });
         });
     }
     async deleteCompanyDetails(addmissionId, installmentId) {
