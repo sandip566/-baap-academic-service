@@ -46,7 +46,7 @@ router.post(
     totalPaidAmount += otherAmount;
     console.log(totalPaidAmount);
 
-    let remainingAmount=req.body.courseFee-totalPaidAmount
+    let remainingAmount=req.body.courseFee-totalPaidAmount||0
 
     const serviceResponse = await service.create(req.body);
   
@@ -64,6 +64,20 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
       return;
   }
   const serviceResponse = await service.getRecoveryData(req.params.groupId);
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
+router.get("/getFeesStatData/:groupId", async (req, res, next) => {
+  const groupId = req.params.groupId;
+  const criteria = {
+    currentDate: req.query.currentDate,
+    academicYear: req.query.academicYear,
+    // userId:req.query.userId,
+    // installmentId: req.query.installmentId
+  };
+  const serviceResponse = await service.getFeesStatData(
+    groupId,
+    criteria
+  );
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
