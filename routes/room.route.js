@@ -20,7 +20,11 @@ router.post(
 );
 
 router.get("/all", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
+  const pagination = {
+    pageNumber: req.query.pageNumber || 1,
+    pageSize: 10 
+};
+  const serviceResponse = await service.getAllByCriteria({req,query,pagination});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
