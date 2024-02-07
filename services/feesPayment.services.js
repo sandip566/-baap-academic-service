@@ -18,23 +18,42 @@ class feesPaymentService extends BaseService {
         }, 0);
 
         const totalRemainingAmount = data.reduce((total, item) => {
-          if (item.remainingAmount) {
-              total += parseFloat(item.remainingAmount);
-          }
-          return total;
-      }, 0);
+            if (item.remainingAmount) {
+                total += parseFloat(item.remainingAmount);
+            }
+            return total;
+        }, 0);
 
-        console.log("Total Paid Amount:", totalRemainingAmount);
-        let response={
-         
-          totalPaidAmount:totalPaidAmount,
-          totalRemainingAmount:totalRemainingAmount,
-          feesDefaulter:data,
+        console.log("Total Paid Amount:", totalPaidAmount);
 
-        }
-        return response; 
+        const servicesWithData = await Promise.all(
+            data.map(async (service) => {
+                let additionalData = {};
+                let feesAdditionalData = {};
+
+                if (service.addmissionId ) {
+                    const feesTemplateId = await StudentsAdmissionModel.findOne({ addmissionId: service.addmissionId });
+                    feesAdditionalData.addmissionId = feesTemplateId;
+                    console.log(feesTemplateId);
+                }
+
+                additionalData.addmissionId = feesAdditionalData;
+
+                return { ...service._doc, ...additionalData.addmissionId };
+            })
+        );
+
+        let response = {
+            totalPaidAmount: totalPaidAmount,
+            totalRemainingAmount: totalRemainingAmount,
+            // feesDefaulter: data,
+            servicesWithData: servicesWithData
+           
+        };
+        return response;
     });
 }
+
 
 
 async getByfeesPaymentId(groupId, feesPaymentId) {

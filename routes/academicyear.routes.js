@@ -78,27 +78,27 @@ router.put("/groupId/:groupId/academicYearId/:academicYearId",TokenService.check
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/academicYearId/:id", async (req, res) => {
+router.get("/academicYearId/:id",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getByYear/:year",TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.get("/getByYear/:year",TokenService.checkPermission(["OSR,ERPSA2"]), async (req, res) => {
     try {
         const serviceResponse = await service.getByYear(req.params.year);
         requestResponsehelper.sendResponse(res, serviceResponse);

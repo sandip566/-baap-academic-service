@@ -4,10 +4,10 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/religion.services");
 const requestResponseHelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const validationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const TokenService = require("../services/token.services");
 router.post(
   "/",
-  checkSchema(require("../dto/religion.dto")),
+  checkSchema(require("../dto/religion.dto")),TokenService.checkPermission(["ERPSA1"]),
   async (req, res, next) => {
     if (validationHelper.requestValidationErrors(req, res)) {
       return;
@@ -30,7 +30,7 @@ router.get("/all", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["ERPSA2"]),async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     religionId: req.query.religionId,
@@ -43,7 +43,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/religionId/:religionId", async (req, res) => {
+router.delete("/religionId/:religionId",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
   try {
     const religionId = req.params.religionId;
     const data = await service.deleteReligionById({ religionId });
@@ -58,7 +58,7 @@ router.delete("/religionId/:religionId", async (req, res) => {
   }
 });
 
-router.put("/religionId/:religionId", async (req, res) => {
+router.put("/religionId/:religionId",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
   try {
     const religionId = req.params.religionId;
     const newData = req.body;
@@ -74,12 +74,12 @@ router.put("/religionId/:religionId", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
   const serviceResponse = await service.updateById(req.params.id, req.body);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });

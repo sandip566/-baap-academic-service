@@ -4,10 +4,11 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/courses.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require('../dto/courses.dto')),
+    checkSchema(require('../dto/courses.dto')),TokenService.checkPermission(["ERPSA1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -31,28 +32,28 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/getByCourseId/:courseId", async (req, res, next) => {
+router.get("/getByCourseId/:courseId",TokenService.checkPermission(["ERPSA2"]), async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
     const serviceResponse = await service.getByCourseId(req.params.courseId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         courseId: req.query.courseId,
@@ -63,7 +64,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/courseId/:courseId", async (req, res) => {
+router.delete("/groupId/:groupId/courseId/:courseId",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
    
     try {
         const courseId = req.params.courseId;
@@ -85,7 +86,7 @@ router.delete("/groupId/:groupId/courseId/:courseId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/courseId/:courseId", async (req, res) => {
+router.put("/groupId/:groupId/courseId/:courseId",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
