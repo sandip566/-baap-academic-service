@@ -71,8 +71,10 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
   const criteria = {
     currentDate: req.query.currentDate,
     academicYear: req.query.academicYear,
-    // userId:req.query.userId,
-    // installmentId: req.query.installmentId
+    location: req.query.location,
+    course:req.query.course,
+    class:req.query.class,
+    division: req.query.division
   };
   const serviceResponse = await service.getFeesStatData(
     groupId,
