@@ -50,6 +50,7 @@ router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
       roomId: req.query.roomId,
       hostelId: req.query.hostelId,
       status: req.query.status,
+      pageNumber:parseInt(req.query.pageNumber) || 1
     }
     const serviceResponse = await service.getAllRoomDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

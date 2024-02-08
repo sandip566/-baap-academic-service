@@ -1,19 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/miscellaneousPayment.services");
+const service = require("../services/hostelPayment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
     "/",
-    checkSchema(require("../dto/miscellaneousPayment.dto")),
+    checkSchema(require("../dto/hostelPaymnet.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const miscellaneousPaymentId = Date.now();
-        req.body.miscellaneousPaymentId = miscellaneousPaymentId;
+        const hostelPaymnetId = Date.now();
+        req.body.hostelPaymnetId = hostelPaymnetId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -43,16 +43,16 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
+router.get("/getAllupdateHostelPaymnet/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        miscellaneousPaymentId: req.query.miscellaneousPaymentId,
+        hostelPaymnetId: req.query.hostelPaymnetId,
         studentId: req.query.studentId,
-        empId: req.query.empId,
-        installmentId: req.query.installmentId,
+        mmemberId: req.query.memberId,
+        hostelId: req.query.hostelId,
         pageNumber:parseInt(req.query.pageNumber) || 1
     };
-    const serviceResponse = await service.getAllMiscellaneousPaymentByGroupId(
+    const serviceResponse = await service.getAllHostelPaymnetByGroupId(
         groupId,
         criteria
     );
@@ -60,22 +60,22 @@ router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
 });
 
 router.delete(
-    "/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId",
+    "/groupId/:groupId/hostelPaymnetId/:hostelPaymnetId",
     async (req, res) => {
         try {
-            const miscellaneousPaymentId = req.params.miscellaneousPaymentId;
+            const hostelPaymnetId = req.params.hostelPaymnetId;
             const groupId = req.params.groupId;
-            const deleteMiscellaneousPayment =
-                await service.deleteMiscellaneousPaymentById({
-                    miscellaneousPaymentId: miscellaneousPaymentId,
+            const deleteHostelPaymnet =
+                await service.deleteHostelPaymnetById({
+                    hostelPaymnetId: hostelPaymnetId,
                     groupId: groupId,
                 });
-            if (!deleteMiscellaneousPayment) {
+            if (!deleteHostelPaymnet) {
                 res.status(404).json({
-                    error: "deleteMiscellaneousPayment data not found to delete",
+                    error: "HostelPaymnet data not found to delete",
                 });
             } else {
-                res.status(201).json(deleteMiscellaneousPayment);
+                res.status(201).json(deleteHostelPaymnet);
             }
         } catch (error) {
             console.error(error);
@@ -85,24 +85,24 @@ router.delete(
 );
 
 router.put(
-    "/groupId/:groupId/miscellaneousPaymentId/:miscellaneousPaymentId",
+    "/groupId/:groupId/hostelPaymnetId/:hostelPaymnetId",
     async (req, res) => {
         try {
-            const miscellaneousPaymentId = req.params.miscellaneousPaymentId;
+            const hostelPaymnetId = req.params.hostelPaymnetId;
             const groupId = req.params.groupId;
             const newData = req.body;
-            const updateMiscellaneousPayment =
-                await service.updateMiscellaneousPaymentById(
-                    miscellaneousPaymentId,
+            const updateHostelPaymnet =
+                await service.updateHostelPaymnetById(
+                    hostelPaymnetId,
                     groupId,
                     newData
                 );
-            if (!updateMiscellaneousPayment) {
+            if (!updateHostelPaymnet) {
                 res.status(404).json({
-                    error: "updateMiscellaneousPayment data not found to update",
+                    error: "HostelPaymnet data not found to update",
                 });
             } else {
-                res.status(200).json(updateMiscellaneousPayment);
+                res.status(200).json(updateHostelPaymnet);
             }
         } catch (error) {
             console.error(error);
