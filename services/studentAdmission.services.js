@@ -323,15 +323,16 @@ class StudentsAdmmisionService extends BaseService {
                                         let class_id;
                                         let division_id;
                                         if (courseDetail.course_id) {
+                                            console.log("aaaqqqqqqqqqqqqqqqqqqqq", courseDetail.course_id);
                                             course_id =
                                                 await courseModel.findOne({
-                                                    course_id:
-                                                        courseDetail.courseId,
+                                                    courseId:
+                                                        courseDetail.course_id,
                                                 });
 
                                             courseAdditionalData.course_id =
                                                 course_id;
-                                            // console.log(course_id);
+                                            console.log("course_iddddddddddddddddddddddddd", course_id);
                                         }
 
                                         if (courseDetail.class_id) {
