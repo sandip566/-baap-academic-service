@@ -118,11 +118,69 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
+    // async getByAddmissionId(addmissionId) {
+    //     return this.execute(() => {
+    //         return this.model.findOne({ addmissionId: addmissionId });
+    //     });
+    // }
     async getByAddmissionId(addmissionId) {
-        return this.execute(() => {
-            return this.model.findOne({ addmissionId: addmissionId });
-        });
+        try {
+            const studentAdmission = await this.model.findOne({ addmissionId: addmissionId });
+            if (!studentAdmission) {
+                throw new Error("Student admission not found");
+            }
+    
+            let additionalData = {};
+    
+            // Process course details
+            // if (studentAdmission.courseDetails && studentAdmission.courseDetails.length > 0) {
+            //     additionalData.courseDetails = await Promise.all(
+            //         studentAdmission.courseDetails.map(async (courseDetail) => {
+            //             let courseAdditionalData = {};
+    
+            //             if (courseDetail.courseId) {
+            //                 const course = await courseModel.findOne({ course_id: courseDetail.courseId });
+            //                 courseAdditionalData.courseName = course ? course.CourseName : "";
+            //                 courseAdditionalData.courseFee = course ? course.Fees : "";
+            //             }
+    
+            //             if (courseDetail.classId) {
+            //                 const classInfo = await ClassModel.findOne({ class_id: courseDetail.classId });
+            //                 courseAdditionalData.className = classInfo ? classInfo.name : "";
+            //             }
+    
+            //             if (courseDetail.divisionId) {
+            //                 const divisionInfo = await DivisionModel.findOne({ division_id: courseDetail.divisionId });
+            //                 courseAdditionalData.divisionName = divisionInfo ? divisionInfo.Name : "";
+            //             }
+    
+            //             return courseAdditionalData;
+            //         })
+            //     );
+            // }
+    
+            // Process fees details
+            if (studentAdmission.feesDetails && studentAdmission.feesDetails.length > 0) {
+                additionalData.feesDetails = await Promise.all(
+                    studentAdmission.feesDetails.map(async (feesDetail) => {
+                        let feesAdditionalData = {};
+    
+                        if (feesDetail.feesTemplateId) {
+                            const feesTemplate = await feesTemplateModel.findOne({ feesTemplateId: feesDetail.feesTemplateId });
+                            feesAdditionalData.feesTemplateId = feesTemplate;
+                        }
+    
+                        return { ...feesDetail, ...feesAdditionalData };
+                    })
+                );
+            }
+    
+            return { ...studentAdmission._doc, ...additionalData };
+        } catch (error) {
+            throw error;
+        }
     }
+    
 
     async getAllDataByGroupId(groupId, query, reverseOrder = true) {
         try {
