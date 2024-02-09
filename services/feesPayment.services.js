@@ -240,6 +240,11 @@ async getByAdmissionAndEmpId(addmissionId,empId) {
 }
 
 
+async getByfeesPaymentId(groupId,feesPaymentId) {
+  return this.execute(() => {
+      return this.model.findOne({ groupId: groupId ,feesPaymentId:feesPaymentId});
+  });
+}
 
 //original
 // async getFeesStatData(groupId) {
