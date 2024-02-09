@@ -195,7 +195,8 @@ const servicesWithData = await Promise.all(
           courseFees: course_id?.Fees,
           installments:installmentLengths[0],
           paidAmount:service.paidAmount,
-          remainingAmount:service.remainingAmount
+          remainingAmount:service.remainingAmount,
+          feesPaymentId:service.feesPaymentId
           // courseFee:course_id.Fees,
          
         
@@ -231,6 +232,11 @@ return response;
   })
 }
 
+async getByAdmissionAndEmpId(addmissionId,empId) {
+  return this.execute(() => {
+      return this.model.findOne({ addmissionId: addmissionId ,empId:empId});
+  });
+}
 
 
 
