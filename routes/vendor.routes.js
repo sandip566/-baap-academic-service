@@ -21,9 +21,11 @@ router.post(
 
 router.get("/all", async (req, res) => {
     const pagination = {
-        pageNumber: req.query.pageNumber || 1,
+        pageNumber:parseInt(req.query.pageNumber) || 1,
         pageSize: 10
     };
+    console.log('pageNumber:', pagination.pageNumber);
+
     const serviceResponse = await service.getAllByCriteria(req.query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -48,7 +50,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         vendorId: req.query.vendorId,
-        vendorName: req.query.vendorName
+        vendorName: req.query.vendorName,
+        pageNumber:parseInt(req.query.pageNumber)||1
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,

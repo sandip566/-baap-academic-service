@@ -7,7 +7,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const TokenService = require("../services/token.services");
 router.post(
     "/",
-    checkSchema(require("../dto/feesTemplate.dto")),TokenService.checkPermission(["ERPSA1"]),
+    checkSchema(require("../dto/feesTemplate.dto")),TokenService.checkPermission(["EMT2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -19,31 +19,27 @@ router.post(
     }
 );
 
-router.get("/all",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
-    const pagination = {
-        pageNumber: req.query.pageNumber || 1,
-        pageSize: 10
-    };
-    const serviceResponse = await service.getAllByCriteria(req.query,pagination);
+router.get("/all",TokenService.checkPermission(["EMT1"]), async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria(req.query);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
+router.delete("/:id",TokenService.checkPermission(["EMT4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
+router.put("/:id",TokenService.checkPermission(["EMT3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
+router.get("/:id",TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
+router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         feesTemplateId: req.query.feesTemplateId,
@@ -55,7 +51,7 @@ router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["ERPSA2"])
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
+router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.checkPermission(["EMT4"]), async (req, res) => {
     try {
         const feesTemplateId = req.params.feesTemplateId
         const groupId = req.params.groupId
@@ -71,7 +67,7 @@ router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.ch
     }
 });
 
-router.put("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
+router.put("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.checkPermission(["EMT3"]), async (req, res) => {
     try {
         const feesTemplateId = req.params.feesTemplateId;
         const groupId = req.params.groupId;

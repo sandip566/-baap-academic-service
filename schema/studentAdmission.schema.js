@@ -17,8 +17,12 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: String,
             required: false
         },
+        location:{
+            type: String,
+            required: false
+        },
         academicYear: {
-            type: Number,
+            type: String,
             required: false
         },
         studentId: {
