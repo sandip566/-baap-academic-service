@@ -80,6 +80,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
     groupId,
     criteria
   );
+  // console.log(serviceResponse);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -116,7 +117,8 @@ router.get("/getAllFeesPayment/groupId/:groupId", async (req, res) => {
     feesPaymentId: req.query.feesPaymentId,
     empId: req.query.empId,
     userId:req.query.userId,
-    installmentId: req.query.installmentId
+    installmentId: req.query.installmentId,
+    search: req.query.search,
   };
   const serviceResponse = await service.getAllFeesPaymentByGroupId(
     groupId,

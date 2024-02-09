@@ -259,8 +259,8 @@ class StudentsAdmmisionService extends BaseService {
                                         if (courseDetail.course_id) {
                                             const course_id =
                                                 await courseModel.findOne({
-                                                    course_id:
-                                                        courseDetail.courseId,
+                                                    courseId:
+                                                        courseDetail.course_id,
                                                 });
                                             additionalData.course_id =
                                                 course_id;
