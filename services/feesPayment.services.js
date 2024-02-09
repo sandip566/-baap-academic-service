@@ -196,7 +196,8 @@ const servicesWithData = await Promise.all(
           installments:installmentLengths[0],
           paidAmount:service.paidAmount,
           remainingAmount:service.remainingAmount,
-          feesPaymentId:service.feesPaymentId
+          feesPaymentId:service.feesPaymentId,
+          groupId:service.groupId
           // courseFee:course_id.Fees,
          
         
