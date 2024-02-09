@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { checkSchema } = require("express-validator");
+const { checkSchema, query } = require("express-validator");
 const service = require("../services/vendor.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
@@ -24,9 +24,8 @@ router.get("/all", async (req, res) => {
         pageNumber:parseInt(req.query.pageNumber) || 1,
         pageSize: 10
     };
-    console.log('pageNumber:', pagination.pageNumber);
-
-    const serviceResponse = await service.getAllByCriteria(req.query, pagination);
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 

@@ -30,7 +30,8 @@ router.get("/all", async (req, res) => {
     pageNumber: req.query.pageNumber || 1,
     pageSize: 10
 };
-  const serviceResponse = await service.getAllByCriteria(req.query, pagination);
+const { pageNumber, pageSize, ...query } = req.query;
+  const serviceResponse = await service.getAllByCriteria(query, pagination);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
@@ -38,7 +39,8 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMR1"]),
   const groupId = req.params.groupId;
   const criteria = {
     religionId: req.query.religionId,
-    name: req.query.name
+    name: req.query.name,
+    pageNumber:parseInt(req.query.pageNumber)||1
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,

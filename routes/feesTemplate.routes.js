@@ -20,7 +20,12 @@ router.post(
 );
 
 router.get("/all",TokenService.checkPermission(["EMT1"]), async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
+    const pagination = {
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: 10
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query,pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -43,6 +48,7 @@ router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMT1"]), 
     const groupId = req.params.groupId;
     const criteria = {
         feesTemplateId: req.query.feesTemplateId,
+        pageNumber:parseInt(req.query.pageNumber)||1
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
