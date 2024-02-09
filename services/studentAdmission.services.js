@@ -118,9 +118,16 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
+    async getByAddmissionIdData(addmissionId) {
+        return this.execute(() => {
+            return this.model.findOne({ addmissionId: addmissionId });
+        });
+    }
+
     async getByAddmissionId(addmissionId) {
         try {
             const studentAdmission = await this.model.findOne({ addmissionId: addmissionId });
+            console.log(studentAdmission);
             if (!studentAdmission) {
                 throw new Error("Student admission not found");
             }
