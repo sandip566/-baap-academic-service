@@ -10,16 +10,19 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId) {
+    async getRecoveryData(groupId,skip,limit) {
         return this.execute(async () => {
-            let data = await this.model.find({ groupId: groupId });
+            let data = await this.model.find({ groupId: groupId })
+            .skip(skip)
+            .limit(limit)
+            .exec();
             const totalPaidAmount = data.reduce((total, item) => {
                 if (item.paidAmount) {
                     total += parseFloat(item.paidAmount);
                 }
                 return total;
             }, 0);
-
+         
             const totalRemainingAmount = data.reduce((total, item) => {
                 if (item.remainingAmount) {
                     total += parseFloat(item.remainingAmount);
@@ -64,7 +67,7 @@ class feesPaymentService extends BaseService {
             const query = {
                 groupId: groupId,
             };
-
+  
             let courseData = await courseModel.find({ groupId: groupId });
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,

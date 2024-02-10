@@ -63,7 +63,10 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
   if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
   }
-  const serviceResponse = await service.getRecoveryData(req.params.groupId);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const skip = (page - 1) * limit;
+  const serviceResponse = await service.getRecoveryData(req.params.groupId,skip,limit);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
@@ -85,7 +88,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
 });
 
 router.get("/all", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
+  const serviceResponse = await service.getAllByCriteria({req,query, pagination});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getByfeesPaymentId/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res, next) => {
