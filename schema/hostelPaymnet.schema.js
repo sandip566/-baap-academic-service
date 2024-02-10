@@ -1,6 +1,6 @@
 const mongoose = require("mongoose")
 
-const hostelPaymnetSchema = new schema(
+const hostelPaymnetSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
@@ -18,7 +18,7 @@ const hostelPaymnetSchema = new schema(
             require: false
         },
         paymentAmount: {
-            type: number
+            type: Number
         },
         paymentDate: {
             type: Date,
@@ -26,7 +26,7 @@ const hostelPaymnetSchema = new schema(
         },
         recivedBy: {
             memberId: {
-                type: number,
+                type: Number,
                 require: false
             }
         }

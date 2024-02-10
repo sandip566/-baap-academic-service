@@ -41,6 +41,7 @@ router.get("/all", async (req, res) => {
         pageNumber: req.query.pageNumber || 1,
         pageSize: 10 
     };
+    const { pageNumber, pageSize, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria({req,query,pagination});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
