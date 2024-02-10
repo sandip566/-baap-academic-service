@@ -30,6 +30,14 @@ const feesPaymentSchema = new mongoose.Schema(
         feesPaymentId: {
             type: Number,
         },
+        currentDate:{
+            type: String,
+            required: false,
+        },
+        academicYear:{
+            type: String,
+            required: false,
+        },
         userId: {
             type: Number,
             required: false,

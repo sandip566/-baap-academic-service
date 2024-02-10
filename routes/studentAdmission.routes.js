@@ -6,7 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { default: mongoose } = require("mongoose");
 const feesInstallmentServices = require("../services/feesInstallment.services");
-
+const TokenService = require("../services/token.services");
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -50,7 +50,7 @@ router.post("/data/save", async (req, res, next) => {
         }
 
         if (req.body.addmissionId) {
-            const existingDocument = await service.getByAddmissionId(
+            const existingDocument = await service.getByAddmissionIdData(
                 req.body.addmissionId
             );
 

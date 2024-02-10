@@ -118,11 +118,74 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
-    async getByAddmissionId(addmissionId) {
+    async getByAddmissionIdData(addmissionId) {
         return this.execute(() => {
             return this.model.findOne({ addmissionId: addmissionId });
         });
     }
+
+    async getByAddmissionId(addmissionId) {
+        try {
+            const studentAdmission = await this.model.findOne({ addmissionId: addmissionId });
+            console.log(studentAdmission);
+            if (!studentAdmission) {
+                throw new Error("Student admission not found");
+            }
+    
+            let additionalData = {};
+    
+            // Process course details
+            // if (studentAdmission.courseDetails && studentAdmission.courseDetails.length > 0) {
+            //     additionalData.courseDetails = await Promise.all(
+            //         studentAdmission.courseDetails.map(async (courseDetail) => {
+            //             let courseAdditionalData = {};
+    
+            //             if (courseDetail.courseId) {
+            //                 const course = await courseModel.findOne({ course_id: courseDetail.courseId });
+            //                 courseAdditionalData.courseName = course ? course.CourseName : "";
+            //                 courseAdditionalData.courseFee = course ? course.Fees : "";
+            //             }
+    
+            //             if (courseDetail.classId) {
+            //                 const classInfo = await ClassModel.findOne({ class_id: courseDetail.classId });
+            //                 courseAdditionalData.className = classInfo ? classInfo.name : "";
+            //             }
+    
+            //             if (courseDetail.divisionId) {
+            //                 const divisionInfo = await DivisionModel.findOne({ division_id: courseDetail.divisionId });
+            //                 courseAdditionalData.divisionName = divisionInfo ? divisionInfo.Name : "";
+            //             }
+    
+            //             return courseAdditionalData;
+            //         })
+            //     );
+            // }
+    
+            // Process fees details
+            if (studentAdmission.feesDetails && studentAdmission.feesDetails.length > 0) {
+                additionalData.feesDetails = await Promise.all(
+                    studentAdmission.feesDetails.map(async (feesDetail) => {
+                        let feesAdditionalData = {};
+    
+                        if (feesDetail.feesTemplateId) {
+                            const feesTemplate = await feesTemplateModel.findOne({ feesTemplateId: feesDetail.feesTemplateId });
+                            feesAdditionalData.feesTemplateId = feesTemplate;
+                        }
+    
+                        return { ...feesDetail, ...feesAdditionalData };
+                    })
+                );
+            }
+    let response={
+        status: 'success',
+        data:{...studentAdmission._doc, ...additionalData}
+    }
+            return response
+        } catch (error) {
+            throw error;
+        }
+    }
+    
 
     async getAllDataByGroupId(groupId, query, reverseOrder = true) {
         try {
@@ -196,8 +259,8 @@ class StudentsAdmmisionService extends BaseService {
                                         if (courseDetail.course_id) {
                                             const course_id =
                                                 await courseModel.findOne({
-                                                    course_id:
-                                                        courseDetail.courseId,
+                                                    courseId:
+                                                        courseDetail.course_id,
                                                 });
                                             additionalData.course_id =
                                                 course_id;
@@ -323,15 +386,16 @@ class StudentsAdmmisionService extends BaseService {
                                         let class_id;
                                         let division_id;
                                         if (courseDetail.course_id) {
+                                            console.log("aaaqqqqqqqqqqqqqqqqqqqq", courseDetail.course_id);
                                             course_id =
                                                 await courseModel.findOne({
-                                                    course_id:
-                                                        courseDetail.courseId,
+                                                    courseId:
+                                                        courseDetail.course_id,
                                                 });
 
                                             courseAdditionalData.course_id =
                                                 course_id;
-                                            // console.log(course_id);
+                                            console.log("course_iddddddddddddddddddddddddd", course_id);
                                         }
 
                                         if (courseDetail.class_id) {

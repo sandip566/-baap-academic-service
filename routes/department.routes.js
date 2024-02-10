@@ -7,7 +7,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const TokenService = require("../services/token.services");
 router.post(
     "/",
-    checkSchema(require("../dto/department.dto")),TokenService.checkPermission(["ERPSA1"]),
+    checkSchema(require("../dto/department.dto")),TokenService.checkPermission(["EMD2"]),
     async (req, res, next) => {
       if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
@@ -29,7 +29,7 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/departmentId/:departmentId",TokenService.checkPermission(["ERPSA4"]), async (req, res) => {
+router.delete("/groupId/:groupId/departmentId/:departmentId",TokenService.checkPermission(["EMD4"]), async (req, res) => {
     try {
         const departmentId = req.params.departmentId;
         const groupId = req.params.groupId;
@@ -44,7 +44,7 @@ router.delete("/groupId/:groupId/departmentId/:departmentId",TokenService.checkP
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["ERPSA2"]),async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMD1"]),async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
        departmentName:req.query.departmentName,
@@ -54,7 +54,7 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["ERPSA2"]
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.put("/groupId/:groupId/departmentId/:departmentId",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
+router.put("/groupId/:groupId/departmentId/:departmentId",TokenService.checkPermission(["EMD3"]), async (req, res) => {
     try {
         const departmentId = req.params.departmentId;
         const groupId = req.params.groupId;
@@ -72,7 +72,7 @@ router.put("/groupId/:groupId/departmentId/:departmentId",TokenService.checkPerm
     }
 });
 
-router.get("/:id",TokenService.checkPermission(["ERPSA2"]), async (req, res) => {
+router.get("/:id",TokenService.checkPermission(["EMD1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

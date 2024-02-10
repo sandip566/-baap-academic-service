@@ -4,7 +4,7 @@ const feesTemplate = mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: true
         },
         feesTemplateId: {
             type: Number,
