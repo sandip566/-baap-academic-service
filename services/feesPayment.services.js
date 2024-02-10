@@ -109,7 +109,7 @@ class feesPaymentService extends BaseService {
 
             if (criteria.academicYear) {
                 query.academicYear = criteria.academicYear;
-                admissionData = admissionData.filter(
+                feesData = feesData.filter(
                     (data) => data.academicYear === query.academicYear
                 );
             }
