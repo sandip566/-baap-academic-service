@@ -136,7 +136,7 @@ class feesPaymentService extends BaseService {
             if (criteria.feesTemplateId) {
                 query.feesTemplateId = criteria.feesTemplateId;
                 admissionData = admissionData.filter((data) => {
-                  if (data.feesDetails && data.courseDetails.length > 0) {
+                  if (data.feesDetails && data.feesDetails.length > 0) {
                         let matchingfeesTemplateId = data.feesDetails.some(
                             (feesTemplate) => feesTemplate.feesTemplateId  && feesTemplate.feesTemplateId.toString()=== query.feesTemplateId.toString()
                         );
