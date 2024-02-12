@@ -61,6 +61,7 @@ class feesPaymentService extends BaseService {
 
     async getFeesStatData(groupId, criteria) {
         return this.execute(async () => {
+            try {
             const query = {
                 groupId: groupId,
             };
@@ -93,10 +94,22 @@ class feesPaymentService extends BaseService {
                     (fee) => fee.currentDate === formattedDate
                 );
             }
+            if (criteria.month) {
+                query.month = criteria.month;
+                const month = query.month.padStart(2, '0'); // Ensure month is zero-padded
+                feesData = feesData.filter(
+                    (data) => {
+                        const currentDate = new Date(data.currentDate);
+                        const dataMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+                        return dataMonth === month;
+                    }
+                );
+            }
+            
 
             if (criteria.academicYear) {
                 query.academicYear = criteria.academicYear;
-                admissionData = admissionData.filter(
+                feesData = feesData.filter(
                     (data) => data.academicYear === query.academicYear
                 );
             }
@@ -108,6 +121,30 @@ class feesPaymentService extends BaseService {
                 );
             }
             console.log("ssssssssssssssssssss",admissionData);
+            if (criteria.department) {
+                query.department = criteria.department;
+                admissionData = admissionData.filter((data) => {
+                  if (data.courseDetails && data.courseDetails.length > 0) {
+                        let matchingdepartment = data.courseDetails.some(
+                            (departments) => departments.department_id  && departments.department_id.toString()=== query.department.toString()
+                        );
+                        return matchingdepartment
+                    }
+                    return false;
+                });
+            }
+            if (criteria.feesTemplateId) {
+                query.feesTemplateId = criteria.feesTemplateId;
+                admissionData = admissionData.filter((data) => {
+                  if (data.feesDetails && data.feesDetails.length > 0) {
+                        let matchingfeesTemplateId = data.feesDetails.some(
+                            (feesTemplate) => feesTemplate.feesTemplateId  && feesTemplate.feesTemplateId.toString()=== query.feesTemplateId.toString()
+                        );
+                        return matchingfeesTemplateId
+                    }
+                    return false;
+                });
+            }
             if (criteria.course) {
               query.course = criteria.course;
               admissionData = admissionData.filter((data) => {
@@ -217,7 +254,7 @@ class feesPaymentService extends BaseService {
             let class_id;
             let division_id;
             const servicesWithData = await Promise.all(
-                feesData.map(async (service) => {
+                feesData?.map(async (service) => {
                     let additionalData = {};
                     let feesAdditionalData = {};
 
@@ -226,6 +263,7 @@ class feesPaymentService extends BaseService {
                             (admission) =>
                                 admission.addmissionId === service.addmissionId
                         );
+
                         if (matchingAdmission) {
                             await Promise.all(
                                 matchingAdmission.courseDetails.map(
@@ -312,6 +350,10 @@ class feesPaymentService extends BaseService {
             };
 
             return response;
+        } catch (error) {
+            console.error("Error occurred:", error);
+            throw error;
+        }
         });
     }
 

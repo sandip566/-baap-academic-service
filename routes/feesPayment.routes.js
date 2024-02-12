@@ -74,7 +74,10 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
     location: req.query.location,
     course:req.query.course,
     class:req.query.class,
-    division: req.query.division
+    department:req.query.department,
+    feesTemplateId:req.query.feesTemplateId,
+    division: req.query.division,
+    month:req.query.month,
   };
   const serviceResponse = await service.getFeesStatData(
     groupId,
