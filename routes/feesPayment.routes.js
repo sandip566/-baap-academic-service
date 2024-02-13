@@ -159,31 +159,45 @@ router.post(
 
 // );
 router.get("/getRecoveryData/:groupId", async (req, res, next) => {
-  if (ValidationHelper.requestValidationErrors(req, res)) {
-      return;
-  }
-  const serviceResponse = await service.getRecoveryData(req.params.groupId);
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const page=parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit) || 10
+    const skip=(page-1)*limit;
+    const serviceResponse=await service.getRecoveryData(
+      req.params.groupId,
+      skip,
+      limit,
+      page
+      );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    currentDate: req.query.currentDate,
-    academicYear: req.query.academicYear,
-    location: req.query.location,
-    course:req.query.course,
-    class:req.query.class,
-    department:req.query.department,
-    feesTemplateId:req.query.feesTemplateId,
-    division: req.query.division,
-    month:req.query.month,
-  };
-  const serviceResponse = await service.getFeesStatData(
-    groupId,
-    criteria
-  );
-  // console.log(serviceResponse);
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    const groupId = req.params.groupId;
+    const criteria = {
+        currentDate: req.query.currentDate,
+        academicYear: req.query.academicYear,
+        location: req.query.location,
+        course: req.query.course,
+        class: req.query.class,
+        department: req.query.department,
+        feesTemplateId: req.query.feesTemplateId,
+        division: req.query.division,
+        month: req.query.month,
+    };
+    const page=parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit) || 10
+    // const skip = (page - 1) * limit;
+    const skip=(page-1)*limit;
+     const serviceResponse = await service.getFeesStatData(
+          groupId,
+          criteria,
+          skip,
+          page,
+          limit
+      );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all", async (req, res) => {

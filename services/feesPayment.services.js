@@ -10,7 +10,7 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId) {
+    async getRecoveryData(groupId,skip,limit) {
         return this.execute(async () => {
             let data = await this.model.find({ groupId: groupId });
             const totalPaidAmount = data.reduce((total, item) => {
@@ -59,18 +59,29 @@ class feesPaymentService extends BaseService {
         });
     }
 
-    async getFeesStatData(groupId, criteria) {
+    async getFeesStatData(groupId,criteria,skip,limit) {
         return this.execute(async () => {
             try {
             const query = {
                 groupId: groupId,
             };
 
-            let courseData = await courseModel.find({ groupId: groupId });
-            let admissionData = await StudentsAdmissionModel.find({
-                groupId: groupId,
-            });
-            let feesData = await this.model.find({ groupId: groupId });
+                let courseData = await courseModel
+                    .find({ groupId: groupId })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec();
+                let admissionData = await StudentsAdmissionModel.find({
+                    groupId: groupId,
+                })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec()
+                let feesData = await this.model
+                    .find({ groupId: groupId })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec();
 
             console.log(criteria.currentDate, criteria.currentDate);
             const currentDateValue = criteria.currentDate
