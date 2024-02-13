@@ -414,13 +414,16 @@ class feesPaymentService extends BaseService {
 
     async getByAdmissionAndEmpId(addmissionId, empId) {
         return this.execute(() => {
-            return this.model.findOne({
-                addmissionId: addmissionId,
-                empId: empId,
-            });
+            return this.model
+                .findOne({
+                    addmissionId: addmissionId,
+                    empId: empId,
+                })
+                .sort({ _id: -1 }); 
         });
     }
-
+    
+    
     async getByfeesPaymentId(groupId, feesPaymentId) {
         return this.execute(async () => {
             let feesdata = {};
