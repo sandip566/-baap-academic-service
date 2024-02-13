@@ -78,24 +78,30 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    currentDate: req.query.currentDate,
-    academicYear: req.query.academicYear,
-    location: req.query.location,
-    course:req.query.course,
-    class:req.query.class,
-    department:req.query.department,
-    feesTemplateId:req.query.feesTemplateId,
-    division: req.query.division,
-    month:req.query.month,
-  };
-  const serviceResponse = await service.getFeesStatData(
-    groupId,
-    criteria
-  );
-  // console.log(serviceResponse);
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    const groupId = req.params.groupId;
+    const criteria = {
+        currentDate: req.query.currentDate,
+        academicYear: req.query.academicYear,
+        location: req.query.location,
+        course: req.query.course,
+        class: req.query.class,
+        department: req.query.department,
+        feesTemplateId: req.query.feesTemplateId,
+        division: req.query.division,
+        month: req.query.month,
+    };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const serviceResponse = await service.getFeesStatData(
+        groupId,
+        criteria,
+        skip,
+        page,
+        limit
+    );
+    // console.log(serviceResponse);
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all", async (req, res) => {
@@ -136,19 +142,19 @@ router.get("/:id", async (req, res) => {
 });
 
 router.get("/getAllFeesPayment/groupId/:groupId", async (req, res) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    feesPaymentId: req.query.feesPaymentId,
-    empId: req.query.empId,
-    userId:req.query.userId,
-    installmentId: req.query.installmentId,
-    search: req.query.search,
-  };
-  const serviceResponse = await service.getAllFeesPaymentByGroupId(
-    groupId,
-    criteria
-  );
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    const groupId = req.params.groupId;
+    const criteria = {
+        feesPaymentId: req.query.feesPaymentId,
+        empId: req.query.empId,
+        userId: req.query.userId,
+        installmentId: req.query.installmentId,
+        search: req.query.search,
+    };
+    const serviceResponse = await service.getAllFeesPaymentByGroupId(
+        groupId,
+        criteria
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.delete(
