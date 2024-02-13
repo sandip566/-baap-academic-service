@@ -10,7 +10,7 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId, skip, limit) {
+    async getRecoveryData(groupId,skip,limit) {
         return this.execute(async () => {
             let data = await this.model
                 .find({ groupId: groupId })
@@ -63,7 +63,7 @@ class feesPaymentService extends BaseService {
         });
     }
 
-    async getFeesStatData(groupId, criteria,skip,page,limit) {
+    async getFeesStatData(groupId,criteria,skip,limit) {
         return this.execute(async () => {
             try {
                 const query = {
@@ -80,7 +80,7 @@ class feesPaymentService extends BaseService {
                 })
                     .skip(skip)
                     .limit(limit)
-                    .exec();
+                    .exec()
                 let feesData = await this.model
                     .find({ groupId: groupId })
                     .skip(skip)
