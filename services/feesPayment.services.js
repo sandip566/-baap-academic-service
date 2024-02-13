@@ -7,22 +7,22 @@ const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 
 class feesPaymentService extends BaseService {
-    constructor(dbModel, entityName) {
-        super(dbModel, entityName);
-    }
-    async getRecoveryData(groupId, skip, limit) {
-        return this.execute(async () => {
-            let data = await this.model
+      constructor(dbModel, entityName) {
+            super(dbModel, entityName);
+      }
+      async getRecoveryData(groupId, skip, limit) {
+            return this.execute(async () => {
+                let data = await this.model
                 .find({ groupId: groupId })
                 .skip(skip)
                 .limit(limit)
                 .exec();
-            const totalPaidAmount = data.reduce((total, item) => {
-                if (item.paidAmount) {
-                    total += parseFloat(item.paidAmount);
-                }
-                return total;
-            }, 0);
+                const totalPaidAmount = data.reduce((total, item) => {
+                    if (item.paidAmount) {
+                        total += parseFloat(item.paidAmount);
+                    }
+                    return total;
+                }, 0);
 
             const totalRemainingAmount = data.reduce((total, item) => {
                 if (item.remainingAmount) {
@@ -65,6 +65,7 @@ class feesPaymentService extends BaseService {
 
     async getFeesStatData(groupId, criteria) {
         return this.execute(async () => {
+            try {
             const query = {
                 groupId: groupId,
             };
@@ -97,10 +98,22 @@ class feesPaymentService extends BaseService {
                     (fee) => fee.currentDate === formattedDate
                 );
             }
+            if (criteria.month) {
+                query.month = criteria.month;
+                const month = query.month.padStart(2, '0'); // Ensure month is zero-padded
+                feesData = feesData.filter(
+                    (data) => {
+                        const currentDate = new Date(data.currentDate);
+                        const dataMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+                        return dataMonth === month;
+                    }
+                );
+            }
+            
 
             if (criteria.academicYear) {
                 query.academicYear = criteria.academicYear;
-                admissionData = admissionData.filter(
+                feesData = feesData.filter(
                     (data) => data.academicYear === query.academicYear
                 );
             }
@@ -111,28 +124,55 @@ class feesPaymentService extends BaseService {
                     (data) => data.location == query.location
                 );
             }
-
-            if (criteria.course) {
-                query.course = criteria.course;
+            console.log("ssssssssssssssssssss",admissionData);
+            if (criteria.department) {
+                query.department = criteria.department;
                 admissionData = admissionData.filter((data) => {
-                    if (data.courseDetails.length > 0) {
-                        let matchingCourses = data.courseDetails.filter(
-                            (course) => course.course_id == query.course
+                  if (data.courseDetails && data.courseDetails.length > 0) {
+                        let matchingdepartment = data.courseDetails.some(
+                            (departments) => departments.department_id  && departments.department_id.toString()=== query.department.toString()
                         );
-                        return matchingCourses.length > 0;
+                        return matchingdepartment
                     }
                     return false;
                 });
             }
+            if (criteria.feesTemplateId) {
+                query.feesTemplateId = criteria.feesTemplateId;
+                admissionData = admissionData.filter((data) => {
+                  if (data.feesDetails && data.feesDetails.length > 0) {
+                        let matchingfeesTemplateId = data.feesDetails.some(
+                            (feesTemplate) => feesTemplate.feesTemplateId  && feesTemplate.feesTemplateId.toString()=== query.feesTemplateId.toString()
+                        );
+                        return matchingfeesTemplateId
+                    }
+                    return false;
+                });
+            }
+            if (criteria.course) {
+              query.course = criteria.course;
+              admissionData = admissionData.filter((data) => {
+                  if (data.courseDetails && data.courseDetails.length > 0) {
+                      const matchingCourses = data.courseDetails.some(
+                          (course) => course.course_id && course.course_id.toString() === query.course.toString()
+                      );
+                      console.log("matchingCourses", matchingCourses);
+                      return matchingCourses;
+                  }
+                  return false;
+              });
+          }
+          
+            console.log("qqqqqqqqqqqqqqq",admissionData);
 
             if (criteria.class) {
                 query.class = criteria.class;
                 admissionData = admissionData.filter((data) => {
-                    if (data.courseDetails.length > 0) {
-                        let matchingclasses = data.courseDetails.filter(
-                            (classes) => classes.class_id == query.class
+                  if (data.courseDetails && data.courseDetails.length > 0) {
+                        let matchingclasses = data.courseDetails.some(
+                            (classes) => classes.class_id  && classes.class_id.toString()=== query.class.toString()
                         );
-                        return matchingclasses.length > 0;
+                        return matchingclasses
                     }
                     return false;
                 });
@@ -141,12 +181,12 @@ class feesPaymentService extends BaseService {
             if (criteria.division) {
                 query.division = criteria.division;
                 admissionData = admissionData.filter((data) => {
-                    if (data.courseDetails.length > 0) {
-                        let matchingdivision = data.courseDetails.filter(
+                  if (data.courseDetails && data.courseDetails.length > 0) {
+                        let matchingdivision = data.courseDetails.some(
                             (divisions) =>
-                                divisions.division_id == query.division
+                                divisions.division_id   && divisions.division_id.toString()=== query.division.toString()
                         );
-                        return matchingdivision.length > 0;
+                        return matchingdivision
                     }
                     return false;
                 });
@@ -218,7 +258,7 @@ class feesPaymentService extends BaseService {
             let class_id;
             let division_id;
             const servicesWithData = await Promise.all(
-                feesData.map(async (service) => {
+                feesData?.map(async (service) => {
                     let additionalData = {};
                     let feesAdditionalData = {};
 
@@ -227,6 +267,7 @@ class feesPaymentService extends BaseService {
                             (admission) =>
                                 admission.addmissionId === service.addmissionId
                         );
+
                         if (matchingAdmission) {
                             await Promise.all(
                                 matchingAdmission.courseDetails.map(
@@ -241,7 +282,10 @@ class feesPaymentService extends BaseService {
                                         }
                                         if (admission.class_id) {
                                             class_id = await ClassModel.findOne(
-                                                { classId: admission.class_id }
+                                                {
+                                                    feesTemplateId:
+                                                        admission.class_id,
+                                                }
                                             );
                                             admission.class_id = class_id;
                                         }
@@ -256,15 +300,17 @@ class feesPaymentService extends BaseService {
                                     }
                                 )
                             );
-                            const installmentLengths =
-                                matchingAdmission.feesDetails.map(
-                                    (item) => item.installment.length
-                                );
-                            console.log(
-                                "Lengths of installment arrays:",
-                                installmentLengths
-                            );
-                            console.log(matchingAdmission.feesDetails);
+                            const installmentLengths = matchingAdmission.feesDetails.map(
+                              (item) => (item.installment ? item.installment.length : 0)
+                          );
+                          const installments = installmentLengths.length > 0 ? installmentLengths[0] : 0;
+                          console.log(
+                              "Lengths of installment arrays:",
+                              installmentLengths
+                          );
+                          console.log(matchingAdmission.feesDetails);
+                          
+                          
                             return {
                                 candidateName: matchingAdmission.name,
                                 className: class_id?.name,
@@ -272,9 +318,11 @@ class feesPaymentService extends BaseService {
                                 divisionName: division_id?.Name,
                                 courseName: course_id?.CourseName,
                                 courseFees: course_id?.Fees,
-                                installments: installmentLengths[0],
+                                installments: installments,
                                 paidAmount: service.paidAmount,
                                 remainingAmount: service.remainingAmount,
+                                feesPaymentId: service.feesPaymentId,
+                                groupId: service.groupId,
                                 // courseFee:course_id.Fees,
                             };
                         }
@@ -306,6 +354,81 @@ class feesPaymentService extends BaseService {
             };
 
             return response;
+        } catch (error) {
+            console.error("Error occurred:", error);
+            throw error;
+        }
+        });
+    }
+
+    async getByAdmissionAndEmpId(addmissionId, empId) {
+        return this.execute(() => {
+            return this.model.findOne({
+                addmissionId: addmissionId,
+                empId: empId,
+            });
+        });
+    }
+
+    async getByfeesPaymentId(groupId, feesPaymentId) {
+        return this.execute(async () => {
+            let feesdata = {};
+            let course_id;
+            let class_id;
+            let feesTemplateId;
+            const feesPaymentData = await this.model.findOne({
+                groupId: groupId,
+                feesPaymentId: feesPaymentId,
+            });
+
+            if (feesPaymentData) {
+                const addmissionId = feesPaymentData.addmissionId;
+                if (addmissionId) {
+                    const addmissionId1 = await StudentsAdmissionModel.findOne({
+                        groupId: groupId,
+                        addmissionId: addmissionId,
+                    });
+                    feesdata.addmissionId = addmissionId1;
+                    let courseIds = addmissionId1.courseDetails.forEach(
+                        (element) => {
+                            course_id = element.course_id;
+                            class_id = element.class_id;
+                            console.log(course_id);
+                        }
+                    );
+                    let templateIds = addmissionId1.feesDetails.forEach(
+                        (element) => {
+                            feesTemplateId = element.feesTemplateId;
+                        }
+                    );
+
+                    let courseAdditionalData = {};
+
+                    let courseDetails = await courseModel.findOne({
+                        groupId: groupId,
+                        courseId: course_id,
+                    });
+                    let classDetails = await ClassModel.findOne({
+                        groupId: groupId,
+                        classId: class_id,
+                    });
+                    let feesTemplateIds = await feesTemplateModel.findOne({
+                        groupId: groupId,
+                        feesTemplateId: feesTemplateId,
+                    });
+
+                    courseAdditionalData.course_id = courseDetails;
+                    courseAdditionalData.class_id = classDetails;
+                    courseAdditionalData.feesTemplateId = feesTemplateIds;
+
+                    return {
+                        ...courseAdditionalData,
+                        ...feesPaymentData._doc,
+                        ...feesdata,
+                    };
+                }
+            }
+            return null;
         });
     }
 
@@ -433,7 +556,6 @@ class feesPaymentService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10;
         if (criteria.feesPaymentId)
             query.feesPaymentId = criteria.feesPaymentId;
         if (criteria.empId) query.empId = criteria.empId;
