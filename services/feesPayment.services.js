@@ -10,12 +10,10 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId,skip,limit) {
+    async getRecoveryData(groupId) {
         return this.execute(async () => {
             let data = await this.model.find({ groupId: groupId })
-            .skip(skip)
-            .limit(limit)
-            .exec();
+           
             const totalPaidAmount = data.reduce((total, item) => {
                 if (item.paidAmount) {
                     total += parseFloat(item.paidAmount);

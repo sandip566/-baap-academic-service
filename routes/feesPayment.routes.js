@@ -63,10 +63,7 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
   if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
   }
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const skip = (page - 1) * limit;
-  const serviceResponse = await service.getRecoveryData(req.params.groupId,skip,limit);
+  const serviceResponse = await service.getRecoveryData(req.params.groupId);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
