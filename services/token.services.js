@@ -66,15 +66,28 @@ class TokenService {
         };
     }
 
+    // static async decodeToken(token) {
+    //     try {
+    //         const decoded = jwt.verify(token, process.env.API_SECRET);
+    //         console.log(decoded);
+    //         return decoded;
+    //     } catch (error) {
+    //         console.error('Token verification error:', error.message);
+    //         throw new Error('Token verification failed');
+    //     }
+    // }
     static async decodeToken(token) {
         try {
+            console.log("Token received:", token);
             const decoded = jwt.verify(token, process.env.API_SECRET);
+            console.log("Decoded token:", decoded);
             return decoded;
         } catch (error) {
             console.error('Token verification error:', error.message);
             throw new Error('Token verification failed');
         }
     }
+    
 }
 
 module.exports = TokenService;

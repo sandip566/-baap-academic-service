@@ -14,13 +14,69 @@ const feesInstallmentService = require("../services/feesInstallment.services");
 //     if (ValidationHelper.requestValidationErrors(req, res)) {
 //       return;
 //     }
+//     let addmissionId=req.body.addmissionId
+//     console.log("addmisionId", addmissionId);
+//     let empId=req.body.empId
+//     let existingRecord=await service.getByAdmissionAndEmpId(addmissionId,empId);
+//     console.log("existingRecord, empId", existingRecord);
+
+// if(existingRecord){
+//   const feesPaymentId = +Date.now();
+//   req.body.feesPaymentId = feesPaymentId;
+
+//   const installmentDetails = req.body.installment;
+//   const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+//   let totalPaidAmount = 0;
+
+//   for (const installment of installmentDetails) {
+//     if (installment.radio) {
+//       totalPaidAmount += parseFloat(installment.amount);
+//     }
+//   }
+//   totalPaidAmount += otherAmount;
+//   console.log(totalPaidAmount);
+
+//   let remainingAmount=existingRecord.paidAmount-totalPaidAmount||0
+
+//   const serviceResponse = await service.create(req.body);
+
+//  let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount,remainingAmount);
+// console.log(a);
+  
+//   serviceResponse.data.paidAmount = totalPaidAmount;
+//   serviceResponse.data.remainingAmount=remainingAmount
+// }else{
 //     const feesPaymentId = +Date.now();
 //     req.body.feesPaymentId = feesPaymentId;
-//     const installmentId = req.body.installmentId;
-//     const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
-//     const serviceResponse = await service.create(req.body, updateResult);
+
+//     const installmentDetails = req.body.installment;
+//     const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+//     let totalPaidAmount = 0;
+
+//     for (const installment of installmentDetails) {
+//       if (installment.radio) {
+//         totalPaidAmount += parseFloat(installment.amount);
+//       }
+//     }
+//     totalPaidAmount += otherAmount;
+//     console.log(totalPaidAmount);
+
+//     let remainingAmount=req.body.courseFee-totalPaidAmount||0
+
+//     const serviceResponse = await service.create(req.body);
+  
+//    let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount,remainingAmount);
+// console.log(a);
+    
+//     serviceResponse.data.paidAmount = totalPaidAmount;
+//     serviceResponse.data.remainingAmount=remainingAmount
+  
 //     requestResponsehelper.sendResponse(res, serviceResponse);
 //   }
+//   }
+
 // );
 router.post(
     "/",
