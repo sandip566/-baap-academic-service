@@ -13,7 +13,10 @@ class feesPaymentService extends BaseService {
     async getRecoveryData(groupId,skip,limit) {
         return this.execute(async () => {
             let data = await this.model.find({ groupId: groupId })
-           
+            .skip(skip)
+            .limit(limit)
+            .exec()
+            //const count = await .countDocuments(data);
             const totalPaidAmount = data.reduce((total, item) => {
                 if (item.paidAmount) {
                     total += parseFloat(item.paidAmount);
@@ -54,322 +57,322 @@ class feesPaymentService extends BaseService {
                 totalPaidAmount: totalPaidAmount,
                 totalRemainingAmount: totalRemainingAmount,
                 // feesDefaulter: data,
+                //count:count,
                 servicesWithData: servicesWithData,
+                totalItemsCount: await this.model.countDocuments(data)
             };
             return response;
         });
     }
 
     async getFeesStatData(groupId,criteria,skip,limit) {
-        return this.execute(async () => {
-            try {
-            const query = {
-                groupId: groupId,
-            };
+      return this.execute(async () => {
+          try {
+          const query = {
+              groupId: groupId,
+          };
+              let courseData = await courseModel
+                  .find({ groupId: groupId })
+                  .skip(skip)
+                  .limit(limit)
+                  .exec()
+              let admissionData = await StudentsAdmissionModel.find({
+                  groupId: groupId,
+              })
+                  .skip(skip)
+                  .limit(limit)
+                  .exec()
+              let feesData = await this.model
+                  .find({ groupId: groupId })
+                  .skip(skip)
+                  .limit(limit)
+                  .exec();
 
-                let courseData = await courseModel
-                    .find({ groupId: groupId })
-                    .skip(skip)
-                    .limit(limit)
-                    .exec();
-                let admissionData = await StudentsAdmissionModel.find({
-                    groupId: groupId,
-                })
-                    .skip(skip)
-                    .limit(limit)
-                    .exec()
-                let feesData = await this.model
-                    .find({ groupId: groupId })
-                    .skip(skip)
-                    .limit(limit)
-                    .exec();
+          console.log(criteria.currentDate, criteria.currentDate);
+          const currentDateValue = criteria.currentDate
+              ? criteria.currentDate
+              : null;
+          console.log(currentDateValue);
+          const currentDateObj = currentDateValue
+              ? new Date(currentDateValue)
+              : null;
 
-            console.log(criteria.currentDate, criteria.currentDate);
-            const currentDateValue = criteria.currentDate
-                ? criteria.currentDate
-                : null;
-            console.log(currentDateValue);
-            const currentDateObj = currentDateValue
-                ? new Date(currentDateValue)
-                : null;
+          if (currentDateObj) {
+              const year = currentDateObj.getFullYear();
+              const month = String(currentDateObj.getMonth() + 1).padStart(
+                  2,
+                  "0"
+              );
+              const day = String(currentDateObj.getDate()).padStart(2, "0");
+              const formattedDate = `${year}/${month}/${day}`;
 
-            if (currentDateObj) {
-                const year = currentDateObj.getFullYear();
-                const month = String(currentDateObj.getMonth() + 1).padStart(
-                    2,
-                    "0"
-                );
-                const day = String(currentDateObj.getDate()).padStart(2, "0");
-                const formattedDate = `${year}/${month}/${day}`;
+              feesData = feesData.filter(
+                  (fee) => fee.currentDate === formattedDate
+              );
+          }
+          if (criteria.month) {
+              query.month = criteria.month;
+              const month = query.month.padStart(2, '0'); // Ensure month is zero-padded
+              feesData = feesData.filter(
+                  (data) => {
+                      const currentDate = new Date(data.currentDate);
+                      const dataMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
+                      return dataMonth === month;
+                  }
+              );
+          }
+          
 
-                feesData = feesData.filter(
-                    (fee) => fee.currentDate === formattedDate
-                );
-            }
-            if (criteria.month) {
-                query.month = criteria.month;
-                const month = query.month.padStart(2, '0'); // Ensure month is zero-padded
-                feesData = feesData.filter(
-                    (data) => {
-                        const currentDate = new Date(data.currentDate);
-                        const dataMonth = String(currentDate.getMonth() + 1).padStart(2, '0');
-                        return dataMonth === month;
-                    }
-                );
-            }
-            
+          if (criteria.academicYear) {
+              query.academicYear = criteria.academicYear;
+              feesData = feesData.filter(
+                  (data) => data.academicYear === query.academicYear
+              );
+          }
 
-            if (criteria.academicYear) {
-                query.academicYear = criteria.academicYear;
-                feesData = feesData.filter(
-                    (data) => data.academicYear === query.academicYear
-                );
-            }
-
-            if (criteria.location) {
-                query.location = criteria.location;
-                admissionData = admissionData.filter(
-                    (data) => data.location == query.location
-                );
-            }
-            console.log("ssssssssssssssssssss",admissionData);
-            if (criteria.department) {
-                query.department = criteria.department;
-                admissionData = admissionData.filter((data) => {
-                  if (data.courseDetails && data.courseDetails.length > 0) {
-                        let matchingdepartment = data.courseDetails.some(
-                            (departments) => departments.department_id  && departments.department_id.toString()=== query.department.toString()
-                        );
-                        return matchingdepartment
-                    }
-                    return false;
-                });
-            }
-            if (criteria.feesTemplateId) {
-                query.feesTemplateId = criteria.feesTemplateId;
-                admissionData = admissionData.filter((data) => {
-                  if (data.feesDetails && data.feesDetails.length > 0) {
-                        let matchingfeesTemplateId = data.feesDetails.some(
-                            (feesTemplate) => feesTemplate.feesTemplateId  && feesTemplate.feesTemplateId.toString()=== query.feesTemplateId.toString()
-                        );
-                        return matchingfeesTemplateId
-                    }
-                    return false;
-                });
-            }
-            if (criteria.course) {
-              query.course = criteria.course;
+          if (criteria.location) {
+              query.location = criteria.location;
+              admissionData = admissionData.filter(
+                  (data) => data.location == query.location
+              );
+          }
+          console.log("ssssssssssssssssssss",admissionData);
+          if (criteria.department) {
+              query.department = criteria.department;
               admissionData = admissionData.filter((data) => {
-                  if (data.courseDetails && data.courseDetails.length > 0) {
-                      const matchingCourses = data.courseDetails.some(
-                          (course) => course.course_id && course.course_id.toString() === query.course.toString()
+                if (data.courseDetails && data.courseDetails.length > 0) {
+                      let matchingdepartment = data.courseDetails.some(
+                          (departments) => departments.department_id  && departments.department_id.toString()=== query.department.toString()
                       );
-                      console.log("matchingCourses", matchingCourses);
-                      return matchingCourses;
+                      return matchingdepartment
                   }
                   return false;
               });
           }
-          
-            console.log("qqqqqqqqqqqqqqq",admissionData);
-
-            if (criteria.class) {
-                query.class = criteria.class;
-                admissionData = admissionData.filter((data) => {
-                  if (data.courseDetails && data.courseDetails.length > 0) {
-                        let matchingclasses = data.courseDetails.some(
-                            (classes) => classes.class_id  && classes.class_id.toString()=== query.class.toString()
-                        );
-                        return matchingclasses
-                    }
-                    return false;
-                });
-            }
-
-            if (criteria.division) {
-                query.division = criteria.division;
-                admissionData = admissionData.filter((data) => {
-                  if (data.courseDetails && data.courseDetails.length > 0) {
-                        let matchingdivision = data.courseDetails.some(
-                            (divisions) =>
-                                divisions.division_id   && divisions.division_id.toString()=== query.division.toString()
-                        );
-                        return matchingdivision
-                    }
-                    return false;
-                });
-            }
-
-            let coursePayments = {};
-            courseData.forEach((course) => {
-                coursePayments[course.CourseName] = {
-                    totalPaidAmount: 0,
-                    totalRemainingAmount: 0,
-                };
-            });
-
-            admissionData.forEach((admission) => {
-                if (
-                    admission.courseDetails &&
-                    admission.courseDetails.length > 0
-                ) {
-                    admission.courseDetails.forEach((courseDetail) => {
-                        const courseId = courseDetail.course_id;
-                        const courseExists = courseData.find(
-                            (course) => course.courseId === courseId
-                        );
-
-                        if (courseExists) {
-                            const courseName = courseExists.CourseName;
-                            const paymentsForCourse = feesData.filter(
-                                (payment) =>
-                                    payment.addmissionId ===
-                                    admission.addmissionId
-                            );
-                            const paidAmountForCourse =
-                                paymentsForCourse.reduce(
-                                    (total, payment) =>
-                                        total +
-                                        parseFloat(payment.paidAmount || 0),
-                                    0
-                                );
-                            const remainingAmountForCourse =
-                                paymentsForCourse.reduce(
-                                    (total, payment) =>
-                                        total +
-                                        parseFloat(
-                                            payment.remainingAmount || 0
-                                        ),
-                                    0
-                                );
-
-                            coursePayments[courseName].totalPaidAmount +=
-                                paidAmountForCourse;
-                            coursePayments[courseName].totalRemainingAmount +=
-                                remainingAmountForCourse;
-                        }
-                    });
+          if (criteria.feesTemplateId) {
+              query.feesTemplateId = criteria.feesTemplateId;
+              admissionData = admissionData.filter((data) => {
+                if (data.feesDetails && data.feesDetails.length > 0) {
+                      let matchingfeesTemplateId = data.feesDetails.some(
+                          (feesTemplate) => feesTemplate.feesTemplateId  && feesTemplate.feesTemplateId.toString()=== query.feesTemplateId.toString()
+                      );
+                      return matchingfeesTemplateId
+                  }
+                  return false;
+              });
+          }
+          if (criteria.course) {
+            query.course = criteria.course;
+            admissionData = admissionData.filter((data) => {
+                if (data.courseDetails && data.courseDetails.length > 0) {
+                    const matchingCourses = data.courseDetails.some(
+                        (course) => course.course_id && course.course_id.toString() === query.course.toString()
+                    );
+                    console.log("matchingCourses", matchingCourses);
+                    return matchingCourses;
                 }
+                return false;
             });
-            let formattedCoursePayments = Object.keys(coursePayments).map(
-                (courseName) => {
-                    return {
-                        name: courseName,
-                        totalPaidAmount:
-                            coursePayments[courseName].totalPaidAmount,
-                        totalRemainingAmount:
-                            coursePayments[courseName].totalRemainingAmount,
-                    };
-                }
-            );
-            let course_id;
-            let class_id;
-            let division_id;
-            const servicesWithData = await Promise.all(
-                feesData?.map(async (service) => {
-                    let additionalData = {};
-                    let feesAdditionalData = {};
-
-                    if (service.addmissionId) {
-                        const matchingAdmission = admissionData.find(
-                            (admission) =>
-                                admission.addmissionId === service.addmissionId
-                        );
-
-                        if (matchingAdmission) {
-                            await Promise.all(
-                                matchingAdmission.courseDetails.map(
-                                    async (admission) => {
-                                        if (admission.course_id) {
-                                            course_id =
-                                                await courseModel.findOne({
-                                                    courseId:
-                                                        admission.course_id,
-                                                });
-                                            admission.course_id = course_id;
-                                        }
-                                        if (admission.class_id) {
-                                            class_id = await ClassModel.findOne(
-                                                {
-                                                    feesTemplateId:
-                                                        admission.class_id,
-                                                }
-                                            );
-                                            admission.class_id = class_id;
-                                        }
-                                        if (admission.division_id) {
-                                            division_id =
-                                                await DivisionModel.findOne({
-                                                    divisionId:
-                                                        admission.division_id,
-                                                });
-                                            admission.division_id = division_id;
-                                        }
-                                    }
-                                )
-                            );
-                            const installmentLengths = matchingAdmission.feesDetails.map(
-                              (item) => (item.installment ? item.installment.length : 0)
-                          );
-                          const installments = installmentLengths.length > 0 ? installmentLengths[0] : 0;
-                          console.log(
-                              "Lengths of installment arrays:",
-                              installmentLengths
-                          );
-                          console.log(matchingAdmission.feesDetails);
-                          
-                          
-                            return {
-                                candidateName: matchingAdmission.name,
-                                className: class_id?.name,
-                                phoneNumber: matchingAdmission.phoneNumber,
-                                divisionName: division_id?.Name,
-                                courseName: course_id?.CourseName,
-                                courseFees: course_id?.Fees,
-                                installments: installments,
-                                paidAmount: service.paidAmount,
-                                remainingAmount: service.remainingAmount,
-                                feesPaymentId: service.feesPaymentId,
-                               addmissionId:service.addmissionId,
-                               empId: service.empId,
-                                groupId: service.groupId,
-                                // courseFee:course_id.Fees,
-                            };
-                        }
-
-                        feesAdditionalData.addmissionId =
-                            matchingAdmission || {};
-                    }
-
-                    additionalData.addmissionId = feesAdditionalData;
-
-                    if (
-                        Object.keys(feesAdditionalData.addmissionId).length ===
-                        0
-                    ) {
-                        return {};
-                    }
-
-                    return { ...service._doc, ...additionalData.addmissionId };
-                })
-            );
-
-            const filteredServicesWithData = servicesWithData.filter(
-                (service) => Object.keys(service).length !== 0
-            );
-
-            let response = {
-                coursePayments: formattedCoursePayments,
-                servicesWithData: filteredServicesWithData,
-            };
-
-            return response;
-        } catch (error) {
-            console.error("Error occurred:", error);
-            throw error;
         }
-        });
-    }
+        
+          console.log("qqqqqqqqqqqqqqq",admissionData);
+
+          if (criteria.class) {
+              query.class = criteria.class;
+              admissionData = admissionData.filter((data) => {
+                if (data.courseDetails && data.courseDetails.length > 0) {
+                      let matchingclasses = data.courseDetails.some(
+                          (classes) => classes.class_id  && classes.class_id.toString()=== query.class.toString()
+                      );
+                      return matchingclasses
+                  }
+                  return false;
+              });
+          }
+
+          if (criteria.division) {
+              query.division = criteria.division;
+              admissionData = admissionData.filter((data) => {
+                if (data.courseDetails && data.courseDetails.length > 0) {
+                      let matchingdivision = data.courseDetails.some(
+                          (divisions) =>
+                              divisions.division_id   && divisions.division_id.toString()=== query.division.toString()
+                      );
+                      return matchingdivision
+                  }
+                  return false;
+              });
+          }
+
+          let coursePayments = {};
+          courseData.forEach((course) => {
+              coursePayments[course.CourseName] = {
+                  totalPaidAmount: 0,
+                  totalRemainingAmount: 0,
+              };
+          });
+
+          admissionData.forEach((admission) => {
+              if (
+                  admission.courseDetails &&
+                  admission.courseDetails.length > 0
+              ) {
+                  admission.courseDetails.forEach((courseDetail) => {
+                      const courseId = courseDetail.course_id;
+                      const courseExists = courseData.find(
+                          (course) => course.courseId === courseId
+                      );
+
+                      if (courseExists) {
+                          const courseName = courseExists.CourseName;
+                          const paymentsForCourse = feesData.filter(
+                              (payment) =>
+                                  payment.addmissionId ===
+                                  admission.addmissionId
+                          );
+                          const paidAmountForCourse =
+                              paymentsForCourse.reduce(
+                                  (total, payment) =>
+                                      total +
+                                      parseFloat(payment.paidAmount || 0),
+                                  0
+                              );
+                          const remainingAmountForCourse =
+                              paymentsForCourse.reduce(
+                                  (total, payment) =>
+                                      total +
+                                      parseFloat(
+                                          payment.remainingAmount || 0
+                                      ),
+                                  0
+                              );
+
+                          coursePayments[courseName].totalPaidAmount +=
+                              paidAmountForCourse;
+                          coursePayments[courseName].totalRemainingAmount +=
+                              remainingAmountForCourse;
+                      }
+                  });
+              }
+          });
+          let formattedCoursePayments = Object.keys(coursePayments).map(
+              (courseName) => {
+                  return {
+                      name: courseName,
+                      totalPaidAmount:
+                          coursePayments[courseName].totalPaidAmount,
+                      totalRemainingAmount:
+                          coursePayments[courseName].totalRemainingAmount,
+                  };
+              }
+          );
+          let course_id;
+          let class_id;
+          let division_id;
+          const servicesWithData = await Promise.all(
+              feesData?.map(async (service) => {
+                  let additionalData = {};
+                  let feesAdditionalData = {};
+
+                  if (service.addmissionId) {
+                      const matchingAdmission = admissionData.find(
+                          (admission) =>
+                              admission.addmissionId === service.addmissionId
+                      );
+
+                      if (matchingAdmission) {
+                          await Promise.all(
+                              matchingAdmission.courseDetails.map(
+                                  async (admission) => {
+                                      if (admission.course_id) {
+                                          course_id =
+                                              await courseModel.findOne({
+                                                  courseId:
+                                                      admission.course_id,
+                                              });
+                                          admission.course_id = course_id;
+                                      }
+                                      if (admission.class_id) {
+                                          class_id = await ClassModel.findOne(
+                                              {
+                                                  feesTemplateId:
+                                                      admission.class_id,
+                                              }
+                                          );
+                                          admission.class_id = class_id;
+                                      }
+                                      if (admission.division_id) {
+                                          division_id =
+                                              await DivisionModel.findOne({
+                                                  divisionId:
+                                                      admission.division_id,
+                                              });
+                                          admission.division_id = division_id;
+                                      }
+                                  }
+                              )
+                          );
+                          const installmentLengths = matchingAdmission.feesDetails.map(
+                            (item) => (item.installment ? item.installment.length : 0)
+                        );
+                        const installments = installmentLengths.length > 0 ? installmentLengths[0] : 0;
+                        console.log(
+                            "Lengths of installment arrays:",
+                            installmentLengths
+                        );
+                        console.log(matchingAdmission.feesDetails);
+                        
+                        
+                          return {
+                              candidateName: matchingAdmission.name,
+                              className: class_id?.name,
+                              phoneNumber: matchingAdmission.phoneNumber,
+                              divisionName: division_id?.Name,
+                              courseName: course_id?.CourseName,
+                              courseFees: course_id?.Fees,
+                              installments: installments,
+                              paidAmount: service.paidAmount,
+                              remainingAmount: service.remainingAmount,
+                              feesPaymentId: service.feesPaymentId,
+                              groupId: service.groupId,
+                              // courseFee:course_id.Fees,
+                          };
+                      }
+
+                      feesAdditionalData.addmissionId =
+                          matchingAdmission || {};
+                  }
+
+                  additionalData.addmissionId = feesAdditionalData;
+
+                  if (
+                      Object.keys(feesAdditionalData.addmissionId).length ===
+                      0
+                  ) {
+                      return {};
+                  }
+
+                  return { ...service._doc, ...additionalData.addmissionId };
+              })
+          );
+
+          const filteredServicesWithData = servicesWithData.filter(
+              (service) => Object.keys(service).length !== 0
+          );
+
+          let response = {
+              coursePayments: formattedCoursePayments,
+              servicesWithData: filteredServicesWithData,
+              totalItemsCount: await this.model.countDocuments(filteredServicesWithData,formattedCoursePayments)
+          };
+
+          return response;
+      } catch (error) {
+          console.error("Error occurred:", error);
+          throw error;
+      }
+      });
+  }
 
     async getByAdmissionAndEmpId(addmissionId, empId) {
         return this.execute(() => {
