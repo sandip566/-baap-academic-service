@@ -1,5 +1,6 @@
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class Service extends BaseService {
     constructor(dbModel, entityName) {
@@ -13,6 +14,12 @@ class Service extends BaseService {
         criteria.pageSize = 10;
         if (criteria.feesTemplateId) query.feesTemplateId = criteria.feesTemplateId;
         return this.preparePaginationAndReturnData(query, criteria);
+    }
+    async getByfeesTemplateId(feesTemplateId) {
+        const result = await this.model.findOne({ feesTemplateId });
+        return new ServiceResponse({
+            data: result,
+        });
     }
 
     async deletefeesTemplateById(feesTemplateId, groupId) {

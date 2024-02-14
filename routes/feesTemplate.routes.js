@@ -19,13 +19,48 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+
+    const feesTemplateId = req.params.feesTemplateId;
+    const installmentNo = parseInt(req.params.installmentNo);
+
+    try {
+        const installmentDetails = [];
+        const serviceResponse = await service.getByfeesTemplateId(feesTemplateId);
+
+        if (serviceResponse.data) {
+            const totalFees = serviceResponse.data.totalFees;
+            const installmentAmount = totalFees / installmentNo;
+
+            for (let i = 1; i <= installmentNo; i++) {
+                installmentDetails.push({
+                    installmentNo: i,
+                    amount: installmentAmount,
+                });
+            }
+            serviceResponse.data.installmentDetails = installmentDetails;
+        }
+        let response = {
+            status: "success",
+            data: installmentDetails
+        }
+        requestResponsehelper.sendResponse(res, response);
+    } catch (error) {
+        console.error("Error occurred:", error);
+        requestResponsehelper.sendResponse(res, { status: "Failed", message: "An error occurred while processing the request." });
+    }
+});
+
 
 router.get("/all", TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10
+        pageSize: req.query.pageNumber
     };
-    const { pageNumber, pageSize, ...query } = req.query;
+    const { pageNumber, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

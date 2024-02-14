@@ -41,6 +41,7 @@ router.post(
 
       let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
 
+
       const serviceResponse = await service.create(req.body);
 
       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
@@ -84,7 +85,6 @@ router.post(
     }
   }
 );
-
 
 // router.post(
 //   "/",
@@ -161,7 +161,15 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
   if (ValidationHelper.requestValidationErrors(req, res)) {
     return;
   }
-  const serviceResponse = await service.getRecoveryData(req.params.groupId);
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10
+  const skip = (page - 1) * limit;
+  const serviceResponse = await service.getRecoveryData(
+    req.params.groupId,
+    skip,
+    limit,
+    page
+  );
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
@@ -177,11 +185,17 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
     division: req.query.division,
     month: req.query.month,
   };
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10
+  // const skip = (page - 1) * limit;
+  const skip = (page - 1) * limit;
   const serviceResponse = await service.getFeesStatData(
     groupId,
-    criteria
+    criteria,
+    skip,
+    page,
+    limit
   );
-  // console.log(serviceResponse);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 

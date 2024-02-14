@@ -12,14 +12,20 @@ const DocumentSchema = new mongoose.Schema(
         rollId: {
             type: Number
         },
-        name: {
+        title: {
             type: String,
             required: false,
         },
         description: {
             type: String,
             required: false
-        }
+        },
+        compulsory: {
+            type: Boolean
+        },
+        category: {
+            type: String
+        },
     },
     { strict: false, timestamps: true }
 );

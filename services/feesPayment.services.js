@@ -10,8 +10,7 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
-    async getRecoveryData(groupId) {
+    async getRecoveryData(groupId,skip,limit) {
         return this.execute(async () => {
             let data = await this.model.find({ groupId: groupId });
             const totalPaidAmount = data.reduce((total, item) => {
@@ -47,7 +46,8 @@ class feesPaymentService extends BaseService {
                     additionalData.addmissionId = feesAdditionalData;
                     return { ...service._doc, ...additionalData.addmissionId };
                 })
-            );
+            ) 
+
             let response = {
                 totalPaidAmount: totalPaidAmount,
                 totalRemainingAmount: totalRemainingAmount,
@@ -58,18 +58,29 @@ class feesPaymentService extends BaseService {
         });
     }
 
-    async getFeesStatData(groupId, criteria) {
+    async getFeesStatData(groupId,criteria,skip,limit) {
         return this.execute(async () => {
             try {
                 const query = {
                     groupId: groupId,
                 };
 
-                let courseData = await courseModel.find({ groupId: groupId });
+                let courseData = await courseModel
+                    .find({ groupId: groupId })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec();
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
-                });
-                let feesData = await this.model.find({ groupId: groupId });
+                })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec()
+                let feesData = await this.model
+                    .find({ groupId: groupId })
+                    .skip(skip)
+                    .limit(limit)
+                    .exec();
 
                 console.log(criteria.currentDate, criteria.currentDate);
                 const currentDateValue = criteria.currentDate
@@ -263,64 +274,66 @@ class feesPaymentService extends BaseService {
                                     admission.addmissionId === service.addmissionId
                             );
 
-                            if (matchingAdmission) {
-                                await Promise.all(
-                                    matchingAdmission.courseDetails.map(
-                                        async (admission) => {
-                                            if (admission.course_id) {
-                                                course_id =
-                                                    await courseModel.findOne({
-                                                        courseId:
-                                                            admission.course_id,
-                                                    });
-                                                admission.course_id = course_id;
-                                            }
-                                            if (admission.class_id) {
-                                                class_id = await ClassModel.findOne(
-                                                    {
-                                                        feesTemplateId:
-                                                            admission.class_id,
-                                                    }
-                                                );
-                                                admission.class_id = class_id;
-                                            }
-                                            if (admission.division_id) {
-                                                division_id =
-                                                    await DivisionModel.findOne({
-                                                        divisionId:
-                                                            admission.division_id,
-                                                    });
-                                                admission.division_id = division_id;
-                                            }
+                        if (matchingAdmission) {
+                            await Promise.all(
+                                matchingAdmission.courseDetails.map(
+                                    async (admission) => {
+                                        if (admission.course_id) {
+                                            course_id =
+                                                await courseModel.findOne({
+                                                    courseId:
+                                                        admission.course_id,
+                                                });
+                                            admission.course_id = course_id;
                                         }
-                                    )
-                                );
-                                const installmentLengths = matchingAdmission.feesDetails.map(
-                                    (item) => (item.installment ? item.installment.length : 0)
-                                );
-                                const installments = installmentLengths.length > 0 ? installmentLengths[0] : 0;
-                                console.log(
-                                    "Lengths of installment arrays:",
-                                    installmentLengths
-                                );
-                                console.log(matchingAdmission.feesDetails);
-
-
-                                return {
-                                    candidateName: matchingAdmission.name,
-                                    className: class_id?.name,
-                                    phoneNumber: matchingAdmission.phoneNumber,
-                                    divisionName: division_id?.Name,
-                                    courseName: course_id?.CourseName,
-                                    courseFees: course_id?.Fees,
-                                    installments: installments,
-                                    paidAmount: service.paidAmount,
-                                    remainingAmount: service.remainingAmount,
-                                    feesPaymentId: service.feesPaymentId,
-                                    groupId: service.groupId,
-                                    // courseFee:course_id.Fees,
-                                };
-                            }
+                                        if (admission.class_id) {
+                                            class_id = await ClassModel.findOne(
+                                                {
+                                                    feesTemplateId:
+                                                        admission.class_id,
+                                                }
+                                            );
+                                            admission.class_id = class_id;
+                                        }
+                                        if (admission.division_id) {
+                                            division_id =
+                                                await DivisionModel.findOne({
+                                                    divisionId:
+                                                        admission.division_id,
+                                                });
+                                            admission.division_id = division_id;
+                                        }
+                                    }
+                                )
+                            );
+                            const installmentLengths = matchingAdmission.feesDetails.map(
+                              (item) => (item.installment ? item.installment.length : 0)
+                          );
+                          const installments = installmentLengths.length > 0 ? installmentLengths[0] : 0;
+                          console.log(
+                              "Lengths of installment arrays:",
+                              installmentLengths
+                          );
+                          console.log(matchingAdmission.feesDetails);
+                          
+                          
+                            return {
+                                candidateName: matchingAdmission.name,
+                                className: class_id?.name,
+                                phoneNumber: matchingAdmission.phoneNumber,
+                                divisionName: division_id?.Name,
+                                courseName: course_id?.CourseName,
+                                courseFees: course_id?.Fees,
+                                installments: installments,
+                                paidAmount: service.paidAmount,
+                                remainingAmount: service.remainingAmount,
+                                feesPaymentId: service.feesPaymentId,
+                               addmissionId:service.addmissionId,
+                               empId: service.empId,
+                                groupId: service.groupId,
+                                // courseFee:course_id.Fees,
+                            };
+                        }
 
                             feesAdditionalData.addmissionId =
                                 matchingAdmission || {};
