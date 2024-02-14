@@ -49,19 +49,35 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async updateFeesInstallmentById(installmentId, groupId, newData) {
+    // async updateFeesInstallmentById(installmentId, newData) {
+    //     try {
+    //         const updateFee = await feesInstallmentModel.findOneAndUpdate(
+    //             { installmentId: installmentId},
+                
+    //             newData,
+    //             { new: true }
+            
+    //         );
+    //         console.log("updateFeeeeeeeeeeeeeeeeeeeeeeeeeeeee", updateFee);
+    //         return updateFee;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
+    async updateFeesInstallmentById(installmentId, newFeesDetails) {
         try {
-            const updateFee = await feesInstallmentModel.findOneAndUpdate(
-                { installmentId: installmentId, groupId: groupId },
-                newData,
+            const updateResult = await feesInstallmentModel.findOneAndUpdate(
+                { installmentId: installmentId },
+                { feesDetails: newFeesDetails }, // Update only the feesDetails field
                 { new: true }
             );
-            return updateFee;
+           
+            return updateResult;
         } catch (error) {
             throw error;
         }
     }
-
+    
     async getStudentById(studentId) {
         try {
             const student = await Student.findOne({ _id: studentId });
