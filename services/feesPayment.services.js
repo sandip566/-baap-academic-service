@@ -51,7 +51,7 @@ class feesPaymentService extends BaseService {
 
                     return { ...service._doc, ...additionalData.addmissionId };
                 })
-            );
+            ) 
 
             let response = {
                 totalPaidAmount: totalPaidAmount,
