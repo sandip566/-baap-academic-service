@@ -16,6 +16,7 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
+        criteria.pageSize = 10;
         if (criteria.religionId) query.religionId = criteria.religionId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
