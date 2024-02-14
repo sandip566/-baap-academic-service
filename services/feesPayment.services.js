@@ -48,7 +48,7 @@ class feesPaymentService extends BaseService {
 
                     return { ...service._doc, ...additionalData.addmissionId };
                 })
-            );
+            ) 
 
             let response = {
                 totalPaidAmount: totalPaidAmount,
@@ -330,6 +330,8 @@ class feesPaymentService extends BaseService {
                                 paidAmount: service.paidAmount,
                                 remainingAmount: service.remainingAmount,
                                 feesPaymentId: service.feesPaymentId,
+                               addmissionId:service.addmissionId,
+                               empId: service.empId,
                                 groupId: service.groupId,
                                 // courseFee:course_id.Fees,
                             };

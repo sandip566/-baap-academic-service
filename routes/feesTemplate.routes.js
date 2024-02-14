@@ -18,6 +18,40 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    
+    const feesTemplateId = req.params.feesTemplateId;
+    const installmentNo = parseInt(req.params.installmentNo);
+
+    try {
+        const serviceResponse = await service.getByfeesTemplateId(feesTemplateId);
+
+        if (serviceResponse.data) {
+            const totalFees = serviceResponse.data.totalFees;
+            const installmentAmount = totalFees / installmentNo;
+            const installmentDetails = [];
+
+            for (let i = 1; i <= installmentNo; i++) {
+                installmentDetails.push({
+                    installmentNo: i,
+                    amount: installmentAmount,
+                });
+            }
+
+            serviceResponse.data.installmentDetails = installmentDetails;
+        }
+
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error("Error occurred:", error);
+        requestResponsehelper.sendResponse(res, { status: "Failed", message: "An error occurred while processing the request." });
+    }
+});
+
+
 
 router.get("/all",TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const pagination = {

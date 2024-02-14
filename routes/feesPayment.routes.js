@@ -42,6 +42,7 @@ router.post(
 
       let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
 
+      
       const serviceResponse = await service.create(req.body);
 
       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
