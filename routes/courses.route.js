@@ -4,19 +4,20 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/courses.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require('../dto/courses.dto')),
+    checkSchema(require('../dto/courses.dto')),TokenService.checkPermission(["EMC2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code);
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code,req.body.CourseName);
         console.log(existingRecord);
         if (existingRecord.data) {
            
-            return res.status(400).json({ error: "Code With The Same GroupId Already Exists." });
+            return res.status(404).json({ error: "Code with Same Name Already Exists." });
         }
         const courseId = +Date.now();
         req.body.courseId = courseId;
@@ -31,28 +32,28 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",TokenService.checkPermission(["EMC4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id",TokenService.checkPermission(["EMC1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/getByCourseId/:courseId", async (req, res, next) => {
+router.get("/getByCourseId/:courseId",TokenService.checkPermission(["EMC1"]), async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
     const serviceResponse = await service.getByCourseId(req.params.courseId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMC1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         courseId: req.query.courseId,
@@ -63,7 +64,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/courseId/:courseId", async (req, res) => {
+router.delete("/groupId/:groupId/courseId/:courseId",TokenService.checkPermission(["EMC4"]), async (req, res) => {
+   
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
@@ -84,7 +86,7 @@ router.delete("/groupId/:groupId/courseId/:courseId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/courseId/:courseId", async (req, res) => {
+router.put("/groupId/:groupId/courseId/:courseId",TokenService.checkPermission(["EMC3"]), async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
@@ -94,6 +96,7 @@ router.put("/groupId/:groupId/courseId/:courseId", async (req, res) => {
             groupId,
             newData
         );
+
         if (!updatecourse) {
             res.status(404).json({
                 error: "course data not found to update",

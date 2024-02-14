@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const feesInstallmentSchema = new mongoose.Schema(
     {
         groupId: {
@@ -9,10 +10,10 @@ const feesInstallmentSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        // userId: {
-        //     type:Number,
-        //     required: false
-        // },
+        studentId: {
+            type: Number,
+            required: false
+        },
         installmentId: {
             type: Number,
         },
@@ -26,10 +27,10 @@ const feesInstallmentSchema = new mongoose.Schema(
         // installmentAmount: {
         //     type: Number,
         // },
-        // isPaid: {
-        //     type: Boolean,
-        //     default: false
-        // },
+        isPaid: {
+            type: Boolean,
+            default: false
+        },
         installmentNo: {
             type: Number,
             require: false

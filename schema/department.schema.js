@@ -13,6 +13,12 @@ const departmentSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        departmentHead: {
+            code: {
+                type: String,
+                required: false
+            }
+        }
     },
     { strict: false, timestamps: true }
 );

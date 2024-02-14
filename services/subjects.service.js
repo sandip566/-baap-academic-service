@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const SubjectModel = require("../schema/subjects.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -13,6 +14,14 @@ class SubjectService extends BaseService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async getBySubjectIdAndGroupId(groupId, name) {
+
+        const result = await this.model.findOne({ groupId: groupId, name: name });
+        return new ServiceResponse({
+            data: result
+        })
     }
 
     async deleteBySubjectId(subjectId, groupId) {

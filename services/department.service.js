@@ -15,13 +15,27 @@ class DepartmentService extends BaseService {
         if (criteria.departmentName) query.departmentName = new RegExp(criteria.departmentName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    async getByCourseIdAndGroupId(groupId,departmentName,departmentHead) {
-        let code=departmentHead.code
-        const result = await this.model.findOne({ groupId:groupId,departmentName:departmentName,code:code });
+
+    async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
+        const codeValue = departmentHead.code instanceof Object ? departmentHead.code.code : departmentHead.code;
+        const result = await this.model.findOne({
+            groupId: groupId,
+            'departmentHead.code': codeValue,
+        });
         return new ServiceResponse({
             data: result,
         });
     }
+
+    // async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
+    //     let code = departmentHead.code;
+    //     const result = await this.model.findOne({ groupId: groupId, departmentName: departmentName,code: code});
+    //     // const codeResult = await this.model.findOne({ groupId: groupId, code: code });
+    //     return new ServiceResponse({
+    //         data: result,
+    //         // code: codeResult
+    //     });
+    // }
     async deleteByDataId(departmentId, groupId) {
         try {
             return await DepartmentModel.deleteOne({ departmentId: departmentId, groupId: groupId });

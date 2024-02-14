@@ -8,7 +8,7 @@ const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require("../dto/academicyear.dto")),
+    checkSchema(require("../dto/academicyear.dto")), TokenService.checkPermission(["EMA2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -16,14 +16,16 @@ router.post(
         const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId, req.body.year);
         console.log(existingRecord);
         if (existingRecord.data) {
-            return res.status(400).json({ error: "Data With The Same GroupId Already Exists." });
+
+            return res.status(409).json({ error: "Data With The Same GroupId Already Exists." });
         }
         if (req.body.startDate > req.body.endDate) {
-            return res.status(400).json({ error: "Start Year must be greater than End Year." });
+            return res.status(404).json({ error: "Start Year must be greater than End Year." });
         }
         const academicYearId = +Date.now();
         req.body.academicYearId = academicYearId;
         const serviceResponse = await service.create(req.body);
+        console.log(serviceResponse);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
@@ -33,13 +35,13 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.delete("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["EMA4"]), async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const academicYearId = req.params.academicYearId;
         const Data = await service.deleteByDataId(groupId, academicYearId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(404).json({ warning: 'Data not found to delete' });
         } else {
             res.status(201).json(Data);
         }
@@ -48,8 +50,7 @@ router.delete("/groupId/:groupId/academicYearId/:academicYearId", TokenService.c
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMA1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         //    classId:req.query.classId,
@@ -59,15 +60,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-router.put("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.put("/groupId/:groupId/academicYearId/:academicYearId", TokenService.checkPermission(["EMA3"]), async (req, res) => {
     try {
         const academicYearId = req.params.academicYearId;
         const groupId = req.params.groupId;
         const newData = req.body;
         const Data = await service.updateDataById(academicYearId, groupId, newData);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to update' });
+            res.status(404).json({ warning: 'Data not found to update' });
         } else {
             res.status(201).json(Data);
         }
@@ -77,27 +77,27 @@ router.put("/groupId/:groupId/academicYearId/:academicYearId", TokenService.chec
     }
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", TokenService.checkPermission(["EMA1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/academicYearId/:id", async (req, res) => {
+router.get("/academicYearId/:id", TokenService.checkPermission(["EMA1"]), async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["EMA4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["EMA3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getByYear/:year", TokenService.checkPermission(["OSR"]), async (req, res) => {
+router.get("/getByYear/:year", TokenService.checkPermission(["EMA1"]), async (req, res) => {
     try {
         const serviceResponse = await service.getByYear(req.params.year);
         requestResponsehelper.sendResponse(res, serviceResponse);

@@ -4,13 +4,20 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/religion.services");
 const requestResponseHelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const validationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const TokenService = require("../services/token.services");
 
 router.post(
   "/",
-  checkSchema(require("../dto/religion.dto")),
+  checkSchema(require("../dto/religion.dto")), TokenService.checkPermission(["EMR2"]),
   async (req, res, next) => {
     if (validationHelper.requestValidationErrors(req, res)) {
       return;
+    }
+    const existingRecord = await service.getByCourseIdAndGroupId(req.body.religion);
+    console.log(existingRecord);
+    if (existingRecord.data) {
+
+      return res.status(409).json({ error: "Code With The Same Name Already Exists." });
     }
     const religionId = +Date.now();
     req.body.religionId = religionId;
@@ -20,15 +27,21 @@ router.post(
 );
 
 router.get("/all", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
+  const pagination = {
+    pageNumber: req.query.pageNumber || 1,
+    pageSize: 10
+  };
+  const { pageNumber, pageSize, ...query } = req.query;
+  const serviceResponse = await service.getAllByCriteria(query, pagination);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMR1"]), async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     religionId: req.query.religionId,
-    name: req.query.name
+    name: req.query.name,
+    pageNumber: parseInt(req.query.pageNumber) || 1
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,
@@ -37,7 +50,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/religionId/:religionId", async (req, res) => {
+router.delete("/religionId/:religionId", TokenService.checkPermission(["EMR4"]), async (req, res) => {
   try {
     const religionId = req.params.religionId;
     const data = await service.deleteReligionById({ religionId });
@@ -52,7 +65,7 @@ router.delete("/religionId/:religionId", async (req, res) => {
   }
 });
 
-router.put("/religionId/:religionId", async (req, res) => {
+router.put("/religionId/:religionId", TokenService.checkPermission(["EMR3"]), async (req, res) => {
   try {
     const religionId = req.params.religionId;
     const newData = req.body;
@@ -68,12 +81,12 @@ router.put("/religionId/:religionId", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["EMR4"]), async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["EMR3"]), async (req, res) => {
   const serviceResponse = await service.updateById(req.params.id, req.body);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });

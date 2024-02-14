@@ -47,8 +47,6 @@ router.get("/getAllNotice/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         noticeBoardId: req.query.noticeBoardId,
-        studentId: req.query.studentId,
-        memberId: req.query.memberId,
         title: req.query.title,
     };
     const serviceResponse = await service.getAllNoticeByGroupId(

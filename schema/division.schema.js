@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+
 const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
@@ -21,7 +22,7 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-     
+
     },
     { strict: false, timestamps: true }
 );

@@ -12,28 +12,23 @@ class CourseService extends BaseService {
             const query = {
                 groupId: groupId,
             };
-    
             if (criteria.CourseName)
                 query.CourseName = new RegExp(criteria.CourseName, "i");
             if (criteria.University)
                 query.University = new RegExp(criteria.University, "i");
             if (criteria.courseId) query.courseId = criteria.courseId;
-    
             const services = await courseModel.find(query);
             // console.log(services);
-    
+
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
                     let additionalData = {};
                     // console.log(additionalData);
                     let departmentDetails;
-    
                     if (service.Department) {
-                       
                         departmentDetails = await DepartmentModel.findOne({
                             departmentId: service.Department,
                         });
-    
                         if (departmentDetails) {
                             additionalData.Department = departmentDetails.departmentName
                         }
@@ -44,7 +39,6 @@ class CourseService extends BaseService {
                     };
                 })
             );
-    
             return {
                 status: "Success",
                 data: {
@@ -60,19 +54,21 @@ class CourseService extends BaseService {
             };
         }
     }
-    
+
     async getByCourseId(courseId) {
         const result = await this.model.findOne({ courseId });
         return new ServiceResponse({
             data: result,
         });
     }
-    async getByCourseIdAndGroupId(groupId,Code) {
-        const result = await this.model.findOne({ groupId:groupId,Code:Code });
+
+    async getByCourseIdAndGroupId(groupId, Code, name) {
+        const result = await this.model.findOne({ groupId: groupId, Code: Code, CourseName: name });
         return new ServiceResponse({
             data: result,
         });
     }
+
     async deleteCourseById(courseId, groupId) {
         try {
             return await courseModel.deleteOne(courseId, groupId);

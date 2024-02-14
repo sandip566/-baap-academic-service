@@ -11,8 +11,6 @@ class noticeBoardService extends BaseService {
             groupId: groupId,
         };
         if (criteria.noticeBoardId) query.noticeBoardId = criteria.noticeBoardId;
-        if (criteria.studentId) query.studentId = criteria.studentId;
-        if (criteria.memberId) query.memberId = criteria.memberId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
         return this.preparePaginationAndReturnData(query, criteria)
     }

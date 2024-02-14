@@ -6,7 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { default: mongoose } = require("mongoose");
 const feesInstallmentServices = require("../services/feesInstallment.services");
-
+const TokenService = require("../services/token.services");
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -25,6 +25,7 @@ router.post(
         }
     }
 );
+
 router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
@@ -49,7 +50,7 @@ router.post("/data/save", async (req, res, next) => {
         }
 
         if (req.body.addmissionId) {
-            const existingDocument = await service.getByaddmissionId(
+            const existingDocument = await service.getByAddmissionIdData(
                 req.body.addmissionId
             );
 
@@ -74,14 +75,11 @@ router.post("/data/save", async (req, res, next) => {
                 //               feesDetailsId: feesDetailsId,
                 //               feesDetails: feesDetailsData,
                 //           };
-                //       })
-
-
-               
+                //       })  
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-         
+
                     const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
                         const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
 
@@ -92,25 +90,25 @@ router.post("/data/save", async (req, res, next) => {
                                 installmentNo: uniqueInstallNo,
                             };
                         });
-                
-                      
+
+
                         return {
                             ...feesDetail,
                             installment: updatedInstallments,
                         };
                     });
-                
-                   
+
+
                     req.body.feesDetails = updatedFeesDetails;
-                
+
                     const feesinstallmentResponse = await feesInstallmentServices.updateUser(
                         req.body.addmissionId,
                         req.body
                     );
-                
+
                     console.log(feesinstallmentResponse);
                 }
-                
+
 
                 // //     : existingDocument.data?.feesDetails || [];
                 // if(req.body.feesDetails){
@@ -134,19 +132,19 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-                console.log(req.body.feesDetails);
+                    console.log(req.body.feesDetails);
                     const feesinstallment = await feesInstallmentServices.create(req.body);
                     console.log(feesinstallment);
-                
-                 
+
+
                     const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
                         ...detail,
-                        installNo: index + 1, 
+                        installNo: index + 1,
                     }));
-                console.log(updatedInstallments);
+                    console.log(updatedInstallments);
                     req.body.feesDetails = updatedInstallments;
                 }
-                
+
                 // if(req.body.feesDetails){
                 // const installmentId = +Date.now();
                 // req.body.installmentId = installmentId;
@@ -242,6 +240,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             groupId,
             criteria
         );
+
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);
@@ -261,7 +260,7 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             addmissionId: req.query.addmissionId,
             empId: req.query.empId
         };
-        
+
         const serviceResponse = await service.getfeesPayment(
             groupId,
             criteria

@@ -1,28 +1,23 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/books.services");
+const service = require("../services/busroutes.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
     "/",
-    checkSchema(require("../dto/books.dto")),
+    checkSchema(require("../dto/busroutes.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const bookId = +Date.now();
-        req.body.bookId = bookId;
+        const routeId = +Date.now();
+        req.body.routeId = routeId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
-router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -38,52 +33,66 @@ router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
+router.get("/all/busRoutes", async (req, res) => {
+    const pagination = {
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: 10
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        title: req.query.title,
-        author: req.query.author,
-        availableCount: req.query.availableCount,
+        routeId: req.query.routeId,
+        routeName: req.query.routeName,
+        schedule: req.query.schedule,
+        pageNumber: parseInt(req.query.pageNumber) || 1
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
+
+router.delete("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
-        const bookId = req.params.bookId;
+        const routeId = req.params.routeId;
         const groupId = req.params.groupId;
-        const bookData = await service.deleteBookById({
-            bookId: bookId,
+        const Data = await service.deleteRoute({
+            routeId: routeId,
             groupId: groupId,
         });
-        if (!bookData) {
+        if (!Data) {
             res.status(404).json({
-                error: "book data not found to delete",
+                error: "route data not found to delete",
             });
         } else {
-            res.status(201).json(bookData);
+            res.status(201).json(Data);
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
+
+router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
-        const bookId = req.params.bookId;
+        const routeId = req.params.routeId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updatebook = await service.updateBookById(
-            bookId,
+        const updateroute = await service.updateRoute(
+            routeId,
             groupId,
             newData
         );
-        if (!updatebook) {
+        if (!updateroute) {
             res.status(404).json({
-                error: "book data not found to update",
+                error: " data not found to update",
             });
         } else {
-            res.status(200).json({ updatebook, message: "data update successfully" });
+            res.status(200).json({ updateroute, message: "data update successfully" });
         }
     } catch (error) {
         console.error(error);

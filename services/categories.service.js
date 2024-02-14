@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const CategoriesModel = require("../schema/categories.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -6,6 +7,12 @@ class CategoriesService extends BaseService {
         super(dbModel, entityName);
     }
 
+    async getByCourseIdAndGroupId(name) {
+        const result = await this.model.findOne({ name: name });
+        return new ServiceResponse({
+            data: result,
+        });
+    }
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,

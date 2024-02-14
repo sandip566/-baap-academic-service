@@ -47,7 +47,8 @@ router.get("/getAllstudents/groupId/:groupId", async (req, res) => {
       name: req.query.name,
       dob: req.query.dob,
     }
-    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    const sortOptions = { createdAt: -1 };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria, sortOptions);
     requestResponsehelper.sendResponse(res, serviceResponse);
   } catch (error) {
     console.error(error);

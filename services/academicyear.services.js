@@ -26,6 +26,7 @@ class AcademicYearService extends BaseService {
             throw error;
         }
     }
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
@@ -35,14 +36,16 @@ class AcademicYearService extends BaseService {
         // if (criteria.courseId) query.courseId = criteria.courseId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    async getByCourseIdAndGroupId(groupId,year) {
-        const result = await this.model.findOne({ groupId:groupId,year:year });
+
+    async getByCourseIdAndGroupId(groupId, year) {
+        const result = await this.model.findOne({ groupId: groupId, year: year });
+        console.log("aaaaaaaaaaaaaaa", result);
         return new ServiceResponse({
             data: result,
         });
     }
 
-    async deleteByDataId(groupId,academicYearId) {
+    async deleteByDataId(groupId, academicYearId) {
         try {
             const deleteData = await AcademicYearModel.deleteOne({ groupId: groupId, academicYearId: academicYearId });
             console.log(deleteData);

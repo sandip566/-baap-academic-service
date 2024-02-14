@@ -3,22 +3,44 @@ const feesPaymentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : true,
+            required: true,
         },
         addmissionId: {
             type: Number,
             required: true,
         },
-        userId: {
-            type: Number,
-            required : false,
+        status: {
+            type: String,
+            required: false,
+            default: "paid"
+        },
+        paidAmount: {
+            type: String,
+            required: false,
+            default: "0"
+        },
+        remainingAmount: {
+            type: String,
+            required: false,
         },
         empId: {
             type: Number,
-            required : true,
+            required: true,
         },
         feesPaymentId: {
             type: Number,
+        },
+        currentDate: {
+            type: String,
+            required: false,
+        },
+        academicYear: {
+            type: String,
+            required: false,
+        },
+        userId: {
+            type: Number,
+            required: false,
         },
 
         // paidAmount: {
@@ -35,12 +57,12 @@ const feesPaymentSchema = new mongoose.Schema(
         //     type: String,
         //     enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
         // },
-        // receivedBy: {
-        //     empId: {
-        //         type:Number,
-        //         required: false
-        //     },
-        // },
+        receivedBy: {
+            empId: {
+                type: Number,
+                required: false
+            },
+        },
         // feesTemplateId: {
         //     type:Number,
         //     required: false

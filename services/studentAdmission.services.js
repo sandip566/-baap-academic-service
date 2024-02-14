@@ -78,11 +78,13 @@ class StudentsAdmmisionService extends BaseService {
 
     //         return response;
     //     }
-    async getByaddmissionId(addmissionId) {
+
+    async getRecoveryData(groupId) {
         return this.execute(() => {
-            return this.model.findOne({ addmissionId: addmissionId });
+            return this.model.find({ groupId: groupId });
         });
     }
+
     async deleteCompanyDetails(addmissionId, installmentId) {
         try {
             const deletedMember =
@@ -117,13 +119,76 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
-    async getByAddmissionId(addmissionId) {
+
+    async getByAddmissionIdData(addmissionId) {
         return this.execute(() => {
             return this.model.findOne({ addmissionId: addmissionId });
         });
     }
 
-    async getAllDataByGroupId(groupId, query) {
+    async getByAddmissionId(addmissionId) {
+        try {
+            const studentAdmission = await this.model.findOne({ addmissionId: addmissionId });
+            console.log(studentAdmission);
+            if (!studentAdmission) {
+                throw new Error("Student admission not found");
+            }
+
+            let additionalData = {};
+
+            // Process course details
+            // if (studentAdmission.courseDetails && studentAdmission.courseDetails.length > 0) {
+            //     additionalData.courseDetails = await Promise.all(
+            //         studentAdmission.courseDetails.map(async (courseDetail) => {
+            //             let courseAdditionalData = {};
+
+            //             if (courseDetail.courseId) {
+            //                 const course = await courseModel.findOne({ course_id: courseDetail.courseId });
+            //                 courseAdditionalData.courseName = course ? course.CourseName : "";
+            //                 courseAdditionalData.courseFee = course ? course.Fees : "";
+            //             }
+
+            //             if (courseDetail.classId) {
+            //                 const classInfo = await ClassModel.findOne({ class_id: courseDetail.classId });
+            //                 courseAdditionalData.className = classInfo ? classInfo.name : "";
+            //             }
+
+            //             if (courseDetail.divisionId) {
+            //                 const divisionInfo = await DivisionModel.findOne({ division_id: courseDetail.divisionId });
+            //                 courseAdditionalData.divisionName = divisionInfo ? divisionInfo.Name : "";
+            //             }
+
+            //             return courseAdditionalData;
+            //         })
+            //     );
+            // }
+
+            // Process fees details
+            if (studentAdmission.feesDetails && studentAdmission.feesDetails.length > 0) {
+                additionalData.feesDetails = await Promise.all(
+                    studentAdmission.feesDetails.map(async (feesDetail) => {
+                        let feesAdditionalData = {};
+
+                        if (feesDetail.feesTemplateId) {
+                            const feesTemplate = await feesTemplateModel.findOne({ feesTemplateId: feesDetail.feesTemplateId });
+                            feesAdditionalData.feesTemplateId = feesTemplate;
+                        }
+
+                        return { ...feesDetail, ...feesAdditionalData };
+                    })
+                );
+            }
+            let response = {
+                status: 'success',
+                data: { ...studentAdmission._doc, ...additionalData }
+            }
+            return response
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getAllDataByGroupId(groupId, query, reverseOrder = true) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -195,27 +260,29 @@ class StudentsAdmmisionService extends BaseService {
                                         if (courseDetail.course_id) {
                                             const course_id =
                                                 await courseModel.findOne({
-                                                    course_id:
-                                                        courseDetail.courseId,
+                                                    courseId:
+                                                        courseDetail.course_id,
                                                 });
                                             additionalData.course_id =
                                                 course_id;
                                         }
 
                                         if (courseDetail.class_id) {
+                                            console.log(courseDetail.class_id);
                                             const class_id =
                                                 await ClassModel.findOne({
-                                                    class_id:
-                                                        courseDetail.classId,
+                                                    classId:
+                                                        courseDetail.class_id,
                                                 });
                                             additionalData.class_id = class_id;
+                                            console.log(class_id);
                                         }
 
                                         if (courseDetail.division_id) {
                                             const division_id =
                                                 await DivisionModel.findOne({
-                                                    division_id:
-                                                        courseDetail.divisionId,
+                                                    divisionId:
+                                                        courseDetail.division_id,
                                                 });
                                             additionalData.division_id =
                                                 division_id;
@@ -228,7 +295,6 @@ class StudentsAdmmisionService extends BaseService {
                                     }
                                 )
                             );
-
                         return {
                             ...service._doc,
                             courseDetails: courseDetailsWithAdditionalData,
@@ -237,6 +303,12 @@ class StudentsAdmmisionService extends BaseService {
                     return service;
                 })
             );
+            servicesWithData.sort((a, b) => {
+                const dateA = new Date(a.createdAt);
+                const dateB = new Date(b.createdAt);
+                return reverseOrder ? dateB - dateA : dateA - dateB;
+            });
+
             const response = {
                 status: "Success",
                 data: {
@@ -245,6 +317,7 @@ class StudentsAdmmisionService extends BaseService {
                 },
             };
 
+            // let results = await studentAdmissionModel.find(servicesWithData).sort({ createdAt: reverseOrder ? -1 : 1 });
             return response;
         } catch (error) {
             console.error("Error:", error);
@@ -313,15 +386,16 @@ class StudentsAdmmisionService extends BaseService {
                                         let class_id;
                                         let division_id;
                                         if (courseDetail.course_id) {
+                                            console.log("aaaqqqqqqqqqqqqqqqqqqqq", courseDetail.course_id);
                                             course_id =
                                                 await courseModel.findOne({
-                                                    course_id:
-                                                        courseDetail.courseId,
+                                                    courseId:
+                                                        courseDetail.course_id,
                                                 });
 
                                             courseAdditionalData.course_id =
                                                 course_id;
-                                            // console.log(course_id);
+                                            console.log("course_iddddddddddddddddddddddddd", course_id);
                                         }
 
                                         if (courseDetail.class_id) {
@@ -351,6 +425,7 @@ class StudentsAdmmisionService extends BaseService {
 
                                         return {
                                             courseName: course_id.CourseName,
+                                            courseFee: course_id.Fees,
                                             className: class_id.name,
                                             divisionName: division_id.Name,
                                         };
@@ -396,71 +471,67 @@ class StudentsAdmmisionService extends BaseService {
                 addmissionId: query.addmissionId,
             });
 
-            let response1;
-            let modifiedFeesPaymentData = await Promise.all(
-                feesPaymentData.map(async (feesPayment) => {
-                    try {
-                        const addmissionData =
-                            await studentAdmissionModel.findOne({
-                                addmissionId: feesPayment.addmissionId,
+            // let response1;
+            let modifiedFeesPaymentData = [];
+
+
+
+            let response1 = []; // Define response1 as an array
+
+            for (const feesPayment of feesPaymentData) {
+                try {
+                    const addmissionData = await studentAdmissionModel.findOne({
+                        addmissionId: feesPayment.addmissionId,
+                    });
+
+                    if (addmissionData) {
+                        const feesDetailsWithAdditionalData = [];
+                        for (const feesDetail of addmissionData.courseDetails) {
+                            let feesAdditionalData = {};
+
+                            if (feesDetail.course_id) {
+                                const courseData = await courseModel.findOne({
+                                    course_id: feesDetail.courseId,
+                                });
+                                feesAdditionalData.course_id = courseData ? courseData.CourseName : '';
+                            }
+
+                            feesDetailsWithAdditionalData.push({
+                                ...feesDetail,
+                                ...feesAdditionalData,
                             });
-
-                        if (addmissionData) {
-                            const feesDetailsWithAdditionalData =
-                                await Promise.all(
-                                    addmissionData.courseDetails.map(
-                                        async (feesDetail) => {
-                                            let feesAdditionalData = {};
-
-                                            if (feesDetail.course_id) {
-                                                const course_id =
-                                                    await courseModel.findOne({
-                                                        course_id:
-                                                            feesDetail.courseId,
-                                                    });
-                                                feesAdditionalData.course_id =
-                                                    course_id.CourseName;
-                                            }
-
-                                            return {
-                                                ...feesDetail,
-                                                ...feesAdditionalData,
-                                            };
-                                        }
-                                    )
-                                );
-                            console.log("feesDetailsWithAdditionalData",feesDetailsWithAdditionalData);
-                            const convertedObject =
-                                feesDetailsWithAdditionalData.reduce(
-                                    (acc, course) => {
-                                        acc = {courseName:course.course_id}
-                                        return acc;
-                                    },
-                                    {}
-                                );
-                                console.log(convertedObject);
-                            response1 = [{
-                                ...feesPayment._doc,
-                                courseName: convertedObject.courseName,
-                            }];
                         }
-                    } catch (error) {
-                        console.error(
-                            "Error fetching data from studentAdmissionModel:",
-                            error
-                        );
 
-                        return feesPayment;
+                        const convertedObject =
+                            feesDetailsWithAdditionalData.reduce(
+                                (acc, course) => {
+                                    acc = { courseName: course.course_id }
+                                    return acc;
+                                },
+                                {}
+                            );
+                        console.log(convertedObject);
+                        response1.push({
+                            ...feesPayment._doc,
+                            courseName: convertedObject.courseName,
+                        });
+                        modifiedFeesPaymentData.push(...feesDetailsWithAdditionalData);
                     }
-                })
-            );
+                } catch (error) {
+                    console.error("Error fetching data from studentAdmissionModel:", error);
+                    modifiedFeesPaymentData.push(feesPayment);
+                }
+            }
+
+            console.log("feesDetailsWithAdditionalData:", modifiedFeesPaymentData);
+            console.log("Response1:", response1);
 
             console.log("Modified Fees Payment Data:", modifiedFeesPaymentData);
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.addmissionId == query.addmissionId,
+                    data.empId === query.empId &&
+                    data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -536,7 +607,17 @@ class StudentsAdmmisionService extends BaseService {
     //         return { isError: true, message: 'An error occurred during data retrieval' };
     //     }
     // }
-
+    async findLatestAdmission() {
+        try {
+            // Find the latest student admission based on the createdAt field in descending order
+            const latestAdmission = await studentAdmissionModel.findOne().sort({ createdAt: -1 });
+            console.log("latestAdmission", latestAdmission);
+            return latestAdmission;
+        } catch (error) {
+            console.error(error);
+            return { error: "Failed to find the latest admission." };
+        }
+    }
     async getAdmissionListing(groupId, academicYear, criteria) {
         const query = {
             groupId: groupId,

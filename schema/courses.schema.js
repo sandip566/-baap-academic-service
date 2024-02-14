@@ -10,13 +10,13 @@ const courseSchema = new mongoose.Schema(
             required: false,
             type: String
         },
-        departmentId:{
-            type:Number,
+        departmentId: {
+            type: Number,
             required: false
         },
-        Code:{
+        Code: {
             type: String,
-            required: false, 
+            required: false,
         },
         duration: {
             type: String,
