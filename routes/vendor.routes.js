@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { checkSchema } = require("express-validator");
+const { checkSchema, query } = require("express-validator");
 const service = require("../services/vendor.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
@@ -20,9 +20,15 @@ router.post(
 );
 
 router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
+    const pagination = {
+        pageNumber:parseInt(req.query.pageNumber) || 1,
+        pageSize: 10
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -43,7 +49,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         vendorId: req.query.vendorId,
-        vendorName: req.query.vendorName
+        vendorName: req.query.vendorName,
+        pageNumber:parseInt(req.query.pageNumber)||1
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,

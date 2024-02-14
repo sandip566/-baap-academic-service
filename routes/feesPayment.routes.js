@@ -5,7 +5,87 @@ const service = require("../services/feesPayment.services");
 const Service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper")
-const feesInstallmentService=require("../services/feesInstallment.services")
+const feesInstallmentService=require("../services/feesInstallment.services");
+const feesTemplateModel = require("../schema/feesTemplate.schema");
+
+
+router.post(
+  "/",
+  checkSchema(require("../dto/feesPayment.dto")),
+  async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+      return;
+    }
+    const addmissionId = req.body.addmissionId;
+    const empId = req.body.empId;
+    
+   
+    const existingRecord = await service.getByAdmissionAndEmpId(addmissionId, empId);
+
+    if (existingRecord.data!==null) {
+      const feesPaymentId = +Date.now();
+      req.body.feesPaymentId = feesPaymentId;
+
+      const installmentDetails = req.body.installment;
+      const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+      let totalPaidAmount = 0;
+
+      for (const installment of installmentDetails) {
+        if (installment.radio) {
+          totalPaidAmount += parseFloat(installment.amount);
+        }
+      }
+      totalPaidAmount += otherAmount;
+
+      console.log(totalPaidAmount);
+
+      let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
+
+      const serviceResponse = await service.create(req.body);
+
+      let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
+      console.log(a);
+
+      serviceResponse.data.paidAmount = totalPaidAmount;
+      serviceResponse.data.remainingAmount = remainingAmount;
+      
+      // Send the response
+      requestResponsehelper.sendResponse(res, serviceResponse);
+    } else {
+      const feesPaymentId = +Date.now();
+      req.body.feesPaymentId = feesPaymentId;
+
+      const installmentDetails = req.body.installment;
+      const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+      let totalPaidAmount = 0;
+
+      for (const installment of installmentDetails) {
+        if (installment.radio) {
+          totalPaidAmount += parseFloat(installment.amount);
+        }
+      }
+      totalPaidAmount += otherAmount;
+
+      console.log(totalPaidAmount);
+
+      let remainingAmount = req.body.courseFee - totalPaidAmount || 0;
+
+      const serviceResponse = await service.create(req.body);
+
+      let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
+      console.log(a);
+
+      serviceResponse.data.paidAmount = totalPaidAmount;
+      serviceResponse.data.remainingAmount = remainingAmount;
+
+      // Send the response
+      requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+  }
+);
+
 
 // router.post(
 //   "/",
@@ -14,77 +94,110 @@ const feesInstallmentService=require("../services/feesInstallment.services")
 //     if (ValidationHelper.requestValidationErrors(req, res)) {
 //       return;
 //     }
+//     let addmissionId=req.body.addmissionId
+//     console.log("addmisionId", addmissionId);
+//     let empId=req.body.empId
+//     let existingRecord=await service.getByAdmissionAndEmpId(addmissionId,empId);
+//     console.log("existingRecord, empId", existingRecord);
+
+// if(existingRecord){
+//   const feesPaymentId = +Date.now();
+//   req.body.feesPaymentId = feesPaymentId;
+
+//   const installmentDetails = req.body.installment;
+//   const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+//   let totalPaidAmount = 0;
+
+//   for (const installment of installmentDetails) {
+//     if (installment.radio) {
+//       totalPaidAmount += parseFloat(installment.amount);
+//     }
+//   }
+//   totalPaidAmount += otherAmount;
+//   console.log(totalPaidAmount);
+
+//   let remainingAmount=existingRecord.paidAmount-totalPaidAmount||0
+
+//   const serviceResponse = await service.create(req.body);
+
+//  let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount,remainingAmount);
+// console.log(a);
+  
+//   serviceResponse.data.paidAmount = totalPaidAmount;
+//   serviceResponse.data.remainingAmount=remainingAmount
+// }else{
 //     const feesPaymentId = +Date.now();
 //     req.body.feesPaymentId = feesPaymentId;
-//     const installmentId = req.body.installmentId;
-//     const updateResult = await feesInstallmentService.updateInstallmentAsPaid(installmentId);
-//     const serviceResponse = await service.create(req.body, updateResult);
+
+//     const installmentDetails = req.body.installment;
+//     const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+//     let totalPaidAmount = 0;
+
+//     for (const installment of installmentDetails) {
+//       if (installment.radio) {
+//         totalPaidAmount += parseFloat(installment.amount);
+//       }
+//     }
+//     totalPaidAmount += otherAmount;
+//     console.log(totalPaidAmount);
+
+//     let remainingAmount=req.body.courseFee-totalPaidAmount||0
+
+//     const serviceResponse = await service.create(req.body);
+  
+//    let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount,remainingAmount);
+// console.log(a);
+    
+//     serviceResponse.data.paidAmount = totalPaidAmount;
+//     serviceResponse.data.remainingAmount=remainingAmount
+  
 //     requestResponsehelper.sendResponse(res, serviceResponse);
 //   }
+//   }
+
 // );
-router.post(
-  "/",
-  checkSchema(require("../dto/feesPayment.dto")),
-  async (req, res, next) => {
-    if (ValidationHelper.requestValidationErrors(req, res)) {
-      return;
-    }
-
-    const feesPaymentId = +Date.now();
-    req.body.feesPaymentId = feesPaymentId;
-
-    const installmentDetails = req.body.installment;
-    const otherAmount = parseFloat(req.body.other_amount) || 0; 
-
-    let totalPaidAmount = 0;
-
-    for (const installment of installmentDetails) {
-      if (installment.radio) {
-        totalPaidAmount += parseFloat(installment.amount);
-      }
-    }
-    totalPaidAmount += otherAmount;
-    console.log(totalPaidAmount);
-
-    let remainingAmount=req.body.courseFee-totalPaidAmount||0
-
-    const serviceResponse = await service.create(req.body);
-  
-   let a= await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount,remainingAmount);
-console.log(a);
-    
-    serviceResponse.data.paidAmount = totalPaidAmount;
-    serviceResponse.data.remainingAmount=remainingAmount
-   
-    requestResponsehelper.sendResponse(res, serviceResponse);
-  }
-);
 router.get("/getRecoveryData/:groupId", async (req, res, next) => {
-  if (ValidationHelper.requestValidationErrors(req, res)) {
-      return;
-  }
-  const serviceResponse = await service.getRecoveryData(req.params.groupId);
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const page=parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit) || 10
+    const skip=(page-1)*limit;
+    const serviceResponse=await service.getRecoveryData(
+      req.params.groupId,
+      skip,
+      limit,
+      page
+      );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    currentDate: req.query.currentDate,
-    academicYear: req.query.academicYear,
-    location: req.query.location,
-    course:req.query.course,
-    class:req.query.class,
-    department:req.query.department,
-    feesTemplateId:req.query.feesTemplateId,
-    division: req.query.division,
-    month:req.query.month,
-  };
-  const serviceResponse = await service.getFeesStatData(
-    groupId,
-    criteria
-  );
-  // console.log(serviceResponse);
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    const groupId = req.params.groupId;
+    const criteria = {
+        currentDate: req.query.currentDate,
+        academicYear: req.query.academicYear,
+        location: req.query.location,
+        course: req.query.course,
+        class: req.query.class,
+        department: req.query.department,
+        feesTemplateId: req.query.feesTemplateId,
+        division: req.query.division,
+        month: req.query.month,
+    };
+    const page=parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit) || 10
+    // const skip = (page - 1) * limit;
+    const skip=(page-1)*limit;
+     const serviceResponse = await service.getFeesStatData(
+          groupId,
+          criteria,
+          skip,
+          page,
+          limit
+      );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all", async (req, res) => {

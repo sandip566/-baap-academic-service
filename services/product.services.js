@@ -10,6 +10,7 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
+        criteria.pageSize = 10;
         if (criteria.productId) query.productId = criteria.productId;
         return this.preparePaginationAndReturnData(query, criteria);
     }

@@ -10,9 +10,11 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
+        criteria.pageSize = 10;
         if (criteria.vendorId) query.vendorId = criteria.vendorId;
         if (criteria.vendorName) query.vendorName = new RegExp(criteria.vendorName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
+        
     }
 
     async deleteVendorById(vendorId, groupId) {
