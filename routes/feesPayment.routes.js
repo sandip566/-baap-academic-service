@@ -36,12 +36,14 @@ router.post(
         }
       }
       totalPaidAmount += otherAmount;
-
+      if (totalPaidAmount > existingRecord.data.remainingAmount) {
+        return res.status(400).json({ error: "You have paid extra amount." });
+      }
       console.log(totalPaidAmount);
 
-      let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
-
-
+      // let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
+      let remainingAmount = Math.max(existingRecord.data.remainingAmount - totalPaidAmount, 0) ||0;
+      
       const serviceResponse = await service.create(req.body);
 
       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
@@ -67,10 +69,12 @@ router.post(
         }
       }
       totalPaidAmount += otherAmount;
-
+      if (totalPaidAmount >req.body.courseFee) {
+        return res.status(400).json({ error: "You have paid extra amount." });
+      }
       console.log(totalPaidAmount);
 
-      let remainingAmount = req.body.courseFee - totalPaidAmount || 0;
+      let remainingAmount =Math.max(req.body.courseFee - totalPaidAmount,0) || 0;
 
       const serviceResponse = await service.create(req.body);
 
@@ -173,30 +177,30 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/getFeesStatData/:groupId", async (req, res, next) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    currentDate: req.query.currentDate,
-    academicYear: req.query.academicYear,
-    location: req.query.location,
-    course: req.query.course,
-    class: req.query.class,
-    department: req.query.department,
-    feesTemplateId: req.query.feesTemplateId,
-    division: req.query.division,
-    month: req.query.month,
-  };
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10
-  // const skip = (page - 1) * limit;
-  const skip = (page - 1) * limit;
-  const serviceResponse = await service.getFeesStatData(
-    groupId,
-    criteria,
-    skip,
-    page,
-    limit
-  );
-  requestResponsehelper.sendResponse(res, serviceResponse);
+    const groupId = req.params.groupId;
+    const criteria = {
+        currentDate: req.query.currentDate,
+        academicYear: req.query.academicYear,
+        location: req.query.location,
+        course: req.query.course,
+        class: req.query.class,
+        department: req.query.department,
+        feesTemplateId: req.query.feesTemplateId,
+        division: req.query.division,
+        month: req.query.month,
+    };
+    const page=parseInt(req.query.page)||1;
+    const limit = parseInt(req.query.limit) || 5
+    // const skip = (page - 1) * limit;
+    // const skip=(page-1)*limit;
+     const serviceResponse = await service.getFeesStatData(
+          groupId,
+          criteria,
+          // skip,
+          page,
+          limit
+      );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all", async (req, res) => {

@@ -35,7 +35,13 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
+router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByInstallmentId(req.params.installmentId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);

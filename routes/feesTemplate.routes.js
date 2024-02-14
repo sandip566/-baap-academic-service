@@ -34,7 +34,7 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
         if (serviceResponse.data) {
             const totalFees = serviceResponse.data.totalFees;
             const installmentAmount = totalFees / installmentNo;
-
+           
             for (let i = 1; i <= installmentNo; i++) {
                 installmentDetails.push({
                     installmentNo: i,
@@ -43,9 +43,9 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
             }
             serviceResponse.data.installmentDetails = installmentDetails;
         }
-        let response = {
-            status: "success",
-            data: installmentDetails
+        let response={
+            status:"success",
+            data:installmentDetails,
         }
         requestResponsehelper.sendResponse(res, response);
     } catch (error) {
