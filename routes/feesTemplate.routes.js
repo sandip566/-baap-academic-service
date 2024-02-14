@@ -27,12 +27,13 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
     const installmentNo = parseInt(req.params.installmentNo);
 
     try {
+        const installmentDetails = [];
         const serviceResponse = await service.getByfeesTemplateId(feesTemplateId);
 
         if (serviceResponse.data) {
             const totalFees = serviceResponse.data.totalFees;
             const installmentAmount = totalFees / installmentNo;
-            const installmentDetails = [];
+           
 
             for (let i = 1; i <= installmentNo; i++) {
                 installmentDetails.push({
@@ -43,8 +44,11 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
 
             serviceResponse.data.installmentDetails = installmentDetails;
         }
-
-        requestResponsehelper.sendResponse(res, serviceResponse);
+        let response={
+            status:"success",
+            data:installmentDetails,
+        }
+        requestResponsehelper.sendResponse(res, response);
     } catch (error) {
         console.error("Error occurred:", error);
         requestResponsehelper.sendResponse(res, { status: "Failed", message: "An error occurred while processing the request." });
