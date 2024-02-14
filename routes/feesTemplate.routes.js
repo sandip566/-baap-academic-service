@@ -56,9 +56,9 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
 router.get("/all",TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10
+        pageSize: req.query.pageNumber
     };
-    const { pageNumber, pageSize, ...query } = req.query;
+    const { pageNumber, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria(query,pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -98,7 +98,7 @@ router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.ch
         const Data = await service.deletefeesTemplateById({ feesTemplateId: feesTemplateId, groupId: groupId });
         if (!Data) {
             res.status(404).json({ error: 'data not found to delete' });
-        } else {    
+        } else {
             res.status(201).json(Data);
         }
     } catch (error) {
