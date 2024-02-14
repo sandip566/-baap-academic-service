@@ -88,6 +88,7 @@ router.post("/data/save", async (req, res, next) => {
                             return {
                                 ...installment,
                                 installmentNo: uniqueInstallNo,
+                                status:"pending"
                             };
                         });
                 
@@ -103,6 +104,7 @@ router.post("/data/save", async (req, res, next) => {
                 
                     const feesinstallmentResponse = await feesInstallmentServices.updateUser(
                         req.body.addmissionId,
+                        req.body.groupId,
                         req.body
                     );
                 

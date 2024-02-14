@@ -7,7 +7,11 @@ class feesInstallmentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
+    async getByInstallmentId(installmentId) {
+        return this.execute(() => {
+            return this.model.findOne({ installmentId: installmentId });
+        });
+    }
     async getAllFeesInstallmentByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
@@ -18,10 +22,10 @@ class feesInstallmentService extends BaseService {
         if (criteria.installmentNo) query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria,);
     }
-    async updateUser(addmissionId, data) {
+    async updateUser(addmissionId,groupId, data) {
         try {
             const resp = await feesInstallmentModel.findOneAndUpdate(
-                { addmissionId: addmissionId },
+                { addmissionId: addmissionId, groupId: groupId},
 
                 data,
                 { upsert: true, new: true }

@@ -37,11 +37,13 @@ router.post(
         }
       }
       totalPaidAmount += otherAmount;
-
+      if (totalPaidAmount > existingRecord.data.remainingAmount) {
+        return res.status(400).json({ error: "You have paid extra amount." });
+      }
       console.log(totalPaidAmount);
 
-      let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
-
+      // let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
+      let remainingAmount = Math.max(existingRecord.data.remainingAmount - totalPaidAmount, 0) ||0;
       
       const serviceResponse = await service.create(req.body);
 
@@ -68,10 +70,12 @@ router.post(
         }
       }
       totalPaidAmount += otherAmount;
-
+      if (totalPaidAmount >req.body.courseFee) {
+        return res.status(400).json({ error: "You have paid extra amount." });
+      }
       console.log(totalPaidAmount);
 
-      let remainingAmount = req.body.courseFee - totalPaidAmount || 0;
+      let remainingAmount =Math.max(req.body.courseFee - totalPaidAmount,0) || 0;
 
       const serviceResponse = await service.create(req.body);
 
@@ -188,13 +192,13 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
         month: req.query.month,
     };
     const page=parseInt(req.query.page)||1;
-    const limit = parseInt(req.query.limit) || 10
+    const limit = parseInt(req.query.limit) || 5
     // const skip = (page - 1) * limit;
-    const skip=(page-1)*limit;
+    // const skip=(page-1)*limit;
      const serviceResponse = await service.getFeesStatData(
           groupId,
           criteria,
-          skip,
+          // skip,
           page,
           limit
       );
