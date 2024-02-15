@@ -257,12 +257,14 @@ class StudentsAdmmisionService extends BaseService {
                                     async (courseDetail) => {
                                         let additionalData = {};
 
-                                        if (courseDetail.course_id) {
+                                        if (courseDetail.course_id && courseDetail.course_id !== "null") {
+                                            console.log("ddddddddddddddddd", courseDetail.course_id);
                                             const course_id =
                                                 await courseModel.findOne({
                                                     courseId:
                                                         courseDetail.course_id,
                                                 });
+                                                console.log(course_id);
                                             additionalData.course_id =
                                                 course_id;
                                         }
