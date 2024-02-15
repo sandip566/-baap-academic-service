@@ -9,7 +9,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 
 router.post(
     "/",
-    checkSchema(require("../dto/latefeepayment.dto")),
+    checkSchema(require("../dto/document.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
