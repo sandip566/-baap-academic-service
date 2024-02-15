@@ -1,6 +1,7 @@
 const DocumentModel = require("../schema/document.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
+
 class DocumentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);

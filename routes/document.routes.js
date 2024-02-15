@@ -8,8 +8,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
-    "/",
-    upload.single('file'),
+    "/", upload.single('file'),
     checkSchema(require("../dto/latefeepayment.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
