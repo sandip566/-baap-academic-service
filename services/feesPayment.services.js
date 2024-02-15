@@ -133,7 +133,7 @@ class feesPaymentService extends BaseService {
                         (data) => data.location == query.location
                     );
                 }
-                console.log("ssssssssssssssssssss", admissionData);
+                // console.log("ssssssssssssssssssss", admissionData);
                 if (criteria.department) {
                     query.department = criteria.department;
                     admissionData = admissionData.filter((data) => {
@@ -454,11 +454,12 @@ class feesPaymentService extends BaseService {
                                     "Lengths of installment arrays:",
                                     installmentLengths
                                 );
-                                console.log(matchingAdmission.feesDetails);
+                               
+
                 
                                 return{
                                     candidateName: matchingAdmission.name,
-                                    className: class_id?.name,
+                                    className: class_id?.name,  
                                     phoneNumber: matchingAdmission.phoneNumber,
                                     divisionName: division_id?.Name,
                                     courseName: course_id?.CourseName,
@@ -496,7 +497,7 @@ class feesPaymentService extends BaseService {
                     return acc;
                 }, {});
                 
-                // Convert back to array
+              
                 const finalServices = Object.values(filteredServices);
                console.log("finalServices", finalServices);   
                 const filteredServicesWithData = servicesWithData.filter(
