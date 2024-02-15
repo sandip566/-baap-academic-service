@@ -1,42 +1,19 @@
 const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
 const { checkSchema } = require("express-validator");
 const service = require("../services/document.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
-    "/", upload.single('file'),
-    checkSchema(require("../dto/latefeepayment.dto")),
+    "/",
+    checkSchema(require("../dto/document.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        try {
-            if (req.body.memberId) {
-                const existingDoc = await service.getBymemberId(req.body.memberId);
-                if (existingDoc) {
-                    const updatedData = {
-                        ...req.body,
-                        document: req.file
-                    };
-                    const serviceResponse = await service.updateData(req.body.memberId, updatedData);
-                    requestResponsehelper.sendResponse(res, serviceResponse);
-                } else {
-                    res.status(404).json({ error: "Document not found for memberId" });
-                }
-            } else {
-                const serviceResponse = await service.saveData(req.body);
-                res.json({
-                    data: serviceResponse,
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal server error" });
-        }
+        const serviceResponse = await service.create(req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
