@@ -6,8 +6,9 @@ class CategoriesService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     async getByCourseIdAndGroupId(name) {
-        const result = await this.model.findOne({name:name });
+        const result = await this.model.findOne({ name: name });
         return new ServiceResponse({
             data: result,
         });

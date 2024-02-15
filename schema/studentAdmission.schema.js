@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-
 const studentsAdmissionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false
+            required: false
         },
         studentAdmissionId: {
             type: Number,
@@ -13,11 +12,11 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        courseName:{
+        courseName: {
             type: String,
             required: false
         },
-        location:{
+        location: {
             type: String,
             required: false
         },

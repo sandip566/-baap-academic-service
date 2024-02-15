@@ -25,12 +25,12 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id",TokenService.checkPermission(["PATML4"]), async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["PATML4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id",TokenService.checkPermission(["PATML3"]), async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["PATML3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -40,8 +40,7 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-
-router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["PATML1"]), async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["PATML1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         name: req.query.name,
@@ -52,7 +51,7 @@ router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["PATML1"])
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/attendanceId/:attendanceId",TokenService.checkPermission(["PATML4"]), async (req, res) => {
+router.delete("/groupId/:groupId/attendanceId/:attendanceId", TokenService.checkPermission(["PATML4"]), async (req, res) => {
     try {
         const attendanceId = req.params.attendanceId;
         const groupId = req.params.groupId;
@@ -73,7 +72,7 @@ router.delete("/groupId/:groupId/attendanceId/:attendanceId",TokenService.checkP
     }
 });
 
-router.put("/groupId/:groupId/attendanceId/:attendanceId",TokenService.checkPermission(["PATML3"]), async (req, res) => {
+router.put("/groupId/:groupId/attendanceId/:attendanceId", TokenService.checkPermission(["PATML3"]), async (req, res) => {
     try {
         const attendanceId = req.params.attendanceId;
         const groupId = req.params.groupId;

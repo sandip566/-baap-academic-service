@@ -41,6 +41,7 @@ class feesInstallmentService extends BaseService {
             });
         }
     }
+
     async deleteFeesInstallmentById(installmentId, groupId) {
         try {
             return await feesInstallmentModel.deleteOne(installmentId, groupId);
@@ -86,11 +87,13 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
     async getByInstallmentId(installmentId) {
         return this.execute(() => {
             return this.model.findOne({ installmentId: installmentId });
         });
     }
+
     async getInstallmentsByStudentId(studentId) {
         try {
 
@@ -100,15 +103,16 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
     async deleteStudentById(installmentId) {
         try {
-            let installmentData=await this.getByInstallmentId(installmentId);
+            let installmentData = await this.getByInstallmentId(installmentId);
             console.log(installmentData.data);
-            let Data=installmentData.data
+            let Data = installmentData.data
             const result = await feesInstallmentModel.deleteOne({ installmentId: installmentId });
-    
+
             if (result.deletedCount === 1) {
-                return { success: true,data:Data, message: 'Student deleted successfully' };
+                return { success: true, data: Data, message: 'Student deleted successfully' };
             } else {
                 return { success: false, message: 'Student not found' };
             }
@@ -116,7 +120,7 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-    
+
     async updateInstallmentAsPaid(installmentId) {
         try {
             const updateResult = await feesInstallmentModel.findOneAndUpdate(

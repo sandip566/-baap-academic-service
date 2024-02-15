@@ -58,14 +58,14 @@ router.post("/data/save", async (req, res, next) => {
             if (existingDocument) {
                 req.body.documents = req.body.documents
                     ? req.body.documents.map((documentData) => {
-                          const documentId =
-                              +Date.now() + Math.floor(Math.random() * 1000);
-                          return {
-                              _id: new mongoose.Types.ObjectId(),
-                              documentId: documentId,
-                              documents: documentData,
-                          };
-                      })
+                        const documentId =
+                            +Date.now() + Math.floor(Math.random() * 1000);
+                        return {
+                            _id: new mongoose.Types.ObjectId(),
+                            documentId: documentId,
+                            documents: documentData,
+                        };
+                    })
                     : existingDocument.data?.documents || [];
 
                 // req.body.feesDetails = req.body.feesDetails
@@ -80,7 +80,7 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-         
+
                     const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
                         const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
 
@@ -92,26 +92,26 @@ router.post("/data/save", async (req, res, next) => {
                                 status:"pending"
                             };
                         });
-                
-                      
+
+
                         return {
                             ...feesDetail,
                             installment: updatedInstallments,
                         };
                     });
-                
-                   
+
+
                     req.body.feesDetails = updatedFeesDetails;
-                
+
                     const feesinstallmentResponse = await feesInstallmentServices.updateUser(
                         req.body.addmissionId,
                         req.body.groupId,
                         req.body
                     );
-                
+
                     console.log(feesinstallmentResponse);
                 }
-                
+
 
               
                 const serviceResponse = await service.updateUser(
@@ -127,19 +127,19 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-                console.log(req.body.feesDetails);
+                    console.log(req.body.feesDetails);
                     const feesinstallment = await feesInstallmentServices.create(req.body);
                     console.log(feesinstallment);
-                
-                 
+
+
                     const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
                         ...detail,
-                        installNo: index + 1, 
+                        installNo: index + 1,
                     }));
-                console.log(updatedInstallments);
+                    console.log(updatedInstallments);
                     req.body.feesDetails = updatedInstallments;
                 }
-                
+
                 // if(req.body.feesDetails){
                 // const installmentId = +Date.now();
                 // req.body.installmentId = installmentId;
@@ -302,12 +302,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             lastName: req.query.lastName,
             search: req.query.search,
         };
-        
+
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria
         );
-        
+
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);
@@ -327,7 +327,7 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             addmissionId: req.query.addmissionId,
             empId: req.query.empId
         };
-        
+
         const serviceResponse = await service.getfeesPayment(
             groupId,
             criteria
@@ -403,5 +403,4 @@ router.put(
         }
     }
 );
-
 module.exports = router;

@@ -49,7 +49,6 @@ class feesPaymentService extends BaseService {
                     }
 
                     additionalData.addmissionId = feesAdditionalData;
-
                     return { ...service._doc, ...additionalData.addmissionId };
                 })
             );

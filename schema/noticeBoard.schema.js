@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const moment = require("moment");
-
 const noticeBoardSchema = new mongoose.Schema(
     {
         noticeBoardId: {
@@ -28,9 +27,9 @@ const noticeBoardSchema = new mongoose.Schema(
             type: Boolean,
             default: false
         },
-     createNotice:{
-        type:String
-     }
+        createNotice: {
+            type: String
+        }
     },
     { strict: false, timestamps: true }
 );

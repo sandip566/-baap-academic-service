@@ -7,15 +7,15 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const TokenService = require("../services/token.services");
 router.post(
   "/",
-  checkSchema(require("../dto/subject.dto")),TokenService.checkPermission(["EMS2"]),
+  checkSchema(require("../dto/subject.dto")), TokenService.checkPermission(["EMS2"]),
   async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const existingRecord = await service.getBySubjectIdAndGroupId(req.body.groupId,req.body.name);
+    const existingRecord = await service.getBySubjectIdAndGroupId(req.body.groupId, req.body.name);
     console.log(existingRecord);
     if (existingRecord.data) {
-        return res.status(404).json({ error: "Name,Code With The Same GroupId Already Exists." });
+      return res.status(404).json({ error: "Name,Code With The Same GroupId Already Exists." });
     }
     const subjectId = +Date.now();
     req.body.subjectId = subjectId;
@@ -29,22 +29,22 @@ router.get("/all", async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id",TokenService.checkPermission(["EMS4"]), async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["EMS4"]), async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id",TokenService.checkPermission(["EMS3"]), async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["EMS3"]), async (req, res) => {
   const serviceResponse = await service.updateById(req.params.id, req.body);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id",TokenService.checkPermission(["EMS1"]), async (req, res) => {
+router.get("/:id", TokenService.checkPermission(["EMS1"]), async (req, res) => {
   const serviceResponse = await service.getById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/subjectId/:subjectId",TokenService.checkPermission(["EMS4"]), async (req, res) => {
+router.delete("/groupId/:groupId/subjectId/:subjectId", TokenService.checkPermission(["EMS4"]), async (req, res) => {
   try {
     const subjectId = req.params.subjectId
     const groupId = req.params.groupId
@@ -60,7 +60,7 @@ router.delete("/groupId/:groupId/subjectId/:subjectId",TokenService.checkPermiss
   }
 });
 
-router.put("/groupId/:groupId/subjectId/:subjectId", TokenService.checkPermission(["EMS3"]),async (req, res) => {
+router.put("/groupId/:groupId/subjectId/:subjectId", TokenService.checkPermission(["EMS3"]), async (req, res) => {
   try {
     const subjectId = req.params.subjectId;
     const groupId = req.params.groupId;
@@ -77,7 +77,7 @@ router.put("/groupId/:groupId/subjectId/:subjectId", TokenService.checkPermissio
   }
 });
 
-router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMS1"]), async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMS1"]), async (req, res) => {
   const groupId = req.params.groupId;
   const criteria = {
     subjectName: req.query.subjectName,

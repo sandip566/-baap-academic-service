@@ -7,7 +7,7 @@ class Service extends BaseService {
         super(dbModel, entityName);
     }
     async getByCourseIdAndGroupId(name) {
-        const result = await this.model.findOne({religion:name });
+        const result = await this.model.findOne({ religion: name });
         return new ServiceResponse({
             data: result,
         });
@@ -32,7 +32,7 @@ class Service extends BaseService {
 
     async updateReligionById(religionId, newData) {
         try {
-            const updateData = await religionModel.findOneAndUpdate({religionId: religionId }, newData, { new: true });
+            const updateData = await religionModel.findOneAndUpdate({ religionId: religionId }, newData, { new: true });
             return updateData;
         } catch (error) {
             throw error;

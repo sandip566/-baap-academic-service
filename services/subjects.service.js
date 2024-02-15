@@ -15,11 +15,12 @@ class SubjectService extends BaseService {
             throw error;
         }
     }
-    async getBySubjectIdAndGroupId(groupId,name) {
-        
-        const result = await this.model.findOne({ groupId:groupId,name:name });
+
+    async getBySubjectIdAndGroupId(groupId, name) {
+
+        const result = await this.model.findOne({ groupId: groupId, name: name });
         return new ServiceResponse({
-            data:result
+            data: result
         })
     }
 

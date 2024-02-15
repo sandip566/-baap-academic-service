@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-
 const ReminderSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false
+            required: false
         },
         reminderId: {
             type: Number,

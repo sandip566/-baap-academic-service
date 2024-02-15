@@ -4,7 +4,7 @@ const DivisionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false,
+            required: false,
         },
         divisionId: {
             type: Number,
@@ -22,7 +22,7 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-     
+
     },
     { strict: false, timestamps: true }
 );

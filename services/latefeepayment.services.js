@@ -6,10 +6,6 @@ class LatefeepaymentService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async save(dataObject) {
-        return await LatefeepaymentModel.create(dataObject);
-    }
-
     async getByDataId(lateFeePaymentId) {
         return this.execute(() => {
             return LatefeepaymentModel.findOne({ lateFeePaymentId: lateFeePaymentId });

@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const VisitorSchema = new mongoose.Schema(
     {
         groupId: {

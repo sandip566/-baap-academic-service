@@ -15,20 +15,18 @@ class DepartmentService extends BaseService {
         if (criteria.departmentName) query.departmentName = new RegExp(criteria.departmentName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    
+
     async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
         const codeValue = departmentHead.code instanceof Object ? departmentHead.code.code : departmentHead.code;
-      
         const result = await this.model.findOne({
-          groupId: groupId,
-          'departmentHead.code': codeValue,
+            groupId: groupId,
+            'departmentHead.code': codeValue,
         });
-      
         return new ServiceResponse({
-          data: result,
+            data: result,
         });
-      }
-      
+    }
+
     // async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
     //     let code = departmentHead.code;
     //     const result = await this.model.findOne({ groupId: groupId, departmentName: departmentName,code: code});
