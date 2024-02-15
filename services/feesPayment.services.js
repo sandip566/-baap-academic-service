@@ -5,6 +5,7 @@ const courseModel = require("../schema/courses.schema");
 const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
+const FeesInstallmentModel=require("../schema/feesInstallment.schema")
 
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -133,7 +134,7 @@ class feesPaymentService extends BaseService {
                         (data) => data.location == query.location
                     );
                 }
-                console.log("ssssssssssssssssssss", admissionData);
+                // console.log("ssssssssssssssssssss", admissionData);
                 if (criteria.department) {
                     query.department = criteria.department;
                     admissionData = admissionData.filter((data) => {
@@ -454,24 +455,49 @@ class feesPaymentService extends BaseService {
                                     "Lengths of installment arrays:",
                                     installmentLengths
                                 );
-                                console.log(matchingAdmission.feesDetails);
-                
-                                return{
-                                    candidateName: matchingAdmission.name,
-                                    className: class_id?.name,
-                                    phoneNumber: matchingAdmission.phoneNumber,
-                                    divisionName: division_id?.Name,
-                                    courseName: course_id?.CourseName,
-                                    courseFees: course_id?.Fees,
-                                    installments: installments,
-                                    paidAmount: service.paidAmount,
-                                    remainingAmount: service.remainingAmount,
-                                    feesPaymentId: service.feesPaymentId,
-                                    addmissionId: service.addmissionId,
-                                    empId: service.empId,
-                                    groupId: service.groupId,
-                                    // courseFee:course_id.Fees,
-                                };
+
+
+                                const installmentIds = feesData.map(service => service.installmentId);
+
+const installmentRecords = await FeesInstallmentModel.find({ installmentId: { $in: installmentIds } });
+
+const updatedInstallmentRecords = installmentRecords.map(record => {
+    let isDue = false; 
+
+    record.feesDetails.forEach(detail => {
+        detail.installment.forEach(item => {
+            if (item.status === 'pending' &&(item.date) < criteria.currentDate) {
+              
+                isDue = true;
+                return; 
+            }
+        });
+        if (isDue) return; 
+    });
+
+    return {
+        candidateName: matchingAdmission.name,
+        className: class_id?.name,
+        phoneNumber: matchingAdmission.phoneNumber,
+        divisionName: division_id?.Name,
+        courseName: course_id?.CourseName,
+        courseFees: course_id?.Fees,
+        dueStatus: isDue, 
+        status:record.status,
+        paidAmount: service.paidAmount,
+        remainingAmount: service.remainingAmount,
+        feesPaymentId: service.feesPaymentId,
+        installmentId: service.installmentId,
+        addmissionId: service.addmissionId,
+        empId: service.empId,
+        groupId: service.groupId,
+    };
+});
+
+console.log("Updated installmentRecords: ", updatedInstallmentRecords);
+
+return updatedInstallmentRecords;
+
                             }
                 
                             feesAdditionalData.addmissionId = matchingAdmission || {};
@@ -496,13 +522,13 @@ class feesPaymentService extends BaseService {
                     return acc;
                 }, {});
                 
-                // Convert back to array
+              
                 const finalServices = Object.values(filteredServices);
-               console.log("finalServices", finalServices);   
+            //    console.log("finalServices", finalServices);   
                 const filteredServicesWithData = servicesWithData.filter(
                     (service) => Object.keys(service).length !== 0
                 );
-
+               
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: finalServices,

@@ -1,14 +1,14 @@
 const express = require("express");
 const router = express.Router();
-const multer = require('multer');
-const upload = multer({ dest: 'uploads/' });
+// const multer = require('multer');
+// const upload = multer({ dest: 'uploads/' });
 const { checkSchema } = require("express-validator");
 const service = require("../services/document.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
-    "/", upload.single('file'),
+    "/",
     checkSchema(require("../dto/latefeepayment.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
