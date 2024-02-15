@@ -455,7 +455,8 @@ class feesPaymentService extends BaseService {
                                     installmentLengths
                                 );
                                
-
+let data=service.installmentId
+console.log(data);
                 
                                 return{
                                     candidateName: matchingAdmission.name,
