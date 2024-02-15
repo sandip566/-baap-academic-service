@@ -8,6 +8,90 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const feesInstallmentService = require("../services/feesInstallment.services");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 
+
+// router.post(
+//   "/",
+//   checkSchema(require("../dto/feesPayment.dto")),
+//   async (req, res, next) => {
+//     if (ValidationHelper.requestValidationErrors(req, res)) {
+//       return;
+//     }
+//     const addmissionId = req.body.addmissionId;
+//     const empId = req.body.empId;
+    
+   
+//     const existingRecord = await service.getByAdmissionAndEmpId(addmissionId, empId);
+
+//     if (existingRecord.data!==null) {
+//       const feesPaymentId = +Date.now();
+//       req.body.feesPaymentId = feesPaymentId;
+
+//       const installmentDetails = req.body.installment;
+//       const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+//       let totalPaidAmount = 0;
+
+//       for (const installment of installmentDetails) {
+//         if (installment.radio) {
+//           totalPaidAmount += parseFloat(installment.amount);
+//         }
+//       }
+//       totalPaidAmount += otherAmount;
+//       if (totalPaidAmount > existingRecord.data.remainingAmount) {
+//         return res.status(400).json({ error: "You have paid extra amount." });
+//       }
+//       console.log(totalPaidAmount);
+
+//       // let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
+//       let remainingAmount = Math.max(existingRecord.data.remainingAmount - totalPaidAmount, 0) ||0;
+      
+//       const serviceResponse = await service.create(req.body);
+
+//       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
+//       console.log(a);
+
+//       serviceResponse.data.paidAmount = totalPaidAmount;
+//       serviceResponse.data.remainingAmount = remainingAmount;
+      
+//       // Send the response
+//       requestResponsehelper.sendResponse(res, serviceResponse);
+//     } else {
+//       const feesPaymentId = +Date.now();
+//       req.body.feesPaymentId = feesPaymentId;
+
+//       const installmentDetails = req.body.installment;
+//       const otherAmount = parseFloat(req.body.other_amount) || 0; 
+
+//       let totalPaidAmount = 0;
+
+//       for (const installment of installmentDetails) {
+//         if (installment.radio) {
+//           totalPaidAmount += parseFloat(installment.amount);
+//         }
+//       }
+//       totalPaidAmount += otherAmount;
+//       if (totalPaidAmount >req.body.courseFee) {
+//         return res.status(400).json({ error: "You have paid extra amount." });
+//       }
+//       console.log(totalPaidAmount);
+
+//       let remainingAmount =Math.max(req.body.courseFee - totalPaidAmount,0) || 0;
+
+//       const serviceResponse = await service.create(req.body);
+
+//       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
+//       console.log(a);
+
+//       serviceResponse.data.paidAmount = totalPaidAmount;
+//       serviceResponse.data.remainingAmount = remainingAmount;
+
+//       // Send the response
+//       requestResponsehelper.sendResponse(res, serviceResponse);
+//     }
+//   }
+// );
+
+
 router.post(
   "/",
   checkSchema(require("../dto/feesPayment.dto")),
@@ -15,9 +99,21 @@ router.post(
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
+
     const addmissionId = req.body.addmissionId;
     const empId = req.body.empId;
+    const installmentDetails = req.body.installment;
+    const otherAmount = parseFloat(req.body.other_amount) || 0;
 
+    let totalPaidAmount = 0;
+
+    for (const installment of installmentDetails) {
+      if (installment.radio) {
+        totalPaidAmount += parseFloat(installment.amount);
+      }
+    }
+
+    totalPaidAmount += otherAmount;
 
     const existingRecord = await service.getByAdmissionAndEmpId(addmissionId, empId);
 
@@ -25,61 +121,76 @@ router.post(
       const feesPaymentId = +Date.now();
       req.body.feesPaymentId = feesPaymentId;
 
-      const installmentDetails = req.body.installment;
-      const otherAmount = parseFloat(req.body.other_amount) || 0;
-
-      let totalPaidAmount = 0;
-
-      for (const installment of installmentDetails) {
-        if (installment.radio) {
-          totalPaidAmount += parseFloat(installment.amount);
-        }
-      }
-      totalPaidAmount += otherAmount;
       if (totalPaidAmount > existingRecord.data.remainingAmount) {
         return res.status(400).json({ error: "You have paid extra amount." });
       }
-      console.log(totalPaidAmount);
 
-      // let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
-      let remainingAmount = Math.max(existingRecord.data.remainingAmount - totalPaidAmount, 0) ||0;
-      
+      let remainingAmount = Math.max(existingRecord.data.remainingAmount - totalPaidAmount, 0) || 0;
+
       const serviceResponse = await service.create(req.body);
+      const updateResult = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
 
-      let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
-      console.log(a);
+     
+      const installmentRecord = await feesInstallmentService.getByInstallmentId(req.body.installmentId);
+console.log(installmentRecord.data);
+      if (installmentRecord) {
+       
+        for (const feesDetail of installmentRecord.data.feesDetails) {
+          for (const installment of feesDetail.installment) {
+         
+            for (const reqInstallment of req.body.installment) {
+              if (installment.installmentNo === reqInstallment.installmentNo && reqInstallment.radio) {
+             
+                installment.status = "paid";
+                console.log("aaaaaaaaaaaaaaaaaaaa",installment);
+              }
+            }
+          }
+        }
+
+     
+      let a=  await feesInstallmentService.updateFeesInstallmentById(installmentRecord.data.installmentId, installmentRecord.data.feesDetails);
+      console.log("dataaaaaaaaaaaaaaaaaaaaaa",a.feesDetails[0].installment);
+      }
 
       serviceResponse.data.paidAmount = totalPaidAmount;
       serviceResponse.data.remainingAmount = remainingAmount;
 
-      // Send the response
+     
       requestResponsehelper.sendResponse(res, serviceResponse);
     } else {
       const feesPaymentId = +Date.now();
       req.body.feesPaymentId = feesPaymentId;
 
-      const installmentDetails = req.body.installment;
-      const otherAmount = parseFloat(req.body.other_amount) || 0;
-
-      let totalPaidAmount = 0;
-
-      for (const installment of installmentDetails) {
-        if (installment.radio) {
-          totalPaidAmount += parseFloat(installment.amount);
-        }
-      }
-      totalPaidAmount += otherAmount;
-      if (totalPaidAmount >req.body.courseFee) {
+      if (totalPaidAmount > req.body.courseFee) {
         return res.status(400).json({ error: "You have paid extra amount." });
       }
-      console.log(totalPaidAmount);
 
-      let remainingAmount =Math.max(req.body.courseFee - totalPaidAmount,0) || 0;
+      let remainingAmount = Math.max(req.body.courseFee - totalPaidAmount, 0) || 0;
 
       const serviceResponse = await service.create(req.body);
+      const updateResult = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
 
-      let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
-      console.log(a);
+     
+      const installmentRecord = await feesInstallmentService.getByInstallmentId(req.body.installmentId);
+
+      if (installmentRecord) {
+       
+        for (const feesDetail of installmentRecord.data.feesDetails) {
+          for (const installment of feesDetail.installment) {
+           
+            for (const reqInstallment of req.body.installment) {
+              if (installment.installmentNo === reqInstallment.installmentNo && reqInstallment.radio) {
+               
+                installment.status = "paid";
+              }
+            }
+          }
+        }
+
+      await feesInstallmentService.updateFeesInstallmentById(installmentRecord.data.installmentId, installmentRecord.data.feesDetails);
+     
+      }
 
       serviceResponse.data.paidAmount = totalPaidAmount;
       serviceResponse.data.remainingAmount = remainingAmount;
@@ -89,6 +200,14 @@ router.post(
     }
   }
 );
+
+
+
+
+
+
+
+
 
 // router.post(
 //   "/",

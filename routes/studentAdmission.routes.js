@@ -42,6 +42,7 @@ router.get("/all", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+//original
 
 router.post("/data/save", async (req, res, next) => {
     try {
@@ -112,15 +113,7 @@ router.post("/data/save", async (req, res, next) => {
                 }
 
 
-                // //     : existingDocument.data?.feesDetails || [];
-                // if(req.body.feesDetails){
-                //     const installmentId = +Date.now();
-                //     req.body.installmentId = installmentId;
-                // const feesinstallmentResponse = await feesInstallmentServices.updateUser(
-                //     req.body.addmissionId,
-                //     req.body
-                // );  
-                // }    
+              
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -162,22 +155,94 @@ router.post("/data/save", async (req, res, next) => {
     }
 });
 
-// router.post(
-//     "/addInstallment/addmissionId/:addmissionId",
-//     // checkSchema(require("../dto/villageDevelopmentCommitte/village-development-committe.dto")),
-//     async (req, res, next) => {
+// router.post("/data/save", async (req, res, next) => {
+//     try {
 //         if (ValidationHelper.requestValidationErrors(req, res)) {
 //             return;
 //         }
-//         const serviceResponse = await service.addInstallment(
-//             // req.params.groupId,
-//             req.params.addmissionId,
-//             req.body
-//         );
-//         console.log(serviceResponse);
-//         requestResponsehelper.sendResponse(res, serviceResponse);
+
+//         if (req.body.addmissionId) {
+//             const existingDocument = await service.getByAddmissionIdData(
+//                 req.body.addmissionId
+//             );
+
+//             if (existingDocument) {
+//                 req.body.documents = req.body.documents
+//                     ? req.body.documents.map((documentData) => {
+//                           const documentId =
+//                               +Date.now() + Math.floor(Math.random() * 1000);
+//                           return {
+//                               _id: new mongoose.Types.ObjectId(),
+//                               documentId: documentId,
+//                               documents: documentData,
+//                           };
+//                       })
+//                     : existingDocument.data?.documents || [];
+
+//                 if (req.body.feesDetails) {
+//                     const installmentId = +Date.now();
+//                                         req.body.installmentId = installmentId;
+//                     const installments = req.body.feesDetails.flatMap((feesDetail) => {
+//                         // return feesDetail.installment.map((installment) => {
+//                             return {
+//                                 feesDetail,
+//                                 installmentId:installmentId,
+//                                 addmissionId: req.body.addmissionId,
+//                                 groupId: req.body.groupId,
+//                                 empId: req.body.empId,
+//                             };
+//                         // });
+//                     });
+
+//                     // // Create or update fees installment records
+//                     // await Promise.all(installments.map(async (installment) => {
+//                     //     const feesinstallment = await feesInstallmentServices.create(installment);
+//                     //     console.log(feesinstallment);
+//                     // }));
+
+//                     // // // Remove installment details from the request body
+//                     // // delete req.body.feesDetails;
+//                 }
+
+//                 const serviceResponse = await service.updateUser(
+//                     req.body.addmissionId,
+//                     req.body
+//                 );
+
+//                 requestResponsehelper.sendResponse(res, serviceResponse);
+//             } else {
+//                 const serviceResponse = await service.create(req.body);
+
+//                 if (req.body.feesDetails) {
+//                     const installmentId = +Date.now();
+//                     req.body.installmentId = installmentId;
+//                     const installments = req.body.feesDetails.flatMap((feesDetail) => {
+//                         // return feesDetail.installment.map((installment) => {
+//                             return {
+//                                 feesDetail,
+//                                 installmentId:installmentId,
+//                                 addmissionId: req.body.addmissionId,
+//                                 groupId: req.body.groupId,
+//                                 empId: req.body.empId,
+//                             };
+//                         // });
+//                     });
+
+//                     // Create fees installment records
+//                     await Promise.all(installments.map(async (installment) => {
+//                         const feesinstallment = await feesInstallmentServices.create(installment);
+//                         console.log(feesinstallment);
+//                     }));
+//                 }
+
+//                 requestResponsehelper.sendResponse(res, serviceResponse);
+//             }
+//         }
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: "Internal server error" });
 //     }
-// );
+// });
 
 router.delete(
     "/installmentDetails/addmissionId/:addmissionId/installmentId/:installmentId",
