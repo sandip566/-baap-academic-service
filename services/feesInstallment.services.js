@@ -4,6 +4,7 @@ const Student = require("../schema/student.schema");
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const studentAdmissionModel = require("../schema/studentAdmission.schema");
 const courseModel = require("../schema/courses.schema");
+const ClassModel = require("../schema/classes.schema");
 
 class feesInstallmentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -226,6 +227,100 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
+    async getAllDataByCourseId(groupId, courseId) {
+        try {
+            const classes = await ClassModel.find({ courseId, groupId });
+            return classes;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getTotalStudentsForClass(classId, groupId) {
+        try {
+            const totalStudents = await studentAdmissionModel.countDocuments({
+                "courseDetails.class_id": (classId),
+                groupId: groupId
+            });
+            return totalStudents;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    async getTotalFeesAndPendingFeesForClass(classId, groupId, feesTemplateId, academicYear) {
+        try {
+            let fee = await feesInstallmentModel.aggregate([
+                {
+                    $match: {
+                        "courseDetails.class_id": Number(classId),
+                        groupId: Number(groupId),
+                        "feesDetail.feesTemplateId": Number(feesTemplateId),
+                        academicYear: academicYear
+                    }
+                },
+                {
+                    $unwind: "$feesDetails"
+                },
+                {
+                    $unwind: "$feesDetails.installment"
+                },
+                {
+                    $group: {
+                        _id: {
+                            documentId: "$_id",
+                            status: "$feesDetails.installment.status"
+                        },
+                        totalAmount: { $sum: { $toInt: "$feesDetails.installment.amount" } }
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$_id.documentId",
+                        feesDetails: {
+                            $push: {
+                                status: "$_id.status",
+                                totalAmount: "$totalAmount"
+                            }
+                        },
+                        totalAmountAllStatus: { $sum: "$totalAmount" },
+                        totalStudents: { $sum: 1 }
+                    }
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        feesDetails: 1,
+                        totalAmountAllStatus: 1
+                    }
+                }
+            ]);
+
+            const response = {
+                totalFees: 0,
+                pendingFees: 0,
+                paidFees: 0
+            };
+
+            if (fee.length > 0) {
+                response.totalFees = fee[0].totalAmountAllStatus;
+                fee[0].feesDetails.forEach(detail => {
+                    if (detail.status === 'pending') {
+                        response.pendingFees += detail.totalAmount;
+                    } else if (detail.status === 'paid') {
+                        response.paidFees += detail.totalAmount;
+                    }
+                });
+            }
+
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    }
+
 
 }
 module.exports = new feesInstallmentService(feesInstallmentModel, "FeesInstallation");
