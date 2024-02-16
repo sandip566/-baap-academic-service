@@ -5,9 +5,9 @@ const religionSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        name: {
-            type: String,
-            required: false
+        religion:{
+            type:String,
+            required:false
         }
     },
     { strict: false, timestamps: true }

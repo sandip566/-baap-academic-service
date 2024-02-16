@@ -6,8 +6,11 @@ const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const courseModel = require("../schema/courses.schema");
 const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
-const FeesTemplateModel = require("../schema/feesTemplate.schema");
+const religionModel = require("../schema/religion.schema");
+const SubjectModel = require("../schema/subjects.schema")
+// const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
+
 const FeesPaymentModel = require("../schema/feesPayment.schema");
 
 class StudentsAdmmisionService extends BaseService {
@@ -475,9 +478,6 @@ class StudentsAdmmisionService extends BaseService {
 
             // let response1;
             let modifiedFeesPaymentData = [];
-
-
-
             let response1 = []; // Define response1 as an array
 
             for (const feesPayment of feesPaymentData) {
@@ -706,6 +706,202 @@ class StudentsAdmmisionService extends BaseService {
                 isError: true,
                 message: "An error occurred during data retrieval",
             };
+        }
+    }
+
+
+
+    async bulkUpload(headers, dataRows, userId) {
+        try {
+            const studentAdmissionId = Date.now();
+            for (const row of dataRows) {
+                if (row.every(value => value === null || value === '')) {
+                    continue;
+                }
+    
+                const obj = {};
+                headers.forEach((header, index) => {
+                    obj[header] = row[index];
+                });
+    
+                // Validate smart_id uniqueness
+                const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": obj.smart_id });
+                if (existingSmartIdRecord) {
+                    throw new Error('Smart ID already exists');
+                }
+    
+                const courseName = obj.courseName;
+                const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
+                const religionName = obj.religion;
+                const { religionId } = await this.getReligionId(religionName);
+                const name = obj.name;
+                const { TemplateId } = await this.getTemplateIDbyCourseName(name);
+                const subjectsArray = obj.subjects.split(',');
+    
+                const phoneNumber = String(obj.phoneNumber).trim();
+                const phone = String(obj.phone).trim();
+    
+                // Validate phone numbers
+                if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
+                    throw new Error('Invalid phone number');
+                }
+    
+                // Check if phone number already exists in the database
+                const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
+                if (existingPhoneNumberRecord) {
+                    throw new Error('Phone number already exists');
+                }
+    
+                // Construct payload
+                const payload = {
+                    studentAdmissionId: studentAdmissionId,
+                    academicYear: obj.adcedemicYear,
+                    caste: obj.caste,
+                    dateOfBirth: obj.dateOfBirth,
+                    document: [obj.document],
+                    email: obj.email,
+                    firstName: obj.firstName,
+                    lastName: obj.lastName,
+                    middleName: obj.middleName,
+                    empId: obj.empId,
+                    gender: obj.gender,
+                    location: obj.location,
+                    name: obj.name,
+                    password: obj.password,
+                    phoneNumber: phoneNumber,
+                    profile_img: obj.profile_img,
+                    religion: obj.religion,
+                    religionId: religionId,
+                    roleId: obj.roleId,
+                    title: obj.title,
+                    userId: obj.userId,
+                    familyDetails: [
+                        {
+                            father_name: obj.father_name,
+                            mother_name: obj.mother_name,
+                            guardian_name: obj.guardian_name,
+                            father_phone_number: obj.father_phone_number,
+                            mother_phone_number: obj.mother_phone_number,
+                            guardian_phone_number: obj.guardian_phone_number,
+                            emergency_contact: [
+                                {
+                                    contact_name: obj.contact_name,
+                                    phone_number: obj.phone_number,
+                                    relationship: obj.relationship,
+                                },
+                            ],
+                        },
+                    ],
+                    contactDetails: [
+                        {
+                            phone: phone,
+                            email: obj.email,
+                            whats_app: obj.whats_app,
+                            facebook: obj.facebook,
+                            instagram: obj.instagram,
+                            linked_in: obj.linked_in,
+                        },
+                    ],
+                    securitySettings: [
+                        {
+                            smart_id: obj.smart_id,
+                            subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
+                            public_profile_url: obj.public_profile_url,
+                        },
+                    ],
+                    courseDetails: {
+                        course_id: courseId,
+                        class_id: classId,
+                        division_id: divisionId,
+                        subjects: subjectsArray,
+                    },
+                    feesDetails: [
+                        {
+                            feesTemplateId: TemplateId,
+                            installment: [
+                                {
+                                    amount: obj.amount,
+                                    date: obj.date,
+                                    numberOfInstalment: obj.numberOfInstalment,
+                                    installmentNo: obj.installmentNo,
+                                    status: obj.status,
+                                },
+                            ],
+                        },
+                    ],
+                    installmentId: obj.installmentId,
+                    createdBy: userId,
+                    updatedBy: userId,
+                };
+    
+                // Insert payload into the database
+                const result = await studentAdmissionModel.insertMany(payload);
+    
+                return {
+                    message: 'Data uploaded successfully',
+                    data: result,
+                };
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+    
+    
+
+
+
+    async getIdsByCourseName(courseName) {
+        try {
+            const course = await courseModel.findOne({ courseName: courseName });
+
+            if (!course) {
+                return {
+                    courseId: null,
+                    classId: null,
+                    divisionId: null
+                };
+            }
+
+            const courseId = course.courseId;
+            const classInfo = await ClassModel.findOne({ courseId });
+
+            if (!classInfo) {
+                return {
+                    courseId,
+                    classId: null,
+                    divisionId: null
+                };
+            }
+
+            const classId = classInfo.classId;
+
+            const divisionInfo = await DivisionModel.findOne({ classId });
+
+            return {
+                courseId,
+                classId,
+                divisionId: divisionInfo ? divisionInfo.divisionId : null
+            };
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async getReligionId(religion) {
+        let religionName = await religionModel.findOne({ religion: religion })
+        const religionId = religionName.religionId
+        return {
+            religionId
+        }
+    }
+
+    async getTemplateIDbyCourseName(name) {
+        let name1 = await feesTemplateModel.findOne({ name: name })
+        const TemplateId = name1.feesTemplateId
+        return {
+            TemplateId
         }
     }
 }
