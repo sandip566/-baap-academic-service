@@ -1,3 +1,4 @@
+const { query } = require("express");
 const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -36,5 +37,31 @@ class BooksService extends BaseService {
             throw error;
         }
     }
+    async getTotalAvailableBooks() {
+        try {
+          const books = await booksModel.find();
+          let totalCount = 0;
+          for (const book of books) {
+            totalCount += book.availableCount;
+          }
+          return totalCount;
+        } catch (error) {
+          throw error;
+        }
+    }
+
+    // async getTotalBooks() {
+    //     try {
+    //       const books = await booksModel.find();
+    //       let totalCount = 0;
+    //       for (const book of books) {
+    //         totalCount += book.totalCopies;
+    //       }
+    //       return totalCount;
+    //     } catch (error) {
+    //       throw error;
+    //     }
+    // }
+
 }
 module.exports = new BooksService(booksModel, "books");

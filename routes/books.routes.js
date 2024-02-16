@@ -4,7 +4,8 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/books.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const Book = require("../schema/books.schema");
+const { group } = require("console");
 router.post(
     "/",
     checkSchema(require("../dto/books.dto")),
@@ -20,7 +21,12 @@ router.post(
 );
 
 router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
+    const pagination = {
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: 3,
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -34,10 +40,10 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
-    const serviceResponse = await service.getById(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+// router.get("/:id", async (req, res) => {
+//     const serviceResponse = await service.getById(req.params.id);
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+// });
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -45,7 +51,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         author: req.query.author,
         availableCount: req.query.availableCount,
     };
-    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    const serviceResponse = await service.getAllDataByGroupId(
+        groupId,
+        criteria
+    );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
@@ -83,11 +92,39 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
                 error: "book data not found to update",
             });
         } else {
-            res.status(200).json({ updatebook, message: "data update successfully" });
+            res.status(200).json({
+                updatebook,
+                message: "data update successfully",
+            });
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/totalAvailableBooks", async (req, res) => {
+    try {
+        const totalCount = await service.getTotalAvailableBooks();
+        res.json({ totalAvailableBooks: totalCount });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.get("/totalBooks", async (req, res) => {
+    try {
+        const books = await Book.find({});
+        let totalCount = 0;
+        for (const book of books) {
+            totalCount += book.totalCopies;
+        }
+        res.json({ totalAvailableBooks: totalCount });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 module.exports = router;
