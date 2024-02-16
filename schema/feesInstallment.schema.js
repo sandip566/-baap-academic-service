@@ -1,18 +1,18 @@
-
 const mongoose = require("mongoose");
+
 const feesInstallmentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false,
+            required: false,
         },
         addmissionId: {
-            type:Number,
-            required: false
+            type: Number,
+            required: false,
         },
         studentId: {
-            type:Number,
-            required: false
+            type: Number,
+            required: false,
         },
         installmentId: {
             type: Number,
@@ -29,11 +29,15 @@ const feesInstallmentSchema = new mongoose.Schema(
         // },
         isPaid: {
             type: Boolean,
-            default: false
+            default: false,
+        },
+        status: {
+            type: String,
+            default: "pending",
         },
         installmentNo: {
             type: Number,
-            require: false
+            require: false,
         },
         reciptNo: {
             type: Number,
@@ -42,5 +46,8 @@ const feesInstallmentSchema = new mongoose.Schema(
     { strict: false, timestamps: true }
 );
 feesInstallmentSchema.plugin(require("mongoose-autopopulate"));
-const FeesInstallmentModel = mongoose.model("feesInstallment", feesInstallmentSchema);
+const FeesInstallmentModel = mongoose.model(
+    "feesInstallment",
+    feesInstallmentSchema
+);
 module.exports = FeesInstallmentModel;

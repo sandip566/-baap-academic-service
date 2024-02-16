@@ -83,5 +83,4 @@ router.get("/:id", async (req, res) => {
   const serviceResponse = await shelfService.getById(req.params.id);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
-
 module.exports = router;

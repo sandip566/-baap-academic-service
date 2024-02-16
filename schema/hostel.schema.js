@@ -1,10 +1,9 @@
 const mongoose = require("mongoose");
-
 const HostelSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required : false
+            required: false
         },
         hostelId: {
             type: Number,

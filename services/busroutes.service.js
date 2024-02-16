@@ -5,11 +5,12 @@ class BusRoutesService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize=10
+        criteria.pageSize = 10
         if (criteria.routeName) query.routeName = new RegExp(criteria.routeName, "i");
         if (criteria.schedule) query.schedule = new RegExp(criteria.schedule, "i");
         if (criteria.routeId) query.routeId = criteria.routeId;
@@ -37,5 +38,4 @@ class BusRoutesService extends BaseService {
         }
     }
 }
-
 module.exports = new BusRoutesService(BusRoutesModel, 'busroutes');

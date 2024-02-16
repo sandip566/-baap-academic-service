@@ -5,9 +5,10 @@ const service = require("../services/categories.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+
 router.post(
   "/",
-  checkSchema(require("../dto/categories.dto")),TokenService.checkPermission(["EFC2"]),
+  checkSchema(require("../dto/categories.dto")), TokenService.checkPermission(["EFC2"]),
   async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
@@ -15,8 +16,8 @@ router.post(
     const existingRecord = await service.getByCourseIdAndGroupId(req.body.name);
     console.log(existingRecord);
     if (existingRecord.data) {
-       
-        return res.status(409).json({ error: " Same Name Already Exists." });
+
+      return res.status(409).json({ error: " Same Name Already Exists." });
     }
     const categoriseId = +Date.now();
     req.body.categoriseId = categoriseId;
@@ -25,27 +26,27 @@ router.post(
   }
 );
 
-router.get("/all",TokenService.checkPermission(["EFC1"]), async (req, res) => {
+router.get("/all", TokenService.checkPermission(["EFC1"]), async (req, res) => {
   const serviceResponse = await service.getAllByCriteria({});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id",TokenService.checkPermission(["EFC4"]), async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["EFC4"]), async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id",TokenService.checkPermission(["EFC2"]), async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["EFC2"]), async (req, res) => {
   const serviceResponse = await service.updateById(req.params.id, req.body);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id",TokenService.checkPermission(["EFC1"]), async (req, res) => {
+router.get("/:id", TokenService.checkPermission(["EFC1"]), async (req, res) => {
   const serviceResponse = await service.getById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/categoriesId/:categoriesId",TokenService.checkPermission(["EFC4"]), async (req, res) => {
+router.delete("/categoriesId/:categoriesId", TokenService.checkPermission(["EFC4"]), async (req, res) => {
   try {
     const categoriesId = req.params.categoriesId;
     const data = await service.deleteCategoriesById({ categoriesId });
@@ -60,7 +61,7 @@ router.delete("/categoriesId/:categoriesId",TokenService.checkPermission(["EFC4"
   }
 });
 
-router.put("/categoriesId/:categoriesId",TokenService.checkPermission(["EFC3"]), async (req, res) => {
+router.put("/categoriesId/:categoriesId", TokenService.checkPermission(["EFC3"]), async (req, res) => {
   try {
     const categoriesId = req.params.categoriesId;
     const newData = req.body;

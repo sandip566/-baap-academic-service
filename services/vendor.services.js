@@ -14,7 +14,6 @@ class Service extends BaseService {
         if (criteria.vendorId) query.vendorId = criteria.vendorId;
         if (criteria.vendorName) query.vendorName = new RegExp(criteria.vendorName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
-        
     }
 
     async deleteVendorById(vendorId, groupId) {

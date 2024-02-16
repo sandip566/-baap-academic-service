@@ -21,19 +21,16 @@ router.post(
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -43,8 +40,7 @@ router.get("/all/busRoutes", async (req, res) => {
         pageSize: 10
     };
     const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria(query,pagination);
-
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -54,11 +50,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         routeId: req.query.routeId,
         routeName: req.query.routeName,
         schedule: req.query.schedule,
-        pageNumber:parseInt(req.query.pageNumber)||1
+        pageNumber: parseInt(req.query.pageNumber) || 1
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.delete("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
         const routeId = req.params.routeId;
@@ -79,6 +76,7 @@ router.delete("/groupId/:groupId/routeId/:routeId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
         const routeId = req.params.routeId;

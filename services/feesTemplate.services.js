@@ -21,6 +21,7 @@ class Service extends BaseService {
             data: result,
         });
     }
+
     async deletefeesTemplateById(feesTemplateId, groupId) {
         try {
             return await feesTemplateModel.deleteOne(feesTemplateId, groupId);

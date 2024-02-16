@@ -6,10 +6,6 @@ class ReminderService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async save(dataObject) {
-        return await ReminderModel.create(dataObject);
-    }
-
     async getByDataId(reminderId) {
         return this.execute(() => {
             return ReminderModel.findOne({ reminderId: reminderId });

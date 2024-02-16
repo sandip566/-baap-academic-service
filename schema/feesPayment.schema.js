@@ -19,7 +19,7 @@ const feesPaymentSchema = new mongoose.Schema(
             required: false,
             default: "0"
         },
-        remainingAmount:{
+        remainingAmount: {
             type: String,
             required: false,
         },
@@ -30,11 +30,11 @@ const feesPaymentSchema = new mongoose.Schema(
         feesPaymentId: {
             type: Number,
         },
-        currentDate:{
+        currentDate: {
             type: String,
             required: false,
         },
-        academicYear:{
+        academicYear: {
             type: String,
             required: false,
         },

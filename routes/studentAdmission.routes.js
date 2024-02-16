@@ -42,6 +42,7 @@ router.get("/all", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+//original
 
 router.post("/data/save", async (req, res, next) => {
     try {
@@ -57,14 +58,14 @@ router.post("/data/save", async (req, res, next) => {
             if (existingDocument) {
                 req.body.documents = req.body.documents
                     ? req.body.documents.map((documentData) => {
-                          const documentId =
-                              +Date.now() + Math.floor(Math.random() * 1000);
-                          return {
-                              _id: new mongoose.Types.ObjectId(),
-                              documentId: documentId,
-                              documents: documentData,
-                          };
-                      })
+                        const documentId =
+                            +Date.now() + Math.floor(Math.random() * 1000);
+                        return {
+                            _id: new mongoose.Types.ObjectId(),
+                            documentId: documentId,
+                            documents: documentData,
+                        };
+                    })
                     : existingDocument.data?.documents || [];
 
                 // req.body.feesDetails = req.body.feesDetails
@@ -79,7 +80,7 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-         
+
                     const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
                         const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
 
@@ -88,37 +89,31 @@ router.post("/data/save", async (req, res, next) => {
                             return {
                                 ...installment,
                                 installmentNo: uniqueInstallNo,
+                                status:"pending"
                             };
                         });
-                
-                      
+
+
                         return {
                             ...feesDetail,
                             installment: updatedInstallments,
                         };
                     });
-                
-                   
+
+
                     req.body.feesDetails = updatedFeesDetails;
-                
+
                     const feesinstallmentResponse = await feesInstallmentServices.updateUser(
                         req.body.addmissionId,
+                        req.body.groupId,
                         req.body
                     );
-                
+
                     console.log(feesinstallmentResponse);
                 }
-                
 
-                // //     : existingDocument.data?.feesDetails || [];
-                // if(req.body.feesDetails){
-                //     const installmentId = +Date.now();
-                //     req.body.installmentId = installmentId;
-                // const feesinstallmentResponse = await feesInstallmentServices.updateUser(
-                //     req.body.addmissionId,
-                //     req.body
-                // );  
-                // }    
+
+              
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -132,19 +127,19 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-                console.log(req.body.feesDetails);
+                    console.log(req.body.feesDetails);
                     const feesinstallment = await feesInstallmentServices.create(req.body);
                     console.log(feesinstallment);
-                
-                 
+
+
                     const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
                         ...detail,
-                        installNo: index + 1, 
+                        installNo: index + 1,
                     }));
-                console.log(updatedInstallments);
+                    console.log(updatedInstallments);
                     req.body.feesDetails = updatedInstallments;
                 }
-                
+
                 // if(req.body.feesDetails){
                 // const installmentId = +Date.now();
                 // req.body.installmentId = installmentId;
@@ -160,22 +155,94 @@ router.post("/data/save", async (req, res, next) => {
     }
 });
 
-// router.post(
-//     "/addInstallment/addmissionId/:addmissionId",
-//     // checkSchema(require("../dto/villageDevelopmentCommitte/village-development-committe.dto")),
-//     async (req, res, next) => {
+// router.post("/data/save", async (req, res, next) => {
+//     try {
 //         if (ValidationHelper.requestValidationErrors(req, res)) {
 //             return;
 //         }
-//         const serviceResponse = await service.addInstallment(
-//             // req.params.groupId,
-//             req.params.addmissionId,
-//             req.body
-//         );
-//         console.log(serviceResponse);
-//         requestResponsehelper.sendResponse(res, serviceResponse);
+
+//         if (req.body.addmissionId) {
+//             const existingDocument = await service.getByAddmissionIdData(
+//                 req.body.addmissionId
+//             );
+
+//             if (existingDocument) {
+//                 req.body.documents = req.body.documents
+//                     ? req.body.documents.map((documentData) => {
+//                           const documentId =
+//                               +Date.now() + Math.floor(Math.random() * 1000);
+//                           return {
+//                               _id: new mongoose.Types.ObjectId(),
+//                               documentId: documentId,
+//                               documents: documentData,
+//                           };
+//                       })
+//                     : existingDocument.data?.documents || [];
+
+//                 if (req.body.feesDetails) {
+//                     const installmentId = +Date.now();
+//                                         req.body.installmentId = installmentId;
+//                     const installments = req.body.feesDetails.flatMap((feesDetail) => {
+//                         // return feesDetail.installment.map((installment) => {
+//                             return {
+//                                 feesDetail,
+//                                 installmentId:installmentId,
+//                                 addmissionId: req.body.addmissionId,
+//                                 groupId: req.body.groupId,
+//                                 empId: req.body.empId,
+//                             };
+//                         // });
+//                     });
+
+//                     // // Create or update fees installment records
+//                     // await Promise.all(installments.map(async (installment) => {
+//                     //     const feesinstallment = await feesInstallmentServices.create(installment);
+//                     //     console.log(feesinstallment);
+//                     // }));
+
+//                     // // // Remove installment details from the request body
+//                     // // delete req.body.feesDetails;
+//                 }
+
+//                 const serviceResponse = await service.updateUser(
+//                     req.body.addmissionId,
+//                     req.body
+//                 );
+
+//                 requestResponsehelper.sendResponse(res, serviceResponse);
+//             } else {
+//                 const serviceResponse = await service.create(req.body);
+
+//                 if (req.body.feesDetails) {
+//                     const installmentId = +Date.now();
+//                     req.body.installmentId = installmentId;
+//                     const installments = req.body.feesDetails.flatMap((feesDetail) => {
+//                         // return feesDetail.installment.map((installment) => {
+//                             return {
+//                                 feesDetail,
+//                                 installmentId:installmentId,
+//                                 addmissionId: req.body.addmissionId,
+//                                 groupId: req.body.groupId,
+//                                 empId: req.body.empId,
+//                             };
+//                         // });
+//                     });
+
+//                     // Create fees installment records
+//                     await Promise.all(installments.map(async (installment) => {
+//                         const feesinstallment = await feesInstallmentServices.create(installment);
+//                         console.log(feesinstallment);
+//                     }));
+//                 }
+
+//                 requestResponsehelper.sendResponse(res, serviceResponse);
+//             }
+//         }
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({ error: "Internal server error" });
 //     }
-// );
+// });
 
 router.delete(
     "/installmentDetails/addmissionId/:addmissionId/installmentId/:installmentId",
@@ -235,12 +302,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             lastName: req.query.lastName,
             search: req.query.search,
         };
-        
+
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria
         );
-        
+
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);
@@ -260,7 +327,7 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             addmissionId: req.query.addmissionId,
             empId: req.query.empId
         };
-        
+
         const serviceResponse = await service.getfeesPayment(
             groupId,
             criteria
@@ -336,5 +403,4 @@ router.put(
         }
     }
 );
-
 module.exports = router;

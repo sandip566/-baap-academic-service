@@ -5,9 +5,10 @@ const service = require("../services/feesTemplate.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+
 router.post(
     "/",
-    checkSchema(require("../dto/feesTemplate.dto")),TokenService.checkPermission(["EMT2"]),
+    checkSchema(require("../dto/feesTemplate.dto")), TokenService.checkPermission(["EMT2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -22,29 +23,31 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    
+
     const feesTemplateId = req.params.feesTemplateId;
     const installmentNo = parseInt(req.params.installmentNo);
 
     try {
+        const installmentDetails = [];
         const serviceResponse = await service.getByfeesTemplateId(feesTemplateId);
 
         if (serviceResponse.data) {
             const totalFees = serviceResponse.data.totalFees;
             const installmentAmount = totalFees / installmentNo;
-            const installmentDetails = [];
-
+           
             for (let i = 1; i <= installmentNo; i++) {
                 installmentDetails.push({
                     installmentNo: i,
                     amount: installmentAmount,
                 });
             }
-
             serviceResponse.data.installmentDetails = installmentDetails;
         }
-
-        requestResponsehelper.sendResponse(res, serviceResponse);
+        let response={
+            status:"success",
+            data:installmentDetails,
+        }
+        requestResponsehelper.sendResponse(res, response);
     } catch (error) {
         console.error("Error occurred:", error);
         requestResponsehelper.sendResponse(res, { status: "Failed", message: "An error occurred while processing the request." });
@@ -52,37 +55,36 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
 });
 
 
-
-router.get("/all",TokenService.checkPermission(["EMT1"]), async (req, res) => {
+router.get("/all", TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
         pageSize: req.query.pageNumber
     };
     const { pageNumber, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria(query,pagination);
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id",TokenService.checkPermission(["EMT4"]), async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["EMT4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id",TokenService.checkPermission(["EMT3"]), async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["EMT3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id",TokenService.checkPermission(["EMT1"]), async (req, res) => {
+router.get("/:id", TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMT1"]), async (req, res) => {
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         feesTemplateId: req.query.feesTemplateId,
-        pageNumber:parseInt(req.query.pageNumber)||1
+        pageNumber: parseInt(req.query.pageNumber) || 1
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -91,7 +93,7 @@ router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMT1"]), 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.checkPermission(["EMT4"]), async (req, res) => {
+router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId", TokenService.checkPermission(["EMT4"]), async (req, res) => {
     try {
         const feesTemplateId = req.params.feesTemplateId
         const groupId = req.params.groupId
@@ -107,7 +109,7 @@ router.delete("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.ch
     }
 });
 
-router.put("/groupId/:groupId/feesTemplateId/:feesTemplateId",TokenService.checkPermission(["EMT3"]), async (req, res) => {
+router.put("/groupId/:groupId/feesTemplateId/:feesTemplateId", TokenService.checkPermission(["EMT3"]), async (req, res) => {
     try {
         const feesTemplateId = req.params.feesTemplateId;
         const groupId = req.params.groupId;

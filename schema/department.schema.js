@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const departmentSchema = new mongoose.Schema(
     {
         groupId: {
@@ -14,10 +13,10 @@ const departmentSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        departmentHead:{
-            code:{
-                type:String,
-                required:false
+        departmentHead: {
+            code: {
+                type: String,
+                required: false
             }
         }
     },
