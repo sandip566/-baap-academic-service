@@ -52,42 +52,6 @@ class BooksService extends BaseService {
     }
 }      
 
-// getAllDataByGroupId(groupId, criteria) {
-//     const query = {
-//         groupId: groupId,
-//     };
-    
-//     if (criteria.search) {
-//         const searchRegex = new RegExp(criteria.search, "i");
-        
-//         if (criteria.title) {
-//             query.title = searchRegex;
-//         } else {
-//             const searchData  await this.model.aggregate([
-               
-//                 { $match: { ...query, title: searchRegex } }
-//             ]);
-
-//             if (searchData.length > 0) {
-//                 return { success: true, data: searchData };
-//             } else {
-//                 return { success: false, message: "No data found for the provided search criteria" };
-//             }
-//         }
-//     }
-
-//     // If no search criteria provided or if it's specifically for a title, return all data
-//     const allData = await this.preparePaginationAndReturnData(query, criteria);
-
-//     if (allData.length > 0) {
-//         return { success: true, data: allData };
-//     } else {
-//         return { success: false, message: "No data found" };
-//     }
-// }
-
-
-
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
