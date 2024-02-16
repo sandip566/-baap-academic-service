@@ -5,16 +5,88 @@ class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
     getAllDataByGroupId(groupId, criteria) {
-        const query = {
+    try {
+        const searchFilter = {
             groupId: groupId,
         };
-        if (criteria.title) query.title = new RegExp(criteria.title, "i");
-        if (criteria.author) query.author = new RegExp(criteria.author, "i");
-        if (criteria.availableCount) query.availableCount = criteria.availableCount;
-        return this.preparePaginationAndReturnData(query, criteria);
+    
+        if (criteria.search) {
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                searchFilter.$or = [
+                    { title: { $regex: criteria.search, $options: "i" } },
+                    { author: { $regex: criteria.search, $options: "i" } },
+                    { ISBN: numericSearch },
+                    { RFID: criteria.search } // Assuming RFID is searched as exact match
+                ];
+            } else {
+                searchFilter.$or = [
+                    { title: { $regex: criteria.search, $options: "i" } },
+                    { author: { $regex: criteria.search, $options: "i" } },
+                    { RFID: criteria.search } // Assuming RFID is searched as exact match
+                ];
+            }
+        }
+    
+        if (criteria.availableCount) {
+            searchFilter.availableCount = criteria.availableCount;
+        }
+    
+        if (criteria.totalCopies) {
+            searchFilter.totalCopies = criteria.totalCopies;
+        }
+    
+        if (criteria.shelfId) {
+            searchFilter.shelfId = criteria.shelfId;
+        }
+    
+        if (criteria.status) {
+            searchFilter.status = criteria.status;
+        }
+        if (criteria.title) {
+            searchFilter.title= criteria.title;
+        }
+    } catch (error) {
+         console.log(error)
     }
+}      
+
+// getAllDataByGroupId(groupId, criteria) {
+//     const query = {
+//         groupId: groupId,
+//     };
+    
+//     if (criteria.search) {
+//         const searchRegex = new RegExp(criteria.search, "i");
+        
+//         if (criteria.title) {
+//             query.title = searchRegex;
+//         } else {
+//             const searchData  await this.model.aggregate([
+               
+//                 { $match: { ...query, title: searchRegex } }
+//             ]);
+
+//             if (searchData.length > 0) {
+//                 return { success: true, data: searchData };
+//             } else {
+//                 return { success: false, message: "No data found for the provided search criteria" };
+//             }
+//         }
+//     }
+
+//     // If no search criteria provided or if it's specifically for a title, return all data
+//     const allData = await this.preparePaginationAndReturnData(query, criteria);
+
+//     if (allData.length > 0) {
+//         return { success: true, data: allData };
+//     } else {
+//         return { success: false, message: "No data found" };
+//     }
+// }
+
+
 
     async deleteBookById(bookId, groupId) {
         try {
@@ -34,6 +106,20 @@ class BooksService extends BaseService {
             return updateBook;
         } catch (error) {
             throw error;
+        }
+    }
+
+
+    async getTotalBooks() {
+        try {
+          const books = await booksModel.find();
+          let totalCount = 0;
+          for (const book of books) {
+            totalCount += book.totalCopies;
+          }
+          return totalCount;
+        } catch (error) {
+          throw error;
         }
     }
 }

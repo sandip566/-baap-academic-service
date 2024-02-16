@@ -44,9 +44,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         title: req.query.title,
         author: req.query.author,
         availableCount: req.query.availableCount,
+        search: req.query.search,
+        department:req.query.department,
+        publisher:req.query.publisher,
+        price:req.query.price,
     };
-    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
-    requestResponsehelper.sendResponse(res, serviceResponse);
+    const serviceResponse = service.getAllDataByGroupId(groupId, criteria);
+    //equestResponsehelper.sendResponse(res, serviceResponse);
+    res.json({serviceResponse})
 });
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
@@ -90,4 +95,15 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+router.get('/abc', async (req, res) => {
+    try {
+      const totalCount = await service.getTotalBooks();
+      res.json({ totalAvailableBooks: totalCount });
+    } catch (error) {
+      console.error("Error:", error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
 module.exports = router;

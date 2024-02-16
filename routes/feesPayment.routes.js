@@ -299,20 +299,8 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
 });
 
 router.get("/all", async (req, res) => {
-<<<<<<< HEAD
-  const serviceResponse = await service.getAllByCriteria({req,query, pagination});
-  requestResponsehelper.sendResponse(res, serviceResponse);
-});
-router.get("/getByfeesPaymentId/groupId/:groupId/feesPaymentId/:feesPaymentId", async (req, res, next) => {
-  if (ValidationHelper.requestValidationErrors(req, res)) {
-      return;
-  }
-  const serviceResponse = await service.getByfeesPaymentId(req.params.groupId, req.params.feesPaymentId);
-  requestResponsehelper.sendResponse(res, serviceResponse);
-=======
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
->>>>>>> 8fa8d1e820c59a4eff5e533b9e8655b71e0f59a0
 });
 router.get(
     "/getByfeesPaymentId/groupId/:groupId/feesPaymentId/:feesPaymentId",
