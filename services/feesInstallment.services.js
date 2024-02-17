@@ -20,11 +20,13 @@ class feesInstallmentService extends BaseService {
         const query = {
             groupId: groupId,
         };
+
+        criteria.pageSize = 10
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.installmentId) query.installmentId = criteria.installmentId;
         if (criteria.empId) query.empId = criteria.empId;
         if (criteria.installmentNo) query.installmentNo = criteria.installmentNo;
-        return this.preparePaginationAndReturnData(query, criteria,);
+        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async updateUser(addmissionId, groupId, data) {

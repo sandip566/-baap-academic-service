@@ -326,7 +326,7 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-    async getfeesPayment(groupId, query) {
+    async  getfeesPayment(groupId, query) {
         try {
             const searchFilter = {
                 groupId: groupId,

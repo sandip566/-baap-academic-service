@@ -20,7 +20,12 @@ router.post(
 );
 
 router.get("/all", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
+  const pagination = {
+    pageNumber: req.query.pageNumber || 1,
+    pageSize: 10 
+};
+const { pageNumber, pageSize, ...query } = req.query;
+  const serviceResponse = await service.getAllByCriteria({req,query,pagination});
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -46,6 +51,7 @@ router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
       roomId: req.query.roomId,
       hostelId: req.query.hostelId,
       status: req.query.status,
+      pageNumber:parseInt(req.query.pageNumber) || 1
     }
     const serviceResponse = await service.getAllRoomDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

@@ -37,6 +37,16 @@ const booksSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        price:{
+            type:Number
+        },
+        publisher:{
+            type:String
+        },
+        department:{
+            type:Number,
+            require:false
+        },
         status: {
             type: String,
             enum: ["Available", "Lost", "Loaned", "Reserved", "NotAvailable"]
