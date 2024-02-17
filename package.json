@@ -29,7 +29,8 @@
         "request": "^2.88.2",
         "require-dir": "^1.2.0",
         "saslprep": "^1.0.3",
-        "serverless-http": "^3.1.1"
+        "serverless-http": "^3.1.1",
+        "xlsx": "^0.19.3"
     },
     "devDependencies": {
         "nodemon": "^2.0.20",

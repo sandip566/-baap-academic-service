@@ -727,23 +727,25 @@ class StudentsAdmmisionService extends BaseService {
                 // Validate smart_id uniqueness
                 const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": obj.smart_id });
                 if (existingSmartIdRecord) {
-                    throw new Error('Smart ID already exists');
+                    throw new Error(`${ obj.smart_id } Smart ID already exists`);
                 }
     
                 const courseName = obj.courseName;
                 const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
                 const religionName = obj.religion;
-                const { religionId } = await this.getReligionId(religionName);
+                const { religionId } = await this.getReligionId(religionName,obj.groupId);
+                console.log(religionId)
                 const name = obj.name;
                 const { TemplateId } = await this.getTemplateIDbyCourseName(name);
                 const subjectsArray = obj.subjects.split(',');
     
                 const phoneNumber = String(obj.phoneNumber).trim();
-                const phone = String(obj.phone).trim();
+                const phone = String(obj.phone).trim(); 
     
                 // Validate phone numbers
                 if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
                     throw new Error('Invalid phone number');
+                    
                 }
     
                 // Check if phone number already exists in the database
@@ -751,6 +753,7 @@ class StudentsAdmmisionService extends BaseService {
                 if (existingPhoneNumberRecord) {
                     throw new Error('Phone number already exists');
                 }
+                console.log(existingPhoneNumberRecord)
     
                 // Construct payload
                 const payload = {
@@ -889,14 +892,23 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async getReligionId(religion) {
-        let religionName = await religionModel.findOne({ religion: religion })
-        const religionId = religionName.religionId
+    async  getReligionId(religion, groupId) {
+        religion = religion.toLowerCase();
+        groupId = groupId
+console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",religion,groupId);
+        let religionName = await religionModel.findOne({ religion: { $regex: new RegExp(religion, "i") }, groupId: groupId });
+    
+        if (!religionName) {
+            throw new Error(`Religion with provided criteria not found`);
+        }
+    
+        console.log("religionName", religionName);
+        const religionId = religionName.religionId;
         return {
             religionId
-        }
+        };
     }
-
+    
     async getTemplateIDbyCourseName(name) {
         let name1 = await feesTemplateModel.findOne({ name: name })
         const TemplateId = name1.feesTemplateId
