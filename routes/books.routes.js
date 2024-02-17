@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/books.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const booksModel = require("../schema/books.schema");
 
 router.post(
     "/",
@@ -38,21 +39,42 @@ router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        title: req.query.title,
-        author: req.query.author,
-        availableCount: req.query.availableCount,
-        search: req.query.search,
-        department:req.query.department,
-        publisher:req.query.publisher,
-        price:req.query.price,
-    };
-    const serviceResponse = service.getAllDataByGroupId(groupId, criteria);
-    //equestResponsehelper.sendResponse(res, serviceResponse);
-    res.json({serviceResponse})
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            title: req.query.title,
+            author: req.query.author,
+            availableCount: req.query.availableCount,
+            search: req.query.search,
+            department: req.query.department,
+            publisher: req.query.publisher,
+            price: req.query.price,
+           status:req.query.status
+        };
+
+        // Call the service function to get the search filter
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria);
+
+        // Check if search filter is not null
+        if (searchFilter !== null) {
+            // Use the search filter to fetch data from the database
+            const data = await booksModel.find(searchFilter) .populate('department');;
+
+            // Return all data related to the matched documents
+            res.json(data);
+        } else {
+            // Handle the case when search filter is null
+            res.status(500).send('Server Error');
+        }
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 });
+
+
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;

@@ -6,52 +6,45 @@ class BooksService extends BaseService {
         super(dbModel, entityName);
     }
     getAllDataByGroupId(groupId, criteria) {
-    try {
-        const searchFilter = {
-            groupId: groupId,
-        };
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
     
-        if (criteria.search) {
-            const numericSearch = parseInt(criteria.search);
-            if (!isNaN(numericSearch)) {
-                searchFilter.$or = [
-                    { title: { $regex: criteria.search, $options: "i" } },
-                    { author: { $regex: criteria.search, $options: "i" } },
-                    { ISBN: numericSearch },
-                    { RFID: criteria.search } // Assuming RFID is searched as exact match
-                ];
-            } else {
-                searchFilter.$or = [
-                    { title: { $regex: criteria.search, $options: "i" } },
-                    { author: { $regex: criteria.search, $options: "i" } },
-                    { RFID: criteria.search } // Assuming RFID is searched as exact match
-                ];
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { ISBN: numericSearch },
+                        { department: numericSearch },
+                        { price: numericSearch },
+                        { availableCount: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { status: { $regex: criteria.search, $options: "i" } },
+                        { title: { $regex: criteria.search, $options: "i" } },
+                        { author: { $regex: criteria.search, $options: "i" } },
+                        { publisher: { $regex: criteria.search, $options: "i" } },
+                        { RFID: criteria.search } // Assuming RFID is searched as exact match
+                    ];
+                }
             }
-        }
     
-        if (criteria.availableCount) {
-            searchFilter.availableCount = criteria.availableCount;
+            if (criteria.shelfId) {
+                searchFilter.shelfId = criteria.shelfId;
+            }
+            if (criteria.department) {
+                searchFilter.department = criteria.department;
+            }
+            
+            return searchFilter;
+        } catch (error) {
+            console.log(error);
+            return null;
         }
-    
-        if (criteria.totalCopies) {
-            searchFilter.totalCopies = criteria.totalCopies;
-        }
-    
-        if (criteria.shelfId) {
-            searchFilter.shelfId = criteria.shelfId;
-        }
-    
-        if (criteria.status) {
-            searchFilter.status = criteria.status;
-        }
-        if (criteria.title) {
-            searchFilter.title= criteria.title;
-        }
-    } catch (error) {
-         console.log(error)
     }
-}      
-
+    
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
