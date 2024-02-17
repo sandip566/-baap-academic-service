@@ -40,6 +40,12 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        phoneNumber:{
+            type: Number,
+        },
+        phone:{
+            type:Number
+        }
     },
     { strict: false, timestamps: true }
 );
