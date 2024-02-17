@@ -77,9 +77,10 @@ router.post("/issue-book", async (req, res) => {
 
 router.post("/return-book", async (req, res) => {
     try {
-        const { groupId, bookId, title, returnDate } = req.body;
+        const { groupId, bookId, studentId, returnDate } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
+            studentId:studentId
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -188,7 +189,7 @@ router.put(
     }
 );
 
-router.get("/", async (req, res) => {
+router.get("/issued-books", async (req, res) => {
     try {
         const count = await service.letCountDouments();
         console.log(count);

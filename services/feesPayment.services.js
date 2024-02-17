@@ -25,7 +25,7 @@ class feesPaymentService extends BaseService {
                 }
                 return total;
             }, 0);
-
+         
             const totalRemainingAmount = data.reduce((total, item) => {
                 if (item.remainingAmount) {
                     total += parseFloat(item.remainingAmount);
@@ -69,21 +69,15 @@ class feesPaymentService extends BaseService {
     async getFeesStatData(groupId, criteria,page,limit) {
         return this.execute(async () => {
             try {
-                 const skip = (page - 1) * limit;
-                const query = {
-                    groupId: groupId,
-                };
-
-                let courseData = await courseModel.find({ groupId: groupId }) 
-
-                let admissionData = await StudentsAdmissionModel.find({
-                    groupId: groupId,
-                })
-               
-                let feesData = await this.model.find({ groupId: groupId })
-                .skip(skip)
-                .limit(limit)
-                
+            const query = {
+                groupId: groupId,
+            };
+  
+            let courseData = await courseModel.find({ groupId: groupId });
+            let admissionData = await StudentsAdmissionModel.find({
+                groupId: groupId,
+            });
+            let feesData = await this.model.find({ groupId: groupId });
 
                 console.log(criteria.currentDate, criteria.currentDate);
                 const currentDateValue = criteria.currentDate

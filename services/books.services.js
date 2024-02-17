@@ -6,17 +6,46 @@ class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
     getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.title) query.title = new RegExp(criteria.title, "i");
-        if (criteria.author) query.author = new RegExp(criteria.author, "i");
-        if (criteria.availableCount) query.availableCount = criteria.availableCount;
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+    
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { ISBN: numericSearch },
+                        { department: numericSearch },
+                        { price: numericSearch },
+                        { availableCount: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { status: { $regex: criteria.search, $options: "i" } },
+                        { title: { $regex: criteria.search, $options: "i" } },
+                        { author: { $regex: criteria.search, $options: "i" } },
+                        { publisher: { $regex: criteria.search, $options: "i" } },
+                        { RFID: criteria.search } // Assuming RFID is searched as exact match
+                    ];
+                }
+            }
+    
+            if (criteria.shelfId) {
+                searchFilter.shelfId = criteria.shelfId;
+            }
+            if (criteria.department) {
+                searchFilter.department = criteria.department;
+            }
+            
+            return searchFilter;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
-
+    
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
@@ -39,7 +68,7 @@ class BooksService extends BaseService {
     }
     async getTotalAvailableBooks() {
         try {
-          const books = await booksModel.find();
+          const books = await booksModel.find({returned:false});
           let totalCount = 0;
           for (const book of books) {
             totalCount += book.availableCount;
@@ -49,19 +78,6 @@ class BooksService extends BaseService {
           throw error;
         }
     }
-
-    // async getTotalBooks() {
-    //     try {
-    //       const books = await booksModel.find();
-    //       let totalCount = 0;
-    //       for (const book of books) {
-    //         totalCount += book.totalCopies;
-    //       }
-    //       return totalCount;
-    //     } catch (error) {
-    //       throw error;
-    //     }
-    // }
 
 }
 module.exports = new BooksService(booksModel, "books");

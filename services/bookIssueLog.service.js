@@ -66,6 +66,15 @@ class BookIssueLogService extends BaseService {
         try {
             const currentDate = new Date();
             const bookIssues = await bookIssueLogModel.find();
+            
+            // Fetch all student IDs and book IDs
+            const studentIds = bookIssues.map(issue => issue.studentId);
+            const bookIds = bookIssues.map(issue => issue.bookId);
+    
+            // Fetch student and book details
+            const students = await Student.find({ _id: { $in: studentIds } });
+            const books = await Book.find({ _id: { $in: bookIds } });
+    
             const bookIssuesWithOverdue = bookIssues
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
@@ -81,8 +90,15 @@ class BookIssueLogService extends BaseService {
                     const diffDays = Math.ceil(
                         diffTime / (1000 * 60 * 60 * 24)
                     );
+    
+                    // Find corresponding student and book
+                    const student = students.find(student => student._id.equals(bookIssue.studentId));
+                    const book = books.find(book => book._id.equals(bookIssue.bookId));
+    
                     return {
                         bookIssue,
+                        studentName: student ? student.name : "Unknown Student",
+                        bookName: book ? book.name : "Unknown Book",
                         daysOverdue: diffDays,
                     };
                 });
@@ -91,5 +107,6 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
+    
 }
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");

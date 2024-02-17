@@ -17,6 +17,7 @@ const BusRoutesSchema = new mongoose.Schema(
         schedule: {
             type: String
         },
+       
         groupId: {
             type: Number
         }

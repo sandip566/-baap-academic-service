@@ -10,6 +10,7 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
+        criteria.pageSize = 10
         if (criteria.roomId) query.roomId = criteria.roomId;
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
         if (criteria.status) query.status = new RegExp(criteria.status, "i");

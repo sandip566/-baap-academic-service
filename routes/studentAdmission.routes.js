@@ -7,6 +7,9 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const { default: mongoose } = require("mongoose");
 const feesInstallmentServices = require("../services/feesInstallment.services");
 const TokenService = require("../services/token.services");
+const multer = require("multer");
+const upload = multer();
+const xlsx = require("xlsx");
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -291,6 +294,50 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.post('/studentAdmission', upload.single('excelFile'), async (req, res) => {
+    try {
+        const authHeader = req.headers.authorization;
+      
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'Unauthorized - Token is Not Found' });
+        }
+
+        const token = authHeader.split(' ')[1];
+        const decodedToken = await TokenService.decodeToken(token);
+
+        if (!decodedToken || !decodedToken.userId) {
+            return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
+        }
+
+        const userId = decodedToken.userId;
+
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const excelBuffer = req.file.buffer;
+        const workbook = xlsx.read(excelBuffer, { type: 'buffer' });
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+
+        const excelData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+        if (!excelData || excelData.length < 2) {
+            return res.status(400).json({ error: 'Invalid Excel format' });
+        }
+
+        const headers = excelData[0];
+        const dataRows = excelData.slice(1);
+
+        const result = await service.bulkUpload(headers, dataRows, userId);
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error occurred during upload:', error);
+        res.status(500).json({ error: 'An error occurred during upload.' });
+    }
+});
+
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
