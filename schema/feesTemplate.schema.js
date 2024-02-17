@@ -8,7 +8,9 @@ const feesTemplate = mongoose.Schema(
         },
         feesTemplateId: {
             type: Number,
-            required: false
+        },
+        name:{
+            type:String,
         },
         cast: {
             type: String,
