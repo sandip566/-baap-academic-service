@@ -33,23 +33,19 @@ router.post("/issue-book", async (req, res) => {
         const isBookAvailable = await service.isBookAvailableForIssuing(bookId);
         console.log(isBookAvailable);
         if (!isBookAvailable) {
-            return res
-                .status(400)
-                .json({
-                    success: false,
-                    error: "The book is not available for issuing.",
-                });
+            return res.status(400).json({
+                success: false,
+                error: "The book is not available for issuing.",
+            });
         }
-        const book = await Book.findOne({ title: title });
+        const book = await Book.findOne({ bookId: bookId });
         console.log(book);
         console.log(book.availableCount);
         if (!book || book.availableCount <= 0) {
-            return res
-                .status(400)
-                .json({
-                    success: false,
-                    error: "The book is not available for issuing. Available count is zero.",
-                });
+            return res.status(400).json({
+                success: false,
+                error: "The book is not available for issuing. Available count is zero.",
+            });
         }
         const bookIssueLogId = +Date.now();
         const newReservation = {
@@ -62,7 +58,7 @@ router.post("/issue-book", async (req, res) => {
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
-            { title: title, availableCount: { $gt: 0 } },
+            { bookId: bookId, availableCount: { $gt: 0 } },
             { $inc: { availableCount: -1 } },
             { new: true }
         );
@@ -83,24 +79,20 @@ router.post("/return-book", async (req, res) => {
     try {
         const { groupId, bookId, title, returnDate } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
-            groupId,
-            bookId,
+            bookId: bookId,
         });
         if (!existingReservation) {
-            return res
-                .status(400)
-                .json({
-                    success: false,
-                    error: "The book is not currently issued to the specified group.",
-                });
+            return res.status(400).json({
+                success: false,
+                error: "The book is not currently issued to the specified group.",
+            });
         }
         const updatedReservation = await service.updateBookIssueLogById(
-            existingReservation._id,
-            groupId,
+            existingReservation.bookIssueLogId,
             { returned: true, returnDate: new Date() }
         );
         await Book.findOneAndUpdate(
-            { title: title, availableCount: { $gt: 0 } },
+            { bookId: bookId, availableCount: { $gt: 0 } },
             { $inc: { availableCount: 1 } }
         );
         res.status(200).json({
