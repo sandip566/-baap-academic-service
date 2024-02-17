@@ -1,7 +1,7 @@
 const bookIssueLogModel = require("../schema/bookIssueLog.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const Book = require("../schema/books.schema.js");
-
+const Student=require("../schema/student.schema.js")
 class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -67,13 +67,12 @@ class BookIssueLogService extends BaseService {
             const currentDate = new Date();
             const bookIssues = await bookIssueLogModel.find();
             
-            // Fetch all student IDs and book IDs
             const studentIds = bookIssues.map(issue => issue.studentId);
             const bookIds = bookIssues.map(issue => issue.bookId);
-    
+            
             // Fetch student and book details
-            const students = await Student.find({ _id: { $in: studentIds } });
-            const books = await Book.find({ _id: { $in: bookIds } });
+            const students = await Student.find({ studentId: { $in: studentIds } });
+            const books = await Book.find({ bookId: { $in: bookIds } });
     
             const bookIssuesWithOverdue = bookIssues
                 .filter((bookIssue) => {
@@ -92,13 +91,14 @@ class BookIssueLogService extends BaseService {
                     );
     
                     // Find corresponding student and book
-                    const student = students.find(student => student._id.equals(bookIssue.studentId));
-                    const book = books.find(book => book._id.equals(bookIssue.bookId));
-    
+                    const student = students.find(student => student.studentId === bookIssue.studentId);
+                    const book = books.find(book => book.bookId === bookIssue.bookId);
+                    
                     return {
                         bookIssue,
-                        studentName: student ? student.name : "Unknown Student",
-                        bookName: book ? book.name : "Unknown Book",
+                        studentName: student ? student.firstName : "Unknown Student",
+                        bookName: book ? book.title : "Unknown Book",
+                        ISBN:book?book.ISBN:0,
                         daysOverdue: diffDays,
                     };
                 });
@@ -107,6 +107,7 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
+    
     
 }
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");
