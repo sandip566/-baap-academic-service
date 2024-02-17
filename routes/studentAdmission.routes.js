@@ -311,6 +311,7 @@ router.post('/studentAdmission', upload.single('excelFile'), async (req, res) =>
         }
 
         const userId = decodedToken.userId;
+        console.group(userId)
 
         if (!req.file) {
             return res.status(400).json({ error: 'No file uploaded' });
@@ -321,7 +322,7 @@ router.post('/studentAdmission', upload.single('excelFile'), async (req, res) =>
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
         const excelData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-
+         console.log(excelData)
         if (!excelData || excelData.length < 2) {
             return res.status(400).json({ error: 'Invalid Excel format' });
         }
@@ -330,11 +331,13 @@ router.post('/studentAdmission', upload.single('excelFile'), async (req, res) =>
         const dataRows = excelData.slice(1);
 
         const result = await service.bulkUpload(headers, dataRows, userId);
-
-        res.status(200).json(result);
+        if (!result) {
+            throw new Error(`Smart ID already exists`);
+        }
+      
+        res.json({ success: true, message: "Bulk upload successful" ,data:result});
     } catch (error) {
-        console.error('Error occurred during upload:', error);
-        res.status(500).json({ error: 'An error occurred during upload.' });
+        res.status(400).json({ success: false, error: error.message });
     }
 });
 
