@@ -5,10 +5,8 @@ const courseSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-       courseId:{
-        type: Number,
-        required: false
-       },
+        courseId: Number,
+        courseName:String,
         name: {
             required: false,
             type: String

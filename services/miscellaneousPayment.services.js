@@ -10,6 +10,7 @@ class miscellaneousPaymentService extends BaseService {
         const query = {
             groupId: groupId,
         };
+        criteria.pageSize = 10
         if (criteria.miscellaneousPaymentId) query.miscellaneousPaymentId = criteria.miscellaneousPaymentId;
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.empId) query.empId = criteria.empId;

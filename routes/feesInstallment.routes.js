@@ -5,7 +5,10 @@ const service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { MongoClient } = require('mongodb');
+const coursesService = require("../services/courses.service");
+const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const mongoURI = 'mongodb://127.0.0.1:27017/baap-acadamic-dev';
+const { Aggregate, match, project, sum } = require('mongoose').Aggregate;
 let totalAmount = 0;
 let collectedAmount = 0;
 //create reciptNo sequential
@@ -20,6 +23,7 @@ function generateInstallmentNumber() {
     const sequentialPart = installmentCounter++;
     return `${sequentialPart.toString().padStart(0, "0")}`;
 }
+
 router.post(
     "/",
     checkSchema(require("../dto/feesInstallment.dto")),
@@ -35,6 +39,7 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
@@ -42,8 +47,14 @@ router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
     const serviceResponse = await service.getByInstallmentId(req.params.installmentId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
+    const pagination = {
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: 10 
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria({req,query,pagination});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -64,7 +75,8 @@ router.get("/getFeesInstallment/:groupId", async (req, res) => {
         installmentId: req.query.installmentId,
         studentId: req.query.studentId,
         empId: req.query.empId,
-        installmentNo: req.query.installmentNo
+        installmentNo: req.query.installmentNo,
+        pageNumber:parseInt(req.query.pageNumber) || 1
     };
     const serviceResponse = await service.getAllFeesInstallmentByGroupId(
         groupId,
@@ -194,4 +206,88 @@ router.get("/get-remainingFees", async (req, res) => {
     const remainingFees = totalAmount - collectedAmount;
     res.json(remainingFees)
 });
+
+router.get('/get-fees-summary', async (req, res) => {
+    try {
+        const { groupId, feesTemplateId, academicYear } = req.query;
+
+        const courses = await service.getAllDataByGroupId(groupId);
+
+        const coursesWithTotalStudents = await Promise.all(courses.map(async course => {
+            const totalStudents = await service.getTotalStudents(course.courseId);
+            const totalFeesObj = await service.getTotalFeesAndPendingFees(course.courseId, groupId, feesTemplateId, academicYear);
+            const paidFees = totalFeesObj.totalFees - totalFeesObj.pendingFees;
+
+            return {
+                courseName: course.CourseName,
+                courseId: course.courseId,
+                totalStudents: totalStudents,
+                totalFees: totalFeesObj.totalFees,
+                pendingFees: totalFeesObj.pendingFees,
+                paidFees: totalFeesObj.paidFees
+            };
+        }));
+
+        let totalFees = 0;
+        let totalPaidFees = 0;
+        let totalPendingFees = 0;
+        coursesWithTotalStudents.forEach(course => {
+            totalFees += course.totalFees;
+            totalPaidFees += course.paidFees;
+            totalPendingFees += course.pendingFees;
+        });
+
+        const response = {
+            groupId,
+            feesTemplateId,
+            academicYear,
+            courses: coursesWithTotalStudents,
+            totalFees,
+            totalPaidFees,
+            totalPendingFees
+        };
+
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+router.get('/get-classes-fees', async (req, res) => {
+    try {
+        const { groupId, feesTemplateId, academicYear, courseId } = req.query;
+
+        const classes = await service.getAllDataByCourseId(groupId, courseId);
+
+        const response = {
+            groupId,
+            feesTemplateId,
+            academicYear,
+            courseId,
+            classes: []
+        };
+
+        for (const classObj of classes) {
+            const totalStudents = await service.getTotalStudentsForClass(classObj.classId);
+            const totalFeesObj = await service.getTotalFeesAndPendingFeesForClass(classObj.classId, groupId, feesTemplateId, academicYear);
+
+            const paidFees = totalFeesObj.totalFees - totalFeesObj.pendingFees;
+
+            response.classes.push({
+                name: classObj.name,
+                classId: classObj.classId,
+                totalStudents,
+                totalFees: totalFeesObj.totalFees,
+                pendingFees: totalFeesObj.pendingFees,
+                paidFees
+            });
+        }
+
+        res.json(response);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 module.exports = router;
