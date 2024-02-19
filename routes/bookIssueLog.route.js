@@ -192,7 +192,7 @@ router.put(
 router.get("/issue-books-count",async (req,res)=>{
     try{
         const count=await bookIssueLogModel.countDocuments({returned:false});
-        res.json(count)
+        res.json({count:count})
     }
     catch(error){
         console.log(error)
