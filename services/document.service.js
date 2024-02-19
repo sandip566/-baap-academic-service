@@ -25,11 +25,14 @@ class DocumentService extends BaseService {
                 .skip(skip)
                 .limit(limit)
                 .exec();
-            return { data: documents };
+
+            const totalCount = await DocumentModel.countDocuments(criteria);
+
+            return { data: documents, totalCount: documents.length };
         } catch (error) {
             return { error: error.message };
         }
-    };
+    }
 
 
     getAllDataByGroupId(groupId, criteria) {
