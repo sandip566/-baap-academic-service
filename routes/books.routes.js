@@ -21,7 +21,12 @@ router.post(
 );
 
 router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
+    const pagination = {
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: 3,
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -35,10 +40,10 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
-    const serviceResponse = await service.getById(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+// router.get("/:id", async (req, res) => {
+//     const serviceResponse = await service.getById(req.params.id);
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+// });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
@@ -110,7 +115,10 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
                 error: "book data not found to update",
             });
         } else {
-            res.status(200).json({ updatebook, message: "data update successfully" });
+            res.status(200).json({
+                updatebook,
+                message: "data update successfully",
+            });
         }
     } catch (error) {
         console.error(error);
@@ -118,14 +126,28 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-
-router.get('/abc', async (req, res) => {
+router.get("/totalAvailableBooks", async (req, res) => {
     try {
-      const totalCount = await service.getTotalBooks();
-      res.json({ totalAvailableBooks: totalCount });
+        const totalCount = await service.getTotalAvailableBooks();
+        res.json({ totalAvailableBooks: totalCount });
     } catch (error) {
-      console.error("Error:", error);
-      res.status(500).json({ error: 'Internal Server Error' });
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-  });
+});
+
+router.get("/totalBooks", async (req, res) => {
+    try {
+        const books = await booksModel.find({});
+        let totalCount = 0;
+        for (const book of books) {
+            totalCount += book.totalCopies;
+        }
+        res.json({ totalAvailableBooks: totalCount });
+    } catch (error) {
+        console.error("Error:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 module.exports = router;
