@@ -51,17 +51,7 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-    async letCountDouments() {
-        try {
-            const count = await bookIssueLogModel.countDocuments({
-                returned: false,
-            });
-            return count;
-        } catch (error) {
-            throw error;
-        }
-    }
-
+    
     async fetchBookIssuesWithOverdue() {
         try {
             const currentDate = new Date();

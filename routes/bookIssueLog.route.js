@@ -119,10 +119,10 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
-    const serviceResponse = await service.getById(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+// router.get("/:id", async (req, res) => {
+//     const serviceResponse = await service.getById(req.params.id);
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+// });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
@@ -189,16 +189,15 @@ router.put(
     }
 );
 
-router.get("/issued-books", async (req, res) => {
-    try {
-        const count = await service.letCountDouments();
-        console.log(count);
-        res.status(200).json({ count: count });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+router.get("/issue-books-count",async (req,res)=>{
+    try{
+        const count=await bookIssueLogModel.countDocuments({returned:false});
+        res.json(count)
     }
-});
+    catch(error){
+        console.log(error)
+    }
+})
 
 router.get("/book-issues/overdue", async (req, res) => {
     try {
