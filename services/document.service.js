@@ -1,51 +1,10 @@
 const DocumentModel = require("../schema/document.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class DocumentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
-    async saveData(topic) {
-        try {
-            const document = await DocumentModel.create(topic);
-            if (!document) {
-                return new ServiceResponse({
-                    message: "Data not saved",
-                    isError: true,
-                });
-            }
-            return document
-        } catch (err) {
-            throw err;
-        }
-    }
-
-    async getBymemberId(memberId) {
-        return this.execute(() => {
-            return DocumentModel.findOne({ memberId: memberId });
-        });
-    }
-
-    async updateData(memberId, data) {
-        try {
-            const resp = await DocumentModel.findOneAndUpdate(
-                { memberId: memberId },
-                data,
-                { upsert: true, new: true }
-            );
-            return new ServiceResponse({
-                data: resp,
-            });
-        } catch (error) {
-            return new ServiceResponse({
-                isError: true,
-                message: error.message,
-            });
-        }
-    }
-
 
     async getByDataId(memberId) {
         try {
@@ -59,6 +18,19 @@ class DocumentService extends BaseService {
             throw error;
         }
     }
+
+    async getAllByPagination(criteria, skip, limit) {
+        try {
+            const documents = await DocumentModel.find(criteria)
+                .skip(skip)
+                .limit(limit)
+                .exec();
+            return { data: documents };
+        } catch (error) {
+            return { error: error.message };
+        }
+    };
+
 
     getAllDataByGroupId(groupId, criteria) {
         const query = {

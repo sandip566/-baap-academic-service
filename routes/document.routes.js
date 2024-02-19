@@ -9,39 +9,27 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 
 router.post(
     "/",
-    checkSchema(require("../dto/latefeepayment.dto")),
+    checkSchema(require("../dto/document.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        try {
-            if (req.body.memberId) {
-                const existingDoc = await service.getBymemberId(req.body.memberId);
-                if (existingDoc) {
-                    const updatedData = {
-                        ...req.body,
-                        document: req.file
-                    };
-                    const serviceResponse = await service.updateData(req.body.memberId, updatedData);
-                    requestResponsehelper.sendResponse(res, serviceResponse);
-                } else {
-                    res.status(404).json({ error: "Document not found for memberId" });
-                }
-            } else {
-                const serviceResponse = await service.saveData(req.body);
-                res.json({
-                    data: serviceResponse,
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal server error" });
-        }
+        const serviceResponse = await service.create(req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
 router.get("/memberId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/pagination", async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const serviceResponse = await service.getAllByPagination({}, skip, limit);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
