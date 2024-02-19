@@ -24,6 +24,15 @@ router.get("/memberId/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/pagination", async (req, res) => {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const serviceResponse = await service.getAllByPagination({}, skip, limit);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
