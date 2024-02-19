@@ -18,7 +18,7 @@ class feesPaymentService extends BaseService {
                 .skip(skip)
                 .limit(limit)
                 .exec();
-            //const count = await .countDocuments(data);
+            const count = await this.model.countDocuments(data);
             const totalPaidAmount = data.reduce((total, item) => {
                 if (item.paidAmount) {
                     total += parseFloat(item.paidAmount);
@@ -58,7 +58,7 @@ class feesPaymentService extends BaseService {
                 totalPaidAmount: totalPaidAmount,
                 totalRemainingAmount: totalRemainingAmount,
                 // feesDefaulter: data,
-                //count:count,
+                count:count,
                 servicesWithData: servicesWithData,
                 totalItemsCount: await this.model.countDocuments(data),
             };
