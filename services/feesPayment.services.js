@@ -60,7 +60,7 @@ class feesPaymentService extends BaseService {
                 // feesDefaulter: data,
                 count:count,
                 servicesWithData: servicesWithData,
-                totalItemsCount: await this.model.countDocuments(data),
+                StudentRecords: await this.model.countDocuments(data),
             };
             return response;
         });
