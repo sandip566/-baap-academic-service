@@ -7,6 +7,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const feesInstallmentService = require("../services/feesInstallment.services");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
+const studentAdmissionServices = require("../services/studentAdmission.services");
 
 // router.post(
 //   "/",
@@ -144,7 +145,11 @@ router.post(
                 await feesInstallmentService.getByInstallmentId(
                     req.body.installmentId
                 );
-
+            const studentInstallmentRecord =
+                await studentAdmissionServices.getByInstallmentId(
+                    req.body.installmentId,
+                    req.body.addmissionId
+                );
             if (installmentRecord) {
                 for (const feesDetail of installmentRecord.data.feesDetails) {
                     for (const installment of feesDetail.installment) {
@@ -181,7 +186,43 @@ router.post(
                     installmentRecord.data
                 );
             }
+            if (studentInstallmentRecord) {
+                for (const feesDetail of studentInstallmentRecord.data
+                    .feesDetails) {
+                    for (const installment of feesDetail.installment) {
+                        for (const reqInstallment of req.body.installment) {
+                            if (
+                                installment.installmentNo ===
+                                    reqInstallment.installmentNo &&
+                                reqInstallment.radio
+                            ) {
+                                installment.status = "paid";
+                            }
+                        }
+                    }
 
+                    for (const feesDetail of studentInstallmentRecord.data
+                        .feesDetails) {
+                        const allInstallmentsPaid =
+                            feesDetail.installment.every(
+                                (installment) => installment.status === "paid"
+                            );
+
+                        if (allInstallmentsPaid) {
+                            studentInstallmentRecord.data.status = "paid";
+                        } else {
+                            studentInstallmentRecord.data.status = "pending";
+                            break;
+                        }
+                    }
+                }
+
+                await studentAdmissionServices.updateFeesInstallmentById(
+                    studentInstallmentRecord.data.installmentId,
+                    studentInstallmentRecord.data.feesDetails,
+                    studentInstallmentRecord.data
+                );
+            }
             serviceResponse.data.paidAmount = totalPaidAmount;
             serviceResponse.data.remainingAmount = remainingAmount;
 
@@ -208,6 +249,10 @@ router.post(
 
             const installmentRecord =
                 await feesInstallmentService.getByInstallmentId(
+                    req.body.installmentId
+                );
+            const AddmissioninstallmentRecord =
+                await studentAdmissionServices.getByInstallmentId(
                     req.body.installmentId
                 );
 
@@ -246,11 +291,46 @@ router.post(
                     installmentRecord.data
                 );
             }
+            //studentAddmission
+            if (AddmissioninstallmentRecord) {
+                for (const feesDetail of AddmissioninstallmentRecord.data
+                    .feesDetails) {
+                    for (const installment of feesDetail.installment) {
+                        for (const reqInstallment of req.body.installment) {
+                            if (
+                                installment.installmentNo ===
+                                    reqInstallment.installmentNo &&
+                                reqInstallment.radio
+                            ) {
+                                installment.status = "paid";
+                            }
+                        }
+                    }
+                    for (const feesDetail of AddmissioninstallmentRecord.data
+                        .feesDetails) {
+                        const allInstallmentsPaid =
+                            feesDetail.installment.every(
+                                (installment) => installment.status === "paid"
+                            );
 
+                        if (allInstallmentsPaid) {
+                            AddmissioninstallmentRecord.data.status = "paid";
+                        } else {
+                            AddmissioninstallmentRecord.data.status = "pending";
+                            break;
+                        }
+                    }
+                }
+
+                await studentAdmissionServices.updateFeesInstallmentById(
+                    AddmissioninstallmentRecord.data.installmentId,
+                    AddmissioninstallmentRecord.data.feesDetails,
+                    AddmissioninstallmentRecord.data
+                );
+            }
             serviceResponse.data.paidAmount = totalPaidAmount;
             serviceResponse.data.remainingAmount = remainingAmount;
 
-            // Send the response
             requestResponsehelper.sendResponse(res, serviceResponse);
         }
     }
@@ -285,7 +365,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
         month: req.query.month,
     };
     const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 5;
+    const limit = parseInt(req.query.limit) || 100;
     // const skip = (page - 1) * limit;
     // const skip=(page-1)*limit;
     const serviceResponse = await service.getFeesStatData(

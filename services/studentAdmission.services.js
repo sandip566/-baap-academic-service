@@ -17,6 +17,23 @@ class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async getByInstallmentId(installmentId) {
+        return this.execute(() => {
+            return this.model.findOne({ installmentId: installmentId });
+        });
+    }
+    async updateFeesInstallmentById(installmentId, newFeesDetails, newData) {
+        try {
+            const updateResult = await studentAdmissionModel.findOneAndUpdate(
+                { installmentId: installmentId },
+                { feesDetails: newFeesDetails, ...newData },
+                { new: true }
+            );
+            return updateResult;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     async updateStudentsAddmisionById(studentAdmissionId, groupId, newData) {
         try {
@@ -478,7 +495,7 @@ class StudentsAdmmisionService extends BaseService {
 
             // let response1;
             let modifiedFeesPaymentData = [];
-            let response1 = []; // Define response1 as an array
+            let response1 = []; 
 
             for (const feesPayment of feesPaymentData) {
                 try {
