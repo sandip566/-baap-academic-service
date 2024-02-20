@@ -19,19 +19,6 @@ class DocumentService extends BaseService {
         }
     }
 
-    async getAllByPagination(criteria, skip, limit) {
-        try {
-            const documents = await DocumentModel.find(criteria)
-                .skip(skip)
-                .limit(limit)
-                .exec();
-            return { data: documents };
-        } catch (error) {
-            return { error: error.message };
-        }
-    };
-
-
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
