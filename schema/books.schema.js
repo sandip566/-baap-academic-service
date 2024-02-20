@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const booksSchema = new mongoose.Schema(
     {
         bookId: Number,
-        title: {
+        name: {
             type: String,
             required: false,
         },
@@ -43,7 +43,7 @@ const booksSchema = new mongoose.Schema(
         publisher:{
             type:String
         },
-        department:{
+        departmentId:{
             type:Number,
             require:false
         },
