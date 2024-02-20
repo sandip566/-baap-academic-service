@@ -200,12 +200,7 @@ router.get("/issue-books-count",async (req,res)=>{
 })
 
 router.get("/book-issues/overdue", async (req, res) => {
-    try {
         const bookIssues = await service.fetchBookIssuesWithOverdue();
-        res.json(bookIssues);
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+        requestResponsehelper.sendResponse(res,bookIssues);
 });
 module.exports = router;
