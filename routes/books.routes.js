@@ -54,6 +54,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             name: req.query.name,
             author: req.query.author,
             totalCount: req.query.totalCount,
+           availableCount:req.query.availableCount,
             search: req.query.search,
             shelfId: req.query.shelfId,
             department: req.query.department,

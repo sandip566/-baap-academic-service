@@ -22,6 +22,7 @@ class BooksService extends BaseService {
                         { price: numericSearch },
                         { departmentId: numericSearch },
                         { totalCount: numericSearch },
+                        { availableCount: numericSearch },
                     ];
                 } else {
                     // Non-numeric search
