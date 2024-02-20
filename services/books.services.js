@@ -74,7 +74,7 @@ class BooksService extends BaseService {
     }
     async getTotalAvailableBooks() {
         try {
-          const books = await booksModel.find({returned:false});
+          const books = await booksModel.find();
           let totalCount = 0;
           for (const book of books) {
             totalCount += book.availableCount;

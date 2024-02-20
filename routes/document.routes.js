@@ -9,34 +9,13 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 
 router.post(
     "/",
-    checkSchema(require("../dto/latefeepayment.dto")),
+    checkSchema(require("../dto/document.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        try {
-            if (req.body.memberId) {
-                const existingDoc = await service.getBymemberId(req.body.memberId);
-                if (existingDoc) {
-                    const updatedData = {
-                        ...req.body,
-                        document: req.file
-                    };
-                    const serviceResponse = await service.updateData(req.body.memberId, updatedData);
-                    requestResponsehelper.sendResponse(res, serviceResponse);
-                } else {
-                    res.status(404).json({ error: "Document not found for memberId" });
-                }
-            } else {
-                const serviceResponse = await service.saveData(req.body);
-                res.json({
-                    data: serviceResponse,
-                });
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal server error" });
-        }
+        const serviceResponse = await service.create(req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
@@ -46,7 +25,12 @@ router.get("/memberId/:id", async (req, res) => {
 });
 
 router.get("/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria({});
+    const pagination = {
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: 10
+    };
+    const { pageNumber, pageSize, ...query } = req.query;
+    const serviceResponse = await service.getAllByCriteria(query, pagination);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
