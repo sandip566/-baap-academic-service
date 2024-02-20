@@ -53,7 +53,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             name: req.query.name,
             author: req.query.author,
-            availableCount: req.query.availableCount,
+            totalCount: req.query.totalCount,
             search: req.query.search,
             shelfId: req.query.shelfId,
             department: req.query.department,
