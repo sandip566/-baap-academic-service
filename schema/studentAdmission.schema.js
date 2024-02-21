@@ -24,6 +24,10 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: String,
             required: false
         },
+        installmentId:{
+            type: Number,
+            required: false
+        },
         studentId: {
             type: Number,
             required: false

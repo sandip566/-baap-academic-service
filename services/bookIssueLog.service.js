@@ -1,7 +1,7 @@
 const bookIssueLogModel = require("../schema/bookIssueLog.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const Book = require("../schema/books.schema.js");
-const Student=require("../schema/student.schema.js")
+const Student = require("../schema/student.schema.js");
 class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -29,7 +29,7 @@ class BookIssueLogService extends BaseService {
     async updateBookIssueLogById(bookIssueLogId, newData) {
         try {
             const updateBookIssueLog = await bookIssueLogModel.findOneAndUpdate(
-                { bookIssueLogId: bookIssueLogId},
+                { bookIssueLogId: bookIssueLogId },
                 { $set: newData },
                 { new: true }
             );
@@ -51,19 +51,21 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-    
+
     async fetchBookIssuesWithOverdue() {
         try {
             const currentDate = new Date();
             const bookIssues = await bookIssueLogModel.find();
-            
-            const studentIds = bookIssues.map(issue => issue.studentId);
-            const bookIds = bookIssues.map(issue => issue.bookId);
-            
+
+            const studentIds = bookIssues.map((issue) => issue.studentId);
+            const bookIds = bookIssues.map((issue) => issue.bookId);
+
             // Fetch student and book details
-            const students = await Student.find({ studentId: { $in: studentIds } });
+            const students = await Student.find({
+                studentId: { $in: studentIds },
+            });
             const books = await Book.find({ bookId: { $in: bookIds } });
-    
+
             const bookIssuesWithOverdue = bookIssues
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
@@ -79,25 +81,32 @@ class BookIssueLogService extends BaseService {
                     const diffDays = Math.ceil(
                         diffTime / (1000 * 60 * 60 * 24)
                     );
-    
+
                     // Find corresponding student and book
-                    const student = students.find(student => student.studentId === bookIssue.studentId);
-                    const book = books.find(book => book.bookId === bookIssue.bookId);
-                    
-                    return {
-                        bookIssue,
-                        studentName: student ? student.firstName : "Unknown Student",
+                    const student = students.find(
+                        (student) => student.studentId === bookIssue.studentId
+                    );
+                    const book = books.find(
+                        (book) => book.bookId === bookIssue.bookId
+                    );
+                    let bookIssueDate = bookIssue.issueDate;
+                    var response = {
+                        bookIssueDate,
+                        studentName: student
+                            ? student.firstName
+                            : "Unknown Student",
                         bookName: book ? book.title : "Unknown Book",
-                        ISBN:book?book.ISBN:0,
+                        ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
                     };
+                    return response;
                 });
-            return bookIssuesWithOverdue;
+            return {
+                data: bookIssuesWithOverdue,
+            };
         } catch (error) {
             throw error;
         }
     }
-    
-    
 }
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");

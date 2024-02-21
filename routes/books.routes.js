@@ -5,6 +5,8 @@ const service = require("../services/books.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const booksModel = require("../schema/books.schema");
+const shelfModel=require('../schema/shelf.schema');
+const deparmentModel=require("../schema/department.schema")
 
 router.post(
     "/",
@@ -49,36 +51,36 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
-            title: req.query.title,
+            name: req.query.name,
             author: req.query.author,
-            availableCount: req.query.availableCount,
+            totalCount: req.query.totalCount,
+           availableCount:req.query.availableCount,
             search: req.query.search,
+            shelfId: req.query.shelfId,
             department: req.query.department,
             publisher: req.query.publisher,
             price: req.query.price,
-           status:req.query.status
+            status: req.query.status
         };
 
-        // Call the service function to get the search filter
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
 
-        // Check if search filter is not null
-        if (searchFilter !== null) {
-            // Use the search filter to fetch data from the database
-            const data = await booksModel.find(searchFilter) .populate('department');;
+        // Use the search filter to fetch data from the database
+        const books = await booksModel.find(searchFilter);
 
-            // Return all data related to the matched documents
-            res.json(data);
-        } else {
-            // Handle the case when search filter is null
-            res.status(500).send('Server Error');
-        }
+        // Manually populate shelf and department information
+        const populatedBooks = await Promise.all(books.map(async (book) => {
+            const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
+            const department = await deparmentModel.findOne({ departmentId: book.departmentId });
+            return { ...book._doc, shelf, department };
+        }));
+        // Return all data related to the matched documents
+        res.json(populatedBooks);
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 });
-
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {

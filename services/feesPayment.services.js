@@ -5,7 +5,7 @@ const courseModel = require("../schema/courses.schema");
 const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
-const FeesInstallmentModel=require("../schema/feesInstallment.schema")
+const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -18,14 +18,14 @@ class feesPaymentService extends BaseService {
                 .skip(skip)
                 .limit(limit)
                 .exec();
-            const count = await this.model.countDocuments(data);
+            //const count = await .countDocuments(data);
             const totalPaidAmount = data.reduce((total, item) => {
                 if (item.paidAmount) {
                     total += parseFloat(item.paidAmount);
                 }
                 return total;
             }, 0);
-         
+
             const totalRemainingAmount = data.reduce((total, item) => {
                 if (item.remainingAmount) {
                     total += parseFloat(item.remainingAmount);
@@ -54,30 +54,56 @@ class feesPaymentService extends BaseService {
                 })
             );
 
+            // Grouping services based on addmissionId and keeping only the last occurrence
+            const groupedServices = {};
+
+            servicesWithData.forEach((service) => {
+                const addmissionId = service.addmissionId.addmissionId;
+                const paidAmount = parseFloat(service.paidAmount) || 0;
+
+                if (!groupedServices[addmissionId]) {
+                    groupedServices[addmissionId] = {
+                        ...service,
+                        paidAmount: paidAmount,
+                    };
+                } else {
+                    console.log();
+                    groupedServices[addmissionId].paidAmount += paidAmount;
+                }
+            });
+
+            const finalServices = Object.values(groupedServices);
+
             let response = {
                 totalPaidAmount: totalPaidAmount,
                 totalRemainingAmount: totalRemainingAmount,
                 // feesDefaulter: data,
-                count:count,
-                servicesWithData: servicesWithData,
-                totalItemsCount: await this.model.countDocuments(data),
+                //count:count,
+                servicesWithData: finalServices,
+                StudentRecords: await this.model.countDocuments(data),
             };
             return response;
         });
     }
 
-    async getFeesStatData(groupId, criteria,page,limit) {
+    async getFeesStatData(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
-            const query = {
-                groupId: groupId,
-            };
-  
-            let courseData = await courseModel.find({ groupId: groupId });
-            let admissionData = await StudentsAdmissionModel.find({
-                groupId: groupId,
-            });
-            let feesData = await this.model.find({ groupId: groupId });
+                const skip = (page - 1) * limit;
+                const query = {
+                    groupId: groupId,
+                };
+
+                let courseData = await courseModel.find({ groupId: groupId });
+
+                let admissionData = await StudentsAdmissionModel.find({
+                    groupId: groupId,
+                });
+
+                let feesData = await this.model
+                    .find({ groupId: groupId })
+                    .skip(skip)
+                    .limit(limit);
 
                 console.log(criteria.currentDate, criteria.currentDate);
                 const currentDateValue = criteria.currentDate
@@ -181,8 +207,6 @@ class feesPaymentService extends BaseService {
                         return false;
                     });
                 }
-
-                console.log("qqqqqqqqqqqqqqq", admissionData);
 
                 if (criteria.class) {
                     query.class = criteria.class;
@@ -289,6 +313,8 @@ class feesPaymentService extends BaseService {
                 let course_id;
                 let class_id;
                 let division_id;
+                let divisionDoc;
+                let classDoc
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -368,7 +394,6 @@ class feesPaymentService extends BaseService {
                 //                     // courseFee:course_id.Fees,
                 //                 };
 
-
                 //             }
 
                 //             feesAdditionalData.addmissionId =
@@ -394,13 +419,14 @@ class feesPaymentService extends BaseService {
                     feesData?.map(async (service) => {
                         let additionalData = {};
                         let feesAdditionalData = {};
-                
+
                         if (service.addmissionId) {
                             const matchingAdmission = admissionData.find(
                                 (admission) =>
-                                    admission.addmissionId === service.addmissionId
+                                    admission.addmissionId ===
+                                    service.addmissionId
                             );
-                
+
                             if (matchingAdmission) {
                                 await Promise.all(
                                     matchingAdmission.courseDetails.map(
@@ -413,22 +439,44 @@ class feesPaymentService extends BaseService {
                                                     });
                                                 admission.course_id = course_id;
                                             }
+
                                             if (admission.class_id) {
-                                                class_id =
+                                                classDoc =
                                                     await ClassModel.findOne({
-                                                        feesTemplateId:
+                                                        classId:
                                                             admission.class_id,
                                                     });
+                                                    if (classDoc) {
+                                                        class_id =
+                                                        classDoc.classId;
+                                                        console.log(class_id);
+                                                    } else {
+                                                        console.error(
+                                                            "Division document not found for division_id:",
+                                                            admission.class_id
+                                                        );
+                                                    }
                                                 admission.class_id = class_id;
                                             }
                                             if (admission.division_id) {
-                                                division_id =
+                                                divisionDoc =
                                                     await DivisionModel.findOne(
                                                         {
                                                             divisionId:
                                                                 admission.division_id,
                                                         }
                                                     );
+                                            
+                                                if (divisionDoc) {
+                                                    division_id =
+                                                        divisionDoc.divisionId;
+                                                    console.log(division_id);
+                                                } else {
+                                                    console.error(
+                                                        "Division document not found for division_id:",
+                                                        admission.division_id
+                                                    );
+                                                }
                                                 admission.division_id =
                                                     division_id;
                                             }
@@ -450,83 +498,122 @@ class feesPaymentService extends BaseService {
                                     installmentLengths
                                 );
 
+                                const installmentIds = feesData.map(
+                                    (service) => service.installmentId
+                                );
 
-                                const installmentIds = feesData.map(service => service.installmentId);
+                                const installmentRecords =
+                                    await FeesInstallmentModel.find({
+                                        installmentId: { $in: installmentIds },
+                                    });
 
-const installmentRecords = await FeesInstallmentModel.find({ installmentId: { $in: installmentIds } });
+                                const updatedInstallmentRecords =
+                                    installmentRecords.map((record) => {
+                                        let isDue = false;
 
-const updatedInstallmentRecords = installmentRecords.map(record => {
-    let isDue = false; 
+                                        record.feesDetails.forEach((detail) => {
+                                            detail.installment.forEach(
+                                                (item) => {
+                                                    if (
+                                                        item.status ===
+                                                            "pending" &&
+                                                        item.date <
+                                                            criteria.currentDate
+                                                    ) {
+                                                        isDue = true;
+                                                        return;
+                                                    }
+                                                }
+                                            );
+                                            if (isDue) return;
+                                        });
 
-    record.feesDetails.forEach(detail => {
-        detail.installment.forEach(item => {
-            if (item.status === 'pending' &&(item.date) < criteria.currentDate) {
-              
-                isDue = true;
-                return; 
-            }
-        });
-        if (isDue) return; 
-    });
+                                        return {
+                                            candidateName:
+                                                matchingAdmission.name,
+                                            className: classDoc?.name,
+                                            phoneNumber:
+                                                matchingAdmission.phoneNumber,
+                                            divisionName: divisionDoc?.Name,
+                                            courseName: course_id?.CourseName,
+                                            courseFees: course_id?.Fees,
+                                            dueStatus: isDue,
+                                            status: record.status,
+                                            paidAmount: service.paidAmount,
+                                            remainingAmount:
+                                                service.remainingAmount,
+                                            feesPaymentId:
+                                                service.feesPaymentId,
+                                            installmentId:
+                                                service.installmentId,
+                                            addmissionId: service.addmissionId,
+                                            empId: service.empId,
+                                            installments: installmentLengths[0],
+                                            groupId: service.groupId,
+                                        };
+                                    });
 
-    return {
-        candidateName: matchingAdmission.name,
-        className: class_id?.name,
-        phoneNumber: matchingAdmission.phoneNumber,
-        divisionName: division_id?.Name,
-        courseName: course_id?.CourseName,
-        courseFees: course_id?.Fees,
-        dueStatus: isDue, 
-        status:record.status,
-        paidAmount: service.paidAmount,
-        remainingAmount: service.remainingAmount,
-        feesPaymentId: service.feesPaymentId,
-        installmentId: service.installmentId,
-        addmissionId: service.addmissionId,
-        empId: service.empId,
-        groupId: service.groupId,
-    };
-});
+                                console.log(
+                                    "Updated installmentRecords: ",
+                                    updatedInstallmentRecords
+                                );
 
-console.log("Updated installmentRecords: ", updatedInstallmentRecords);
-
-return updatedInstallmentRecords;
-
+                                return updatedInstallmentRecords;
                             }
-                
-                            feesAdditionalData.addmissionId = matchingAdmission || {};
+
+                            feesAdditionalData.addmissionId =
+                                matchingAdmission || {};
                         }
-                
+
                         additionalData.addmissionId = feesAdditionalData;
-                
-                        if (Object.keys(feesAdditionalData.addmissionId).length === 0) {
+
+                        if (
+                            Object.keys(feesAdditionalData.addmissionId)
+                                .length === 0
+                        ) {
                             return {};
                         }
-                
+
                         return {
                             ...service._doc,
                             ...additionalData.addmissionId,
                         };
                     })
                 );
-                
-                // Filter out duplicates based on addmissionId and keep only the last occurrence
-                const filteredServices = servicesWithData.reduce((acc, current) => {
-                    acc[current.addmissionId] = current;
-                    return acc;
-                }, {});
-                
-              
-                const finalServices = Object.values(filteredServices);
-            //    console.log("finalServices", finalServices);   
-                const filteredServicesWithData = servicesWithData.filter(
-                    (service) => Object.keys(service).length !== 0
-                );
-               
+
+                // Grouping services based on addmissionId and keeping only the last occurrence
+                const groupedServices = {};
+
+                servicesWithData.forEach((serviceArray) => {
+                    const addmissionId = serviceArray[0].addmissionId;
+                    const totalPaidAmount = serviceArray.reduce(
+                        (total, service) => {
+                            return total + parseFloat(service.paidAmount);
+                        },
+                        0
+                    );
+
+                    if (serviceArray.length == 1) {
+                        const service = serviceArray[0];
+                        service.paidAmount = parseFloat(service.paidAmount);
+                        groupedServices[addmissionId] = service;
+                    } else {
+                        const lastService =
+                            serviceArray[serviceArray.length - 1];
+                        lastService.paidAmount = totalPaidAmount;
+                        groupedServices[addmissionId] = lastService;
+                    }
+                });
+
+                const finalServices = Object.values(groupedServices);
+
                 let response = {
                     coursePayments: formattedCoursePayments,
-                    servicesWithData: finalServices,
-                    totalItemsCount: await this.model.countDocuments(filteredServicesWithData,formattedCoursePayments)
+                    servicesWithData: [finalServices],
+                    totalItemsCount: await this.model.countDocuments(
+                        // filteredServicesWithData,
+                        formattedCoursePayments
+                    ),
                 };
 
                 return response;
