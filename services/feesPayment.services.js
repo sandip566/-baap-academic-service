@@ -58,7 +58,8 @@ class feesPaymentService extends BaseService {
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
-                const addmissionId = service.addmissionId.addmissionId;
+              
+                const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
                 if (!groupedServices[addmissionId]) {
@@ -70,6 +71,7 @@ class feesPaymentService extends BaseService {
                     console.log();
                     groupedServices[addmissionId].paidAmount += paidAmount;
                 }
+            
             });
 
             const finalServices = Object.values(groupedServices);
@@ -415,6 +417,7 @@ class feesPaymentService extends BaseService {
                 //         };
                 //     })
                 // )
+            
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
                         let additionalData = {};
@@ -570,13 +573,11 @@ class feesPaymentService extends BaseService {
                         if (
                             Object.keys(feesAdditionalData.addmissionId)
                                 .length === 0
-                        ) {
-                            return {};
-                        }
+                        ) 
 
                         return {
                             ...service._doc,
-                            ...additionalData.addmissionId,
+                            ...additionalData.addmissionId.addmissionId,
                         };
                     })
                 );
@@ -584,29 +585,32 @@ class feesPaymentService extends BaseService {
                 // Grouping services based on addmissionId and keeping only the last occurrence
                 const groupedServices = {};
 
-                servicesWithData.forEach((serviceArray) => {
-                    const addmissionId = serviceArray[0].addmissionId;
-                    const totalPaidAmount = serviceArray.reduce(
-                        (total, service) => {
-                            return total + parseFloat(service.paidAmount);
-                        },
-                        0
-                    );
+servicesWithData.forEach((serviceArray) => {
+    if (serviceArray.length > 0) {
+       
+        const addmissionId = serviceArray[0].addmissionId;
+        let totalPaidAmount = 0;
+        for (const service of serviceArray) {
+            console.log("service.paidAmount", service.paidAmount);
+            totalPaidAmount += parseFloat(service.paidAmount || 0); // Ensure to handle NaN values
+        }
+        
 
-                    if (serviceArray.length == 1) {
-                        const service = serviceArray[0];
-                        service.paidAmount = parseFloat(service.paidAmount);
-                        groupedServices[addmissionId] = service;
-                    } else {
-                        const lastService =
-                            serviceArray[serviceArray.length - 1];
-                        lastService.paidAmount = totalPaidAmount;
-                        groupedServices[addmissionId] = lastService;
-                    }
-                });
+        if (serviceArray.length == 1) {
+            const service = serviceArray[0];
+            service.paidAmount = parseFloat(service.paidAmount);
+            groupedServices[addmissionId] = service;
+        } else {
+            const lastService = serviceArray[serviceArray.length - 1];
+            lastService.paidAmount = totalPaidAmount;
+            groupedServices[addmissionId] = lastService;
+        }
+    }
+});
+
 
                 const finalServices = Object.values(groupedServices);
-
+console.log(finalServices);
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],

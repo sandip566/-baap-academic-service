@@ -289,15 +289,28 @@ class StudentsAdmmisionService extends BaseService {
                                                 course_id;
                                         }
 
+                                        // if (courseDetail.class_id) {
+                                        //     console.log(courseDetail.class_id);
+                                        //     const class_id =
+                                        //         await ClassModel.findOne({
+                                        //             classId:
+                                        //                 courseDetail.class_id,
+                                        //         });
+                                        //     additionalData.class_id = class_id;
+                                        //     console.log(class_id);
+                                        // }
                                         if (courseDetail.class_id) {
-                                            console.log(courseDetail.class_id);
-                                            const class_id =
-                                                await ClassModel.findOne({
-                                                    classId:
-                                                        courseDetail.class_id,
+                                            
+                                            const classId = parseInt(courseDetail.class_id);
+                                            if (!isNaN(classId)) {
+                                                const class_id = await DivisionModel.findOne({
+                                                    classId: classId,
                                                 });
-                                            additionalData.class_id = class_id;
-                                            console.log(class_id);
+                                                additionalData.class_id = class_id;
+                                            } else {
+                                               
+                                                console.error('courseDetail.class_id is not a valid number:', courseDetail.class_id);
+                                            }
                                         }
 
                                         // if (courseDetail.division_id) {
