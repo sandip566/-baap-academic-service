@@ -300,15 +300,29 @@ class StudentsAdmmisionService extends BaseService {
                                             console.log(class_id);
                                         }
 
+                                        // if (courseDetail.division_id) {
+                                        //     const division_id =
+                                        //         await DivisionModel.findOne({
+                                        //             divisionId:
+                                        //                 courseDetail.division_id,
+                                        //         });
+                                        //     additionalData.division_id =
+                                        //         division_id;
+                                        // }
                                         if (courseDetail.division_id) {
-                                            const division_id =
-                                                await DivisionModel.findOne({
-                                                    divisionId:
-                                                        courseDetail.division_id,
+                                            
+                                            const divisionId = parseInt(courseDetail.division_id);
+                                            if (!isNaN(divisionId)) {
+                                                const division_id = await DivisionModel.findOne({
+                                                    divisionId: divisionId,
                                                 });
-                                            additionalData.division_id =
-                                                division_id;
+                                                additionalData.division_id = division_id;
+                                            } else {
+                                               
+                                                console.error('courseDetail.division_id is not a valid number:', courseDetail.division_id);
+                                            }
                                         }
+                                        
 
                                         return {
                                             ...courseDetail,
