@@ -6,6 +6,9 @@ const shelf = new mongoose.Schema(
       type: String,
       required: false
     },
+    shelfName:{
+      type:String
+    },
     groupId: {
       type: Number,
       required: false

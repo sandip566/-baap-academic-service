@@ -49,6 +49,11 @@ class BooksService extends BaseService {
                 searchFilter.departmentId = criteria.departmentId;
             }
 
+
+            if (criteria.status && criteria.status.toLowerCase() === 'available') {
+                searchFilter.availableCount = { $gt: 0 };
+            }
+    
             return searchFilter;
         } catch (error) {
             console.log(error);
