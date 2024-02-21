@@ -49,6 +49,11 @@ class BooksService extends BaseService {
                 searchFilter.departmentId = criteria.departmentId;
             }
 
+
+            if (criteria.status && criteria.status.toLowerCase() === 'available') {
+                searchFilter.availableCount = { $gt: 0 };
+            }
+    
             return searchFilter;
         } catch (error) {
             console.log(error);
@@ -89,33 +94,75 @@ class BooksService extends BaseService {
         }
     }
 
-async  getBookDetails(bookId) {
-    try {
-        const book = await booksModel.findOne({ bookId: bookId });
-        if (!book) {
-            return { error: "Book not found" };
+    async getBookDetails(groupId, criteria) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    // Numeric search
+                    searchFilter.$or = [
+                        { ISBN: numericSearch },
+                        { shelfId: numericSearch },
+                        { price: numericSearch },
+                        { departmentId: numericSearch },
+                        { totalCount: numericSearch },
+                        { availableCount: numericSearch },
+                    ];
+                } else {
+                    // Non-numeric search
+                    searchFilter.$or = [
+                        { status: { $regex: criteria.search, $options: "i" } },
+                        { name: { $regex: criteria.search, $options: "i" } },
+                        { author: { $regex: criteria.search, $options: "i" } },
+                        {
+                            publisher: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
+                        },
+                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
+                    ];
+                }
+            }
+
+            if (criteria.shelfId) {
+                searchFilter.shelfId = criteria.shelfId;
+            }
+            if (criteria.departmentId) {
+                searchFilter.departmentId = criteria.departmentId;
+            }
+
+            const book = await booksModel.findOne(searchFilter);
+            if (!book) {
+                return { error: "Book not found" };
+            }
+            const issueLogs = await bookIssueLog.find({ bookId: book.bookId });
+            const studentIds = issueLogs.map((issue) => issue.studentId);
+            const students = await Student.find({
+                studentId: { $in: studentIds },
+            });
+
+            // Create a map to easily retrieve student names by studentId
+            const studentMap = {};
+            students.forEach((student) => {
+                studentMap[student.studentId] = student.firstName;
+            });
+
+            // Map issueLogs to include student names
+            const data = issueLogs.map((issue) => ({
+                studentName: studentMap[issue.studentId] || "Unknown Student",
+                issueDate: issue.issueDate,
+            }));
+
+            return { book, issueLogs: data };
+        } catch (error) {
+            console.error("Error fetching book details:", error);
+            return { error: "Internal server error" };
         }
-        const issueLogs = await bookIssueLog.find({ bookId: parseInt(bookId) });
-        const studentIds = issueLogs.map((issue) => issue.studentId);
-        const students = await Student.find({ studentId: { $in: studentIds } });
-
-        // Create a map to easily retrieve student names by studentId
-        const studentMap = {};
-        students.forEach((student) => {
-            studentMap[student.studentId] = student.firstName;
-        });
-
-        // Map issueLogs to include student names
-        const data = issueLogs.map((issue) => ({
-            studentName: studentMap[issue.studentId] || "Unknown Student",
-            issueDate: issue.issueDate
-        }));
-
-        return { book, issueLogs: data };
-    } catch (error) {
-        console.error("Error fetching book details:", error);
-        return { error: "Internal server error" };
     }
-}
 }
 module.exports = new BooksService(booksModel, "books");

@@ -75,7 +75,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             return { ...book._doc, shelf, department };
         }));
         // Return all data related to the matched documents
-        res.json(populatedBooks);
+        res.json({
+            status: "Success",
+            data: {
+                items: populatedBooks,
+                totalItemsCount: populatedBooks.length
+            }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
@@ -152,9 +158,12 @@ router.get("/totalBooks", async (req, res) => {
     }
 });
 
-router.get('/book-details/:bookId', async (req, res) => {
-      const bookId = req.params.bookId;
-      const result = await service.getBookDetails(bookId);
+router.get('/book-details/:groupId', async (req, res) => {
+      const groupId=req.params.groupId
+      const criteria = {
+        search: req.query.search,
+      }
+      const result = await service.getBookDetails(groupId,criteria);
       requestResponsehelper.sendResponse(res, result);
   });
   
