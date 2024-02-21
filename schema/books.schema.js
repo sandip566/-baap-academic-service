@@ -25,7 +25,7 @@ const booksSchema = new mongoose.Schema(
         totalCount: {
             type: Number,
         },
-        avilableCount:{
+        availableCount:{
             type:Number
         },
         totalCopies: {
