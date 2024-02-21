@@ -53,25 +53,26 @@ class feesPaymentService extends BaseService {
                     return { ...service._doc, ...additionalData.addmissionId };
                 })
             );
-          
-             // Grouping services based on addmissionId and keeping only the last occurrence
-             const groupedServices = {};
 
+            // Grouping services based on addmissionId and keeping only the last occurrence
+            const groupedServices = {};
 
-servicesWithData.forEach((service) => {
-    const addmissionId = service.addmissionId.addmissionId;
-    const paidAmount = parseFloat(service.paidAmount) || 0;
+            servicesWithData.forEach((service) => {
+                const addmissionId = service.addmissionId.addmissionId;
+                const paidAmount = parseFloat(service.paidAmount) || 0;
 
-    if (!groupedServices[addmissionId]) {
-       
-        groupedServices[addmissionId] = { ...service, paidAmount: paidAmount };
-    } else {
-      console.log();
-        groupedServices[addmissionId].paidAmount += paidAmount;
-    }
-});
+                if (!groupedServices[addmissionId]) {
+                    groupedServices[addmissionId] = {
+                        ...service,
+                        paidAmount: paidAmount,
+                    };
+                } else {
+                    console.log();
+                    groupedServices[addmissionId].paidAmount += paidAmount;
+                }
+            });
 
-const finalServices = Object.values(groupedServices);
+            const finalServices = Object.values(groupedServices);
 
             let response = {
                 totalPaidAmount: totalPaidAmount,
@@ -312,6 +313,8 @@ const finalServices = Object.values(groupedServices);
                 let course_id;
                 let class_id;
                 let division_id;
+                let divisionDoc;
+                let classDoc
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -436,22 +439,44 @@ const finalServices = Object.values(groupedServices);
                                                     });
                                                 admission.course_id = course_id;
                                             }
+
                                             if (admission.class_id) {
-                                                class_id =
+                                                classDoc =
                                                     await ClassModel.findOne({
-                                                        feesTemplateId:
+                                                        classId:
                                                             admission.class_id,
                                                     });
+                                                    if (classDoc) {
+                                                        class_id =
+                                                        classDoc.classId;
+                                                        console.log(class_id);
+                                                    } else {
+                                                        console.error(
+                                                            "Division document not found for division_id:",
+                                                            admission.class_id
+                                                        );
+                                                    }
                                                 admission.class_id = class_id;
                                             }
                                             if (admission.division_id) {
-                                                division_id =
+                                                divisionDoc =
                                                     await DivisionModel.findOne(
                                                         {
                                                             divisionId:
                                                                 admission.division_id,
                                                         }
                                                     );
+                                            
+                                                if (divisionDoc) {
+                                                    division_id =
+                                                        divisionDoc.divisionId;
+                                                    console.log(division_id);
+                                                } else {
+                                                    console.error(
+                                                        "Division document not found for division_id:",
+                                                        admission.division_id
+                                                    );
+                                                }
                                                 admission.division_id =
                                                     division_id;
                                             }
@@ -506,10 +531,10 @@ const finalServices = Object.values(groupedServices);
                                         return {
                                             candidateName:
                                                 matchingAdmission.name,
-                                            className: class_id?.name,
+                                            className: classDoc?.name,
                                             phoneNumber:
                                                 matchingAdmission.phoneNumber,
-                                            divisionName: division_id?.Name,
+                                            divisionName: divisionDoc?.Name,
                                             courseName: course_id?.CourseName,
                                             courseFees: course_id?.Fees,
                                             dueStatus: isDue,
@@ -523,6 +548,7 @@ const finalServices = Object.values(groupedServices);
                                                 service.installmentId,
                                             addmissionId: service.addmissionId,
                                             empId: service.empId,
+                                            installments: installmentLengths[0],
                                             groupId: service.groupId,
                                         };
                                     });
@@ -581,14 +607,9 @@ const finalServices = Object.values(groupedServices);
 
                 const finalServices = Object.values(groupedServices);
 
-                console.log(
-                    "zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",
-                    finalServices
-                );
-
                 let response = {
                     coursePayments: formattedCoursePayments,
-                    servicesWithData: finalServices,
+                    servicesWithData: [finalServices],
                     totalItemsCount: await this.model.countDocuments(
                         // filteredServicesWithData,
                         formattedCoursePayments
