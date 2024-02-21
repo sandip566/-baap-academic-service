@@ -516,11 +516,29 @@ class feesPaymentService extends BaseService {
 
                                         record.feesDetails.forEach((detail) => {
                                             detail.installment.forEach(
+
                                                 (item) => {
+                                                    console.log("itemieeeeeeeeeeeeeeeeeeeee",item.date,detail.installment);
+//                                                     // Given date string
+// const dateString = item.date;
+
+// // Create a new Date object
+// const date = new Date(dateString);
+
+// // Extract year, month, and day from the date object
+// const year = date.getFullYear();
+// const month = ('0' + (date.getMonth() + 1)).slice(-2); // Adding 1 because month starts from 0
+// const day = ('0' + date.getDate()).slice(-2);
+
+// // Construct the desired format
+// const formattedDate = `${year}/${month}/${day}`;
+
+// console.log(formattedDate);
+
                                                     if (
-                                                        item.status ===
+                                                        item.status ==
                                                             "pending" &&
-                                                        item.date <
+                                                            item.date <
                                                             criteria.currentDate
                                                     ) {
                                                         isDue = true;
