@@ -15,16 +15,20 @@ class BooksService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
+                    // Numeric search
                     searchFilter.$or = [
                         { ISBN: numericSearch },
-                        { department: numericSearch },
+                        { shelfId: numericSearch },
                         { price: numericSearch },
+                        { departmentId: numericSearch },
+                        { totalCount: numericSearch },
                         { availableCount: numericSearch },
                     ];
                 } else {
+                    // Non-numeric search
                     searchFilter.$or = [
                         { status: { $regex: criteria.search, $options: "i" } },
-                        { title: { $regex: criteria.search, $options: "i" } },
+                        { name: { $regex: criteria.search, $options: "i" } },
                         { author: { $regex: criteria.search, $options: "i" } },
                         { publisher: { $regex: criteria.search, $options: "i" } },
                         { RFID: criteria.search } // Assuming RFID is searched as exact match
@@ -32,19 +36,22 @@ class BooksService extends BaseService {
                 }
             }
     
+
+
             if (criteria.shelfId) {
                 searchFilter.shelfId = criteria.shelfId;
             }
-            if (criteria.department) {
-                searchFilter.department = criteria.department;
+            if (criteria.departmentId) {
+                searchFilter.departmentId = criteria.departmentId;
             }
-            
+    
             return searchFilter;
         } catch (error) {
             console.log(error);
             return null;
         }
     }
+    
     
     async deleteBookById(bookId, groupId) {
         try {
