@@ -17,6 +17,23 @@ class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async getByInstallmentId(installmentId) {
+        return this.execute(() => {
+            return this.model.findOne({ installmentId: installmentId });
+        });
+    }
+    async updateFeesInstallmentById(installmentId, newFeesDetails, newData) {
+        try {
+            const updateResult = await studentAdmissionModel.findOneAndUpdate(
+                { installmentId: installmentId },
+                { feesDetails: newFeesDetails, ...newData },
+                { new: true }
+            );
+            return updateResult;
+        } catch (error) {
+            throw error;
+        }
+    }
 
     async updateStudentsAddmisionById(studentAdmissionId, groupId, newData) {
         try {
@@ -283,15 +300,29 @@ class StudentsAdmmisionService extends BaseService {
                                             console.log(class_id);
                                         }
 
+                                        // if (courseDetail.division_id) {
+                                        //     const division_id =
+                                        //         await DivisionModel.findOne({
+                                        //             divisionId:
+                                        //                 courseDetail.division_id,
+                                        //         });
+                                        //     additionalData.division_id =
+                                        //         division_id;
+                                        // }
                                         if (courseDetail.division_id) {
-                                            const division_id =
-                                                await DivisionModel.findOne({
-                                                    divisionId:
-                                                        courseDetail.division_id,
+                                            
+                                            const divisionId = parseInt(courseDetail.division_id);
+                                            if (!isNaN(divisionId)) {
+                                                const division_id = await DivisionModel.findOne({
+                                                    divisionId: divisionId,
                                                 });
-                                            additionalData.division_id =
-                                                division_id;
+                                                additionalData.division_id = division_id;
+                                            } else {
+                                               
+                                                console.error('courseDetail.division_id is not a valid number:', courseDetail.division_id);
+                                            }
                                         }
+                                        
 
                                         return {
                                             ...courseDetail,
@@ -478,7 +509,7 @@ class StudentsAdmmisionService extends BaseService {
 
             // let response1;
             let modifiedFeesPaymentData = [];
-            let response1 = []; // Define response1 as an array
+            let response1 = []; 
 
             for (const feesPayment of feesPaymentData) {
                 try {
