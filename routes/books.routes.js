@@ -115,16 +115,23 @@ router.get("/totalAvailableBooks", async (req, res) => {
 
 router.get("/totalBooks", async (req, res) => {
     try {
-        const books = await booksModel.find({});
+        const books = await booksModel.find();
         let totalCount = 0;
         for (const book of books) {
-            totalCount += book.totalCopies;
+            totalCount +=parseInt(book.totalCopies)|| 0;
         }
-        res.json({ totalAvailableBooks: totalCount });
+        res.json({ total: totalCount });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get('/book-details/:bookId', async (req, res) => {
+      const bookId = req.params.bookId;
+      const result = await service.getBookDetails(bookId);
+      requestResponsehelper.sendResponse(res, result);
+  });
+  
 
 module.exports = router;
