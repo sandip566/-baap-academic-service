@@ -6,13 +6,36 @@ class ShelfService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
     getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.shelfId) query.shelfId = criteria.shelfId;
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+    
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    // Numeric search
+                    searchFilter.$or = [
+
+                    ];
+                } else {
+                    // Non-numeric search
+                    searchFilter.$or = [
+                        { locationIdentifier: { $regex: criteria.search, $options: "i" } },
+                        { shelfName: { $regex: criteria.search, $options: "i" } },
+                       
+                    ];
+                }
+            }
+            // if (criteria.shelfName) {
+            //     searchFilter.shelfName = { $regex: criteria.shelfName, $options: "i" };
+            // }
+            return searchFilter;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
 
     async deleteShelfById(shelfId, groupId) {

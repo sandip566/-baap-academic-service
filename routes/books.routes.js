@@ -127,9 +127,12 @@ router.get("/totalBooks", async (req, res) => {
     }
 });
 
-router.get('/book-details/:bookId', async (req, res) => {
-      const bookId = req.params.bookId;
-      const result = await service.getBookDetails(bookId);
+router.get('/book-details/:groupId', async (req, res) => {
+      const groupId=req.params.groupId
+      const criteria = {
+        search: req.query.search,
+      }
+      const result = await service.getBookDetails(groupId,criteria);
       requestResponsehelper.sendResponse(res, result);
   });
   

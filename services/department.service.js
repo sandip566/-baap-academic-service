@@ -8,13 +8,35 @@ class DepartmentService extends BaseService {
     }
 
     getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        // if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.departmentName) query.departmentName = new RegExp(criteria.departmentName, "i");
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+    
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    // Numeric search
+                    searchFilter.$or = [
+
+                    ];
+                } else {
+                    // Non-numeric search
+                    searchFilter.$or = [
+                        { departmentHead: { $regex: criteria.search, $options: "i" } },
+                        { departmentName: { $regex: criteria.search, $options: "i" } },
+                       
+                    ];
+                }
+            }
+            return searchFilter;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
+    
+    
 
     async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
         const codeValue = departmentHead.code instanceof Object ? departmentHead.code.code : departmentHead.code;
