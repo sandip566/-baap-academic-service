@@ -2,7 +2,7 @@ const { query } = require("express");
 const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const bookIssueLog = require("../schema/bookIssueLog.schema");
-const Student = require("../schema/student.schema");
+const Student = require("../schema/studentAdmission.schema");
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -94,7 +94,6 @@ class BooksService extends BaseService {
             const searchFilter = {
                 groupId: groupId,
             };
-
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
