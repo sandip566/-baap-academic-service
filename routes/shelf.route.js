@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const shelfService = require("../services/shelf.services");
+const service = require("../services/shelf.services");
 const requestResponseHelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const validationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const shelfModel=require("../schema/shelf.schema")
 
 router.post(
   "/",
@@ -14,33 +15,38 @@ router.post(
     }
     const shelfId = +Date.now();
     req.body.shelfId = shelfId;
-    const serviceResponse = await shelfService.create(req.body);
+    const serviceResponse = await service.create(req.body);
     requestResponseHelper.sendResponse(res, serviceResponse);
   }
 );
 
 router.get("/all", async (req, res) => {
-  const serviceResponse = await shelfService.getAllByCriteria({});
+  const serviceResponse = await service.getAllByCriteria({});
   requestResponseHelper.sendResponse(res, serviceResponse);
+});
+router.get("/all/getByGroupId/:groupId", async (req, res) => {
+  try {
+      const groupId = req.params.groupId;
+      const criteria = {
+          shelfName: req.query.shelfName,
+          search: req.query.search,
+          locationIdentifier: req.query.locationIdentifier,
+      };
+      const searchFilter = service.getAllDataByGroupId(groupId, criteria);
+      const shelf = await shelfModel.find(searchFilter);
+      res.json(shelf);
+  } catch (err) {
+      console.error(err);
+      res.status(500).send('Server Error');
+  }
 });
 
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    shelfId: req.query.shelfId,
-  };
-  const serviceResponse = await shelfService.getAllDataByGroupId(
-    groupId,
-    criteria
-  );
-  requestResponseHelper.sendResponse(res, serviceResponse);
-});
 
 router.delete("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
   try {
     const shelfId = req.params.shelfId;
     const groupId = req.params.groupId;
-    const data = await shelfService.deleteShelfById({ shelfId, groupId });
+    const data = await service.deleteShelfById({ shelfId, groupId });
     if (!data) {
       res.status(404).json({ error: 'Data not found to delete' });
     } else {
@@ -57,7 +63,7 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
     const shelfId = req.params.shelfId;
     const groupId = req.params.groupId;
     const newData = req.body;
-    const updateData = await shelfService.updateShelfById(shelfId, groupId, newData);
+    const updateData = await service.updateShelfById(shelfId, groupId, newData);
     if (!updateData) {
       res.status(404).json({ error: 'Data not found to update' });
     } else {
@@ -70,17 +76,17 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
 });
 
 router.delete("/:id", async (req, res) => {
-  const serviceResponse = await shelfService.deleteById(req.params.id);
+  const serviceResponse = await service.deleteById(req.params.id);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
 router.put("/:id", async (req, res) => {
-  const serviceResponse = await shelfService.updateById(req.params.id, req.body);
+  const serviceResponse = await service.updateById(req.params.id, req.body);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/:id", async (req, res) => {
-  const serviceResponse = await shelfService.getById(req.params.id);
+  const serviceResponse = await service.getById(req.params.id);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 module.exports = router;

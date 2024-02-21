@@ -5,10 +5,12 @@ const service = require("../services/department.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const departmentModel = require("../schema/department.schema");
 
 router.post(
     "/",
-    checkSchema(require("../dto/department.dto")), TokenService.checkPermission(["EMD2"]),
+    checkSchema(require("../dto/department.dto")),
+    //  TokenService.checkPermission(["EMD2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -45,16 +47,28 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.check
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMD1"]), async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        departmentName: req.query.departmentName,
-        //    name:req.query.name,
-        //    courseId:req.query.courseId
-    };
-    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
-    requestResponsehelper.sendResponse(res, serviceResponse);
+
+// , TokenService.checkPermission(["EMD1"]),
+router.get("/all/getByGroupId/:groupId"
+// , TokenService.checkPermission(["EMD1"])
+
+ ,async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            departmentName: req.query.departmentName,
+            search: req.query.search,
+            departmentHead:req.query.departmentHead
+        };
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria);
+        const departments = await departmentModel.find(searchFilter);
+        res.json(departments);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
 });
+
 router.put("/groupId/:groupId/departmentId/:departmentId", TokenService.checkPermission(["EMD3"]), async (req, res) => {
     try {
         const departmentId = req.params.departmentId;
