@@ -6,51 +6,64 @@ class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    getAllDataByGroupId(groupId, criteria) {
+    
+    async getAllDataByGroupId(groupId, publisher, department, shelf, search, page = 1, pageSize = 10) {
         try {
-            const searchFilter = {
-                groupId: groupId,
+            let query = {
+                groupId: groupId
             };
     
-            if (criteria.search) {
-                const numericSearch = parseInt(criteria.search);
+            if (publisher) {
+                query.publisher = publisher;
+            }
+            if (department) {
+                query.department = department;
+            }
+            if (shelf) {
+                query.shelf = shelf;
+            }
+    
+            if (search) {
+                const numericSearch = parseInt(search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
-                    searchFilter.$or = [
-                        { ISBN: numericSearch },
-                        { shelfId: numericSearch },
+                    query.$or = [
+                        { name: { $regex: search, $options: 'i' } },
+                        { shelf: numericSearch },
                         { price: numericSearch },
-                        { departmentId: numericSearch },
-                        { totalCount: numericSearch },
-                        { availableCount: numericSearch },
                     ];
                 } else {
-                    // Non-numeric search
-                    searchFilter.$or = [
-                        { status: { $regex: criteria.search, $options: "i" } },
-                        { name: { $regex: criteria.search, $options: "i" } },
-                        { author: { $regex: criteria.search, $options: "i" } },
-                        { publisher: { $regex: criteria.search, $options: "i" } },
-                        { RFID: criteria.search } // Assuming RFID is searched as exact match
+                    query.$or = [
+                        { name: { $regex: search, $options: 'i' } },
+                        { department: { $regex: search, $options: 'i' } },
+                        { publisher: { $regex: search, $options: 'i' } },
                     ];
                 }
             }
     
+            const totalItems = await booksModel.countDocuments(query);
+            const totalPages = Math.ceil(totalItems / pageSize);   
 
-
-            if (criteria.shelfId) {
-                searchFilter.shelfId = criteria.shelfId;
-            }
-            if (criteria.departmentId) {
-                searchFilter.departmentId = criteria.departmentId;
-            }
+            let bookData = await booksModel.find(query)
+                .skip((page - 1) * pageSize)
+                .sort({createdAt:-1})
+                .limit(Number(pageSize))
+                .exec();
     
-            return searchFilter;
+            return {
+                data: {
+                    items: bookData,
+                    totalItems: totalItems,
+                    totalPages: totalPages,
+                    currentPage: page
+                }
+            };
         } catch (error) {
-            console.log(error);
-            return null;
+            console.error(error);
+            throw error;
         }
     }
+    
+    
     
     
     async deleteBookById(bookId, groupId) {
