@@ -25,7 +25,8 @@ class DocumentService extends BaseService {
         };
         if (criteria.roleId) query.roleId = criteria.roleId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
-        if (criteria.description) query.description = criteria.description;
+        if (criteria.description) query.description = new RegExp(criteria.description, "i");
+        if (criteria.category) query.category = new RegExp(criteria.category, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
