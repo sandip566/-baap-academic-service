@@ -1,7 +1,8 @@
 const { query } = require("express");
 const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-
+const bookIssueLog = require("../schema/bookIssueLog.schema");
+const Student = require("../schema/student.schema");
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -11,7 +12,7 @@ class BooksService extends BaseService {
             const searchFilter = {
                 groupId: groupId,
             };
-    
+
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
@@ -30,13 +31,16 @@ class BooksService extends BaseService {
                         { status: { $regex: criteria.search, $options: "i" } },
                         { name: { $regex: criteria.search, $options: "i" } },
                         { author: { $regex: criteria.search, $options: "i" } },
-                        { publisher: { $regex: criteria.search, $options: "i" } },
-                        { RFID: criteria.search } // Assuming RFID is searched as exact match
+                        {
+                            publisher: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
+                        },
+                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
                     ];
                 }
             }
-    
-
 
             if (criteria.shelfId) {
                 searchFilter.shelfId = criteria.shelfId;
@@ -44,15 +48,14 @@ class BooksService extends BaseService {
             if (criteria.departmentId) {
                 searchFilter.departmentId = criteria.departmentId;
             }
-    
+
             return searchFilter;
         } catch (error) {
             console.log(error);
             return null;
         }
     }
-    
-    
+
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
@@ -75,16 +78,44 @@ class BooksService extends BaseService {
     }
     async getTotalAvailableBooks() {
         try {
-          const books = await booksModel.find();
-          let totalCount = 0;
-          for (const book of books) {
-            totalCount += book.availableCount;
-          }
-          return totalCount;
+            const books = await booksModel.find();
+            let totalCount = 0;
+            for (const book of books) {
+                totalCount += book.availableCount;
+            }
+            return totalCount;
         } catch (error) {
-          throw error;
+            throw error;
         }
     }
 
+async  getBookDetails(bookId) {
+    try {
+        const book = await booksModel.findOne({ bookId: bookId });
+        if (!book) {
+            return { error: "Book not found" };
+        }
+        const issueLogs = await bookIssueLog.find({ bookId: parseInt(bookId) });
+        const studentIds = issueLogs.map((issue) => issue.studentId);
+        const students = await Student.find({ studentId: { $in: studentIds } });
+
+        // Create a map to easily retrieve student names by studentId
+        const studentMap = {};
+        students.forEach((student) => {
+            studentMap[student.studentId] = student.firstName;
+        });
+
+        // Map issueLogs to include student names
+        const data = issueLogs.map((issue) => ({
+            studentName: studentMap[issue.studentId] || "Unknown Student",
+            issueDate: issue.issueDate
+        }));
+
+        return { book, issueLogs: data };
+    } catch (error) {
+        console.error("Error fetching book details:", error);
+        return { error: "Internal server error" };
+    }
+}
 }
 module.exports = new BooksService(booksModel, "books");
