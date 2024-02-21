@@ -34,7 +34,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
       };
       const searchFilter = service.getAllDataByGroupId(groupId, criteria);
       const shelf = await shelfModel.find(searchFilter);
-      res.json(shelf);
+      res.json({
+        status:"success",
+        data:{
+          items:shelf,
+          totalItemsCount:shelf.length
+
+        }
+      });
   } catch (err) {
       console.error(err);
       res.status(500).send('Server Error');

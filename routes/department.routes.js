@@ -62,7 +62,14 @@ router.get("/all/getByGroupId/:groupId"
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
         const departments = await departmentModel.find(searchFilter);
-        res.json(departments);
+        res.json({
+            status:"success",
+            data:{
+                items:departments,
+                totalItemsCount:departments.length
+            }
+
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

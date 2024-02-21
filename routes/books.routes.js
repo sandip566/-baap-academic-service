@@ -75,7 +75,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             return { ...book._doc, shelf, department };
         }));
         // Return all data related to the matched documents
-        res.json(populatedBooks);
+        res.json({
+            status: "Success",
+            data: {
+                items: populatedBooks,
+                totalItemsCount: populatedBooks.length
+            }
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');
