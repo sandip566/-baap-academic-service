@@ -97,7 +97,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             status: "Success",
             data: {
                 items: populatedBooks,
-                totalItemsCount: totalCount,
+                // totalItemsCount: totalCount,
+                // pageNo:page
             },
         });
     } catch (err) {

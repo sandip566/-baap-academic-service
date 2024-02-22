@@ -51,7 +51,7 @@ router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10 
+        pageSize: 10
     };
     const { pageNumber, pageSize, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria({req,query,pagination});
