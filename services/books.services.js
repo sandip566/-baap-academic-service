@@ -79,15 +79,22 @@ class BooksService extends BaseService {
     async getTotalAvailableBooks() {
         try {
             const books = await booksModel.find();
+            if (!books) {
+                console.log("No books found in the database.");
+                return 0; 
+            }
+            
             let totalCount = 0;
             for (const book of books) {
-                totalCount += book.availableCount;
+                totalCount += book.availableCount || 0; 
             }
             return totalCount;
         } catch (error) {
+            console.error("Error in getTotalAvailableBooks:", error);
             throw error;
         }
     }
+    
 
     async getBookDetails(groupId, criteria) {
         try {
