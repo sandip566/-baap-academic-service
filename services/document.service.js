@@ -21,9 +21,9 @@ class DocumentService extends BaseService {
 
     async getByCategory(category) {
         try {
-            const data = await DocumentModel.findOne({ category: category });
+            const data = await DocumentModel.find({ category: category });
             if (data) {
-                return data
+                return { data }
             } else {
                 return { result: "Data Not Found" }
             }
