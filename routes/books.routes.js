@@ -41,21 +41,6 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-
-// router.get("/all/getByGroupId/:groupId", async (req, res) => {
-//     try {
-//         const groupId = req.params.groupId;
-//         const { name, publisher, department, shelf, search, page, pageSize } = req.query;
-
-//         let bookData = await service.getAllDataByGroupId(groupId, name, publisher, department, shelf, search, page, pageSize);
-//         res.json(bookData);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -72,17 +57,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             status: req.query.status,
         };
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; // Default limit to 10 if not provided
+        const limit = parseInt(req.query.limit) || 10; 
         const skip = (page - 1) * limit;
 
         const searchFilter = service.getAllDataByGroupId(groupId, criteria, skip, limit);
-
-        // Use the search filter to fetch data count from the database
         const totalCount = await booksModel.countDocuments(searchFilter);
         const books = await booksModel.find(searchFilter)
             .skip(skip)
             .limit(limit);
-       // Manually populate shelf and department information
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
                 const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
@@ -94,8 +76,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             status: "Success",
             data: {
                 items: populatedBooks,
-                // totalItemsCount: totalCount,
-                // pageNo:page
             },
         });
     } catch (err) {

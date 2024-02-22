@@ -7,64 +7,6 @@ class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    
-    // async getAllDataByGroupId(groupId, publisher, department, shelf, search, page = 1, pageSize = 10) {
-    //     try {
-    //         let query = {
-    //             groupId: groupId
-    //         };
-    
-    //         if (publisher) {
-    //             query.publishaer = publisher;
-    //         }
-    //         if (department) {
-    //             query.department = department;
-    //         }
-    //         if (shelf) {
-    //             query.shelf = shelf;
-    //         }
-    
-    //         if (search) {
-    //             const numericSearch = parseInt(search);
-    //             if (!isNaN(numericSearch)) {
-    //                 query.$or = [
-    //                     { name: { $regex: search, $options: 'i' } },
-    //                     { shelf: numericSearch },
-    //                     { price: numericSearch },
-    //                 ];
-    //             } else {
-    //                 query.$or = [
-    //                     { name: { $regex: search, $options: 'i' } },
-    //                     { department: { $regex: search, $options: 'i' } },
-    //                     { publisher: { $regex: search, $options: 'i' } },
-    //                 ];
-    //             }
-    //         }
-    
-    //         const totalItems = await booksModel.countDocuments(query);
-    //         const totalPages = Math.ceil(totalItems / pageSize);   
-
-    //         let bookData = await booksModel.find(query)
-    //             .skip((page - 1) * pageSize)
-    //             .sort({createdAt:-1})
-    //             .limit(Number(pageSize))
-    //             .exec();
-    
-    //         return {
-    //             data: {
-    //                 items: bookData,
-    //                 totalItems: totalItems,
-    //                 totalPages: totalPages,
-    //                 currentPage: page
-    //             }
-    //         };
-    //     } catch (error) {
-    //         console.error(error);
-    //         throw error;
-    //     }
-    // }
-    
-
     getAllDataByGroupId(groupId, criteria,skip,limit) {
         try {
             const searchFilter = {
@@ -73,7 +15,6 @@ class BooksService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
                     searchFilter.$or = [
                         { ISBN: numericSearch },
                         { shelfId: numericSearch },
@@ -83,7 +24,6 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    // Non-numeric search
                     searchFilter.$or = [
                         { status: { $regex: criteria.search, $options: "i" } },
                         { name: { $regex: criteria.search, $options: "i" } },
@@ -94,7 +34,7 @@ class BooksService extends BaseService {
                                 $options: "i",
                             },
                         },
-                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
+                        { RFID: criteria.search },
                     ];
                 }
             }
@@ -107,11 +47,9 @@ class BooksService extends BaseService {
             return searchFilter;
         } catch (error) {
             console.log(error);
-            return null;
+            throw error;
         }
     }
-    
-    
     
     async deleteBookById(bookId, groupId) {
         try {
@@ -155,7 +93,6 @@ class BooksService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
                     searchFilter.$or = [
                         { ISBN: numericSearch },
                         { shelfId: numericSearch },
@@ -165,7 +102,6 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    // Non-numeric search
                     searchFilter.$or = [
                         { status: { $regex: criteria.search, $options: "i" } },
                         { name: { $regex: criteria.search, $options: "i" } },
@@ -176,7 +112,7 @@ class BooksService extends BaseService {
                                 $options: "i",
                             },
                         },
-                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
+                        { RFID: criteria.search }, 
                     ];
                 }
             }
@@ -198,13 +134,11 @@ class BooksService extends BaseService {
                 studentId: { $in: studentIds },
             });
 
-            // Create a map to easily retrieve student names by studentId
             const studentMap = {};
             students.forEach((student) => {
                 studentMap[student.studentId] = student.firstName;
             });
 
-            // Map issueLogs to include student names
             const data = issueLogs.map((issue) => ({
                 studentName: studentMap[issue.studentId] || "Unknown Student",
                 issueDate: issue.issueDate,
