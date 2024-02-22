@@ -41,18 +41,46 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const { name, publisher, department, shelf, search, page, pageSize } = req.query;
+        const criteria = {
+            name: req.query.name,
+            author: req.query.author,
+            totalCount: req.query.totalCount,
+            availableCount: req.query.availableCount,
+            search: req.query.search,
+            shelfId: req.query.shelfId,
+            department: req.query.department,
+            publisher: req.query.publisher,
+            price: req.query.price,
+            status: req.query.status,
+        };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; 
+        const skip = (page - 1) * limit;
 
-        let bookData = await service.getAllDataByGroupId(groupId, name, publisher, department, shelf, search, page, pageSize);
-        res.json(bookData);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria, skip, limit);
+        const totalCount = await booksModel.countDocuments(searchFilter);
+        const books = await booksModel.find(searchFilter)
+            .skip(skip)
+            .limit(limit);
+        const populatedBooks = await Promise.all(
+            books.map(async (book) => {
+                const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
+                const department = await deparmentModel.findOne({ departmentId: book.departmentId });
+                return { ...book._doc, shelf, department };
+            })
+        );
+        res.json({
+            status: "Success",
+            data: {
+                items: populatedBooks,
+            },
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
     }
 });
 
