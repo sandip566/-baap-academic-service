@@ -64,4 +64,5 @@ class DocumentService extends BaseService {
         }
     }
 }
+
 module.exports = new DocumentService(DocumentModel, 'document');
