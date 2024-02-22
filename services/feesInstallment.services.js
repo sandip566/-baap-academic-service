@@ -259,7 +259,7 @@ class feesInstallmentService extends BaseService {
                     $match: {
                         "courseDetails.class_id": Number(classId),
                         groupId: Number(groupId),
-                        "feesDetail.feesTemplateId": Number(feesTemplateId),
+                        "feesDetails.feesTemplateId": Number(feesTemplateId),
                         academicYear: academicYear
                     }
                 },
