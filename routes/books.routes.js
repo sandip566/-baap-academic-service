@@ -82,8 +82,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const books = await booksModel.find(searchFilter)
             .skip(skip)
             .limit(limit);
-
-        // Manually populate shelf and department information
+       // Manually populate shelf and department information
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
                 const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
@@ -91,8 +90,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 return { ...book._doc, shelf, department };
             })
         );
-
-        // Return all data related to the matched documents along with total count
         res.json({
             status: "Success",
             data: {
