@@ -41,12 +41,6 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-// router.get("/:id", async (req, res) => {
-//     const serviceResponse = await service.getById(req.params.id);
-//     requestResponsehelper.sendResponse(res, serviceResponse);
-// });
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -54,33 +48,42 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             name: req.query.name,
             author: req.query.author,
             totalCount: req.query.totalCount,
-           availableCount:req.query.availableCount,
+            availableCount: req.query.availableCount,
             search: req.query.search,
             shelfId: req.query.shelfId,
             department: req.query.department,
             publisher: req.query.publisher,
             price: req.query.price,
-            status: req.query.status
+            status: req.query.status,
         };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; 
+        const skip = (page - 1) * limit;
 
-        const searchFilter = service.getAllDataByGroupId(groupId, criteria);
-
-        // Use the search filter to fetch data from the database
-        const books = await booksModel.find(searchFilter);
-
-        // Manually populate shelf and department information
-        const populatedBooks = await Promise.all(books.map(async (book) => {
-            const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
-            const department = await deparmentModel.findOne({ departmentId: book.departmentId });
-            return { ...book._doc, shelf, department };
-        }));
-        // Return all data related to the matched documents
-        res.json(populatedBooks);
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria, skip, limit);
+        const totalCount = await booksModel.countDocuments(searchFilter);
+        const books = await booksModel.find(searchFilter)
+            .skip(skip)
+            .limit(limit);
+        const populatedBooks = await Promise.all(
+            books.map(async (book) => {
+                const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
+                const department = await deparmentModel.findOne({ departmentId: book.departmentId });
+                return { ...book._doc, shelf, department };
+            })
+        );
+        res.json({
+            status: "Success",
+            data: {
+                items: populatedBooks,
+            },
+        });
     } catch (err) {
         console.error(err);
-        res.status(500).send('Server Error');
+        res.status(500).send("Server Error");
     }
 });
+
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
@@ -140,16 +143,26 @@ router.get("/totalAvailableBooks", async (req, res) => {
 
 router.get("/totalBooks", async (req, res) => {
     try {
-        const books = await booksModel.find({});
+        const books = await booksModel.find();
         let totalCount = 0;
         for (const book of books) {
-            totalCount += book.totalCopies;
+            totalCount +=parseInt(book.totalCopies)|| 0;
         }
-        res.json({ totalAvailableBooks: totalCount });
+        res.json({ total: totalCount });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get('/book-details/:groupId', async (req, res) => {
+      const groupId=req.params.groupId
+      const criteria = {
+        search: req.query.search,
+      }
+      const result = await service.getBookDetails(groupId,criteria);
+      requestResponsehelper.sendResponse(res, result);
+  });
+  
 
 module.exports = router;
