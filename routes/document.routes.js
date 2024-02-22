@@ -24,13 +24,18 @@ router.get("/memberId/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getByCategory/:category", async (req, res) => {
+    const serviceResponse = await service.getByCategory(req.params.category);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
         pageSize: 10
     };
     const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria(query, pagination);
+    const serviceResponse = await service.getAllByCriteria({ req, query, pagination });
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 

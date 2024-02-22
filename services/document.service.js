@@ -19,6 +19,19 @@ class DocumentService extends BaseService {
         }
     }
 
+    async getByCategory(category) {
+        try {
+            const data = await DocumentModel.findOne({ category: category });
+            if (data) {
+                return data
+            } else {
+                return { result: "Data Not Found" }
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
