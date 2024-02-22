@@ -1,7 +1,5 @@
 const express = require("express");
 const router = express.Router();
-// const multer = require('multer');
-// const upload = multer({ dest: 'uploads/' });
 const { checkSchema } = require("express-validator");
 const service = require("../services/document.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
@@ -24,13 +22,18 @@ router.get("/memberId/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getByCategory/:category", async (req, res) => {
+    const serviceResponse = await service.getByCategory(req.params.category);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
         pageSize: 10
     };
     const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria(query, pagination);
+    const serviceResponse = await service.getAllByCriteria({ req, query, pagination });
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -40,6 +43,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         roleId: req.query.roleId,
         title: req.query.title,
         description: req.query.description,
+        category: req.query.category
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,

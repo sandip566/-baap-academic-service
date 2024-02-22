@@ -19,13 +19,27 @@ class DocumentService extends BaseService {
         }
     }
 
+    async getByCategory(category) {
+        try {
+            const data = await DocumentModel.findOne({ category: category });
+            if (data) {
+                return data
+            } else {
+                return { result: "Data Not Found" }
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
         if (criteria.roleId) query.roleId = criteria.roleId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
-        if (criteria.description) query.description = criteria.description;
+        if (criteria.description) query.description = new RegExp(criteria.description, "i");
+        if (criteria.category) query.category = new RegExp(criteria.category, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
