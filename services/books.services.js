@@ -8,62 +8,108 @@ class BooksService extends BaseService {
         super(dbModel, entityName);
     }
     
-    async getAllDataByGroupId(groupId, publisher, department, shelf, search, page = 1, pageSize = 10) {
+    // async getAllDataByGroupId(groupId, publisher, department, shelf, search, page = 1, pageSize = 10) {
+    //     try {
+    //         let query = {
+    //             groupId: groupId
+    //         };
+    
+    //         if (publisher) {
+    //             query.publishaer = publisher;
+    //         }
+    //         if (department) {
+    //             query.department = department;
+    //         }
+    //         if (shelf) {
+    //             query.shelf = shelf;
+    //         }
+    
+    //         if (search) {
+    //             const numericSearch = parseInt(search);
+    //             if (!isNaN(numericSearch)) {
+    //                 query.$or = [
+    //                     { name: { $regex: search, $options: 'i' } },
+    //                     { shelf: numericSearch },
+    //                     { price: numericSearch },
+    //                 ];
+    //             } else {
+    //                 query.$or = [
+    //                     { name: { $regex: search, $options: 'i' } },
+    //                     { department: { $regex: search, $options: 'i' } },
+    //                     { publisher: { $regex: search, $options: 'i' } },
+    //                 ];
+    //             }
+    //         }
+    
+    //         const totalItems = await booksModel.countDocuments(query);
+    //         const totalPages = Math.ceil(totalItems / pageSize);   
+
+    //         let bookData = await booksModel.find(query)
+    //             .skip((page - 1) * pageSize)
+    //             .sort({createdAt:-1})
+    //             .limit(Number(pageSize))
+    //             .exec();
+    
+    //         return {
+    //             data: {
+    //                 items: bookData,
+    //                 totalItems: totalItems,
+    //                 totalPages: totalPages,
+    //                 currentPage: page
+    //             }
+    //         };
+    //     } catch (error) {
+    //         console.error(error);
+    //         throw error;
+    //     }
+    // }
+    
+
+    getAllDataByGroupId(groupId, criteria,skip,limit) {
         try {
-            let query = {
-                groupId: groupId
+            const searchFilter = {
+                groupId: groupId,
             };
-    
-            if (publisher) {
-                query.publishaer = publisher;
-            }
-            if (department) {
-                query.department = department;
-            }
-            if (shelf) {
-                query.shelf = shelf;
-            }
-    
-            if (search) {
-                const numericSearch = parseInt(search);
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    query.$or = [
-                        { name: { $regex: search, $options: 'i' } },
-                        { shelf: numericSearch },
+                    // Numeric search
+                    searchFilter.$or = [
+                        { ISBN: numericSearch },
+                        { shelfId: numericSearch },
                         { price: numericSearch },
+                        { departmentId: numericSearch },
+                        { totalCount: numericSearch },
+                        { availableCount: numericSearch },
                     ];
                 } else {
-                    query.$or = [
-                        { name: { $regex: search, $options: 'i' } },
-                        { department: { $regex: search, $options: 'i' } },
-                        { publisher: { $regex: search, $options: 'i' } },
+                    // Non-numeric search
+                    searchFilter.$or = [
+                        { status: { $regex: criteria.search, $options: "i" } },
+                        { name: { $regex: criteria.search, $options: "i" } },
+                        { author: { $regex: criteria.search, $options: "i" } },
+                        {
+                            publisher: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
+                        },
+                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
                     ];
                 }
             }
-    
-            const totalItems = await booksModel.countDocuments(query);
-            const totalPages = Math.ceil(totalItems / pageSize);   
-
-            let bookData = await booksModel.find(query)
-                .skip((page - 1) * pageSize)
-                .sort({createdAt:-1})
-                .limit(Number(pageSize))
-                .exec();
-    
-            return {
-                data: {
-                    items: bookData,
-                    totalItems: totalItems,
-                    totalPages: totalPages,
-                    currentPage: page
-                }
-            };
+            if (criteria.shelfId) {
+                searchFilter.shelfId = criteria.shelfId;
+            }
+            if (criteria.departmentId) {
+                searchFilter.departmentId = criteria.departmentId;
+            }
+            return searchFilter;
         } catch (error) {
-            console.error(error);
-            throw error;
+            console.log(error);
+            return null;
         }
     }
-    
     
     
     
