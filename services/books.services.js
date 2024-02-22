@@ -7,16 +7,14 @@ class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    getAllDataByGroupId(groupId, criteria) {
+    getAllDataByGroupId(groupId, criteria,skip,limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
             };
-
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
                     searchFilter.$or = [
                         { ISBN: numericSearch },
                         { shelfId: numericSearch },
@@ -26,7 +24,6 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    // Non-numeric search
                     searchFilter.$or = [
                         { status: { $regex: criteria.search, $options: "i" } },
                         { name: { $regex: criteria.search, $options: "i" } },
@@ -37,25 +34,23 @@ class BooksService extends BaseService {
                                 $options: "i",
                             },
                         },
-                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
+                        { RFID: criteria.search },
                     ];
                 }
             }
-
             if (criteria.shelfId) {
                 searchFilter.shelfId = criteria.shelfId;
             }
             if (criteria.departmentId) {
                 searchFilter.departmentId = criteria.departmentId;
             }
-
             return searchFilter;
         } catch (error) {
             console.log(error);
-            return null;
+            throw error;
         }
     }
-
+    
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
@@ -104,7 +99,6 @@ class BooksService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
                     searchFilter.$or = [
                         { ISBN: numericSearch },
                         { shelfId: numericSearch },
@@ -114,7 +108,6 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    // Non-numeric search
                     searchFilter.$or = [
                         { status: { $regex: criteria.search, $options: "i" } },
                         { name: { $regex: criteria.search, $options: "i" } },
@@ -125,7 +118,7 @@ class BooksService extends BaseService {
                                 $options: "i",
                             },
                         },
-                        { RFID: criteria.search }, // Assuming RFID is searched as exact match
+                        { RFID: criteria.search }, 
                     ];
                 }
             }
@@ -147,13 +140,11 @@ class BooksService extends BaseService {
                 studentId: { $in: studentIds },
             });
 
-            // Create a map to easily retrieve student names by studentId
             const studentMap = {};
             students.forEach((student) => {
                 studentMap[student.studentId] = student.firstName;
             });
 
-            // Map issueLogs to include student names
             const data = issueLogs.map((issue) => ({
                 studentName: studentMap[issue.studentId] || "Unknown Student",
                 issueDate: issue.issueDate,

@@ -28,10 +28,6 @@ const booksSchema = new mongoose.Schema(
         availableCount:{
             type:Number
         },
-        totalCopies: {
-            type: Number,
-            require: false
-        },
         RFID: {
             type: String,
             required: false

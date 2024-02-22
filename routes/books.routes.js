@@ -49,12 +49,6 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-// router.get("/:id", async (req, res) => {
-//     const serviceResponse = await service.getById(req.params.id);
-//     requestResponsehelper.sendResponse(res, serviceResponse);
-// });
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -70,31 +64,34 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             price: req.query.price,
             status: req.query.status,
         };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10; 
+        const skip = (page - 1) * limit;
 
-        const searchFilter = service.getAllDataByGroupId(groupId, criteria);
-
-        // Use the search filter to fetch data from the database
-        const books = await booksModel.find(searchFilter);
-
-        // Manually populate shelf and department information
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria, skip, limit);
+        const totalCount = await booksModel.countDocuments(searchFilter);
+        const books = await booksModel.find(searchFilter)
+            .skip(skip)
+            .limit(limit);
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
-                const shelf = await shelfModel.findOne({
-                    shelfId: book.shelfId,
-                });
-                const department = await deparmentModel.findOne({
-                    departmentId: book.departmentId,
-                });
+                const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
+                const department = await deparmentModel.findOne({ departmentId: book.departmentId });
                 return { ...book._doc, shelf, department };
             })
         );
-        // Return all data related to the matched documents
-        res.json(populatedBooks);
+        res.json({
+            status: "Success",
+            data: {
+                items: populatedBooks,
+            },
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
     }
 });
+
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
