@@ -12,12 +12,14 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const documentId = +Date.now();
+        req.body.documentId = documentId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
-router.get("/memberId/:id", async (req, res) => {
+router.get("/documentId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -28,12 +30,11 @@ router.get("/getByCategory/:category", async (req, res) => {
 });
 
 router.get("/all", async (req, res) => {
-    const pagination = {
-        pageNumber: req.query.pageNumber || 1,
-        pageSize: 10
-    };
-    const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria({ req, query, pagination });
+    const { pageNumber = 1, pageSize = 10, ...query } = req.query;
+    const { user, headers } = req;
+    const pagination = { pageNumber, pageSize };
+
+    const serviceResponse = await service.getAll({ user, headers, query, pagination });
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -67,11 +68,11 @@ router.delete("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/memberId/:memberId", async (req, res) => {
+router.delete("/groupId/:groupId/documentId/:documentId", async (req, res) => {
     try {
-        const memberId = req.params.memberId;
+        const documentId = req.params.documentId;
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(memberId, groupId);
+        const Data = await service.deleteByDataId(documentId, groupId);
         if (!Data) {
             res.status(404).json({ error: 'Data not found to delete' });
         } else {
@@ -83,12 +84,12 @@ router.delete("/groupId/:groupId/memberId/:memberId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/memberId/:memberId", async (req, res) => {
+router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
     try {
-        const memberId = req.params.memberId;
+        const documentId = req.params.documentId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const Data = await service.updateDataById(memberId, groupId, newData);
+        const Data = await service.updateDataById(documentId, groupId, newData);
         if (!Data) {
             res.status(404).json({ error: 'Data not found to update' });
         } else {
