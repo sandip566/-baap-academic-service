@@ -22,7 +22,7 @@ const booksSchema = new mongoose.Schema(
             type: Number,
             require: false
         },
-        totalCount: {
+        totalCopies: {
             type: Number,
         },
         availableCount:{
