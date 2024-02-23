@@ -51,7 +51,7 @@ router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10 
+        pageSize: 10
     };
     const { pageNumber, pageSize, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria({req,query,pagination});
@@ -268,7 +268,7 @@ router.get('/get-classes-fees', async (req, res) => {
         };
 
         for (const classObj of classes) {
-            const totalStudents = await service.getTotalStudentsForClass(classObj.classId);
+            const totalStudents = await service.getTotalStudentsForClass(classObj.classId, groupId);
             const totalFeesObj = await service.getTotalFeesAndPendingFeesForClass(classObj.classId, groupId, feesTemplateId, academicYear);
 
             const paidFees = totalFeesObj.totalFees - totalFeesObj.pendingFees;
