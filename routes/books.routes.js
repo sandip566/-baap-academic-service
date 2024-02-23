@@ -5,8 +5,8 @@ const service = require("../services/books.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const booksModel = require("../schema/books.schema");
-const shelfModel=require('../schema/shelf.schema');
-const deparmentModel=require("../schema/department.schema")
+const shelfModel = require("../schema/shelf.schema");
+const deparmentModel = require("../schema/department.schema");
 
 router.post(
     "/",
@@ -14,6 +14,14 @@ router.post(
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
+        }
+        const existingRecord = await service.checkName(
+            req.body.name
+        );
+        if (existingRecord.data) {
+            return res
+                .status(409)
+                .json({ error: " Same Name Already Exists." });
         }
         const bookId = +Date.now();
         req.body.bookId = bookId;
@@ -146,7 +154,7 @@ router.get("/totalBooks", async (req, res) => {
         const books = await booksModel.find();
         let totalCount = 0;
         for (const book of books) {
-            totalCount +=parseInt(book.totalCopies)|| 0;
+            totalCount += parseInt(book.totalCopies) || 0;
         }
         res.json({ total: totalCount });
     } catch (error) {
@@ -155,14 +163,13 @@ router.get("/totalBooks", async (req, res) => {
     }
 });
 
-router.get('/book-details/:groupId', async (req, res) => {
-      const groupId=req.params.groupId
-      const criteria = {
+router.get("/book-details/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
         search: req.query.search,
-      }
-      const result = await service.getBookDetails(groupId,criteria);
-      requestResponsehelper.sendResponse(res, result);
-  });
-  
+    };
+    const result = await service.getBookDetails(groupId, criteria);
+    requestResponsehelper.sendResponse(res, result);
+});
 
 module.exports = router;
