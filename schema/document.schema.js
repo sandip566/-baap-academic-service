@@ -6,6 +6,9 @@ const DocumentSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        documentId: {
+            type: Number,
+        },
         memberId: {
             type: Number
         },
