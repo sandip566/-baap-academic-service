@@ -58,7 +58,6 @@ class feesPaymentService extends BaseService {
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
-              
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
@@ -71,7 +70,6 @@ class feesPaymentService extends BaseService {
                     console.log();
                     groupedServices[addmissionId].paidAmount += paidAmount;
                 }
-            
             });
 
             const finalServices = Object.values(groupedServices);
@@ -133,7 +131,7 @@ class feesPaymentService extends BaseService {
                 }
                 if (criteria.month) {
                     query.month = criteria.month;
-                    const month = query.month.padStart(2, "0"); // Ensure month is zero-padded
+                    const month = query.month.padStart(2, "0");
                     feesData = feesData.filter((data) => {
                         const currentDate = new Date(data.currentDate);
                         const dataMonth = String(
@@ -316,7 +314,7 @@ class feesPaymentService extends BaseService {
                 let class_id;
                 let division_id;
                 let divisionDoc;
-                let classDoc
+                let classDoc;
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -417,7 +415,7 @@ class feesPaymentService extends BaseService {
                 //         };
                 //     })
                 // )
-            
+
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
                         let additionalData = {};
@@ -449,16 +447,15 @@ class feesPaymentService extends BaseService {
                                                         classId:
                                                             admission.class_id,
                                                     });
-                                                    if (classDoc) {
-                                                        class_id =
-                                                        classDoc.classId;
-                                                        console.log(class_id);
-                                                    } else {
-                                                        console.error(
-                                                            "Division document not found for division_id:",
-                                                            admission.class_id
-                                                        );
-                                                    }
+                                                if (classDoc) {
+                                                    class_id = classDoc.classId;
+                                                    console.log(class_id);
+                                                } else {
+                                                    console.error(
+                                                        "Division document not found for division_id:",
+                                                        admission.class_id
+                                                    );
+                                                }
                                                 admission.class_id = class_id;
                                             }
                                             if (admission.division_id) {
@@ -469,7 +466,7 @@ class feesPaymentService extends BaseService {
                                                                 admission.division_id,
                                                         }
                                                     );
-                                            
+
                                                 if (divisionDoc) {
                                                     division_id =
                                                         divisionDoc.divisionId;
@@ -513,32 +510,34 @@ class feesPaymentService extends BaseService {
                                 const updatedInstallmentRecords =
                                     installmentRecords.map((record) => {
                                         let isDue = false;
-
+console.log("paidddddddddddddddddd",record.status);
                                         record.feesDetails.forEach((detail) => {
                                             detail.installment.forEach(
-
                                                 (item) => {
-                                                    console.log("itemieeeeeeeeeeeeeeeeeeeee",item.date,detail.installment);
-//                                                     // Given date string
-// const dateString = item.date;
+                                                    const dateString =
+                                                        item.date;
 
-// // Create a new Date object
-// const date = new Date(dateString);
+                                                    const date = new Date(
+                                                        dateString
+                                                    );
 
-// // Extract year, month, and day from the date object
-// const year = date.getFullYear();
-// const month = ('0' + (date.getMonth() + 1)).slice(-2); // Adding 1 because month starts from 0
-// const day = ('0' + date.getDate()).slice(-2);
+                                                    const year =
+                                                        date.getFullYear();
+                                                    const month = (
+                                                        "0" +
+                                                        (date.getMonth() + 1)
+                                                    ).slice(-2);
+                                                    const day =
+                                                        "0" +
+                                                        date.getDate() -
+                                                        1;
 
-// // Construct the desired format
-// const formattedDate = `${year}/${month}/${day}`;
-
-// console.log(formattedDate);
+                                                    const formattedDate = `${year}/${month}/${day}`;
 
                                                     if (
                                                         item.status ==
                                                             "pending" &&
-                                                            item.date <
+                                                        formattedDate <
                                                             criteria.currentDate
                                                     ) {
                                                         isDue = true;
@@ -574,10 +573,7 @@ class feesPaymentService extends BaseService {
                                         };
                                     });
 
-                                console.log(
-                                    "Updated installmentRecords: ",
-                                    updatedInstallmentRecords
-                                );
+                               
 
                                 return updatedInstallmentRecords;
                             }
@@ -591,44 +587,43 @@ class feesPaymentService extends BaseService {
                         if (
                             Object.keys(feesAdditionalData.addmissionId)
                                 .length === 0
-                        ) 
-
-                        return {
-                            ...service._doc,
-                            ...additionalData.addmissionId.addmissionId,
-                        };
+                        )
+                            return {
+                                ...service._doc,
+                                ...additionalData.addmissionId.addmissionId,
+                            };
                     })
                 );
 
                 // Grouping services based on addmissionId and keeping only the last occurrence
                 const groupedServices = {};
 
-servicesWithData.forEach((serviceArray) => {
-    if (serviceArray.length > 0) {
-       
-        const addmissionId = serviceArray[0].addmissionId;
-        let totalPaidAmount = 0;
-        for (const service of serviceArray) {
-            console.log("service.paidAmount", service.paidAmount);
-            totalPaidAmount += parseFloat(service.paidAmount || 0); // Ensure to handle NaN values
-        }
-        
+                servicesWithData.forEach((serviceArray) => {
+                    if (serviceArray.length > 0) {
+                        const addmissionId = serviceArray[0].addmissionId;
+                        let totalPaidAmount = 0;
+                        for (const service of serviceArray) {
+                           
+                            totalPaidAmount += parseFloat(
+                                service.paidAmount || 0
+                            ); // Ensure to handle NaN values
+                        }
 
-        if (serviceArray.length == 1) {
-            const service = serviceArray[0];
-            service.paidAmount = parseFloat(service.paidAmount);
-            groupedServices[addmissionId] = service;
-        } else {
-            const lastService = serviceArray[serviceArray.length - 1];
-            lastService.paidAmount = totalPaidAmount;
-            groupedServices[addmissionId] = lastService;
-        }
-    }
-});
-
+                        if (serviceArray.length == 1) {
+                            const service = serviceArray[0];
+                            service.paidAmount = parseFloat(service.paidAmount);
+                            groupedServices[addmissionId] = service;
+                        } else {
+                            const lastService =
+                                serviceArray[serviceArray.length - 1];
+                            lastService.paidAmount = totalPaidAmount;
+                            groupedServices[addmissionId] = lastService;
+                        }
+                    }
+                });
 
                 const finalServices = Object.values(groupedServices);
-console.log(finalServices);
+                // console.log(finalServices);
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
