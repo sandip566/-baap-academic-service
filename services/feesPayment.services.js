@@ -58,6 +58,7 @@ class feesPaymentService extends BaseService {
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
+              
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
