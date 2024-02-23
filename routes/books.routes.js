@@ -15,14 +15,6 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const existingRecord = await service.checkName(
-            req.body.name
-        );
-        if (existingRecord.data) {
-            return res
-                .status(409)
-                .json({ error: " Same Name Already Exists." });
-        }
         const bookId = +Date.now();
         req.body.bookId = bookId;
         const serviceResponse = await service.create(req.body);
