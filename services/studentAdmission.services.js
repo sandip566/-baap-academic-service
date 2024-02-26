@@ -289,15 +289,28 @@ class StudentsAdmmisionService extends BaseService {
                                                 course_id;
                                         }
 
+                                        // if (courseDetail.class_id) {
+                                        //     console.log(courseDetail.class_id);
+                                        //     const class_id =
+                                        //         await ClassModel.findOne({
+                                        //             classId:
+                                        //                 courseDetail.class_id,
+                                        //         });
+                                        //     additionalData.class_id = class_id;
+                                        //     console.log(class_id);
+                                        // }
                                         if (courseDetail.class_id) {
-                                            console.log(courseDetail.class_id);
-                                            const class_id =
-                                                await ClassModel.findOne({
-                                                    classId:
-                                                        courseDetail.class_id,
+                                            
+                                            const classId = parseInt(courseDetail.class_id);
+                                            if (!isNaN(classId)) {
+                                                const class_id = await DivisionModel.findOne({
+                                                    classId: classId,
                                                 });
-                                            additionalData.class_id = class_id;
-                                            console.log(class_id);
+                                                additionalData.class_id = class_id;
+                                            } else {
+                                               
+                                                console.error('courseDetail.class_id is not a valid number:', courseDetail.class_id);
+                                            }
                                         }
 
                                         // if (courseDetail.division_id) {
@@ -672,6 +685,7 @@ class StudentsAdmmisionService extends BaseService {
                     admission.courseDetails.length > 0
                 ) {
                     admission.courseDetails.forEach((courseDetail) => {
+                        console.log(courseDetail.course_id);
                         courseIds.push(courseDetail.course_id);
                     });
                 }
@@ -684,6 +698,7 @@ class StudentsAdmmisionService extends BaseService {
             const courseDetails = await courseModel.find({
                 courseId: { $in: courseIds },
             });
+            
             console.log("courseDetails", courseDetails);
 
             admissionData.data.items.forEach((admission) => {
@@ -698,12 +713,13 @@ class StudentsAdmmisionService extends BaseService {
                                 courseDetail.course_id.toString()
                         ); // Convert to string
                         if (matchingCourse) {
-                            const courseId = matchingCourse.courseId.toString(); // Convert to string
+                            const courseId = matchingCourse.courseId.toString(); 
+                            console.log("courseId", courseId);
                             const courseName =
                                 matchingCourse.CourseName ||
-                                matchingCourse.name; // Adjust property name based on your actual data
+                                matchingCourse.name; 
                             const existingCourse = courseCounts.find(
-                                (courseCount) => courseCount.id === courseId
+                                (courseCount) => courseCount.courseId === courseId
                             );
                             if (existingCourse) {
                                 existingCourse.count += 1;
