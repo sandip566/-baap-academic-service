@@ -17,6 +17,7 @@ class CourseService extends BaseService {
             if (criteria.University)
                 query.University = new RegExp(criteria.University, "i");
             if (criteria.courseId) query.courseId = criteria.courseId;
+            if (criteria.Department) query.Department = criteria.Department;
             const services = await courseModel.find(query);
             // console.log(services);
 
