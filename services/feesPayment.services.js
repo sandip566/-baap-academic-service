@@ -262,6 +262,7 @@ class feesPaymentService extends BaseService {
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
                             const courseId = courseDetail.course_id;
+                            console.log(courseId);
                             const courseExists = courseData.find(
                                 (course) => course.courseId === courseId
                             );
@@ -289,8 +290,14 @@ class feesPaymentService extends BaseService {
                                             ),
                                         0
                                     );
+                                    
+                                    if (!coursePayments[courseName].noOfStudents) {
+                                        coursePayments[courseName].noOfStudents = 0;
+                                    }
+                                    coursePayments[courseName].noOfStudents++;
 
-                                coursePayments[courseName].totalPaidAmount +=
+                            
+                                    coursePayments[courseName].totalPaidAmount +=
                                     paidAmountForCourse;
                                 coursePayments[
                                     courseName
@@ -304,6 +311,7 @@ class feesPaymentService extends BaseService {
                     (courseName) => {
                         return {
                             name: courseName,
+                            noOfStudents: coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
                                 coursePayments[courseName].totalPaidAmount,
                             totalRemainingAmount:
