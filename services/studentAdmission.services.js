@@ -896,185 +896,302 @@ class StudentsAdmmisionService extends BaseService {
     //         throw error;
     //     }
     // }
+
+    //original
     
-    
-    async  bulkUpload(dataRows,userId) {
-        try {
+//     async  bulkUpload(dataRows,userId) {
+//         try {
         
-            let data;
-  console.log("ddddddddddddddddddddd", dataRows);
-  dataRows.forEach((row) => { data=row})
+//             let data;
+// //   console.log("ddddddddddddddddddddd", dataRows);
+//   dataRows.forEach((row) => { data=row})
 
+// console.log("jjjjjjjjjjjjjjjjjjjjjjj",data);
+//             const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": data.smart_id });
+//             if (existingSmartIdRecord) {
+//                 throw new Error(`${ data.smart_id } Smart ID already exists`);
+//             }
 
-            const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": data.smart_id });
-            if (existingSmartIdRecord) {
-                throw new Error(`${ data.smart_id } Smart ID already exists`);
-            }
-
-            const courseName = data.courseName;
-            const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
-            const religionName = data.religion;
+//             const CourseName = data.courseName;
+//             let groupId=data.groupId
+//             console.log("courseName",CourseName);
+//             const { courseId, classId, divisionId } = await this.getIdsByCourseName(groupId,CourseName);
+//             console.log(" courseId, classId, divisionId  courseId, classId, divisionId  courseId, classId, divisionId ", courseId, classId, divisionId );
+//             const religionName = data.religion;
            
-            const { religionId } = await this.getReligionId(religionName,data.groupId);
-            console.log(religionId)
-            const name = data.name_2;
+//             const { religionId } = await this.getReligionId(religionName,data.groupId);
+//             console.log(religionId)
+//             const name = data.name_2;
            
-            const { TemplateId } = await this.getTemplateIDbyCourseName(name);
-            const subjectsArray = data.subjects.split(',');
+//             const { TemplateId } = await this.getTemplateIDbyCourseName(name);
+//             const subjectsArray = data.subjects.split(',');
 
-            const phoneNumber = String(data.phoneNumber).trim();
-            const phone = String(data.phone).trim(); 
+//             const phoneNumber = String(data.phoneNumber).trim();
+//             const phone = String(data.phone).trim(); 
 
-            // Validate phone numbers
-            if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
-                throw new Error('Invalid phone number');
+//             // Validate phone numbers
+//             if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
+//                 throw new Error('Invalid phone number');
                 
-            }
+//             }
 
-            // Check if phone number already exists in the database
-            const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
-            if (existingPhoneNumberRecord) {
-                throw new Error('Phone number already exists');
-            }
-            console.log(existingPhoneNumberRecord)
-            const queries = dataRows.map((obj) => {
-                const studentAdmissionId = Date.now() + Math.floor(Math.random() * 1000000);
-                return {
+//             // Check if phone number already exists in the database
+//             const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
+//             if (existingPhoneNumberRecord) {
+//                 throw new Error('Phone number already exists');
+//             }
+//             console.log(existingPhoneNumberRecord)
+//             const queries = dataRows.map((obj) => {
+//                 const studentAdmissionId = Date.now() + Math.floor(Math.random() * 1000000);
+//                 return {
                    
                        
-                            studentAdmissionId: studentAdmissionId,
-                            academicYear: obj.adcedemicYear,
-                            caste: obj.caste,
-                            groupId: obj.groupId,
-                            dateOfBirth: obj.dateOfBirth,
-                            document: [obj.document],
-                            email: obj.email,
-                            firstName: obj.firstName,
-                            lastName: obj.lastName,
-                            middleName: obj.middleName,
-                            empId: obj.empId,
-                            gender: obj.gender,
-                            location: obj.location,
-                            name: obj.name,
-                            password: obj.password,
-                            phoneNumber: phoneNumber,
-                            profile_img: obj.profile_img,
-                            religion: obj.religion,
-                            religionId: religionId,
-                            roleId: obj.roleId,
-                            title: obj.title,
-                            userId: obj.userId,
-                            familyDetails: [
-                                {
-                                    father_name: obj.father_name,
-                                    mother_name: obj.mother_name,
-                                    guardian_name: obj.guardian_name,
-                                    father_phone_number: obj.father_phone_number,
-                                    mother_phone_number: obj.mother_phone_number,
-                                    guardian_phone_number: obj.guardian_phone_number,
-                                    emergency_contact: [
-                                        {
-                                            contact_name: obj.contact_name,
-                                            phone_number: obj.phone_number,
-                                            relationship: obj.relationship,
-                                        },
-                                    ],
-                                },
-                            ],
-                            contactDetails: [
-                                {
-                                    phone: phone,
-                                    email: obj.email,
-                                    whats_app: obj.whats_app,
-                                    facebook: obj.facebook,
-                                    instagram: obj.instagram,
-                                    linked_in: obj.linked_in,
-                                },
-                            ],
-                            securitySettings: [
-                                {
-                                    smart_id: obj.smart_id,
-                                    subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
-                                    public_profile_url: obj.public_profile_url,
-                                },
-                            ],
-                            courseDetails: {
-                                course_id: courseId,
-                                class_id: classId,
-                                division_id: divisionId,
-                                subjects: subjectsArray,
-                            },
-                            feesDetails: [
-                                {
-                                    feesTemplateId: TemplateId,
-                                    installment: [
-                                        {
-                                            amount: obj.amount,
-                                            date: obj.date,
-                                            numberOfInstalment: obj.numberOfInstalment,
-                                            installmentNo: obj.installmentNo,
-                                            status: obj.status,
-                                        },
-                                    ],
-                                },
-                            ],
-                            installmentId: obj.installmentId,
-                            createdBy: obj.createdBy,
-                            updatedBy: obj.updatedBy,
+//                             studentAdmissionId: studentAdmissionId,
+//                             academicYear: obj.adcedemicYear,
+//                             caste: obj.caste,
+//                             groupId: obj.groupId,
+//                             dateOfBirth: obj.dateOfBirth,
+//                             document: [obj.document],
+//                             email: obj.email,
+//                             firstName: obj.firstName,
+//                             lastName: obj.lastName,
+//                             middleName: obj.middleName,
+//                             empId: obj.empId,
+//                             gender: obj.gender,
+//                             location: obj.location,
+//                             name: obj.name,
+//                             password: obj.password,
+//                             phoneNumber: phoneNumber,
+//                             profile_img: obj.profile_img,
+//                             religion: obj.religion,
+//                             religionId: religionId,
+//                             roleId: obj.roleId,
+//                             title: obj.title,
+//                             userId: obj.userId,
+//                             familyDetails: [
+//                                 {
+//                                     father_name: obj.father_name,
+//                                     mother_name: obj.mother_name,
+//                                     guardian_name: obj.guardian_name,
+//                                     father_phone_number: obj.father_phone_number,
+//                                     mother_phone_number: obj.mother_phone_number,
+//                                     guardian_phone_number: obj.guardian_phone_number,
+//                                     emergency_contact: [
+//                                         {
+//                                             contact_name: obj.contact_name,
+//                                             phone_number: obj.phone_number,
+//                                             relationship: obj.relationship,
+//                                         },
+//                                     ],
+//                                 },
+//                             ],
+//                             contactDetails: [
+//                                 {
+//                                     phone: phone,
+//                                     email: obj.email,
+//                                     whats_app: obj.whats_app,
+//                                     facebook: obj.facebook,
+//                                     instagram: obj.instagram,
+//                                     linked_in: obj.linked_in,
+//                                 },
+//                             ],
+//                             securitySettings: [
+//                                 {
+//                                     smart_id: obj.smart_id,
+//                                     subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
+//                                     public_profile_url: obj.public_profile_url,
+//                                 },
+//                             ],
+//                             courseDetails: {
+//                                 course_id: courseId,
+//                                 class_id: classId,
+//                                 division_id: divisionId,
+//                                 subjects: subjectsArray,
+//                             },
+//                             feesDetails: [
+//                                 {
+//                                     feesTemplateId: TemplateId,
+//                                     installment: [
+//                                         {
+//                                             amount: obj.amount,
+//                                             date: obj.date,
+//                                             numberOfInstalment: obj.numberOfInstalment,
+//                                             installmentNo: obj.installmentNo,
+//                                             status: obj.status,
+//                                         },
+//                                     ],
+//                                 },
+//                             ],
+//                             installmentId: obj.installmentId,
+//                             createdBy: obj.createdBy,
+//                             updatedBy: obj.updatedBy,
                         
                        
                      
                 
-                };
-            });
-            const result = await studentAdmissionModel.insertMany(queries);
-    console.log("gggggggggggggggggggggggggggg",result);
-                return result
-        } catch (error) {
-            console.log(error);
-            throw error;
-        }
-    }
+//                 };
+//             });
+//             const result = await studentAdmissionModel.insertMany(queries);
+//     // console.log("gggggggggggggggggggggggggggg",result);
+//                 return result
+//         } catch (error) {
+//             console.log(error);
+//             throw error;
+//         }
+//     }
     
+async bulkUpload(dataRows, userId) {
+    try {
+        let results = [];
 
+        for (let i = 0; i < dataRows.length; i++) {
+            const data = dataRows[i];
+            const CourseName = data.courseName;
+            const className=data.class
+            const divisionName=data.division
+            const groupId = data.groupId;
+console.log("divisionNamedddddddddddddddd",divisionName);
+            const { courseId, classId, divisionId } = await this.getIdsByCourseName(groupId, CourseName,className,divisionName);
+            const religionName = data.religion;
+            const { religionId } = await this.getReligionId(religionName, groupId);
+            const name = data.name_2;
+            const { TemplateId } = await this.getTemplateIDbyCourseName(name);
 
+            const phoneNumber = String(data.phoneNumber).trim();
+            const phone = String(data.phone).trim();
 
-    async getIdsByCourseName(courseName) {
-        try {
-            const course = await courseModel.findOne({ courseName: courseName });
-
-            if (!course) {
-                return {
-                    courseId: null,
-                    classId: null,
-                    divisionId: null
-                };
+            if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
+                throw new Error("Invalid phone number");
             }
 
-            const courseId = course.courseId;
-            const classInfo = await ClassModel.findOne({ courseId });
+            const existingPhoneNumberRecord = await studentAdmissionModel.findOne({
+                $or: [{ phoneNumber: phoneNumber }, { phone: phone }],
+            });
 
-            if (!classInfo) {
-                return {
-                    courseId,
-                    classId: null,
-                    divisionId: null
-                };
+            if (existingPhoneNumberRecord) {
+                throw new Error("Phone number already exists");
             }
 
-            const classId = classInfo.classId;
-
-            const divisionInfo = await DivisionModel.findOne({ classId });
-
-            return {
-                courseId,
-                classId,
-                divisionId: divisionInfo ? divisionInfo.divisionId : null
+            const studentAdmissionId = Date.now() + Math.floor(Math.random() * 1000000);
+            const query = {
+                studentAdmissionId: studentAdmissionId,
+                academicYear: data.adcedemicYear,
+                caste: data.caste,
+                groupId: data.groupId,
+                dateOfBirth: data.dateOfBirth,
+                document: [data.document],
+                email: data.email,
+                firstName: data.firstName,
+                lastName: data.lastName,
+                middleName: data.middleName,
+                empId: data.empId,
+                gender: data.gender,
+                location: data.location,
+                name: data.name,
+                password: data.password,
+                phoneNumber: phoneNumber,
+                profile_img: data.profile_img,
+                religion: data.religion,
+                religionId: religionId,
+                roleId: data.roleId,
+                title: data.title,
+                userId: data.userId,
+                familyDetails: [
+                    {
+                        father_name: data.father_name,
+                        mother_name: data.mother_name,
+                        guardian_name: data.guardian_name,
+                        father_phone_number: data.father_phone_number,
+                        mother_phone_number: data.mother_phone_number,
+                        guardian_phone_number: data.guardian_phone_number,
+                        emergency_contact: [
+                            {
+                                contact_name: data.contact_name,
+                                phone_number: data.phone_number,
+                                relationship: data.relationship,
+                            },
+                        ],
+                    },
+                ],
+                contactDetails: [
+                    {
+                        phone: phone,
+                        email: data.email,
+                        whats_app: data.whats_app,
+                        facebook: data.facebook,
+                        instagram: data.instagram,
+                        linked_in: data.linked_in,
+                    },
+                ],
+                securitySettings: [
+                    {
+                        smart_id: data.smart_id,
+                        subscribe_on_whatsapp: data.subscribe_on_whatsapp,
+                        public_profile_url: data.public_profile_url,
+                    },
+                ],
+                courseDetails: {
+                    course_id: courseId,
+                    class_id: classId,
+                    division_id: divisionId,
+                    subjects: data.subjects.split(","),
+                },
+                feesDetails: [
+                    {
+                        feesTemplateId: TemplateId,
+                        installment: [
+                            {
+                                amount: data.amount,
+                                date: data.date,
+                                numberOfInstalment: data.numberOfInstalment,
+                                installmentNo: data.installmentNo,
+                                status: data.status,
+                            },
+                        ],
+                    },
+                ],
+                installmentId: data.installmentId,
+                createdBy: data.createdBy,
+                updatedBy: data.updatedBy,
             };
-        } catch (error) {
-            throw error;
+
+            const result = await studentAdmissionModel.create(query);
+            results.push(result);
         }
+
+        return results;
+    } catch (error) {
+        console.error(error);
+        throw error;
     }
+}
+
+
+
+async  getIdsByCourseName(groupId, CourseName, className, divisionName) {
+    try {
+        const course = await courseModel.findOne({ groupId: groupId, CourseName: CourseName });
+        console.log("dddddddddddddddddddd", course);
+        
+        const courseId = course ? course.courseId : null;
+
+        const classInfo = await ClassModel.findOne({ groupId: groupId, name: className });
+        console.log("dddddddddddddddddddd", classInfo);
+        const classId = classInfo ? classInfo.classId : null;
+
+        const divisionInfo = await DivisionModel.findOne({ groupId: groupId, Name: divisionName });
+        console.log("dddddddddddddddddddd", divisionInfo);
+        const divisionId = divisionInfo ? divisionInfo.divisionId : null;
+
+        return {
+            courseId: courseId,
+            classId: classId,
+            divisionId: divisionId
+        };
+    } catch (error) {
+        throw error;
+    }
+}
 
     async  getReligionId(religion, groupId) {
         religion = religion;
