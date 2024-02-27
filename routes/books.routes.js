@@ -77,6 +77,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             data: {
                 items: populatedBooks,
             },
+            totalCount:totalCount
         });
     } catch (err) {
         console.error(err);
