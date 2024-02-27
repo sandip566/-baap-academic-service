@@ -900,11 +900,12 @@ class StudentsAdmmisionService extends BaseService {
     
     async  bulkUpload(dataRows,userId) {
         try {
-          
+        
             let data;
   console.log("ddddddddddddddddddddd", dataRows);
   dataRows.forEach((row) => { data=row})
-            const studentAdmissionId = Date.now();
+
+
             const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": data.smart_id });
             if (existingSmartIdRecord) {
                 throw new Error(`${ data.smart_id } Smart ID already exists`);
@@ -917,7 +918,7 @@ class StudentsAdmmisionService extends BaseService {
             const { religionId } = await this.getReligionId(religionName,data.groupId);
             console.log(religionId)
             const name = data.name_2;
-            console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxx",religionName,data.name);
+           
             const { TemplateId } = await this.getTemplateIDbyCourseName(name);
             const subjectsArray = data.subjects.split(',');
 
@@ -937,12 +938,14 @@ class StudentsAdmmisionService extends BaseService {
             }
             console.log(existingPhoneNumberRecord)
             const queries = dataRows.map((obj) => {
+                const studentAdmissionId = Date.now() + Math.floor(Math.random() * 1000000);
                 return {
                    
                        
                             studentAdmissionId: studentAdmissionId,
                             academicYear: obj.adcedemicYear,
                             caste: obj.caste,
+                            groupId: obj.groupId,
                             dateOfBirth: obj.dateOfBirth,
                             document: [obj.document],
                             email: obj.email,
@@ -1016,11 +1019,11 @@ class StudentsAdmmisionService extends BaseService {
                                 },
                             ],
                             installmentId: obj.installmentId,
-                            createdBy: userId,
-                            updatedBy: userId,
+                            createdBy: obj.createdBy,
+                            updatedBy: obj.updatedBy,
                         
                        
-                        upsert: true,
+                     
                 
                 };
             });
@@ -1028,6 +1031,7 @@ class StudentsAdmmisionService extends BaseService {
     console.log("gggggggggggggggggggggggggggg",result);
                 return result
         } catch (error) {
+            console.log(error);
             throw error;
         }
     }
