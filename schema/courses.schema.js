@@ -6,12 +6,12 @@ const courseSchema = new mongoose.Schema(
             required: true
         },
         courseId: Number,
-        courseName:String,
+        CourseName:String,
         name: {
             required: false,
             type: String
         },
-        Department: {
+        departmentId: {
             type: Number,
             required: false
         },

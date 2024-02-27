@@ -18,7 +18,11 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        name: {
+        // name: {
+        //     type: String,
+        //     required: false,
+        // },
+        Name: {
             type: String,
             required: false,
         },

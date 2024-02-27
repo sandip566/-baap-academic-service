@@ -15,6 +15,9 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        if (req.body.totalCopies !== undefined) {
+            req.body.availableCount = req.body.totalCopies;
+        }
         const bookId = +Date.now();
         req.body.bookId = bookId;
         const serviceResponse = await service.create(req.body);
@@ -135,7 +138,7 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
 router.get("/totalAvailableBooks", async (req, res) => {
     try {
         const totalCount = await service.getTotalAvailableBooks();
-        res.json({ totalAvailableBooks: totalCount });
+        res.json({ totalAvailableBooks: totalCount});
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal Server Error" });

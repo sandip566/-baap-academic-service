@@ -137,12 +137,11 @@ class BooksService extends BaseService {
             const issueLogs = await bookIssueLog.find({ bookId: book.bookId });
             const studentIds = issueLogs.map((issue) => issue.studentId);
             const students = await Student.find({
-                studentId: { $in: studentIds },
+                studentAdmissionId: { $in: studentIds },
             });
-
             const studentMap = {};
             students.forEach((student) => {
-                studentMap[student.studentId] = student.firstName;
+                studentMap[student.studentAdmissionId] = student.firstName;
             });
 
             const data = issueLogs.map((issue) => ({
