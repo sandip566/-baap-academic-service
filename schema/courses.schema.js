@@ -11,7 +11,7 @@ const courseSchema = new mongoose.Schema(
             required: false,
             type: String
         },
-        departmentId: {
+        Department: {
             type: Number,
             required: false
         },
