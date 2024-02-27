@@ -41,6 +41,7 @@ class SubjectService extends BaseService {
         if (criteria.courseId) query.courseId = criteria.courseId;
         if (criteria.divisionId) query.divisionId = criteria.divisionId;
         if (criteria.classId) query.classId = criteria.classId;
+        if (criteria.Department) query.Department = criteria.Department;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }

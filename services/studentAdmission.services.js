@@ -289,15 +289,28 @@ class StudentsAdmmisionService extends BaseService {
                                                 course_id;
                                         }
 
+                                        // if (courseDetail.class_id) {
+                                        //     console.log(courseDetail.class_id);
+                                        //     const class_id =
+                                        //         await ClassModel.findOne({
+                                        //             classId:
+                                        //                 courseDetail.class_id,
+                                        //         });
+                                        //     additionalData.class_id = class_id;
+                                        //     console.log(class_id);
+                                        // }
                                         if (courseDetail.class_id) {
-                                            console.log(courseDetail.class_id);
-                                            const class_id =
-                                                await ClassModel.findOne({
-                                                    classId:
-                                                        courseDetail.class_id,
+                                            
+                                            const classId = parseInt(courseDetail.class_id);
+                                            if (!isNaN(classId)) {
+                                                const class_id = await DivisionModel.findOne({
+                                                    classId: classId,
                                                 });
-                                            additionalData.class_id = class_id;
-                                            console.log(class_id);
+                                                additionalData.class_id = class_id;
+                                            } else {
+                                               
+                                                console.error('courseDetail.class_id is not a valid number:', courseDetail.class_id);
+                                            }
                                         }
 
                                         // if (courseDetail.division_id) {
@@ -672,6 +685,7 @@ class StudentsAdmmisionService extends BaseService {
                     admission.courseDetails.length > 0
                 ) {
                     admission.courseDetails.forEach((courseDetail) => {
+                        console.log(courseDetail.course_id);
                         courseIds.push(courseDetail.course_id);
                     });
                 }
@@ -684,6 +698,7 @@ class StudentsAdmmisionService extends BaseService {
             const courseDetails = await courseModel.find({
                 courseId: { $in: courseIds },
             });
+            
             console.log("courseDetails", courseDetails);
 
             admissionData.data.items.forEach((admission) => {
@@ -698,12 +713,13 @@ class StudentsAdmmisionService extends BaseService {
                                 courseDetail.course_id.toString()
                         ); // Convert to string
                         if (matchingCourse) {
-                            const courseId = matchingCourse.courseId.toString(); // Convert to string
+                            const courseId = matchingCourse.courseId.toString(); 
+                            console.log("courseId", courseId);
                             const courseName =
                                 matchingCourse.CourseName ||
-                                matchingCourse.name; // Adjust property name based on your actual data
+                                matchingCourse.name; 
                             const existingCourse = courseCounts.find(
-                                (courseCount) => courseCount.id === courseId
+                                (courseCount) => courseCount.courseId === courseId
                             );
                             if (existingCourse) {
                                 existingCourse.count += 1;
@@ -742,146 +758,279 @@ class StudentsAdmmisionService extends BaseService {
 
 
 
-    async bulkUpload(headers, dataRows, userId) {
-        try {
-            const studentAdmissionId = Date.now();
-            for (const row of dataRows) {
-                if (row.every(value => value === null || value === '')) {
-                    continue;
-                }
+    // async bulkUpload(headers, dataRows, userId) {
+    //     try {
+    //         const studentAdmissionId = Date.now();
+    //         for (const row of dataRows) {
+    //             if (row.every(value => value === null || value === '')) {
+    //                 continue;
+    //             }
     
-                const obj = {};
-                headers.forEach((header, index) => {
-                    obj[header] = row[index];
-                });
+    //             const obj = {};
+    //             headers.forEach((header, index) => {
+    //                 obj[header] = row[index];
+    //             });
     
-                // Validate smart_id uniqueness
-                const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": obj.smart_id });
-                if (existingSmartIdRecord) {
-                    throw new Error(`${ obj.smart_id } Smart ID already exists`);
-                }
+    //             // Validate smart_id uniqueness
+    //             const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": obj.smart_id });
+    //             if (existingSmartIdRecord) {
+    //                 throw new Error(`${ obj.smart_id } Smart ID already exists`);
+    //             }
     
-                const courseName = obj.courseName;
-                const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
-                const religionName = obj.religion;
-                const { religionId } = await this.getReligionId(religionName,obj.groupId);
-                console.log(religionId)
-                const name = obj.name;
-                const { TemplateId } = await this.getTemplateIDbyCourseName(name);
-                const subjectsArray = obj.subjects.split(',');
+    //             const courseName = obj.courseName;
+    //             const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
+    //             const religionName = obj.religion;
+    //             const { religionId } = await this.getReligionId(religionName,obj.groupId);
+    //             console.log(religionId)
+    //             const name = obj.name;
+    //             const { TemplateId } = await this.getTemplateIDbyCourseName(name);
+    //             const subjectsArray = obj.subjects.split(',');
     
-                const phoneNumber = String(obj.phoneNumber).trim();
-                const phone = String(obj.phone).trim(); 
+    //             const phoneNumber = String(obj.phoneNumber).trim();
+    //             const phone = String(obj.phone).trim(); 
     
-                // Validate phone numbers
-                if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
-                    throw new Error('Invalid phone number');
+    //             // Validate phone numbers
+    //             if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
+    //                 throw new Error('Invalid phone number');
                     
-                }
+    //             }
     
-                // Check if phone number already exists in the database
-                const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
-                if (existingPhoneNumberRecord) {
-                    throw new Error('Phone number already exists');
-                }
-                console.log(existingPhoneNumberRecord)
+    //             // Check if phone number already exists in the database
+    //             const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
+    //             if (existingPhoneNumberRecord) {
+    //                 throw new Error('Phone number already exists');
+    //             }
+    //             console.log(existingPhoneNumberRecord)
     
-                // Construct payload
-                const payload = {
-                    studentAdmissionId: studentAdmissionId,
-                    academicYear: obj.adcedemicYear,
-                    caste: obj.caste,
-                    dateOfBirth: obj.dateOfBirth,
-                    document: [obj.document],
-                    email: obj.email,
-                    firstName: obj.firstName,
-                    lastName: obj.lastName,
-                    middleName: obj.middleName,
-                    empId: obj.empId,
-                    gender: obj.gender,
-                    location: obj.location,
-                    name: obj.name,
-                    password: obj.password,
-                    phoneNumber: phoneNumber,
-                    profile_img: obj.profile_img,
-                    religion: obj.religion,
-                    religionId: religionId,
-                    roleId: obj.roleId,
-                    title: obj.title,
-                    userId: obj.userId,
-                    familyDetails: [
-                        {
-                            father_name: obj.father_name,
-                            mother_name: obj.mother_name,
-                            guardian_name: obj.guardian_name,
-                            father_phone_number: obj.father_phone_number,
-                            mother_phone_number: obj.mother_phone_number,
-                            guardian_phone_number: obj.guardian_phone_number,
-                            emergency_contact: [
-                                {
-                                    contact_name: obj.contact_name,
-                                    phone_number: obj.phone_number,
-                                    relationship: obj.relationship,
-                                },
-                            ],
-                        },
-                    ],
-                    contactDetails: [
-                        {
-                            phone: phone,
-                            email: obj.email,
-                            whats_app: obj.whats_app,
-                            facebook: obj.facebook,
-                            instagram: obj.instagram,
-                            linked_in: obj.linked_in,
-                        },
-                    ],
-                    securitySettings: [
-                        {
-                            smart_id: obj.smart_id,
-                            subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
-                            public_profile_url: obj.public_profile_url,
-                        },
-                    ],
-                    courseDetails: {
-                        course_id: courseId,
-                        class_id: classId,
-                        division_id: divisionId,
-                        subjects: subjectsArray,
-                    },
-                    feesDetails: [
-                        {
-                            feesTemplateId: TemplateId,
-                            installment: [
-                                {
-                                    amount: obj.amount,
-                                    date: obj.date,
-                                    numberOfInstalment: obj.numberOfInstalment,
-                                    installmentNo: obj.installmentNo,
-                                    status: obj.status,
-                                },
-                            ],
-                        },
-                    ],
-                    installmentId: obj.installmentId,
-                    createdBy: userId,
-                    updatedBy: userId,
-                };
+    //             // Construct payload
+    //             const payload = {
+    //                 studentAdmissionId: studentAdmissionId,
+    //                 academicYear: obj.adcedemicYear,
+    //                 caste: obj.caste,
+    //                 dateOfBirth: obj.dateOfBirth,
+    //                 document: [obj.document],
+    //                 email: obj.email,
+    //                 firstName: obj.firstName,
+    //                 lastName: obj.lastName,
+    //                 middleName: obj.middleName,
+    //                 empId: obj.empId,
+    //                 gender: obj.gender,
+    //                 location: obj.location,
+    //                 name: obj.name,
+    //                 password: obj.password,
+    //                 phoneNumber: phoneNumber,
+    //                 profile_img: obj.profile_img,
+    //                 religion: obj.religion,
+    //                 religionId: religionId,
+    //                 roleId: obj.roleId,
+    //                 title: obj.title,
+    //                 userId: obj.userId,
+    //                 familyDetails: [
+    //                     {
+    //                         father_name: obj.father_name,
+    //                         mother_name: obj.mother_name,
+    //                         guardian_name: obj.guardian_name,
+    //                         father_phone_number: obj.father_phone_number,
+    //                         mother_phone_number: obj.mother_phone_number,
+    //                         guardian_phone_number: obj.guardian_phone_number,
+    //                         emergency_contact: [
+    //                             {
+    //                                 contact_name: obj.contact_name,
+    //                                 phone_number: obj.phone_number,
+    //                                 relationship: obj.relationship,
+    //                             },
+    //                         ],
+    //                     },
+    //                 ],
+    //                 contactDetails: [
+    //                     {
+    //                         phone: phone,
+    //                         email: obj.email,
+    //                         whats_app: obj.whats_app,
+    //                         facebook: obj.facebook,
+    //                         instagram: obj.instagram,
+    //                         linked_in: obj.linked_in,
+    //                     },
+    //                 ],
+    //                 securitySettings: [
+    //                     {
+    //                         smart_id: obj.smart_id,
+    //                         subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
+    //                         public_profile_url: obj.public_profile_url,
+    //                     },
+    //                 ],
+    //                 courseDetails: {
+    //                     course_id: courseId,
+    //                     class_id: classId,
+    //                     division_id: divisionId,
+    //                     subjects: subjectsArray,
+    //                 },
+    //                 feesDetails: [
+    //                     {
+    //                         feesTemplateId: TemplateId,
+    //                         installment: [
+    //                             {
+    //                                 amount: obj.amount,
+    //                                 date: obj.date,
+    //                                 numberOfInstalment: obj.numberOfInstalment,
+    //                                 installmentNo: obj.installmentNo,
+    //                                 status: obj.status,
+    //                             },
+    //                         ],
+    //                     },
+    //                 ],
+    //                 installmentId: obj.installmentId,
+    //                 createdBy: userId,
+    //                 updatedBy: userId,
+    //             };
     
-                // Insert payload into the database
-                const result = await studentAdmissionModel.insertMany(payload);
+    //             // Insert payload into the database
+    //             const result = await studentAdmissionModel.insertMany(payload);
     
-                return {
-                    message: 'Data uploaded successfully',
-                    data: result,
-                };
+    //             return {
+    //                 message: 'Data uploaded successfully',
+    //                 data: result,
+    //             };
+    //         }
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
+    
+    
+    async  bulkUpload(dataRows,userId) {
+        try {
+          
+            let data;
+  console.log("ddddddddddddddddddddd", dataRows);
+  dataRows.forEach((row) => { data=row})
+            const studentAdmissionId = Date.now();
+            const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": data.smart_id });
+            if (existingSmartIdRecord) {
+                throw new Error(`${ data.smart_id } Smart ID already exists`);
             }
+
+            const courseName = data.courseName;
+            const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
+            const religionName = data.religion;
+           
+            const { religionId } = await this.getReligionId(religionName,data.groupId);
+            console.log(religionId)
+            const name = data.name_2;
+            console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxx",religionName,data.name);
+            const { TemplateId } = await this.getTemplateIDbyCourseName(name);
+            const subjectsArray = data.subjects.split(',');
+
+            const phoneNumber = String(data.phoneNumber).trim();
+            const phone = String(data.phone).trim(); 
+
+            // Validate phone numbers
+            if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
+                throw new Error('Invalid phone number');
+                
+            }
+
+            // Check if phone number already exists in the database
+            const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
+            if (existingPhoneNumberRecord) {
+                throw new Error('Phone number already exists');
+            }
+            console.log(existingPhoneNumberRecord)
+            const queries = dataRows.map((obj) => {
+                return {
+                   
+                       
+                            studentAdmissionId: studentAdmissionId,
+                            academicYear: obj.adcedemicYear,
+                            caste: obj.caste,
+                            dateOfBirth: obj.dateOfBirth,
+                            document: [obj.document],
+                            email: obj.email,
+                            firstName: obj.firstName,
+                            lastName: obj.lastName,
+                            middleName: obj.middleName,
+                            empId: obj.empId,
+                            gender: obj.gender,
+                            location: obj.location,
+                            name: obj.name,
+                            password: obj.password,
+                            phoneNumber: phoneNumber,
+                            profile_img: obj.profile_img,
+                            religion: obj.religion,
+                            religionId: religionId,
+                            roleId: obj.roleId,
+                            title: obj.title,
+                            userId: obj.userId,
+                            familyDetails: [
+                                {
+                                    father_name: obj.father_name,
+                                    mother_name: obj.mother_name,
+                                    guardian_name: obj.guardian_name,
+                                    father_phone_number: obj.father_phone_number,
+                                    mother_phone_number: obj.mother_phone_number,
+                                    guardian_phone_number: obj.guardian_phone_number,
+                                    emergency_contact: [
+                                        {
+                                            contact_name: obj.contact_name,
+                                            phone_number: obj.phone_number,
+                                            relationship: obj.relationship,
+                                        },
+                                    ],
+                                },
+                            ],
+                            contactDetails: [
+                                {
+                                    phone: phone,
+                                    email: obj.email,
+                                    whats_app: obj.whats_app,
+                                    facebook: obj.facebook,
+                                    instagram: obj.instagram,
+                                    linked_in: obj.linked_in,
+                                },
+                            ],
+                            securitySettings: [
+                                {
+                                    smart_id: obj.smart_id,
+                                    subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
+                                    public_profile_url: obj.public_profile_url,
+                                },
+                            ],
+                            courseDetails: {
+                                course_id: courseId,
+                                class_id: classId,
+                                division_id: divisionId,
+                                subjects: subjectsArray,
+                            },
+                            feesDetails: [
+                                {
+                                    feesTemplateId: TemplateId,
+                                    installment: [
+                                        {
+                                            amount: obj.amount,
+                                            date: obj.date,
+                                            numberOfInstalment: obj.numberOfInstalment,
+                                            installmentNo: obj.installmentNo,
+                                            status: obj.status,
+                                        },
+                                    ],
+                                },
+                            ],
+                            installmentId: obj.installmentId,
+                            createdBy: userId,
+                            updatedBy: userId,
+                        
+                       
+                        upsert: true,
+                
+                };
+            });
+            const result = await studentAdmissionModel.insertMany(queries);
+    console.log("gggggggggggggggggggggggggggg",result);
+                return result
         } catch (error) {
             throw error;
         }
     }
-    
-    
     
 
 
@@ -924,7 +1073,7 @@ class StudentsAdmmisionService extends BaseService {
     }
 
     async  getReligionId(religion, groupId) {
-        religion = religion.toLowerCase();
+        religion = religion;
         groupId = groupId
 console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",religion,groupId);
         let religionName = await religionModel.findOne({ religion: { $regex: new RegExp(religion, "i") }, groupId: groupId });
@@ -933,7 +1082,7 @@ console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",religion,groupId);
             throw new Error(`Religion with provided criteria not found`);
         }
     
-        console.log("religionName", religionName);
+        console.log("religionName", religionName.religionId);
         const religionId = religionName.religionId;
         return {
             religionId

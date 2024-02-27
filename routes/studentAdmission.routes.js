@@ -10,6 +10,7 @@ const TokenService = require("../services/token.services");
 const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
+const { isDate } = require("moment");
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -294,7 +295,7 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.post('/studentAdmission', upload.single('excelFile'), async (req, res) => {
+router.post('/bulkupload', upload.single('excelFile'), async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
       
@@ -319,18 +320,19 @@ router.post('/studentAdmission', upload.single('excelFile'), async (req, res) =>
 
         const excelBuffer = req.file.buffer;
         const workbook = xlsx.read(excelBuffer, { type: 'buffer' });
+        // console.log("uuuuuuuuuuuuuuuuuuuuuuuuu", workbook.Sheets[workbook.SheetNames[0]]);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        const excelData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
-         console.log(excelData)
+        const excelData = xlsx.utils.sheet_to_json(sheet);
+         console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",excelData)
         if (!excelData || excelData.length < 2) {
             return res.status(400).json({ error: 'Invalid Excel format' });
         }
 
-        const headers = excelData[0];
-        const dataRows = excelData.slice(1);
+        // const headers = excelData[0];
+        const dataRows = excelData
 
-        const result = await service.bulkUpload(headers, dataRows, userId);
+        const result = await service.bulkUpload( dataRows,userId);
         if (!result) {
             throw new Error(`Smart ID already exists`);
         }
