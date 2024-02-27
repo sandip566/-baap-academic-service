@@ -26,7 +26,7 @@ class CourseService extends BaseService {
                     let additionalData = {};
                     // console.log(additionalData);
                     let departmentDetails;
-                    if (service.Department) {
+                    if (service.Department && service.Department==null) {
                         departmentDetails = await DepartmentModel.findOne({
                             departmentId: service.Department,
                         });
