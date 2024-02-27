@@ -16,18 +16,21 @@ class DepartmentService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
+                 
                     searchFilter.$or = [
 
                     ];
                 } else {
-                    // Non-numeric search
+                    
                     searchFilter.$or = [
                         { departmentHead: { $regex: criteria.search, $options: "i" } },
                         { departmentName: { $regex: criteria.search, $options: "i" } },
                        
                     ];
                 }
+            }
+            if (criteria.academicYearId) {
+                searchFilter.academicYearId = criteria.academicYearId;
             }
             return searchFilter;
         } catch (error) {
