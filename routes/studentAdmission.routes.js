@@ -11,6 +11,7 @@ const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
+const Student=require("../schema/studentAdmission.schema")
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -455,4 +456,16 @@ router.put(
         }
     }
 );
+
+router.get('/autocomplete/students', async (req, res) => {
+    const firstName = req.query.firstName;
+    try {
+      const students = await Student.find({ firstName: { $regex: firstName, $options: 'i' } }).limit(10); // Case-insensitive regex search for student names
+      const suggestedNames = students.map(student => student.name);
+      res.json(suggestedNames);
+    } catch (error) {
+      res.status(500).json({ message: error.message });
+    }
+  });
+  
 module.exports = router;
