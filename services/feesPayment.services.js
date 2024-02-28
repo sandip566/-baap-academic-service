@@ -829,8 +829,8 @@ console.log("paidddddddddddddddddd",record.status);
                     error: "Fees payment record not found.",
                 };
             }
-            feesPayment.paidAmount = totalPaidAmount;
-            feesPayment.remainingAmount = remainingAmount;
+            feesPayment.paidAmount =math.round(totalPaidAmount);
+            feesPayment.remainingAmount = math.round(remainingAmount);
             await feesPayment.save();
 
             return { success: true };
