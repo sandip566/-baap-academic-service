@@ -11,7 +11,7 @@ const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
-const Student=require("../schema/studentAdmission.schema")
+const Student = require("../schema/studentAdmission.schema");
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -35,7 +35,9 @@ router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getByAddmissionId(req.params.addmissionId);
+    const serviceResponse = await service.getByAddmissionId(
+        req.params.addmissionId
+    );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/all", async (req, res) => {
@@ -63,14 +65,14 @@ router.post("/data/save", async (req, res, next) => {
             if (existingDocument) {
                 req.body.documents = req.body.documents
                     ? req.body.documents.map((documentData) => {
-                        const documentId =
-                            +Date.now() + Math.floor(Math.random() * 1000);
-                        return {
-                            _id: new mongoose.Types.ObjectId(),
-                            documentId: documentId,
-                            documents: documentData,
-                        };
-                    })
+                          const documentId =
+                              +Date.now() + Math.floor(Math.random() * 1000);
+                          return {
+                              _id: new mongoose.Types.ObjectId(),
+                              documentId: documentId,
+                              documents: documentData,
+                          };
+                      })
                     : existingDocument.data?.documents || [];
 
                 // req.body.feesDetails = req.body.feesDetails
@@ -81,44 +83,50 @@ router.post("/data/save", async (req, res, next) => {
                 //               feesDetailsId: feesDetailsId,
                 //               feesDetails: feesDetailsData,
                 //           };
-                //       })  
+                //       })
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
 
-                    const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
-                        const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+                    const updatedFeesDetails = req.body.feesDetails.map(
+                        (feesDetail) => {
+                            const installNo =
+                                +Date.now() +
+                                Math.floor(Math.random() * 1000) +
+                                1;
 
-                        const updatedInstallments = feesDetail.installment.map((installment) => {
-                            const uniqueInstallNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+                            const updatedInstallments =
+                                feesDetail.installment.map((installment) => {
+                                    const uniqueInstallNo =
+                                        +Date.now() +
+                                        Math.floor(Math.random() * 1000) +
+                                        1;
+                                    return {
+                                        ...installment,
+                                        installmentNo: uniqueInstallNo,
+                                        status: "pending",
+                                    };
+                                });
+
                             return {
-                                ...installment,
-                                installmentNo: uniqueInstallNo,
-                                status:"pending"
+                                ...feesDetail,
+                                installment: updatedInstallments,
                             };
-                        });
-
-
-                        return {
-                            ...feesDetail,
-                            installment: updatedInstallments,
-                        };
-                    });
-
+                        }
+                    );
 
                     req.body.feesDetails = updatedFeesDetails;
 
-                    const feesinstallmentResponse = await feesInstallmentServices.updateUser(
-                        req.body.addmissionId,
-                        req.body.groupId,
-                        req.body
-                    );
+                    const feesinstallmentResponse =
+                        await feesInstallmentServices.updateUser(
+                            req.body.addmissionId,
+                            req.body.groupId,
+                            req.body
+                        );
 
                     console.log(feesinstallmentResponse);
                 }
 
-
-              
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -133,14 +141,16 @@ router.post("/data/save", async (req, res, next) => {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
                     console.log(req.body.feesDetails);
-                    const feesinstallment = await feesInstallmentServices.create(req.body);
+                    const feesinstallment =
+                        await feesInstallmentServices.create(req.body);
                     console.log(feesinstallment);
 
-
-                    const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
-                        ...detail,
-                        installNo: index + 1,
-                    }));
+                    const updatedInstallments = req.body.feesDetails.map(
+                        (detail, index) => ({
+                            ...detail,
+                            installNo: index + 1,
+                        })
+                    );
                     console.log(updatedInstallments);
                     req.body.feesDetails = updatedInstallments;
                 }
@@ -296,54 +306,60 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.post('/bulkupload', upload.single('excelFile'), async (req, res) => {
+router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
     try {
         const authHeader = req.headers.authorization;
-      
 
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            return res.status(401).json({ message: 'Unauthorized - Token is Not Found' });
+        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+            return res
+                .status(401)
+                .json({ message: "Unauthorized - Token is Not Found" });
         }
 
-        const token = authHeader.split(' ')[1];
+        const token = authHeader.split(" ")[1];
         const decodedToken = await TokenService.decodeToken(token);
 
         if (!decodedToken || !decodedToken.userId) {
-            return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
+            return res
+                .status(401)
+                .json({ message: "Unauthorized - Invalid Token" });
         }
 
         const userId = decodedToken.userId;
-        console.group(userId)
+        console.group(userId);
 
         if (!req.file) {
-            return res.status(400).json({ error: 'No file uploaded' });
+            return res.status(400).json({ error: "No file uploaded" });
         }
 
         const excelBuffer = req.file.buffer;
-        const workbook = xlsx.read(excelBuffer, { type: 'buffer' });
+        const workbook = xlsx.read(excelBuffer, { type: "buffer" });
         // console.log("uuuuuuuuuuuuuuuuuuuuuuuuu", workbook.Sheets[workbook.SheetNames[0]]);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
         const excelData = xlsx.utils.sheet_to_json(sheet);
-         console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",excelData)
+        console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", excelData);
         if (!excelData || excelData.length < 2) {
-            return res.status(400).json({ error: 'Invalid Excel format' });
+            return res.status(400).json({ error: "Invalid Excel format" });
         }
 
         // const headers = excelData[0];
-        const dataRows = excelData
+        const dataRows = excelData;
 
-        const result = await service.bulkUpload( dataRows,userId);
+        const result = await service.bulkUpload(dataRows, userId);
         if (!result) {
             throw new Error(`Smart ID already exists`);
         }
-      
-        res.json({ success: true, message: "Bulk upload successful" ,data:result});
+
+        res.json({
+            success: true,
+            message: "Bulk upload successful",
+            data: result,
+        });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
 });
-
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
@@ -378,13 +394,10 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             lastName: req.query.lastName,
             search: req.query.search,
             addmissionId: req.query.addmissionId,
-            empId: req.query.empId
+            empId: req.query.empId,
         };
 
-        const serviceResponse = await service.getfeesPayment(
-            groupId,
-            criteria
-        );
+        const serviceResponse = await service.getfeesPayment(groupId, criteria);
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);
@@ -457,15 +470,16 @@ router.put(
     }
 );
 
-router.get('/autocomplete/students', async (req, res) => {
+router.get("/autocomplete/students", async (req, res) => {
     const firstName = req.query.firstName;
     try {
-      const students = await Student.find({ firstName: { $regex: firstName, $options: 'i' } }).limit(10); // Case-insensitive regex search for student names
-      const suggestedNames = students.map(student => student.name);
-      res.json(suggestedNames);
+        const students = await Student.find({
+            firstName: { $regex: firstName, $options: "i" },
+        }).limit(10);
+        const suggestedNames = students.map((student) => student.name);
+        res.json(suggestedNames);
     } catch (error) {
-      res.status(500).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
-  });
-  
+});
 module.exports = router;
