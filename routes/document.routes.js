@@ -19,6 +19,35 @@ router.post(
     }
 );
 
+router.post("/data/save",
+    checkSchema(require("../dto/document.dto")),
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        try {
+            if (req.body.documentId) {
+                const existingDoc = await service.getByDocumentIdData(req.body.documentId);
+
+                if (existingDoc) {
+                    const updatedData = {
+                        ...req.body,
+                        documentUrl: req.body.documentUrl,
+                    };
+                    const serviceResponse = await service.updateDocument(req.body.documentId, updatedData);
+                    requestResponsehelper.sendResponse(res, serviceResponse);
+                } else {
+                    res.status(404).json({ error: "Document not found" });
+                }
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal server error" });
+        }
+    }
+);
+
+
 router.get("/documentId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
