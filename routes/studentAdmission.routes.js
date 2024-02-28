@@ -463,7 +463,7 @@ router.put(
 router.get("/autocomplete/students",async(req,res)=>{
     const firstName=req.query.firstName;
     try{
-        const students=await Student.find({firstName:{$regex:firstName,$option:"i"}}).limit(10)
+        const students=await Student.find({firstName:{$regex:firstName,$options:"i"}}).limit(10)
         const suggestedNames=students.map((student)=>student.name)
         res.json(suggestedNames);
     }
