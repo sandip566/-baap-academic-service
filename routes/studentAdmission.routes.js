@@ -465,7 +465,7 @@ router.get("/autocomplete/students",async(req,res)=>{
     try{
         const students=await Student.find({firstName:{$regex:firstName,$options:"i"}}).limit(10)
         const suggestedNames=students.map((student)=>student.name)
-        res.json(suggestedNames);
+        res.json({data:students});
     }
     catch(error){
         res.status(500).json({message:error.message})
