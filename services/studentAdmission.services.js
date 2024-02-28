@@ -463,10 +463,7 @@ class StudentsAdmmisionService extends BaseService {
                                         let class_id;
                                         let division_id;
                                         if (courseDetail.course_id) {
-                                            console.log(
-                                                "aaaqqqqqqqqqqqqqqqqqqqq",
-                                                courseDetail.course_id
-                                            );
+                                            
                                             course_id =
                                                 await courseModel.findOne({
                                                     courseId:
@@ -484,8 +481,8 @@ class StudentsAdmmisionService extends BaseService {
                                         if (courseDetail.class_id) {
                                             class_id = await ClassModel.findOne(
                                                 {
-                                                    class_id:
-                                                        courseDetail.classId,
+                                                    classId:
+                                                        courseDetail.class_id,
                                                 }
                                             );
                                             courseAdditionalData.class_id =
@@ -495,8 +492,8 @@ class StudentsAdmmisionService extends BaseService {
                                         if (courseDetail.division_id) {
                                             division_id =
                                                 await DivisionModel.findOne({
-                                                    division_id:
-                                                        courseDetail.divisionId,
+                                                    divisionId:
+                                                        courseDetail.division_id,
                                                 });
                                             console.log(
                                                 "division_id",
@@ -571,8 +568,9 @@ class StudentsAdmmisionService extends BaseService {
 
                             if (feesDetail.course_id) {
                                 const courseData = await courseModel.findOne({
-                                    course_id: feesDetail.courseId,
+                                    courseId: feesDetail.course_id,
                                 });
+                                console.log("courseDatacourseDatacourseDatacourseDatacourseData",courseData);
                                 feesAdditionalData.course_id = courseData
                                     ? courseData.CourseName
                                     : "";
@@ -582,17 +580,19 @@ class StudentsAdmmisionService extends BaseService {
                                 ...feesDetail,
                                 ...feesAdditionalData,
                             });
+                            console.log("yyyyyyyyyyyyyyyyyyyyyyyyyy",feesAdditionalData);
                         }
 
                         const convertedObject =
                             feesDetailsWithAdditionalData.reduce(
                                 (acc, course) => {
+                                    console.log("fffffffffffffffffff",course);
                                     acc = { courseName: course.course_id };
                                     return acc;
                                 },
                                 {}
                             );
-                        console.log(convertedObject);
+                        console.log("tttttttttttttttttttttttttttttttttt",convertedObject);
                         response1.push({
                             ...feesPayment._doc,
                             courseName: convertedObject.courseName,
