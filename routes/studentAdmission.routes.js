@@ -470,16 +470,16 @@ router.put(
     }
 );
 
-router.get("/autocomplete/students", async (req, res) => {
-    const firstName = req.query.firstName;
-    try {
-        const students = await Student.find({
-            firstName: { $regex: firstName, $options: "i" },
-        }).limit(10);
-        const suggestedNames = students.map((student) => student.name);
+router.get("/autocomplete/students",async(req,res)=>{
+    const firstName=req.query.firstName;
+    try{
+        const students=await Student.find({firstName:{$regex:firstName,$option:"i"}}).limit(10)
+        const suggestedNames=students.map((student)=>student.name)
         res.json(suggestedNames);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
     }
-});
+    catch(error){
+        res.status(500).json({message:error.message})
+    }
+})
+
 module.exports = router;
