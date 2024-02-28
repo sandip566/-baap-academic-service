@@ -308,45 +308,45 @@ router.get("/:id", async (req, res) => {
 });
 router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
     try {
-        const authHeader = req.headers.authorization;
+    //     const authHeader = req.headers.authorization;
+    //   console.log("gggggggggggggggg",authHeader);
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-            return res
-                .status(401)
-                .json({ message: "Unauthorized - Token is Not Found" });
-        }
+    //     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    //         return res.status(401).json({ message: 'Unauthorized - Token is Not Found' });
+    //     }
 
-        const token = authHeader.split(" ")[1];
-        const decodedToken = await TokenService.decodeToken(token);
+    //     const token = authHeader.split(' ')[1];
+    //     const decodedToken = await TokenService.decodeToken(token);
 
-        if (!decodedToken || !decodedToken.userId) {
-            return res
-                .status(401)
-                .json({ message: "Unauthorized - Invalid Token" });
-        }
+    //     if (!decodedToken || !decodedToken.userId) {
+    //         return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
+    //     }
 
-        const userId = decodedToken.userId;
-        console.group(userId);
+    //     const userId = decodedToken.userId;
+    //     console.group(userId)
 
-        if (!req.file) {
-            return res.status(400).json({ error: "No file uploaded" });
-        }
+        // if (!req.file) {
+        //     return res.status(400).json({ error: 'No file uploaded' });
+        // }
 
-        const excelBuffer = req.file.buffer;
-        const workbook = xlsx.read(excelBuffer, { type: "buffer" });
-        // console.log("uuuuuuuuuuuuuuuuuuuuuuuuu", workbook.Sheets[workbook.SheetNames[0]]);
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        // const excelBuffer = req.file.buffer;
+        // const workbook = xlsx.read(excelBuffer, { type: 'buffer' });
+        // // console.log("uuuuuuuuuuuuuuuuuuuuuuuuu", workbook.Sheets[workbook.SheetNames[0]]);
+        // const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-        const excelData = xlsx.utils.sheet_to_json(sheet);
-        console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy", excelData);
-        if (!excelData || excelData.length < 2) {
-            return res.status(400).json({ error: "Invalid Excel format" });
-        }
+        // const excelData = xlsx.utils.sheet_to_json(sheet);
+        //  console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",excelData)
+        // if (!excelData || excelData.length < 2) {
+        //     return res.status(400).json({ error: 'Invalid Excel format' });
+        // }
 
-        // const headers = excelData[0];
-        const dataRows = excelData;
+        // // const headers = excelData[0];
+        // const dataRows = excelData
+let dataRows=req.body.dataRows
+console.log("ccccccccccccc",dataRows);
 
-        const result = await service.bulkUpload(dataRows, userId);
+        const result = await service.bulkUpload( dataRows);
+        
         if (!result) {
             throw new Error(`Smart ID already exists`);
         }

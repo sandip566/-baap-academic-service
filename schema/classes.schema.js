@@ -8,6 +8,10 @@ const classSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        Department: {
+            type: Number,
+            required: false
+        },
         groupId: {
             type: Number,
             required: false

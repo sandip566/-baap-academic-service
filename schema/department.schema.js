@@ -13,6 +13,10 @@ const departmentSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        academicYearId: {
+            type: Number,
+            required: false,
+        },
         departmentHead: {
             code: {
                 type: String,

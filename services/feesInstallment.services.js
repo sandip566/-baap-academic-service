@@ -161,14 +161,13 @@ class feesInstallmentService extends BaseService {
 
     async getTotalFeesAndPendingFees(courseId, groupId, feesTemplateId, academicYear) {
         try {
-
             let fee = await feesInstallmentModel.aggregate([
                 {
                     $match: {
                         "courseDetails.course_id": Number(courseId),
-                        groupId: Number(groupId),
+                        "groupId": Number(groupId),
                         "feesDetails.feesTemplateId": Number(feesTemplateId),
-                        academicYear: academicYear
+                        "academicYear": Number(academicYear)
                     }
                 },
                 {
@@ -183,7 +182,7 @@ class feesInstallmentService extends BaseService {
                             documentId: "$_id",
                             status: "$feesDetails.installment.status"
                         },
-                        totalAmount: { $sum: { $toInt: "$feesDetails.installment.amount" } }
+                        totalAmount: { $sum: "$feesDetails.installment.amount" }
                     }
                 },
                 {
@@ -258,9 +257,9 @@ class feesInstallmentService extends BaseService {
                 {
                     $match: {
                         "courseDetails.class_id": Number(classId),
-                        groupId: Number(groupId),
+                        "groupId": Number(groupId),
                         "feesDetails.feesTemplateId": Number(feesTemplateId),
-                        academicYear: academicYear
+                        "academicYear": Number(academicYear)
                     }
                 },
                 {
@@ -275,7 +274,7 @@ class feesInstallmentService extends BaseService {
                             documentId: "$_id",
                             status: "$feesDetails.installment.status"
                         },
-                        totalAmount: { $sum: { $toInt: "$feesDetails.installment.amount" } }
+                        totalAmount: { $sum: "$feesDetails.installment.amount" }
                     }
                 },
                 {

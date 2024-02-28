@@ -59,7 +59,7 @@ router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMC3"]),a
         courseId: req.query.courseId,
         CourseName: req.query.CourseName,
         University: req.query.University,
-        Department:req.query.departmentId
+        departmentId:req.query.departmentId
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
