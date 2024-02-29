@@ -85,6 +85,7 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMS1"]),
     divisionId: req.query.divisionId,
     classId: req.query.classId,
     subjectId: req.query.subjectId,
+    Department:req.query.departmentId
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,

@@ -196,10 +196,10 @@ router.put(
     }
 );
 
-router.get("/issue-books-count", async (req, res) => {
-    try {
-        const count = await bookIssueLogModel.countDocuments({ returned: false });
-        res.json({ count: count })
+router.get("/issue-books-count",async (req,res)=>{
+    try{
+        const count=await bookIssueLogModel.countDocuments({returned:false});
+        res.json({count:count||0})
     }
     catch (error) {
         console.log(error)

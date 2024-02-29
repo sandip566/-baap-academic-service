@@ -356,6 +356,8 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
     const criteria = {
         currentDate: req.query.currentDate,
         academicYear: req.query.academicYear,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
         location: req.query.location,
         course: req.query.course,
         class: req.query.class,
@@ -363,6 +365,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
         feesTemplateId: req.query.feesTemplateId,
         division: req.query.division,
         month: req.query.month,
+        search: req.query.search,
     };
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 100;

@@ -4,7 +4,7 @@ const booksSchema = new mongoose.Schema(
         bookId: Number,
         name: {
             type: String,
-            required: false,
+            required: false
         },
         groupId: {
             type: Number,
@@ -22,16 +22,12 @@ const booksSchema = new mongoose.Schema(
             type: Number,
             require: false
         },
-        totalCount: {
+        totalCopies: {
             type: Number,
         },
         availableCount:{
             type:Number
         },
-        // totalCopies: {
-        //     type: Number,
-        //     require: false
-        // },
         RFID: {
             type: String,
             required: false

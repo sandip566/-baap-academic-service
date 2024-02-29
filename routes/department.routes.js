@@ -48,9 +48,8 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.check
     }
 });
 
-// , TokenService.checkPermission(["EMD1"]),
-router.get("/all/getByGroupId/:groupId"
-// , TokenService.checkPermission(["EMD1"])
+
+router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"])
 
  ,async (req, res) => {
     try {
@@ -58,7 +57,8 @@ router.get("/all/getByGroupId/:groupId"
         const criteria = {
             departmentName: req.query.departmentName,
             search: req.query.search,
-            departmentHead:req.query.departmentHead
+            departmentHead:req.query.departmentHead,
+            academicYearId:req.query.academicYearId
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
         const departments = await departmentModel.find(searchFilter);

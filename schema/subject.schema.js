@@ -9,6 +9,10 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        Department: {
+            type: Number,
+            required: false
+        },
         classId: {
             type: Number,
             required: false,

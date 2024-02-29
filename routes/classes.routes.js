@@ -51,7 +51,8 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMDC1"])
     const criteria = {
         classId: req.query.classId,
         name: req.query.name,
-        courseId: req.query.courseId
+        courseId: req.query.courseId,
+        Department: req.query.departmentId
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

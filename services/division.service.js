@@ -39,6 +39,7 @@ class DivisionService extends BaseService {
         if (criteria.divisionId) query.divisionId = criteria.divisionId;
         if (criteria.courseId) query.courseId = criteria.courseId;
         if (criteria.classId) query.classId = criteria.classId;
+        if (criteria.Department) query.Department = criteria.Department;
         if (criteria.incharge) query.incharge = new RegExp(criteria.incharge, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }

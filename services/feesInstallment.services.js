@@ -159,16 +159,16 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getTotalFeesAndPendingFees(courseId, groupId, feesTemplateId, academicYear) {
+    async getTotalFeesAndPendingFees( groupId, feesTemplateId, academicYear) {
+        console.log("courseId, groupId, feesTemplateId, academicYear", groupId, feesTemplateId, academicYear);
         try {
-
             let fee = await feesInstallmentModel.aggregate([
                 {
                     $match: {
-                        "courseDetails.course_id": Number(courseId),
-                        groupId: Number(groupId),
-                        "feesDetail.feesTemplateId": Number(feesTemplateId),
-                        academicYear: academicYear
+                        // "courseDetails.course_id": Number(courseId),
+                        "groupId": Number(groupId),
+                        "feesDetails.feesTemplateId": Number(feesTemplateId),
+                        "academicYear": Number(academicYear)
                     }
                 },
                 {
@@ -183,7 +183,7 @@ class feesInstallmentService extends BaseService {
                             documentId: "$_id",
                             status: "$feesDetails.installment.status"
                         },
-                        totalAmount: { $sum: { $toInt: "$feesDetails.installment.amount" } }
+                        totalAmount: { $sum: "$feesDetails.installment.amount" }
                     }
                 },
                 {
@@ -212,8 +212,9 @@ class feesInstallmentService extends BaseService {
                 pendingFees: 0,
                 paidFees: 0
             };
-
+            console.log("jjjjjjjjjjjjjjjjjjjjjjjj",fee);
             if (fee.length > 0) {
+                console.log("jjjjjjjjjjjjjjjjjjjjjjjj",fee);
                 response.totalFees = fee[0].totalAmountAllStatus;
                 fee[0].feesDetails.forEach(detail => {
                     if (detail.status === 'pending') {
@@ -258,9 +259,9 @@ class feesInstallmentService extends BaseService {
                 {
                     $match: {
                         "courseDetails.class_id": Number(classId),
-                        groupId: Number(groupId),
-                        "feesDetail.feesTemplateId": Number(feesTemplateId),
-                        academicYear: academicYear
+                        "groupId": Number(groupId),
+                        "feesDetails.feesTemplateId": Number(feesTemplateId),
+                        "academicYear": Number(academicYear)
                     }
                 },
                 {
@@ -275,7 +276,7 @@ class feesInstallmentService extends BaseService {
                             documentId: "$_id",
                             status: "$feesDetails.installment.status"
                         },
-                        totalAmount: { $sum: { $toInt: "$feesDetails.installment.amount" } }
+                        totalAmount: { $sum: "$feesDetails.installment.amount" }
                     }
                 },
                 {

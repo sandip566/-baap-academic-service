@@ -33,7 +33,7 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
 
         if (serviceResponse.data) {
             const totalFees = serviceResponse.data.totalFees;
-            const installmentAmount = totalFees / installmentNo;
+            const installmentAmount =Math.round (totalFees / installmentNo);
            
             for (let i = 1; i <= installmentNo; i++) {
                 installmentDetails.push({

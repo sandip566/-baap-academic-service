@@ -6,6 +6,9 @@ const DocumentSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        documentId: {
+            type: Number,
+        },
         memberId: {
             type: Number
         },
@@ -26,6 +29,9 @@ const DocumentSchema = new mongoose.Schema(
         category: {
             type: String
         },
+        documentUrl: {
+            type: String
+        }
     },
     { strict: false, timestamps: true }
 );

@@ -53,12 +53,13 @@ router.get("/getByCourseId/:courseId",TokenService.checkPermission(["EMC1"]), as
     const serviceResponse = await service.getByCourseId(req.params.courseId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMC1"]), async (req, res) => {
+router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMC3"]),async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         courseId: req.query.courseId,
         CourseName: req.query.CourseName,
         University: req.query.University,
+        departmentId:req.query.departmentId
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);

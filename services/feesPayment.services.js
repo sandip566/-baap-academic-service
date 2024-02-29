@@ -6,6 +6,7 @@ const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
+const feesInstallmentServices = require("./feesInstallment.services");
 
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -58,7 +59,7 @@ class feesPaymentService extends BaseService {
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
-                const addmissionId = service.addmissionId.addmissionId;
+                const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
                 if (!groupedServices[addmissionId]) {
@@ -95,7 +96,8 @@ class feesPaymentService extends BaseService {
                 };
 
                 let courseData = await courseModel.find({ groupId: groupId });
-
+                let courseID;
+                let courseFee
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
                 });
@@ -129,9 +131,18 @@ class feesPaymentService extends BaseService {
                         (fee) => fee.currentDate === formattedDate
                     );
                 }
+                if (criteria.startDate && criteria.endDate) {
+                    feesData = feesData.filter((fee) => {
+                        return (
+                            fee.currentDate >= criteria.startDate &&
+                            fee.currentDate <= criteria.endDate
+                        );
+                    });
+                }
+
                 if (criteria.month) {
                     query.month = criteria.month;
-                    const month = query.month.padStart(2, "0"); // Ensure month is zero-padded
+                    const month = query.month.padStart(2, "0");
                     feesData = feesData.filter((data) => {
                         const currentDate = new Date(data.currentDate);
                         const dataMonth = String(
@@ -248,9 +259,13 @@ class feesPaymentService extends BaseService {
 
                 let coursePayments = {};
                 courseData.forEach((course) => {
+                    courseID = course.courseId;
+courseFee=course.Fees
                     coursePayments[course.CourseName] = {
                         totalPaidAmount: 0,
                         totalRemainingAmount: 0,
+                        courseId: courseID,
+                        courseFee:courseFee
                     };
                 });
 
@@ -260,13 +275,17 @@ class feesPaymentService extends BaseService {
                         admission.courseDetails.length > 0
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
+                           
                             const courseId = courseDetail.course_id;
+
                             const courseExists = courseData.find(
                                 (course) => course.courseId === courseId
                             );
 
                             if (courseExists) {
                                 const courseName = courseExists.CourseName;
+                                //    console.log("uuuuuuuuuuuuuuuuuuu",courseName);
+
                                 const paymentsForCourse = feesData.filter(
                                     (payment) =>
                                         payment.addmissionId ===
@@ -289,8 +308,23 @@ class feesPaymentService extends BaseService {
                                         0
                                     );
 
+                                if (!coursePayments[courseName].noOfStudents) {
+                                    coursePayments[courseName].noOfStudents = 0;
+                                }
+                                coursePayments[courseName].noOfStudents++;
+
+                                if (!coursePayments[courseName].courseId) {
+                                    coursePayments[courseName].courseId =
+                                        courseID;
+                                }
+                                 if (!coursePayments[courseName].courseFee) {
+                                    coursePayments[courseName].courseFee =
+                                        courseFee;
+                                }
+
                                 coursePayments[courseName].totalPaidAmount +=
                                     paidAmountForCourse;
+
                                 coursePayments[
                                     courseName
                                 ].totalRemainingAmount +=
@@ -303,6 +337,10 @@ class feesPaymentService extends BaseService {
                     (courseName) => {
                         return {
                             name: courseName,
+                            courseId: coursePayments[courseName].courseId,
+                            courseFee: coursePayments[courseName].courseFee,
+                            noOfStudents:
+                                coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
                                 coursePayments[courseName].totalPaidAmount,
                             totalRemainingAmount:
@@ -310,11 +348,21 @@ class feesPaymentService extends BaseService {
                         };
                     }
                 );
+                let totalPaidAmount = 0;
+                let totalRemainingAmount = 0;
+
+                formattedCoursePayments.forEach((course) => {
+                    totalPaidAmount += course.totalPaidAmount || 0;
+                    totalRemainingAmount += course.totalRemainingAmount || 0;
+                });
+
+            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees( groupId, criteria.feesTemplateId,criteria.academicYear)
+console.log("sssssssssssssss",totalFeesData,courseID, groupId, criteria.feesTemplateId,criteria.academicYear);
                 let course_id;
                 let class_id;
                 let division_id;
                 let divisionDoc;
-                let classDoc
+                let classDoc;
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -415,6 +463,7 @@ class feesPaymentService extends BaseService {
                 //         };
                 //     })
                 // )
+
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
                         let additionalData = {};
@@ -446,16 +495,15 @@ class feesPaymentService extends BaseService {
                                                         classId:
                                                             admission.class_id,
                                                     });
-                                                    if (classDoc) {
-                                                        class_id =
-                                                        classDoc.classId;
-                                                        console.log(class_id);
-                                                    } else {
-                                                        console.error(
-                                                            "Division document not found for division_id:",
-                                                            admission.class_id
-                                                        );
-                                                    }
+                                                if (classDoc) {
+                                                    class_id = classDoc.classId;
+                                                    console.log(class_id);
+                                                } else {
+                                                    console.error(
+                                                        "Division document not found for division_id:",
+                                                        admission.class_id
+                                                    );
+                                                }
                                                 admission.class_id = class_id;
                                             }
                                             if (admission.division_id) {
@@ -466,7 +514,7 @@ class feesPaymentService extends BaseService {
                                                                 admission.division_id,
                                                         }
                                                     );
-                                            
+
                                                 if (divisionDoc) {
                                                     division_id =
                                                         divisionDoc.divisionId;
@@ -514,10 +562,30 @@ class feesPaymentService extends BaseService {
                                         record.feesDetails.forEach((detail) => {
                                             detail.installment.forEach(
                                                 (item) => {
+                                                    const dateString =
+                                                        item.date;
+
+                                                    const date = new Date(
+                                                        dateString
+                                                    );
+
+                                                    const year =
+                                                        date.getFullYear();
+                                                    const month = (
+                                                        "0" +
+                                                        (date.getMonth() + 1)
+                                                    ).slice(-2);
+                                                    const day =
+                                                        "0" +
+                                                        date.getDate() -
+                                                        1;
+
+                                                    const formattedDate = `${year}/${month}/${day}`;
+
                                                     if (
-                                                        item.status ===
+                                                        item.status ==
                                                             "pending" &&
-                                                        item.date <
+                                                        formattedDate <
                                                             criteria.currentDate
                                                     ) {
                                                         isDue = true;
@@ -553,11 +621,6 @@ class feesPaymentService extends BaseService {
                                         };
                                     });
 
-                                console.log(
-                                    "Updated installmentRecords: ",
-                                    updatedInstallmentRecords
-                                );
-
                                 return updatedInstallmentRecords;
                             }
 
@@ -570,14 +633,11 @@ class feesPaymentService extends BaseService {
                         if (
                             Object.keys(feesAdditionalData.addmissionId)
                                 .length === 0
-                        ) {
-                            return {};
-                        }
-
-                        return {
-                            ...service._doc,
-                            ...additionalData.addmissionId,
-                        };
+                        )
+                            return {
+                                ...service._doc,
+                                ...additionalData.addmissionId.addmissionId,
+                            };
                     })
                 );
 
@@ -585,31 +645,37 @@ class feesPaymentService extends BaseService {
                 const groupedServices = {};
 
                 servicesWithData.forEach((serviceArray) => {
-                    const addmissionId = serviceArray[0].addmissionId;
-                    const totalPaidAmount = serviceArray.reduce(
-                        (total, service) => {
-                            return total + parseFloat(service.paidAmount);
-                        },
-                        0
-                    );
+                    if (serviceArray.length > 0) {
+                        const addmissionId = serviceArray[0].addmissionId;
+                        let totalPaidAmount = 0;
+                        for (const service of serviceArray) {
+                            totalPaidAmount += parseFloat(
+                                service.paidAmount || 0
+                            ); 
+                        }
 
-                    if (serviceArray.length == 1) {
-                        const service = serviceArray[0];
-                        service.paidAmount = parseFloat(service.paidAmount);
-                        groupedServices[addmissionId] = service;
-                    } else {
-                        const lastService =
-                            serviceArray[serviceArray.length - 1];
-                        lastService.paidAmount = totalPaidAmount;
-                        groupedServices[addmissionId] = lastService;
+                        if (serviceArray.length == 1) {
+                            const service = serviceArray[0];
+                            service.paidAmount = parseFloat(service.paidAmount);
+                            groupedServices[addmissionId] = service;
+                        } else {
+                            const lastService =
+                                serviceArray[serviceArray.length - 1];
+                            lastService.paidAmount = totalPaidAmount;
+                            groupedServices[addmissionId] = lastService;
+                        }
                     }
                 });
 
                 const finalServices = Object.values(groupedServices);
-
+                // console.log(finalServices);
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
+                    totalFees: "100000",
+                    totalPaidFees: totalPaidAmount,
+                    totalPendingFees: totalRemainingAmount,
+
                     totalItemsCount: await this.model.countDocuments(
                         // filteredServicesWithData,
                         formattedCoursePayments
@@ -803,8 +869,8 @@ class feesPaymentService extends BaseService {
                     error: "Fees payment record not found.",
                 };
             }
-            feesPayment.paidAmount = totalPaidAmount;
-            feesPayment.remainingAmount = remainingAmount;
+            feesPayment.paidAmount = Math.round(totalPaidAmount);
+            feesPayment.remainingAmount = Math.round(remainingAmount);
             await feesPayment.save();
 
             return { success: true };
