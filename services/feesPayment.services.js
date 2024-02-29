@@ -97,6 +97,7 @@ class feesPaymentService extends BaseService {
 
                 let courseData = await courseModel.find({ groupId: groupId });
                 let courseID;
+                let courseFee
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
                 });
@@ -259,11 +260,12 @@ class feesPaymentService extends BaseService {
                 let coursePayments = {};
                 courseData.forEach((course) => {
                     courseID = course.courseId;
-
+courseFee=course.Fees
                     coursePayments[course.CourseName] = {
                         totalPaidAmount: 0,
                         totalRemainingAmount: 0,
                         courseId: courseID,
+                        courseFee:courseFee
                     };
                 });
 
@@ -315,6 +317,10 @@ class feesPaymentService extends BaseService {
                                     coursePayments[courseName].courseId =
                                         courseID;
                                 }
+                                 if (!coursePayments[courseName].courseFee) {
+                                    coursePayments[courseName].courseFee =
+                                        courseFee;
+                                }
 
                                 coursePayments[courseName].totalPaidAmount +=
                                     paidAmountForCourse;
@@ -332,6 +338,7 @@ class feesPaymentService extends BaseService {
                         return {
                             name: courseName,
                             courseId: coursePayments[courseName].courseId,
+                            courseFee: coursePayments[courseName].courseFee,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
@@ -349,8 +356,8 @@ class feesPaymentService extends BaseService {
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
 
-            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees(courseID, groupId, criteria.feesTemplateId,criteria.academicYear)
-console.log();
+            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees( groupId, criteria.feesTemplateId,criteria.academicYear)
+console.log("sssssssssssssss",totalFeesData,courseID, groupId, criteria.feesTemplateId,criteria.academicYear);
                 let course_id;
                 let class_id;
                 let division_id;
@@ -644,7 +651,7 @@ console.log();
                         for (const service of serviceArray) {
                             totalPaidAmount += parseFloat(
                                 service.paidAmount || 0
-                            ); // Ensure to handle NaN values
+                            ); 
                         }
 
                         if (serviceArray.length == 1) {
