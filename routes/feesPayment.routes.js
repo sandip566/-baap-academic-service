@@ -356,6 +356,8 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
     const criteria = {
         currentDate: req.query.currentDate,
         academicYear: req.query.academicYear,
+        startDate: req.query.startDate,
+        endDate: req.query.endDate,
         location: req.query.location,
         course: req.query.course,
         class: req.query.class,

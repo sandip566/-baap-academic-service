@@ -209,7 +209,7 @@ router.get("/get-remainingFees", async (req, res) => {
 
 router.get('/get-fees-summary', async (req, res) => {
     try {
-        const { groupId, feesTemplateId, academicYear } = req.query;
+        const { groupId, feesTemplateId, academicYear,currentYear,month,startDate,endDate} = req.query;
 
         const courses = await service.getAllDataByGroupId(groupId);
 

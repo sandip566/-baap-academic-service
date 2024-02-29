@@ -11,7 +11,7 @@ const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
-const Student = require("../schema/studentAdmission.schema");
+const Student=require("../schema/studentAdmission.schema")
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -473,7 +473,7 @@ router.put(
 router.get("/autocomplete/students",async(req,res)=>{
     const firstName=req.query.firstName;
     try{
-        const students=await Student.find({firstName:{$regex:firstName,$option:"i"}}).limit(10)
+        const students=await Student.find({firstName:{$regex:firstName,$options:"i"}}).limit(10)
         const suggestedNames=students.map((student)=>student.name)
         res.json(suggestedNames);
     }
@@ -481,5 +481,4 @@ router.get("/autocomplete/students",async(req,res)=>{
         res.status(500).json({message:error.message})
     }
 })
-
 module.exports = router;
