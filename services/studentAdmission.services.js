@@ -1289,6 +1289,55 @@ class StudentsAdmmisionService extends BaseService {
             TemplateId,
         };
     }
+
+
+async getAllSearchDataByGroupId(groupId, criteria,skip,limit) {
+    try {
+        const searchFilter = {
+            groupId: groupId,
+        };
+        criteria.pageSize=10
+        if (criteria.search) {
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                searchFilter.$or = [
+                    { phoneNumber: numericSearch }
+                ]
+            } else {
+                searchFilter.$or = [
+                    { firstName: { $regex: criteria.search, $options: "i" } },
+                    { lastName: { $regex: criteria.search, $options: "i" } },
+                    { gender: { $regex: criteria.search, $options: "i" } },
+                    {
+                        location: {
+                            $regex: criteria.search,
+                            $options: "i",
+                        },
+                    },
+                    { title: criteria.search },
+                ];
+            }
+        }
+        if (criteria.religion) {
+            searchFilter.religion = criteria.religion;
+        }
+        if (criteria.category) {
+            searchFilter.category = criteria.category;
+        }
+        const students = await StudentsAdmissionModel.find(searchFilter).skip(skip)
+        .limit(limit)
+        .exec();
+        const count=await StudentsAdmissionModel.countDocuments(searchFilter)
+        let response={
+            Data: [students],
+            totalCount:count
+        }
+        return response;
+    } catch (error) {
+        console.log(error);
+        throw error;
+    }
+}
 }
 module.exports = new StudentsAdmmisionService(
     studentAdmissionModel,

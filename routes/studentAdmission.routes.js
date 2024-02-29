@@ -35,7 +35,9 @@ router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getByAddmissionId(req.params.addmissionId);
+    const serviceResponse = await service.getByAddmissionId(
+        req.params.addmissionId
+    );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/all", async (req, res) => {
@@ -63,14 +65,14 @@ router.post("/data/save", async (req, res, next) => {
             if (existingDocument) {
                 req.body.documents = req.body.documents
                     ? req.body.documents.map((documentData) => {
-                        const documentId =
-                            +Date.now() + Math.floor(Math.random() * 1000);
-                        return {
-                            _id: new mongoose.Types.ObjectId(),
-                            documentId: documentId,
-                            documents: documentData,
-                        };
-                    })
+                          const documentId =
+                              +Date.now() + Math.floor(Math.random() * 1000);
+                          return {
+                              _id: new mongoose.Types.ObjectId(),
+                              documentId: documentId,
+                              documents: documentData,
+                          };
+                      })
                     : existingDocument.data?.documents || [];
 
                 // req.body.feesDetails = req.body.feesDetails
@@ -81,44 +83,50 @@ router.post("/data/save", async (req, res, next) => {
                 //               feesDetailsId: feesDetailsId,
                 //               feesDetails: feesDetailsData,
                 //           };
-                //       })  
+                //       })
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
 
-                    const updatedFeesDetails = req.body.feesDetails.map((feesDetail) => {
-                        const installNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+                    const updatedFeesDetails = req.body.feesDetails.map(
+                        (feesDetail) => {
+                            const installNo =
+                                +Date.now() +
+                                Math.floor(Math.random() * 1000) +
+                                1;
 
-                        const updatedInstallments = feesDetail.installment.map((installment) => {
-                            const uniqueInstallNo = +Date.now() + Math.floor(Math.random() * 1000) + 1;
+                            const updatedInstallments =
+                                feesDetail.installment.map((installment) => {
+                                    const uniqueInstallNo =
+                                        +Date.now() +
+                                        Math.floor(Math.random() * 1000) +
+                                        1;
+                                    return {
+                                        ...installment,
+                                        installmentNo: uniqueInstallNo,
+                                        status: "pending",
+                                    };
+                                });
+
                             return {
-                                ...installment,
-                                installmentNo: uniqueInstallNo,
-                                status:"pending"
+                                ...feesDetail,
+                                installment: updatedInstallments,
                             };
-                        });
-
-
-                        return {
-                            ...feesDetail,
-                            installment: updatedInstallments,
-                        };
-                    });
-
+                        }
+                    );
 
                     req.body.feesDetails = updatedFeesDetails;
 
-                    const feesinstallmentResponse = await feesInstallmentServices.updateUser(
-                        req.body.addmissionId,
-                        req.body.groupId,
-                        req.body
-                    );
+                    const feesinstallmentResponse =
+                        await feesInstallmentServices.updateUser(
+                            req.body.addmissionId,
+                            req.body.groupId,
+                            req.body
+                        );
 
                     console.log(feesinstallmentResponse);
                 }
 
-
-              
                 const serviceResponse = await service.updateUser(
                     req.body.addmissionId,
                     req.body
@@ -133,14 +141,16 @@ router.post("/data/save", async (req, res, next) => {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
                     console.log(req.body.feesDetails);
-                    const feesinstallment = await feesInstallmentServices.create(req.body);
+                    const feesinstallment =
+                        await feesInstallmentServices.create(req.body);
                     console.log(feesinstallment);
 
-
-                    const updatedInstallments = req.body.feesDetails.map((detail, index) => ({
-                        ...detail,
-                        installNo: index + 1,
-                    }));
+                    const updatedInstallments = req.body.feesDetails.map(
+                        (detail, index) => ({
+                            ...detail,
+                            installNo: index + 1,
+                        })
+                    );
                     console.log(updatedInstallments);
                     req.body.feesDetails = updatedInstallments;
                 }
@@ -296,7 +306,7 @@ router.get("/:id", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.post('/bulkupload', upload.single('excelFile'), async (req, res) => {
+router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
     try {
     //     const authHeader = req.headers.authorization;
     //   console.log("gggggggggggggggg",authHeader);
@@ -340,13 +350,16 @@ console.log("ccccccccccccc",dataRows);
         if (!result) {
             throw new Error(`Smart ID already exists`);
         }
-      
-        res.json({ success: true, message: "Bulk upload successful" ,data:result});
+
+        res.json({
+            success: true,
+            message: "Bulk upload successful",
+            data: result,
+        });
     } catch (error) {
         res.status(400).json({ success: false, error: error.message });
     }
 });
-
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
@@ -381,13 +394,10 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             lastName: req.query.lastName,
             search: req.query.search,
             addmissionId: req.query.addmissionId,
-            empId: req.query.empId
+            empId: req.query.empId,
         };
 
-        const serviceResponse = await service.getfeesPayment(
-            groupId,
-            criteria
-        );
+        const serviceResponse = await service.getfeesPayment(groupId, criteria);
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);
@@ -471,4 +481,16 @@ router.get("/autocomplete/students",async(req,res)=>{
         res.status(500).json({message:error.message})
     }
 })
+
+router.get("/all/getByGroupId/searching/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        search: req.query.search
+    };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const result = await service.getAllSearchDataByGroupId(groupId, criteria,skip,limit);
+    requestResponsehelper.sendResponse(res, result);
+});
 module.exports = router;
