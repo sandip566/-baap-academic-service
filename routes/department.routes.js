@@ -48,9 +48,8 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.check
     }
 });
 
-// , TokenService.checkPermission(["EMD1"]),
-router.get("/all/getByGroupId/:groupId"
-// , TokenService.checkPermission(["EMD1"])
+
+router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"])
 
  ,async (req, res) => {
     try {

@@ -44,6 +44,54 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+// router.get("/all/getByGroupId/:groupId", async (req, res) => {
+//     try {
+//         const groupId = req.params.groupId;
+//         const criteria = {
+//             name: req.query.name,
+//             author: req.query.author,
+//             totalCount: req.query.totalCount,
+//             availableCount: req.query.availableCount,
+//             search: req.query.search,
+//             shelfId: req.query.shelfId,
+//             departmentId: req.query.departmentId,
+//             publisher: req.query.publisher,
+//             price: req.query.price,
+//             status: req.query.status,
+//             departmentName:req.query.departmentName
+//         };
+//         const page = parseInt(req.query.page) || 1;
+//         const limit = parseInt(req.query.limit) || 10; 
+//         const skip = (page - 1) * limit;
+
+//         const searchFilter =await service.getAllDataByGroupId(groupId, criteria, skip, limit);
+//         const totalCount = await booksModel.countDocuments(searchFilter);
+//         const books = await booksModel.find(searchFilter)
+//             .skip(skip)
+//             .limit(limit);
+//         const populatedBooks = await Promise.all(
+//             books.map(async (book) => {
+//                 const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
+//                 const department = await deparmentModel.findOne({ departmentId: book.departmentId });
+//                 return { ...book._doc, shelf, department };
+//             })
+//         );
+//         res.json({
+//             status: "Success",
+//             data: {
+//                 items: populatedBooks,
+//             },
+//             totalCount:totalCount
+//         });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send("Server Error");
+//     }
+// });
+
+
+
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -54,20 +102,27 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             availableCount: req.query.availableCount,
             search: req.query.search,
             shelfId: req.query.shelfId,
-            department: req.query.department,
+            departmentId: req.query.departmentId,
             publisher: req.query.publisher,
             price: req.query.price,
             status: req.query.status,
+            shelfName: req.query.shelfName,
+            departmentName: req.query.departmentName
         };
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; 
-        const skip = (page - 1) * limit;
 
-        const searchFilter = service.getAllDataByGroupId(groupId, criteria, skip, limit);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const departmentMap = await service.getDepartmentMap();
+
+
+        const { searchFilter} = await service.getAllDataByGroupId(groupId, criteria, skip, limit,departmentMap);
         const totalCount = await booksModel.countDocuments(searchFilter);
         const books = await booksModel.find(searchFilter)
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .exec();
+
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
                 const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
@@ -75,18 +130,26 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 return { ...book._doc, shelf, department };
             })
         );
+
         res.json({
             status: "Success",
             data: {
                 items: populatedBooks,
-            },
-            totalCount:totalCount
+                totalCount: totalCount
+            }
         });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
     }
 });
+
+
+
+
+
+
+
 
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
