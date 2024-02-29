@@ -481,4 +481,16 @@ router.get("/autocomplete/students",async(req,res)=>{
         res.status(500).json({message:error.message})
     }
 })
+
+router.get("/all/getByGroupId/searching/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        search: req.query.search
+    };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const result = await service.getAllSearchDataByGroupId(groupId, criteria,skip,limit);
+    requestResponsehelper.sendResponse(res, result);
+});
 module.exports = router;
