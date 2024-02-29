@@ -28,7 +28,7 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, title, studentId, dueDate, issuedDate } =
+        const { groupId, bookId, title, addmissionId, dueDate, issuedDate } =
             req.body;
         const isBookAvailable = await service.isBookAvailableForIssuing(bookId);
         console.log(isBookAvailable);
@@ -52,7 +52,7 @@ router.post("/issue-book", async (req, res) => {
             groupId: groupId,
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
-            studentId: studentId,
+            addmissionId: addmissionId,
             dueDate: dueDate,
             issuedDate: issuedDate,
         };
@@ -77,10 +77,10 @@ router.post("/issue-book", async (req, res) => {
 
 router.post("/return-book", async (req, res) => {
     try {
-        const { groupId, bookId, studentId, returnDate } = req.body;
+        const { groupId, bookId, addmissionId, returnDate } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
-            studentId:studentId
+            addmissionId:addmissionId
         });
         if (!existingReservation) {
             return res.status(400).json({
