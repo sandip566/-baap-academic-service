@@ -6,6 +6,7 @@ const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
+const feesInstallmentServices = require("./feesInstallment.services");
 
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -58,7 +59,6 @@ class feesPaymentService extends BaseService {
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
-              
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
@@ -96,7 +96,7 @@ class feesPaymentService extends BaseService {
                 };
 
                 let courseData = await courseModel.find({ groupId: groupId });
-
+                let courseID;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
                 });
@@ -130,6 +130,15 @@ class feesPaymentService extends BaseService {
                         (fee) => fee.currentDate === formattedDate
                     );
                 }
+                if (criteria.startDate && criteria.endDate) {
+                    feesData = feesData.filter((fee) => {
+                        return (
+                            fee.currentDate >= criteria.startDate &&
+                            fee.currentDate <= criteria.endDate
+                        );
+                    });
+                }
+
                 if (criteria.month) {
                     query.month = criteria.month;
                     const month = query.month.padStart(2, "0");
@@ -249,9 +258,12 @@ class feesPaymentService extends BaseService {
 
                 let coursePayments = {};
                 courseData.forEach((course) => {
+                    courseID = course.courseId;
+
                     coursePayments[course.CourseName] = {
                         totalPaidAmount: 0,
                         totalRemainingAmount: 0,
+                        courseId: courseID,
                     };
                 });
 
@@ -261,14 +273,17 @@ class feesPaymentService extends BaseService {
                         admission.courseDetails.length > 0
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
+                           
                             const courseId = courseDetail.course_id;
-                            console.log(courseId);
+
                             const courseExists = courseData.find(
                                 (course) => course.courseId === courseId
                             );
 
                             if (courseExists) {
                                 const courseName = courseExists.CourseName;
+                                //    console.log("uuuuuuuuuuuuuuuuuuu",courseName);
+
                                 const paymentsForCourse = feesData.filter(
                                     (payment) =>
                                         payment.addmissionId ===
@@ -290,15 +305,20 @@ class feesPaymentService extends BaseService {
                                             ),
                                         0
                                     );
-                                    
-                                    if (!coursePayments[courseName].noOfStudents) {
-                                        coursePayments[courseName].noOfStudents = 0;
-                                    }
-                                    coursePayments[courseName].noOfStudents++;
 
-                            
-                                    coursePayments[courseName].totalPaidAmount +=
+                                if (!coursePayments[courseName].noOfStudents) {
+                                    coursePayments[courseName].noOfStudents = 0;
+                                }
+                                coursePayments[courseName].noOfStudents++;
+
+                                if (!coursePayments[courseName].courseId) {
+                                    coursePayments[courseName].courseId =
+                                        courseID;
+                                }
+
+                                coursePayments[courseName].totalPaidAmount +=
                                     paidAmountForCourse;
+
                                 coursePayments[
                                     courseName
                                 ].totalRemainingAmount +=
@@ -311,7 +331,9 @@ class feesPaymentService extends BaseService {
                     (courseName) => {
                         return {
                             name: courseName,
-                            noOfStudents: coursePayments[courseName].noOfStudents || 0,
+                            courseId: coursePayments[courseName].courseId,
+                            noOfStudents:
+                                coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
                                 coursePayments[courseName].totalPaidAmount,
                             totalRemainingAmount:
@@ -319,6 +341,16 @@ class feesPaymentService extends BaseService {
                         };
                     }
                 );
+                let totalPaidAmount = 0;
+                let totalRemainingAmount = 0;
+
+                formattedCoursePayments.forEach((course) => {
+                    totalPaidAmount += course.totalPaidAmount || 0;
+                    totalRemainingAmount += course.totalRemainingAmount || 0;
+                });
+
+            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees(courseID, groupId, criteria.feesTemplateId,criteria.academicYear)
+console.log();
                 let course_id;
                 let class_id;
                 let division_id;
@@ -519,7 +551,7 @@ class feesPaymentService extends BaseService {
                                 const updatedInstallmentRecords =
                                     installmentRecords.map((record) => {
                                         let isDue = false;
-console.log("paidddddddddddddddddd",record.status);
+
                                         record.feesDetails.forEach((detail) => {
                                             detail.installment.forEach(
                                                 (item) => {
@@ -582,8 +614,6 @@ console.log("paidddddddddddddddddd",record.status);
                                         };
                                     });
 
-                               
-
                                 return updatedInstallmentRecords;
                             }
 
@@ -612,7 +642,6 @@ console.log("paidddddddddddddddddd",record.status);
                         const addmissionId = serviceArray[0].addmissionId;
                         let totalPaidAmount = 0;
                         for (const service of serviceArray) {
-                           
                             totalPaidAmount += parseFloat(
                                 service.paidAmount || 0
                             ); // Ensure to handle NaN values
@@ -636,6 +665,10 @@ console.log("paidddddddddddddddddd",record.status);
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
+                    totalFees: "100000",
+                    totalPaidFees: totalPaidAmount,
+                    totalPendingFees: totalRemainingAmount,
+
                     totalItemsCount: await this.model.countDocuments(
                         // filteredServicesWithData,
                         formattedCoursePayments
@@ -829,8 +862,8 @@ console.log("paidddddddddddddddddd",record.status);
                     error: "Fees payment record not found.",
                 };
             }
-            feesPayment.paidAmount =math.round(totalPaidAmount);
-            feesPayment.remainingAmount = math.round(remainingAmount);
+            feesPayment.paidAmount = Math.round(totalPaidAmount);
+            feesPayment.remainingAmount = Math.round(remainingAmount);
             await feesPayment.save();
 
             return { success: true };

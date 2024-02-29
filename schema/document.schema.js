@@ -29,6 +29,9 @@ const DocumentSchema = new mongoose.Schema(
         category: {
             type: String
         },
+        documentUrl: {
+            type: String
+        }
     },
     { strict: false, timestamps: true }
 );

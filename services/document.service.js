@@ -1,5 +1,6 @@
 const DocumentModel = require("../schema/document.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class DocumentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -82,6 +83,30 @@ class DocumentService extends BaseService {
         } catch (error) {
             throw error;
         }
+    }
+
+    async updateDocument(documentId, data) {
+        try {
+            const resp = await DocumentModel.findOneAndUpdate(
+                { documentId: documentId },
+                data,
+                { upsert: true, new: true }
+            );
+            return new ServiceResponse({
+                data: resp,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
+
+    async getByDocumentIdData(documentId) {
+        return this.execute(() => {
+            return DocumentModel.findOne({ documentId: documentId });
+        });
     }
 }
 
