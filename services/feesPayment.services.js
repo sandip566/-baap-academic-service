@@ -62,19 +62,33 @@ class feesPaymentService extends BaseService {
             servicesWithData.forEach((service) => {
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
-
-                if (!groupedServices[addmissionId]) {
-                    groupedServices[addmissionId] = {
-                        ...service,
-                        paidAmount: paidAmount,
-                    };
-                } else {
-                    console.log();
-                    groupedServices[addmissionId].paidAmount += paidAmount;
-                }
+            
+                // Store the service data for each addmissionId
+                groupedServices[addmissionId] = {
+                    ...service,
+                    paidAmount: paidAmount,
+                };
             });
+            
+            // Filter only the last occurrence of each addmissionId
+            const lastServices = {};
 
-            const finalServices = Object.values(groupedServices);
+servicesWithData.forEach((service) => {
+    const addmissionId = service?.addmissionId?.addmissionId;
+    const paidAmount = parseFloat(service.paidAmount) || 0;
+
+    // Update or initialize the entry for the current addmissionId with the latest service data
+    lastServices[addmissionId] = {
+        ...service,
+        paidAmount: (lastServices[addmissionId]?.paidAmount || 0) + paidAmount,
+    };
+});
+
+const finalServices = Object.values(lastServices);
+
+            
+      
+            
 
             let response = {
                 totalPaidAmount: totalPaidAmount,
@@ -108,11 +122,11 @@ class feesPaymentService extends BaseService {
                     .skip(skip)
                     .limit(limit);
 
-                console.log(criteria.currentDate, criteria.currentDate);
+                // console.log(criteria.currentDate, criteria.currentDate);
                 const currentDateValue = criteria.currentDate
                     ? criteria.currentDate
                     : null;
-                console.log(currentDateValue);
+                // console.log(currentDateValue);
                 const currentDateObj = currentDateValue
                     ? new Date(currentDateValue)
                     : null;
@@ -213,7 +227,7 @@ class feesPaymentService extends BaseService {
                                     course.course_id.toString() ===
                                         query.course.toString()
                             );
-                            console.log("matchingCourses", matchingCourses);
+                            // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
                         }
                         return false;
@@ -358,7 +372,7 @@ courseFee=course.Fees
                 });
 
             let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees( groupId, criteria.feesTemplateId,criteria.academicYear)
-
+// console.log(totalFeesData);
                 let course_id;
                 let class_id;
                 let division_id;
@@ -469,10 +483,17 @@ courseFee=course.Fees
 
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
-                       
+                        let addmissionIds = service.addmissionId; 
+    
+                        if (!visitedAddmissionIds.has(service.addmissionId)) {
+                            visitedAddmissionIds.add(service.addmissionId);
+                            let aa= this.getPaymentData(groupId,addmissionIds)
+                            // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", addmissionIds);
+                          
+                        }
 
-                        let aa= this.getPaymentData(groupId,service.addmissionId,criteria.feesTemplateId,criteria.academicYear,criteria.currentDate,criteria.startDate,criteria.endDate)
-                        // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",addmissionId);
+                      
+                        // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",addmissionIds);
                         let additionalData = {};
                         let feesAdditionalData = {};
 
@@ -504,7 +525,7 @@ courseFee=course.Fees
                                                     });
                                                 if (classDoc) {
                                                     class_id = classDoc.classId;
-                                                    console.log(class_id);
+                                                    // console.log(class_id);
                                                 } else {
                                                     console.error(
                                                         "Division document not found for division_id:",
@@ -525,7 +546,7 @@ courseFee=course.Fees
                                                 if (divisionDoc) {
                                                     division_id =
                                                         divisionDoc.divisionId;
-                                                    console.log(division_id);
+                                                    // console.log(division_id);
                                                 } else {
                                                     console.error(
                                                         "Division document not found for division_id:",
@@ -548,10 +569,10 @@ courseFee=course.Fees
                                     installmentLengths.length > 0
                                         ? installmentLengths[0]
                                         : 0;
-                                console.log(
-                                    "Lengths of installment arrays:",
-                                    installmentLengths
-                                );
+                                // console.log(
+                                //     "Lengths of installment arrays:",
+                                //     installmentLengths
+                                // );
 
                                 const installmentIds = feesData.map(
                                     (service) => service.installmentId
@@ -602,8 +623,8 @@ courseFee=course.Fees
                                             );
                                             if (isDue) return;
                                         });
-                                      
-                                         a= {
+                                   
+                                         return {
                                             candidateName:
                                                 matchingAdmission.name,
                                             className: classDoc?.name,
@@ -626,7 +647,8 @@ courseFee=course.Fees
                                             installments: installmentLengths[0],
                                             groupId: service.groupId,
                                         };
-                                        return a
+                                        // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",a);
+                                       
                                     });
                                
                                 return updatedInstallmentRecords;
@@ -678,6 +700,7 @@ courseFee=course.Fees
                 // console.log(groupedServices);
 
                 const finalServices = Object.values(groupedServices);
+
                 // console.log(finalServices);
                 let response = {
                     coursePayments: formattedCoursePayments,
@@ -711,56 +734,82 @@ courseFee=course.Fees
         });
     }
  
-    async  getPaymentData(groupId, addmissionId) {
- try {
-    const data = await feesPaymentModel.find({ groupId: groupId, addmissionId: addmissionId });
-    console.log("ttttttttttt", data.length);
-    return data;
-} catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
-}
-       
-        // try {
+//     async  getPaymentData(groupId, addmissionIds) {
+// // console.log("addmissionIdsaddmissionIdsaddmissionIdsaddmissionIdsaddmissionIdsaddmissionIds",addmissionIds);
+ 
+//         try {
             
-        //     let addmissionIds = addmissionId; 
+//             let addmissionId = addmissionIds; 
+//             console.log();
+//     let ee=await feesPaymentModel.find({groupId:groupId,addmissionId: addmissionId});
+//             // if (!visitedAddmissionIds.has(addmissionIds)) {
+//             //     visitedAddmissionIds.add(addmissionIds);
+//                 console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr", ee);
+//             // }
     
-        //     if (!visitedAddmissionIds.has(addmissionIds)) {
-        //         visitedAddmissionIds.add(addmissionIds);
-        //         // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", addmissionIds);
-        //     }
+//             // const pipeline = [
+//             //     {
+//             //         $match: {
+//             //             "groupId": Number(groupId),
+//             //             "addmissionId": Number(addmissionId),
+//             //             // Additional match conditions if needed
+//             //         }
+//             //     },
+//             //     {
+//             //         $group: {
+//             //             _id: 1709274617472, 
+//             //             totalAmount: { $sum: "$paidAmount" }, // Calculate total paidAmount
+//             //             // "latestRecord": { $last: "$$ROOT" } // Get the last document
+//             //         }
+//             //     },
+               
+//             //     // {
+//             //     //     $replaceRoot: { newRoot: "$latestRecord" } // Replace the root document with the lastRecord
+//             //     // }
+//             // ];
     
-        //     const pipeline = [
-        //         {
-        //             $match: {
-        //                 "groupId": Number(groupId),
-        //                 "addmissionId": Number(addmissionId),
-        //                 // Additional match conditions if needed
-        //             }
-        //         },
-        //         {
-        //             $group: {
-        //                 _id: null, // Group all documents into one group
-        //                 "totalPaidAmount": { $sum: "$paidAmount" }, // Calculate total paidAmount
-        //                 "latestRecord": { $last: "$$ROOT" } // Get the last document
-        //             }
-        //         },
-        //         {
-        //             $replaceRoot: { newRoot: "$latestRecord" } // Replace the root document with the lastRecord
-        //         }
-        //     ];
+//             // const paymentData = await this.model.aggregate(pipeline);
+//             // console.log("Payment Datauuuuuuuuuuuuuuuuuuuu:", paymentData);
     
-        //     const paymentData = await this.model.aggregate(pipeline);
-        //     console.log("Payment Data:", paymentData);
+//             // return paymentData;
+//         } catch (error) {
+//             console.error("Error fetching payment data:", error);
+//             throw error;
+//         }
+//     }
     
-        //     return paymentData;
-        // } catch (error) {
-        //     console.error("Error fetching payment data:", error);
-        //     throw error;
-        // }
+async getPaymentData(groupId, addmissionIds) {
+    try {
+        // Convert single addmissionId into an array if it's not already an array
+        const addmissionIdArray = Array.isArray(addmissionIds) ? addmissionIds : [addmissionIds];
+
+        const pipeline = [
+            {
+                $match: {
+                    "groupId": Number(groupId),
+                    "addmissionId": { $in: addmissionIdArray.map(Number) }
+                }
+            },
+            {
+                $group: {
+                    _id: "$addmissionId",
+                    lastRecord: { $last: "$$ROOT" }, // Get the last record for each addmissionId
+                    paidAmount: { $sum: { $toDouble: "$paidAmount" } } // Calculate total paidAmount
+                }
+            }
+        ];
+
+        const paymentData = await this.model.aggregate(pipeline);
+
+        console.log("Payment Data:", paymentData.paidAmount);
+
+        return paymentData.map(({ lastRecord, totalAmount }) => ({ ...lastRecord, totalAmount }));
+    } catch (error) {
+        console.error("Error fetching payment data:", error);
+        throw error;
     }
-    
-    
+}
+
     
     async getByfeesPaymentId(groupId, feesPaymentId) {
         return this.execute(async () => {
