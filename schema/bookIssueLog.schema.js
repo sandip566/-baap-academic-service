@@ -31,6 +31,10 @@ const bookIssueLogSchema = new mongoose.Schema(
         bookIssueLogId: {
             type: Number
         },
+        addmissionId:{
+            type:Number,
+            required:false
+        }
     },
     { strict: false, timestamps: true }
 );
