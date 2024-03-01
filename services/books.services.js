@@ -4,6 +4,7 @@ const BaseService = require("@baapcompany/core-api/services/base.service");
 const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema")
+const shelfModel=require("../schema/shelf.schema");
 
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
@@ -65,6 +66,7 @@ class BooksService extends BaseService {
                 groupId: groupId,
             };
             const departmentMap = await this.getDepartmentMap();
+            const shelfMap = await this.getShelfMap();
 
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -79,6 +81,7 @@ class BooksService extends BaseService {
                     ];
                 } else {
                     const departmentId = departmentMap[criteria.search.trim().toLowerCase()];
+                    const shelfId = shelfMap[criteria.search.trim().toLowerCase()]
                     searchFilter.$or = [
                         { status: { $regex: new RegExp(criteria.search, 'i') } },
                         { name: { $regex: new RegExp(criteria.search, 'i') } },
@@ -86,6 +89,8 @@ class BooksService extends BaseService {
                         { publisher: { $regex: new RegExp(criteria.search, 'i') } },
                         { departmentId: departmentId },
                         { departmentName: { $regex: new RegExp(criteria.search, 'i') } }, // Add departmentName search
+                        { shelfId: shelfId },
+                        { shelfName: { $regex: new RegExp(criteria.search, 'i') } }
                     ];
                 }
             }
@@ -104,6 +109,16 @@ class BooksService extends BaseService {
                 } else {
                     // If the provided department name doesn't exist in the department map, return empty result
                     return { searchFilter: {}, departmentMap: {} };
+                }
+            }
+
+            if (criteria.shelfName) {
+                const shelfnameLowercase = criteria.shelfName.toLowerCase();
+                const shelfId = shelfMap[shelfnameLowercase];
+                if (shelfId) {
+                    searchFilter.shelfId = shelfId;
+                } else {
+                    return { searchFilter: {}, shelfMap: {} };
                 }
             }
 
@@ -134,6 +149,25 @@ class BooksService extends BaseService {
             throw new Error("An error occurred while fetching department map.");
         }
     }
+    async getShelfMap() {
+        try {
+            const shelves = await shelfModel.find();
+            const shelfMap = {};
+            shelves.forEach((shelf) => {
+                // Check if shelfName exists before trimming and converting to lowercase
+                if (shelf.shelfName) {
+                    const shelfName = shelf.shelfName.trim().toLowerCase();
+                    shelfMap[shelfName] = shelf.shelfId;
+                }
+            });
+            return shelfMap;
+        } catch (error) {
+            console.error("Error fetching shelf map:", error);
+            throw new Error("An error occurred while fetching shelf map.");
+        }
+    }
+    
+
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
