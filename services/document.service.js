@@ -58,14 +58,12 @@ class DocumentService extends BaseService {
         if (paginationErrors) {
             return paginationErrors;
         }
-
         try {
             const items = await this.model.find(query, {}, {
                 skip: pagination.pageSize * (pagination.pageNumber - 1),
                 limit: pagination.pageSize,
             });
             const totalItemsCount = await this.model.countDocuments(query);
-
             return { items, totalItemsCount };
         } catch (error) {
             console.error("Error fetching items:", error);
@@ -87,13 +85,13 @@ class DocumentService extends BaseService {
 
     async updateDocument(documentId, data) {
         try {
-            const resp = await DocumentModel.findOneAndUpdate(
+            const updateDocument = await DocumentModel.findOneAndUpdate(
                 { documentId: documentId },
                 data,
                 { upsert: true, new: true }
             );
             return new ServiceResponse({
-                data: resp,
+                data: updateDocument,
             });
         } catch (error) {
             return new ServiceResponse({
@@ -103,11 +101,10 @@ class DocumentService extends BaseService {
         }
     }
 
-    async getByDocumentIdData(documentId) {
+    async getByDocumentId(documentId) {
         return this.execute(() => {
             return DocumentModel.findOne({ documentId: documentId });
         });
     }
 }
-
 module.exports = new DocumentService(DocumentModel, 'document');

@@ -35,6 +35,5 @@ const DocumentSchema = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
-
 const DocumentModel = mongoose.model("document", DocumentSchema);
 module.exports = DocumentModel;
