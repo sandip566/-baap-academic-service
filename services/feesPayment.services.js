@@ -7,7 +7,7 @@ const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const feesInstallmentServices = require("./feesInstallment.services");
-const  AcademicYearModel=require("../schema/academicyear.schema");
+const AcademicYearModel = require("../schema/academicyear.schema");
 let visitedAddmissionIds = new Set()
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -178,7 +178,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -193,7 +193,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -211,7 +211,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -231,7 +231,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -250,7 +250,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -261,12 +261,12 @@ class feesPaymentService extends BaseService {
                 let coursePayments = {};
                 courseData.forEach((course) => {
                     courseID = course.courseId;
-courseFee=course.Fees
+                    courseFee = course.Fees
                     coursePayments[course.CourseName] = {
                         totalPaidAmount: 0,
                         totalRemainingAmount: 0,
                         courseId: courseID,
-                        courseFee:courseFee
+                        courseFee: courseFee
                     };
                 });
 
@@ -276,7 +276,7 @@ courseFee=course.Fees
                         admission.courseDetails.length > 0
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
-                           
+
                             const courseId = courseDetail.course_id;
 
                             const courseExists = courseData.find(
@@ -318,7 +318,7 @@ courseFee=course.Fees
                                     coursePayments[courseName].courseId =
                                         courseID;
                                 }
-                                 if (!coursePayments[courseName].courseFee) {
+                                if (!coursePayments[courseName].courseFee) {
                                     coursePayments[courseName].courseFee =
                                         courseFee;
                                 }
@@ -357,7 +357,7 @@ courseFee=course.Fees
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
 
-            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees( groupId, criteria.feesTemplateId,criteria.academicYear)
+                let totalFeesData = await feesInstallmentServices.getTotalFeesAndPendingFees(groupId, criteria.feesTemplateId, criteria.academicYear)
 
                 let course_id;
                 let class_id;
@@ -365,7 +365,7 @@ courseFee=course.Fees
                 let divisionDoc;
                 let classDoc;
                 let a
-               let addmissionId
+                let addmissionId
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -469,9 +469,9 @@ courseFee=course.Fees
 
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
-                       
 
-                        let aa= this.getPaymentData(groupId,service.addmissionId,criteria.feesTemplateId,criteria.academicYear,criteria.currentDate,criteria.startDate,criteria.endDate)
+
+                        let aa = this.getPaymentData(groupId, service.addmissionId, criteria.feesTemplateId, criteria.academicYear, criteria.currentDate, criteria.startDate, criteria.endDate)
                         // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",addmissionId);
                         let additionalData = {};
                         let feesAdditionalData = {};
@@ -591,9 +591,9 @@ courseFee=course.Fees
 
                                                     if (
                                                         item.status ==
-                                                            "pending" &&
+                                                        "pending" &&
                                                         formattedDate <
-                                                            criteria.currentDate
+                                                        criteria.currentDate
                                                     ) {
                                                         isDue = true;
                                                         return;
@@ -602,8 +602,8 @@ courseFee=course.Fees
                                             );
                                             if (isDue) return;
                                         });
-                                      
-                                         a= {
+
+                                        a = {
                                             candidateName:
                                                 matchingAdmission.name,
                                             className: classDoc?.name,
@@ -628,10 +628,10 @@ courseFee=course.Fees
                                         };
                                         return a
                                     });
-                               
+
                                 return updatedInstallmentRecords;
                             }
-                          
+
                             feesAdditionalData.addmissionId =
                                 matchingAdmission || {};
                         }
@@ -643,7 +643,7 @@ courseFee=course.Fees
                                 .length === 0
                         )
                             return {
-                                
+
                                 // ...service._doc,
                                 ...additionalData.addmissionId.addmissionId,
                             };
@@ -655,12 +655,12 @@ courseFee=course.Fees
 
                 servicesWithData.forEach((serviceArray) => {
                     if (serviceArray.length > 0) {
-                        const addmissionId =  serviceArray[0].addmissionId;
+                        const addmissionId = serviceArray[0].addmissionId;
                         let totalPaidAmount = 0;
                         for (const service of serviceArray) {
                             totalPaidAmount += parseFloat(
                                 service.paidAmount || 0
-                            ); 
+                            );
                         }
 
                         if (serviceArray.length == 1) {
@@ -710,26 +710,26 @@ courseFee=course.Fees
                 .sort({ _id: -1 });
         });
     }
- 
-    async  getPaymentData(groupId, addmissionId) {
- try {
-    const data = await feesPaymentModel.find({ groupId: groupId, addmissionId: addmissionId });
-    console.log("ttttttttttt", data.length);
-    return data;
-} catch (error) {
-    console.error("Error fetching data:", error);
-    throw error;
-}
-       
+
+    async getPaymentData(groupId, addmissionId) {
+        try {
+            const data = await feesPaymentModel.find({ groupId: groupId, addmissionId: addmissionId });
+            console.log("ttttttttttt", data.length);
+            return data;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            throw error;
+        }
+
         // try {
-            
+
         //     let addmissionIds = addmissionId; 
-    
+
         //     if (!visitedAddmissionIds.has(addmissionIds)) {
         //         visitedAddmissionIds.add(addmissionIds);
         //         // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", addmissionIds);
         //     }
-    
+
         //     const pipeline = [
         //         {
         //             $match: {
@@ -749,19 +749,19 @@ courseFee=course.Fees
         //             $replaceRoot: { newRoot: "$latestRecord" } // Replace the root document with the lastRecord
         //         }
         //     ];
-    
+
         //     const paymentData = await this.model.aggregate(pipeline);
         //     console.log("Payment Data:", paymentData);
-    
+
         //     return paymentData;
         // } catch (error) {
         //     console.error("Error fetching payment data:", error);
         //     throw error;
         // }
     }
-    
-    
-    
+
+
+
     async getByfeesPaymentId(groupId, feesPaymentId) {
         return this.execute(async () => {
             let feesdata = {};
@@ -782,7 +782,7 @@ courseFee=course.Fees
                         addmissionId: addmissionId,
                     });
                     feesdata.addmissionId = addmissionId1;
- academicYearId=addmissionId1.academicYear
+                    academicYearId = addmissionId1.academicYear
                     let courseIds = addmissionId1.courseDetails.forEach(
                         (element) => {
                             course_id = element.course_id;
@@ -814,11 +814,11 @@ courseFee=course.Fees
                         groupId: groupId,
                         academicYearId: academicYearId,
                     });
-console.log(academicYearIds,academicYearId);
+                    console.log(academicYearIds, academicYearId);
                     courseAdditionalData.course_id = courseDetails;
                     courseAdditionalData.class_id = classDetails;
                     courseAdditionalData.feesTemplateId = feesTemplateIds;
-                    courseAdditionalData.academicYearId =academicYearIds;
+                    courseAdditionalData.academicYearId = academicYearIds;
 
                     return {
                         ...courseAdditionalData,

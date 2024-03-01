@@ -7,6 +7,7 @@ const courseModel = require("../schema/courses.schema");
 const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const religionModel = require("../schema/religion.schema");
+const feesPaymentModel = require("../schema/feesPayment.schema")
 const SubjectModel = require("../schema/subjects.schema");
 // const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
@@ -463,7 +464,7 @@ class StudentsAdmmisionService extends BaseService {
                                         let class_id;
                                         let division_id;
                                         if (courseDetail.course_id) {
-                                            
+
                                             course_id =
                                                 await courseModel.findOne({
                                                     courseId:
@@ -570,7 +571,7 @@ class StudentsAdmmisionService extends BaseService {
                                 const courseData = await courseModel.findOne({
                                     courseId: feesDetail.course_id,
                                 });
-                                console.log("courseDatacourseDatacourseDatacourseDatacourseData",courseData);
+                                console.log("courseDatacourseDatacourseDatacourseDatacourseData", courseData);
                                 feesAdditionalData.course_id = courseData
                                     ? courseData.CourseName
                                     : "";
@@ -580,19 +581,19 @@ class StudentsAdmmisionService extends BaseService {
                                 ...feesDetail,
                                 ...feesAdditionalData,
                             });
-                            console.log("yyyyyyyyyyyyyyyyyyyyyyyyyy",feesAdditionalData);
+                            console.log("yyyyyyyyyyyyyyyyyyyyyyyyyy", feesAdditionalData);
                         }
 
                         const convertedObject =
                             feesDetailsWithAdditionalData.reduce(
                                 (acc, course) => {
-                                    console.log("fffffffffffffffffff",course);
+                                    console.log("fffffffffffffffffff", course);
                                     acc = { courseName: course.course_id };
                                     return acc;
                                 },
                                 {}
                             );
-                        console.log("tttttttttttttttttttttttttttttttttt",convertedObject);
+                        console.log("tttttttttttttttttttttttttttttttttt", convertedObject);
                         response1.push({
                             ...feesPayment._doc,
                             courseName: convertedObject.courseName,
@@ -620,8 +621,8 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.addmissionId == query.addmissionId,
+                    data.empId === query.empId &&
+                    data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -1291,53 +1292,115 @@ class StudentsAdmmisionService extends BaseService {
     }
 
 
-async getAllSearchDataByGroupId(groupId, criteria,skip,limit) {
-    try {
-        const searchFilter = {
-            groupId: groupId,
-        };
-        criteria.pageSize=10
-        if (criteria.search) {
-            const numericSearch = parseInt(criteria.search);
-            if (!isNaN(numericSearch)) {
-                searchFilter.$or = [
-                    { phoneNumber: numericSearch }
-                ]
-            } else {
-                searchFilter.$or = [
-                    { firstName: { $regex: criteria.search, $options: "i" } },
-                    { lastName: { $regex: criteria.search, $options: "i" } },
-                    { gender: { $regex: criteria.search, $options: "i" } },
-                    {
-                        location: {
-                            $regex: criteria.search,
-                            $options: "i",
+    async getAllSearchDataByGroupId(groupId, criteria, skip, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+            let course_id;
+            let class_id;
+            let division_id;
+            let feesTemplateId;
+            criteria.pageSize = 10
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { phoneNumber: numericSearch }
+                    ]
+                } else {
+                    searchFilter.$or = [
+                        { firstName: { $regex: criteria.search, $options: "i" } },
+                        { lastName: { $regex: criteria.search, $options: "i" } },
+                        { gender: { $regex: criteria.search, $options: "i" } },
+                        {
+                            location: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
                         },
-                    },
-                    { title: criteria.search },
-                ];
+                        { title: criteria.search },
+                    ];
+                }
             }
+            if (criteria.religion) {
+                searchFilter.religion = criteria.religion;
+            }
+            if (criteria.category) {
+                searchFilter.category = criteria.category;
+            }
+            const students = await StudentsAdmissionModel.find(searchFilter).skip(skip)
+                .limit(limit)
+                .exec();
+
+            if (students) {
+                let data = students.forEach(item => {
+                    let courseIds = item.courseDetails.forEach(
+                        (element) => {
+                            course_id = element.course_id;
+                            class_id = element.class_id;
+                            division_id = element.division_id;
+                        }
+                    );
+                    let templateIds = item.feesDetails.forEach(
+                        (element) => {
+                            feesTemplateId = element.feesTemplateId;
+                        }
+                    );
+                })
+
+                const addmissionIds = students[0].addmissionId
+                const installmentData=students[0].feesDetails[0].installment
+                let courseDetails = await courseModel.findOne({
+                    groupId: groupId,
+                    courseId: course_id,
+                }, { courseName: 1, fees: 1, _id: 0 });
+
+                let classDetails = await ClassModel.findOne({
+                    groupId: groupId,
+                    classId: class_id,
+                }, { name: 1, _id: 0 });
+
+                let divisionDetails = await DivisionModel.findOne({
+                    groupId: groupId,
+                    divisionId: division_id
+                }, { Name: 1, _id: 0 })
+
+                let feesPaymentDetails = await feesPaymentModel.findOne({
+                    groupId: groupId,
+                    addmissionId: addmissionIds
+                }, { status: 1, paidAmount: 1, courseFee: 1, remainingAmount: 1,feesPaymentId:1, _id: 0 }).sort({ createdAt: -1 });
+
+                const studantData = {
+                    candidateName: `${students[0].firstName} ${students[0].middleName} ${students[0].lastName}`,
+                    phoneNumber: students[0].phoneNumber,
+                    addmissionId: addmissionIds,
+                    empId: students[0].empId,
+                    groupId: students[0].groupId,
+                    installmentId: students[0].installmentId,
+                    installments: installmentData,
+                    courseName:courseDetails.courseName,
+                    className: classDetails.name,
+                    divisionName:divisionDetails.Name,
+                    courseFees:feesPaymentDetails.courseFee,
+                    status:feesPaymentDetails.status,
+                    feesPaymentId: feesPaymentDetails.feesPaymentId,
+                    paidAmount: feesPaymentDetails.paidAmount,
+                    remainingAmount: feesPaymentDetails.remainingAmount
+                }
+
+                const count = await StudentsAdmissionModel.countDocuments(searchFilter)
+                let response = {
+                    servicesWithData: [studantData],
+                    totalCount: count
+                }
+                return response;
+            }
+        } catch (error) {
+            console.log(error);
+            throw error;
         }
-        if (criteria.religion) {
-            searchFilter.religion = criteria.religion;
-        }
-        if (criteria.category) {
-            searchFilter.category = criteria.category;
-        }
-        const students = await StudentsAdmissionModel.find(searchFilter).skip(skip)
-        .limit(limit)
-        .exec();
-        const count=await StudentsAdmissionModel.countDocuments(searchFilter)
-        let response={
-            Data: [students],
-            totalCount:count
-        }
-        return response;
-    } catch (error) {
-        console.log(error);
-        throw error;
     }
-}
 }
 module.exports = new StudentsAdmmisionService(
     studentAdmissionModel,
