@@ -28,10 +28,18 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, title, addmissionId, dueDate, issuedDate } =
-            req.body;
+        const { groupId, bookId, title, addmissionId, studentId, dueDate, issuedDate } = req.body;
+
+        const existingReservation = await bookIssueLogModel.findOne({addmissionId:addmissionId, bookId:bookId, returned:false});
+        if (existingReservation) {
+            return res.status(400).json({
+                success: false,
+                error: "There is already an unreturned reservation for this book and admission ID.",
+            });
+        }
+        
+
         const isBookAvailable = await service.isBookAvailableForIssuing(bookId);
-        console.log(isBookAvailable);
         if (!isBookAvailable) {
             return res.status(400).json({
                 success: false,
@@ -39,8 +47,6 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const book = await Book.findOne({ bookId: bookId });
-        console.log(book);
-        console.log(book.availableCount);
         if (!book || book.availableCount <= 0) {
             return res.status(400).json({
                 success: false,
@@ -52,6 +58,7 @@ router.post("/issue-book", async (req, res) => {
             groupId: groupId,
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
+            studentId: studentId,
             addmissionId: addmissionId,
             dueDate: dueDate,
             issuedDate: issuedDate,
@@ -80,7 +87,7 @@ router.post("/return-book", async (req, res) => {
         const { groupId, bookId, addmissionId, returnDate } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
-            addmissionId:addmissionId
+            addmissionId: addmissionId
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -194,13 +201,13 @@ router.get("/issue-books-count",async (req,res)=>{
         const count=await bookIssueLogModel.countDocuments({returned:false});
         res.json({count:count||0})
     }
-    catch(error){
+    catch (error) {
         console.log(error)
     }
 })
 
 router.get("/book-issues/overdue", async (req, res) => {
-        const bookIssues = await service.fetchBookIssuesWithOverdue();
-        requestResponsehelper.sendResponse(res,bookIssues);
+    const bookIssues = await service.fetchBookIssuesWithOverdue();
+    requestResponsehelper.sendResponse(res, bookIssues);
 });
 module.exports = router;
