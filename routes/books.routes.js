@@ -61,7 +61,7 @@ router.put("/:id", async (req, res) => {
 //             departmentName:req.query.departmentName
 //         };
 //         const page = parseInt(req.query.page) || 1;
-//         const limit = parseInt(req.query.limit) || 10; 
+//         const limit = parseInt(req.query.limit) || 10;
 //         const skip = (page - 1) * limit;
 
 //         const searchFilter =await service.getAllDataByGroupId(groupId, criteria, skip, limit);
@@ -89,9 +89,6 @@ router.put("/:id", async (req, res) => {
 //     }
 // });
 
-
-
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -107,26 +104,38 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             price: req.query.price,
             status: req.query.status,
             shelfName: req.query.shelfName,
-            departmentName: req.query.departmentName
+            departmentName: req.query.departmentName,
         };
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 100;
         const skip = (page - 1) * limit;
         const departmentMap = await service.getDepartmentMap();
-        const shelfMap=await service.getShelfMap();
+        const shelfMap = await service.getShelfMap();
 
-        const { searchFilter} = await service.getAllDataByGroupId(groupId, criteria, skip, limit,departmentMap,shelfMap);
+        const { searchFilter } = await service.getAllDataByGroupId(
+            groupId,
+            criteria,
+            skip,
+            limit,
+            departmentMap,
+            shelfMap
+        );
         const totalCount = await booksModel.countDocuments(searchFilter);
-        const books = await booksModel.find(searchFilter)
+        const books = await booksModel
+            .find(searchFilter)
             .skip(skip)
             .limit(limit)
             .exec();
 
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
-                const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
-                const department = await deparmentModel.findOne({ departmentId: book.departmentId });
+                const shelf = await shelfModel.findOne({
+                    shelfId: book.shelfId,
+                });
+                const department = await deparmentModel.findOne({
+                    departmentId: book.departmentId,
+                });
                 return { ...book._doc, shelf, department };
             })
         );
@@ -135,23 +144,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             status: "Success",
             data: {
                 items: populatedBooks,
-                totalCount: totalCount
-            }
+                totalCount: totalCount,
+            },
         });
     } catch (err) {
         console.error(err);
         res.status(500).send("Server Error");
     }
 });
-
-
-
-
-
-
-
-
-
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;
@@ -201,7 +201,7 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
 router.get("/totalAvailableBooks", async (req, res) => {
     try {
         const totalCount = await service.getTotalAvailableBooks();
-        res.json({ totalAvailableBooks: totalCount});
+        res.json({ totalAvailableBooks: totalCount });
     } catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
@@ -223,42 +223,12 @@ router.get("/totalBooks", async (req, res) => {
 });
 
 router.get("/book-details/:groupId", async (req, res) => {
-    try {
-        const groupId = req.params.groupId;
-        const criteria = {
-            search: req.query.search,
-        };
-        const departmentMap = await service.getDepartmentMap();
-        const { searchFilter } = await service.getBookDetails(
-            groupId,
-            criteria,
-            departmentMap
-        );
-        //const totalCount = await booksModel.countDocuments(searchFilter);
-        const books = await booksModel.find(searchFilter);
-
-        const populatedBooks = await Promise.all(
-            books.map(async (book) => {
-                const shelf = await shelfModel.findOne({
-                    shelfId: book.shelfId,
-                });
-                const department = await deparmentModel.findOne({
-                    departmentId: book.departmentId,
-                });
-                return { ...book._doc, shelf, department };
-            })
-        );
-        res.json({
-            status: "Success",
-            data: {
-                items: populatedBooks,
-                //totalCount: totalCount
-            },
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
-    }
+    const groupId = req.params.groupId;
+    const criteria = {
+        search: req.query.search,
+    };
+    const searchFilter = await service.getBookDetails(groupId, criteria);
+    requestResponsehelper.sendResponse(res, searchFilter);
 });
 
 module.exports = router;
