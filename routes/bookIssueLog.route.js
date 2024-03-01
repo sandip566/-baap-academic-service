@@ -206,6 +206,16 @@ router.get("/issue-books-count",async (req,res)=>{
     }
 })
 
+router.get("/return-books-count",async (req,res)=>{
+    try{
+        const count=await bookIssueLogModel.countDocuments({returned:true});
+        res.json({count:count||0})
+    }
+    catch (error) {
+        console.log(error)
+    }
+})
+
 router.get("/book-issues/overdue", async (req, res) => {
     const bookIssues = await service.fetchBookIssuesWithOverdue();
     requestResponsehelper.sendResponse(res, bookIssues);

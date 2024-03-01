@@ -160,7 +160,7 @@ class feesInstallmentService extends BaseService {
     }
 
     async getTotalFeesAndPendingFees( groupId, feesTemplateId, academicYear) {
-        console.log("courseId, groupId, feesTemplateId, academicYear", groupId, feesTemplateId, academicYear);
+        // console.log("courseId, groupId, feesTemplateId, academicYear", groupId, feesTemplateId, academicYear);
         try {
             let fee = await feesInstallmentModel.aggregate([
                 {
