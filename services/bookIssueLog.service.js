@@ -95,7 +95,7 @@ class BookIssueLogService extends BaseService {
                         studentName: student
                             ? student.firstName
                             : "Unknown Student",
-                        bookName: book ? book.title : "Unknown Book",
+                        bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
                     };
