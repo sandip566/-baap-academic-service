@@ -39,8 +39,8 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const book = await Book.findOne({ bookId: bookId });
-        console.log(book);
-        console.log(book.availableCount);
+        // console.log(book);
+        // console.log(book.availableCount);
         if (!book || book.availableCount <= 0) {
             return res.status(400).json({
                 success: false,
