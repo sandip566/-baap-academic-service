@@ -114,9 +114,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const limit = parseInt(req.query.limit) || 100;
         const skip = (page - 1) * limit;
         const departmentMap = await service.getDepartmentMap();
+        const shelfMap=await service.getShelfMap();
 
-
-        const { searchFilter} = await service.getAllDataByGroupId(groupId, criteria, skip, limit,departmentMap);
+        const { searchFilter} = await service.getAllDataByGroupId(groupId, criteria, skip, limit,departmentMap,shelfMap);
         const totalCount = await booksModel.countDocuments(searchFilter);
         const books = await booksModel.find(searchFilter)
             .skip(skip)
