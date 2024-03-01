@@ -379,7 +379,7 @@ courseFee=course.Fees
                 let divisionDoc;
                 let classDoc;
                 let a
-               let addmissionId
+               let paidAmount
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -483,14 +483,7 @@ courseFee=course.Fees
 
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
-                        let addmissionIds = service.addmissionId; 
-    
-                        if (!visitedAddmissionIds.has(service.addmissionId)) {
-                            visitedAddmissionIds.add(service.addmissionId);
-                            let aa= this.getPaymentData(groupId,addmissionIds)
-                            // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", addmissionIds);
-                          
-                        }
+                        
 
                       
                         // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",addmissionIds);
@@ -623,30 +616,38 @@ courseFee=course.Fees
                                             );
                                             if (isDue) return;
                                         });
-                                   
-                                         return {
-                                            candidateName:
-                                                matchingAdmission.name,
+                                        let addmissionIds = service.addmissionId; 
+    
+                                        if (!visitedAddmissionIds.has(service.addmissionId)) {
+                                            visitedAddmissionIds.add(service.addmissionId);
+                                           
+                                                 paidAmount =  this.getPaymentData(groupId, addmissionIds)
+                                                .then(paymentData => paymentData[0]?.paidAmount) 
+                                                .catch(error => {
+                                                    console.error("Error:", error);
+                                                    return 0;
+                                                });
+                                        }
+                                        // console.log("iiiiiiiiiiiiiiiiiiii",paidAmount);
+                                        return {
+                                            candidateName: matchingAdmission.name,
                                             className: classDoc?.name,
-                                            phoneNumber:
-                                                matchingAdmission.phoneNumber,
+                                            phoneNumber: matchingAdmission.phoneNumber,
                                             divisionName: divisionDoc?.Name,
                                             courseName: course_id?.CourseName,
                                             courseFees: course_id?.Fees,
                                             dueStatus: isDue,
                                             status: record.status,
                                             paidAmount: service.paidAmount,
-                                            remainingAmount:
-                                                service.remainingAmount,
-                                            feesPaymentId:
-                                                service.feesPaymentId,
-                                            installmentId:
-                                                service.installmentId,
+                                            remainingAmount: service.remainingAmount,
+                                            feesPaymentId: service.feesPaymentId,
+                                            installmentId: service.installmentId,
                                             addmissionId: service.addmissionId,
                                             empId: service.empId,
                                             installments: installmentLengths[0],
                                             groupId: service.groupId,
                                         };
+                                        
                                         // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",a);
                                        
                                     });
@@ -678,26 +679,26 @@ courseFee=course.Fees
                 servicesWithData.forEach((serviceArray) => {
                     if (serviceArray.length > 0) {
                         const addmissionId =  serviceArray[0].addmissionId;
-                        let totalPaidAmount = 0;
-                        for (const service of serviceArray) {
-                            totalPaidAmount += parseFloat(
-                                service.paidAmount || 0
-                            ); 
-                        }
+                        // let totalPaidAmount = 0;
+                        // for (const service of serviceArray) {
+                        //     totalPaidAmount += parseFloat(
+                        //         service.paidAmount || 0
+                        //     ); 
+                        // }
 
-                        if (serviceArray.length == 1) {
-                            const service = serviceArray[0];
-                            service.paidAmount = parseFloat(service.paidAmount);
-                            groupedServices[addmissionId] = service;
-                        } else {
+                        // if (serviceArray.length == 1) {
+                        //     const service = serviceArray[0];
+                        //     service.paidAmount = parseFloat(service.paidAmount);
+                        //     groupedServices[addmissionId] = service;
+                        // } else {
                             const lastService =
                                 serviceArray[serviceArray.length - 1];
-                            lastService.paidAmount = totalPaidAmount;
+                            lastService.paidAmount = paidAmount;
                             groupedServices[addmissionId] = lastService;
-                        }
+                        // }
                     }
                 });
-                // console.log(groupedServices);
+                console.log("uuuuuuuuuuuuuuuuuuuuuuuuuuuu",groupedServices);
 
                 const finalServices = Object.values(groupedServices);
 
@@ -801,9 +802,11 @@ async getPaymentData(groupId, addmissionIds) {
 
         const paymentData = await this.model.aggregate(pipeline);
 
-        console.log("Payment Data:", paymentData.paidAmount);
+        // console.log("Payment Data:", paymentData[0]._id);
+       
 
-        return paymentData.map(({ lastRecord, totalAmount }) => ({ ...lastRecord, totalAmount }));
+
+        return paymentData[0].paidAmount;
     } catch (error) {
         console.error("Error fetching payment data:", error);
         throw error;
