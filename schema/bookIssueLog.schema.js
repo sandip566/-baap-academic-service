@@ -9,7 +9,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             type: Number,
             require: false
         },
-        studentId: {
+        addmissionId: {
             type: Number,
             required: false
         },

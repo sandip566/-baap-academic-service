@@ -223,12 +223,42 @@ router.get("/totalBooks", async (req, res) => {
 });
 
 router.get("/book-details/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        search: req.query.search,
-    };
-    const result = await service.getBookDetails(groupId, criteria);
-    requestResponsehelper.sendResponse(res, result);
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            search: req.query.search,
+        };
+        const departmentMap = await service.getDepartmentMap();
+        const { searchFilter } = await service.getBookDetails(
+            groupId,
+            criteria,
+            departmentMap
+        );
+        //const totalCount = await booksModel.countDocuments(searchFilter);
+        const books = await booksModel.find(searchFilter);
+
+        const populatedBooks = await Promise.all(
+            books.map(async (book) => {
+                const shelf = await shelfModel.findOne({
+                    shelfId: book.shelfId,
+                });
+                const department = await deparmentModel.findOne({
+                    departmentId: book.departmentId,
+                });
+                return { ...book._doc, shelf, department };
+            })
+        );
+        res.json({
+            status: "Success",
+            data: {
+                items: populatedBooks,
+                //totalCount: totalCount
+            },
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
 });
 
 module.exports = router;
