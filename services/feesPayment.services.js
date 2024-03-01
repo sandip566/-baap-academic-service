@@ -62,19 +62,33 @@ class feesPaymentService extends BaseService {
             servicesWithData.forEach((service) => {
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
-
-                if (!groupedServices[addmissionId]) {
-                    groupedServices[addmissionId] = {
-                        ...service,
-                        paidAmount: paidAmount,
-                    };
-                } else {
-                    console.log();
-                    groupedServices[addmissionId].paidAmount += paidAmount;
-                }
+            
+                // Store the service data for each addmissionId
+                groupedServices[addmissionId] = {
+                    ...service,
+                    paidAmount: paidAmount,
+                };
             });
+            
+            // Filter only the last occurrence of each addmissionId
+            const lastServices = {};
 
-            const finalServices = Object.values(groupedServices);
+servicesWithData.forEach((service) => {
+    const addmissionId = service?.addmissionId?.addmissionId;
+    const paidAmount = parseFloat(service.paidAmount) || 0;
+
+    // Update or initialize the entry for the current addmissionId with the latest service data
+    lastServices[addmissionId] = {
+        ...service,
+        paidAmount: (lastServices[addmissionId]?.paidAmount || 0) + paidAmount,
+    };
+});
+
+const finalServices = Object.values(lastServices);
+
+            
+      
+            
 
             let response = {
                 totalPaidAmount: totalPaidAmount,
@@ -108,11 +122,11 @@ class feesPaymentService extends BaseService {
                     .skip(skip)
                     .limit(limit);
 
-                console.log(criteria.currentDate, criteria.currentDate);
+                // console.log(criteria.currentDate, criteria.currentDate);
                 const currentDateValue = criteria.currentDate
                     ? criteria.currentDate
                     : null;
-                console.log(currentDateValue);
+                // console.log(currentDateValue);
                 const currentDateObj = currentDateValue
                     ? new Date(currentDateValue)
                     : null;
@@ -213,7 +227,7 @@ class feesPaymentService extends BaseService {
                                     course.course_id.toString() ===
                                     query.course.toString()
                             );
-                            console.log("matchingCourses", matchingCourses);
+                            // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
                         }
                         return false;
@@ -504,7 +518,7 @@ class feesPaymentService extends BaseService {
                                                     });
                                                 if (classDoc) {
                                                     class_id = classDoc.classId;
-                                                    console.log(class_id);
+                                                    // console.log(class_id);
                                                 } else {
                                                     console.error(
                                                         "Division document not found for division_id:",
@@ -525,7 +539,7 @@ class feesPaymentService extends BaseService {
                                                 if (divisionDoc) {
                                                     division_id =
                                                         divisionDoc.divisionId;
-                                                    console.log(division_id);
+                                                    // console.log(division_id);
                                                 } else {
                                                     console.error(
                                                         "Division document not found for division_id:",
@@ -548,10 +562,10 @@ class feesPaymentService extends BaseService {
                                     installmentLengths.length > 0
                                         ? installmentLengths[0]
                                         : 0;
-                                console.log(
-                                    "Lengths of installment arrays:",
-                                    installmentLengths
-                                );
+                                // console.log(
+                                //     "Lengths of installment arrays:",
+                                //     installmentLengths
+                                // );
 
                                 const installmentIds = feesData.map(
                                     (service) => service.installmentId
@@ -626,7 +640,8 @@ class feesPaymentService extends BaseService {
                                             installments: installmentLengths[0],
                                             groupId: service.groupId,
                                         };
-                                        return a
+                                        // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",a);
+                                       
                                     });
 
                                 return updatedInstallmentRecords;
@@ -678,6 +693,7 @@ class feesPaymentService extends BaseService {
                 // console.log(groupedServices);
 
                 const finalServices = Object.values(groupedServices);
+
                 // console.log(finalServices);
                 let response = {
                     coursePayments: formattedCoursePayments,

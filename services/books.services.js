@@ -3,7 +3,8 @@ const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
-const departmentModel = require("../schema/department.schema")
+const departmentModel = require("../schema/department.schema");
+const shelfModel = require("../schema/shelf.schema");
 
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
@@ -65,6 +66,7 @@ class BooksService extends BaseService {
                 groupId: groupId,
             };
             const departmentMap = await this.getDepartmentMap();
+            const shelfMap = await this.getShelfMap();
 
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -78,32 +80,70 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    const departmentId = departmentMap[criteria.search.trim().toLowerCase()];
+                    const departmentId =
+                        departmentMap[criteria.search.trim().toLowerCase()];
+                    const shelfId =
+                        shelfMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
-                        { status: { $regex: new RegExp(criteria.search, 'i') } },
-                        { name: { $regex: new RegExp(criteria.search, 'i') } },
-                        { author: { $regex: new RegExp(criteria.search, 'i') } },
-                        { publisher: { $regex: new RegExp(criteria.search, 'i') } },
+                        {
+                            status: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                        { name: { $regex: new RegExp(criteria.search, "i") } },
+                        {
+                            author: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                        {
+                            publisher: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
                         { departmentId: departmentId },
-                        { departmentName: { $regex: new RegExp(criteria.search, 'i') } }, // Add departmentName search
+                        {
+                            departmentName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        }, // Add departmentName search
+                        { shelfId: shelfId },
+                        {
+                            shelfName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
                     ];
                 }
             }
 
             if (criteria.publisher) {
-                searchFilter.publisher = { $regex: new RegExp(criteria.publisher, 'i') };
+                searchFilter.publisher = {
+                    $regex: new RegExp(criteria.publisher, "i"),
+                };
             }
 
             // const departmentMap = await this.getDepartmentMap();
 
             if (criteria.departmentName) {
-                const departmentNameLowerCase = criteria.departmentName.toLowerCase();
+                const departmentNameLowerCase =
+                    criteria.departmentName.toLowerCase();
                 const departmentId = departmentMap[departmentNameLowerCase];
                 if (departmentId) {
                     searchFilter.departmentId = departmentId;
                 } else {
                     // If the provided department name doesn't exist in the department map, return empty result
                     return { searchFilter: {}, departmentMap: {} };
+                }
+            }
+
+            if (criteria.shelfName) {
+                const shelfnameLowercase = criteria.shelfName.toLowerCase();
+                const shelfId = shelfMap[shelfnameLowercase];
+                if (shelfId) {
+                    searchFilter.shelfId = shelfId;
+                } else {
+                    return { searchFilter: {}, shelfMap: {} };
                 }
             }
 
@@ -117,16 +157,16 @@ class BooksService extends BaseService {
         }
     }
 
-
     async getDepartmentMap() {
         try {
             const departments = await departmentModel.find();
             const departmentMap = {};
             departments.forEach((department) => {
                 // Trim and convert to lowercase before adding to the map
-                const departmentName = department.departmentName.trim().toLowerCase();
+                const departmentName = department.departmentName
+                    .trim()
+                    .toLowerCase();
                 departmentMap[departmentName] = department.departmentId;
-
             });
             return departmentMap;
         } catch (error) {
@@ -134,6 +174,24 @@ class BooksService extends BaseService {
             throw new Error("An error occurred while fetching department map.");
         }
     }
+    async getShelfMap() {
+        try {
+            const shelves = await shelfModel.find();
+            const shelfMap = {};
+            shelves.forEach((shelf) => {
+                // Check if shelfName exists before trimming and converting to lowercase
+                if (shelf.shelfName) {
+                    const shelfName = shelf.shelfName.trim().toLowerCase();
+                    shelfMap[shelfName] = shelf.shelfId;
+                }
+            });
+            return shelfMap;
+        } catch (error) {
+            console.error("Error fetching shelf map:", error);
+            throw new Error("An error occurred while fetching shelf map.");
+        }
+    }
+
     async deleteBookById(bookId, groupId) {
         try {
             return await booksModel.deleteOne(bookId, groupId);
@@ -161,7 +219,6 @@ class BooksService extends BaseService {
                 console.log("No books found in the database.");
                 return 0;
             }
-
             let totalCount = 0;
             for (const book of books) {
                 totalCount += book.availableCount || 0;
@@ -172,7 +229,6 @@ class BooksService extends BaseService {
             throw error;
         }
     }
-
 
     async getBookDetails(groupId, criteria) {
         try {
@@ -213,26 +269,43 @@ class BooksService extends BaseService {
                 searchFilter.departmentId = criteria.departmentId;
             }
 
-            const book = await booksModel.findOne(searchFilter);
-            if (!book) {
+            const books = await booksModel.find(searchFilter);
+
+            const populatedBooks = await Promise.all(
+                books.map(async (book) => {
+                    const shelf = await shelfModel.findOne({
+                        shelfId: book.shelfId,
+                    });
+                    const department = await departmentModel.findOne({
+                        departmentId: book.departmentId,
+                    });
+                    return { ...book._doc, shelf, department };
+                })
+            );
+            if (!books) {
                 return { error: "Book not found" };
             }
-            const issueLogs = await bookIssueLog.find({ bookId: book.bookId });
-            const studentIds = issueLogs.map((issue) => issue.studentId);
+            const issueLogs = await bookIssueLog.find({
+                bookId: { $in: books.map((book) => book.bookId) },
+                returned: false,
+            });
+
+            const studentIds = issueLogs.map((issue) => issue.addmissionId);
             const students = await Student.find({
-                studentAdmissionId: { $in: studentIds },
+                addmissionId: { $in: studentIds },
             });
             const studentMap = {};
             students.forEach((student) => {
-                studentMap[student.studentAdmissionId] = student.firstName;
+                studentMap[student.addmissionId] = student.firstName;
             });
 
             const data = issueLogs.map((issue) => ({
-                studentName: studentMap[issue.studentId] || "Unknown Student",
+                studentName:
+                    studentMap[issue.addmissionId] || "Unknown Student",
                 issueDate: issue.issueDate,
             }));
 
-            return { book, issueLogs: data };
+            return { populatedBooks: populatedBooks, issueLogs: data };
         } catch (error) {
             console.error("Error fetching book details:", error);
             return { error: "Internal server error" };

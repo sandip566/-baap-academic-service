@@ -1,7 +1,7 @@
 const bookIssueLogModel = require("../schema/bookIssueLog.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const Book = require("../schema/books.schema.js");
-const Student = require("../schema/student.schema.js");
+const Student = require("../schema/studentAdmission.schema.js");
 class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -57,12 +57,12 @@ class BookIssueLogService extends BaseService {
             const currentDate = new Date();
             const bookIssues = await bookIssueLogModel.find();
 
-            const studentIds = bookIssues.map((issue) => issue.studentId);
+            const studentIds = bookIssues.map((issue) => issue.addmissionId);
             const bookIds = bookIssues.map((issue) => issue.bookId);
 
             // Fetch student and book details
             const students = await Student.find({
-                studentId: { $in: studentIds },
+                addmissionId: { $in: studentIds },
             });
             const books = await Book.find({ bookId: { $in: bookIds } });
 
@@ -84,7 +84,7 @@ class BookIssueLogService extends BaseService {
 
                     // Find corresponding student and book
                     const student = students.find(
-                        (student) => student.studentId === bookIssue.studentId
+                        (student) => student.addmissionId === bookIssue.addmissionId
                     );
                     const book = books.find(
                         (book) => book.bookId === bookIssue.bookId
@@ -95,7 +95,7 @@ class BookIssueLogService extends BaseService {
                         studentName: student
                             ? student.firstName
                             : "Unknown Student",
-                        bookName: book ? book.title : "Unknown Book",
+                        bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
                     };
