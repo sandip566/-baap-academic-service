@@ -30,6 +30,10 @@ const feesTemplate = mongoose.Schema(
             type: Number,
             required: false
         },
+        addmissionId:{
+            type:Number,
+            required:false
+        },
         checklist: [{
             type: String,
             // enum: checklistOptions,

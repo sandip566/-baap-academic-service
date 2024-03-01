@@ -7,7 +7,7 @@ const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const feesInstallmentServices = require("./feesInstallment.services");
-const  AcademicYearModel=require("../schema/academicyear.schema");
+const AcademicYearModel = require("../schema/academicyear.schema");
 let visitedAddmissionIds = new Set()
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -192,7 +192,7 @@ const finalServices = Object.values(lastServices);
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -207,7 +207,7 @@ const finalServices = Object.values(lastServices);
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -225,7 +225,7 @@ const finalServices = Object.values(lastServices);
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -245,7 +245,7 @@ const finalServices = Object.values(lastServices);
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -264,7 +264,7 @@ const finalServices = Object.values(lastServices);
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -275,12 +275,12 @@ const finalServices = Object.values(lastServices);
                 let coursePayments = {};
                 courseData.forEach((course) => {
                     courseID = course.courseId;
-courseFee=course.Fees
+                    courseFee = course.Fees
                     coursePayments[course.CourseName] = {
                         totalPaidAmount: 0,
                         totalRemainingAmount: 0,
                         courseId: courseID,
-                        courseFee:courseFee
+                        courseFee: courseFee
                     };
                 });
 
@@ -290,7 +290,7 @@ courseFee=course.Fees
                         admission.courseDetails.length > 0
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
-                           
+
                             const courseId = courseDetail.course_id;
 
                             const courseExists = courseData.find(
@@ -332,7 +332,7 @@ courseFee=course.Fees
                                     coursePayments[courseName].courseId =
                                         courseID;
                                 }
-                                 if (!coursePayments[courseName].courseFee) {
+                                if (!coursePayments[courseName].courseFee) {
                                     coursePayments[courseName].courseFee =
                                         courseFee;
                                 }
@@ -371,15 +371,15 @@ courseFee=course.Fees
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
 
-            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees( groupId, criteria.feesTemplateId,criteria.academicYear)
-// console.log(totalFeesData);
+                let totalFeesData = await feesInstallmentServices.getTotalFeesAndPendingFees(groupId, criteria.feesTemplateId, criteria.academicYear)
+
                 let course_id;
                 let class_id;
                 let division_id;
                 let divisionDoc;
                 let classDoc;
                 let a
-               let addmissionId
+                let addmissionId
                 // const servicesWithData = await Promise.all(
                 //     feesData?.map(async (service) => {
                 //         let additionalData = {};
@@ -483,17 +483,10 @@ courseFee=course.Fees
 
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
-                        let addmissionIds = service.addmissionId; 
-    
-                        if (!visitedAddmissionIds.has(service.addmissionId)) {
-                            visitedAddmissionIds.add(service.addmissionId);
-                            let aa= this.getPaymentData(groupId,addmissionIds)
-                            // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", addmissionIds);
-                          
-                        }
 
-                      
-                        // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",addmissionIds);
+
+                        let aa = this.getPaymentData(groupId, service.addmissionId, criteria.feesTemplateId, criteria.academicYear, criteria.currentDate, criteria.startDate, criteria.endDate)
+                        // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",addmissionId);
                         let additionalData = {};
                         let feesAdditionalData = {};
 
@@ -612,9 +605,9 @@ courseFee=course.Fees
 
                                                     if (
                                                         item.status ==
-                                                            "pending" &&
+                                                        "pending" &&
                                                         formattedDate <
-                                                            criteria.currentDate
+                                                        criteria.currentDate
                                                     ) {
                                                         isDue = true;
                                                         return;
@@ -623,8 +616,8 @@ courseFee=course.Fees
                                             );
                                             if (isDue) return;
                                         });
-                                   
-                                         return {
+
+                                        a = {
                                             candidateName:
                                                 matchingAdmission.name,
                                             className: classDoc?.name,
@@ -650,10 +643,10 @@ courseFee=course.Fees
                                         // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",a);
                                        
                                     });
-                               
+
                                 return updatedInstallmentRecords;
                             }
-                          
+
                             feesAdditionalData.addmissionId =
                                 matchingAdmission || {};
                         }
@@ -665,7 +658,7 @@ courseFee=course.Fees
                                 .length === 0
                         )
                             return {
-                                
+
                                 // ...service._doc,
                                 ...additionalData.addmissionId.addmissionId,
                             };
@@ -677,12 +670,12 @@ courseFee=course.Fees
 
                 servicesWithData.forEach((serviceArray) => {
                     if (serviceArray.length > 0) {
-                        const addmissionId =  serviceArray[0].addmissionId;
+                        const addmissionId = serviceArray[0].addmissionId;
                         let totalPaidAmount = 0;
                         for (const service of serviceArray) {
                             totalPaidAmount += parseFloat(
                                 service.paidAmount || 0
-                            ); 
+                            );
                         }
 
                         if (serviceArray.length == 1) {
@@ -733,84 +726,58 @@ courseFee=course.Fees
                 .sort({ _id: -1 });
         });
     }
- 
-//     async  getPaymentData(groupId, addmissionIds) {
-// // console.log("addmissionIdsaddmissionIdsaddmissionIdsaddmissionIdsaddmissionIdsaddmissionIds",addmissionIds);
- 
-//         try {
-            
-//             let addmissionId = addmissionIds; 
-//             console.log();
-//     let ee=await feesPaymentModel.find({groupId:groupId,addmissionId: addmissionId});
-//             // if (!visitedAddmissionIds.has(addmissionIds)) {
-//             //     visitedAddmissionIds.add(addmissionIds);
-//                 console.log("rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr", ee);
-//             // }
-    
-//             // const pipeline = [
-//             //     {
-//             //         $match: {
-//             //             "groupId": Number(groupId),
-//             //             "addmissionId": Number(addmissionId),
-//             //             // Additional match conditions if needed
-//             //         }
-//             //     },
-//             //     {
-//             //         $group: {
-//             //             _id: 1709274617472, 
-//             //             totalAmount: { $sum: "$paidAmount" }, // Calculate total paidAmount
-//             //             // "latestRecord": { $last: "$$ROOT" } // Get the last document
-//             //         }
-//             //     },
-               
-//             //     // {
-//             //     //     $replaceRoot: { newRoot: "$latestRecord" } // Replace the root document with the lastRecord
-//             //     // }
-//             // ];
-    
-//             // const paymentData = await this.model.aggregate(pipeline);
-//             // console.log("Payment Datauuuuuuuuuuuuuuuuuuuu:", paymentData);
-    
-//             // return paymentData;
-//         } catch (error) {
-//             console.error("Error fetching payment data:", error);
-//             throw error;
-//         }
-//     }
-    
-async getPaymentData(groupId, addmissionIds) {
-    try {
-        // Convert single addmissionId into an array if it's not already an array
-        const addmissionIdArray = Array.isArray(addmissionIds) ? addmissionIds : [addmissionIds];
 
-        const pipeline = [
-            {
-                $match: {
-                    "groupId": Number(groupId),
-                    "addmissionId": { $in: addmissionIdArray.map(Number) }
-                }
-            },
-            {
-                $group: {
-                    _id: "$addmissionId",
-                    lastRecord: { $last: "$$ROOT" }, // Get the last record for each addmissionId
-                    paidAmount: { $sum: { $toDouble: "$paidAmount" } } // Calculate total paidAmount
-                }
-            }
-        ];
+    async getPaymentData(groupId, addmissionId) {
+        try {
+            const data = await feesPaymentModel.find({ groupId: groupId, addmissionId: addmissionId });
+            console.log("ttttttttttt", data.length);
+            return data;
+        } catch (error) {
+            console.error("Error fetching data:", error);
+            throw error;
+        }
 
-        const paymentData = await this.model.aggregate(pipeline);
+        // try {
 
-        console.log("Payment Data:", paymentData.paidAmount);
+        //     let addmissionIds = addmissionId; 
 
-        return paymentData.map(({ lastRecord, totalAmount }) => ({ ...lastRecord, totalAmount }));
-    } catch (error) {
-        console.error("Error fetching payment data:", error);
-        throw error;
+        //     if (!visitedAddmissionIds.has(addmissionIds)) {
+        //         visitedAddmissionIds.add(addmissionIds);
+        //         // console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", addmissionIds);
+        //     }
+
+        //     const pipeline = [
+        //         {
+        //             $match: {
+        //                 "groupId": Number(groupId),
+        //                 "addmissionId": Number(addmissionId),
+        //                 // Additional match conditions if needed
+        //             }
+        //         },
+        //         {
+        //             $group: {
+        //                 _id: null, // Group all documents into one group
+        //                 "totalPaidAmount": { $sum: "$paidAmount" }, // Calculate total paidAmount
+        //                 "latestRecord": { $last: "$$ROOT" } // Get the last document
+        //             }
+        //         },
+        //         {
+        //             $replaceRoot: { newRoot: "$latestRecord" } // Replace the root document with the lastRecord
+        //         }
+        //     ];
+
+        //     const paymentData = await this.model.aggregate(pipeline);
+        //     console.log("Payment Data:", paymentData);
+
+        //     return paymentData;
+        // } catch (error) {
+        //     console.error("Error fetching payment data:", error);
+        //     throw error;
+        // }
     }
-}
 
-    
+
+
     async getByfeesPaymentId(groupId, feesPaymentId) {
         return this.execute(async () => {
             let feesdata = {};
@@ -831,7 +798,7 @@ async getPaymentData(groupId, addmissionIds) {
                         addmissionId: addmissionId,
                     });
                     feesdata.addmissionId = addmissionId1;
- academicYearId=addmissionId1.academicYear
+                    academicYearId = addmissionId1.academicYear
                     let courseIds = addmissionId1.courseDetails.forEach(
                         (element) => {
                             course_id = element.course_id;
@@ -863,11 +830,11 @@ async getPaymentData(groupId, addmissionIds) {
                         groupId: groupId,
                         academicYearId: academicYearId,
                     });
-console.log(academicYearIds,academicYearId);
+                    console.log(academicYearIds, academicYearId);
                     courseAdditionalData.course_id = courseDetails;
                     courseAdditionalData.class_id = classDetails;
                     courseAdditionalData.feesTemplateId = feesTemplateIds;
-                    courseAdditionalData.academicYearId =academicYearIds;
+                    courseAdditionalData.academicYearId = academicYearIds;
 
                     return {
                         ...courseAdditionalData,
