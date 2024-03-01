@@ -7,7 +7,7 @@ const DivisionModel = require("../schema/division.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const feesInstallmentServices = require("./feesInstallment.services");
-const  AcademicYearModel=require("../schema/academicyear.schema");
+const AcademicYearModel = require("../schema/academicyear.schema");
 let visitedAddmissionIds = new Set()
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -192,7 +192,7 @@ const finalServices = Object.values(lastServices);
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -207,7 +207,7 @@ const finalServices = Object.values(lastServices);
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -225,7 +225,7 @@ const finalServices = Object.values(lastServices);
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -245,7 +245,7 @@ const finalServices = Object.values(lastServices);
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -264,7 +264,7 @@ const finalServices = Object.values(lastServices);
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -275,12 +275,12 @@ const finalServices = Object.values(lastServices);
                 let coursePayments = {};
                 courseData.forEach((course) => {
                     courseID = course.courseId;
-courseFee=course.Fees
+                    courseFee = course.Fees
                     coursePayments[course.CourseName] = {
                         totalPaidAmount: 0,
                         totalRemainingAmount: 0,
                         courseId: courseID,
-                        courseFee:courseFee
+                        courseFee: courseFee
                     };
                 });
 
@@ -290,7 +290,7 @@ courseFee=course.Fees
                         admission.courseDetails.length > 0
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
-                           
+
                             const courseId = courseDetail.course_id;
 
                             const courseExists = courseData.find(
@@ -332,7 +332,7 @@ courseFee=course.Fees
                                     coursePayments[courseName].courseId =
                                         courseID;
                                 }
-                                 if (!coursePayments[courseName].courseFee) {
+                                if (!coursePayments[courseName].courseFee) {
                                     coursePayments[courseName].courseFee =
                                         courseFee;
                                 }
@@ -371,8 +371,8 @@ courseFee=course.Fees
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
 
-            let totalFeesData=await feesInstallmentServices.getTotalFeesAndPendingFees( groupId, criteria.feesTemplateId,criteria.academicYear)
-// console.log(totalFeesData);
+                let totalFeesData = await feesInstallmentServices.getTotalFeesAndPendingFees(groupId, criteria.feesTemplateId, criteria.academicYear)
+
                 let course_id;
                 let class_id;
                 let division_id;
@@ -605,9 +605,9 @@ courseFee=course.Fees
 
                                                     if (
                                                         item.status ==
-                                                            "pending" &&
+                                                        "pending" &&
                                                         formattedDate <
-                                                            criteria.currentDate
+                                                        criteria.currentDate
                                                     ) {
                                                         isDue = true;
                                                         return;
@@ -651,10 +651,10 @@ courseFee=course.Fees
                                         // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",a);
                                        
                                     });
-                               
+
                                 return updatedInstallmentRecords;
                             }
-                          
+
                             feesAdditionalData.addmissionId =
                                 matchingAdmission || {};
                         }
@@ -666,7 +666,7 @@ courseFee=course.Fees
                                 .length === 0
                         )
                             return {
-                                
+
                                 // ...service._doc,
                                 ...additionalData.addmissionId.addmissionId,
                             };
@@ -813,7 +813,7 @@ async getPaymentData(groupId, addmissionIds) {
     }
 }
 
-    
+
     async getByfeesPaymentId(groupId, feesPaymentId) {
         return this.execute(async () => {
             let feesdata = {};
@@ -834,7 +834,7 @@ async getPaymentData(groupId, addmissionIds) {
                         addmissionId: addmissionId,
                     });
                     feesdata.addmissionId = addmissionId1;
- academicYearId=addmissionId1.academicYear
+                    academicYearId = addmissionId1.academicYear
                     let courseIds = addmissionId1.courseDetails.forEach(
                         (element) => {
                             course_id = element.course_id;
@@ -866,11 +866,11 @@ async getPaymentData(groupId, addmissionIds) {
                         groupId: groupId,
                         academicYearId: academicYearId,
                     });
-console.log(academicYearIds,academicYearId);
+                    console.log(academicYearIds, academicYearId);
                     courseAdditionalData.course_id = courseDetails;
                     courseAdditionalData.class_id = classDetails;
                     courseAdditionalData.feesTemplateId = feesTemplateIds;
-                    courseAdditionalData.academicYearId =academicYearIds;
+                    courseAdditionalData.academicYearId = academicYearIds;
 
                     return {
                         ...courseAdditionalData,
