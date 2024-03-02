@@ -713,36 +713,135 @@ class StudentsAdmmisionService extends BaseService {
     }
     async getAdmissionListing(groupId, academicYear) {
         try {
-            const courseIds = await courseModel.distinct('courseId', { groupId });
-            const courseData = [];
+            let courseData = await courseModel.find({ groupId: groupId });
+            // console.log(courseIds);
+            let admissionData = await StudentsAdmissionModel.find({
+                groupId: groupId,
 
-            for (const courseId of courseIds) {
-                const courseInfo = await courseModel.findOne({ courseId, groupId }, { courseName: 1 });
-                let studentCount = 0;
+            });
+            let coursePayments = {};
+            let courseID;
+                let courseFee;
+            courseData.forEach((course) => {
+                courseID = course.courseId;
+                courseFee = course.Fees;
+                coursePayments[course.CourseName] = {
+                    totalPaidAmount: 0,
+                    totalRemainingAmount: 0,
+                    courseId: courseID,
+                    courseFee: courseFee,
+                };
+            });
 
-                const studentData = await studentAdmissionModel.find({ groupId: groupId, academicYear: academicYear });
+            admissionData.forEach((admission) => {
+                if (
+                    admission.courseDetails &&
+                    admission.courseDetails.length > 0
+                ) {
+                    admission.courseDetails.forEach((courseDetail) => {
+                        const courseId = courseDetail.course_id;
 
-                if (studentData) {
-                    studentData.forEach(item => {
-                        if (item.courseDetails && Array.isArray(item.courseDetails)) {
-                            item.courseDetails.forEach(element => {
-                                if (element.course_id === courseId) {
-                                    studentCount++;
-                                }
-                            });
+                        const courseExists = courseData.find(
+                            (course) => course.courseId === courseId
+                        );
+
+                        if (courseExists) {
+                            const courseName = courseExists.CourseName;
+                            //    console.log("uuuuuuuuuuuuuuuuuuu",courseName);
+
+                            // const paymentsForCourse = feesData.filter(
+                            //     (payment) =>
+                            //         payment.addmissionId ===
+                            //         admission.addmissionId
+                            // );
+                            // const paidAmountForCourse =
+                            //     paymentsForCourse.reduce(
+                            //         (total, payment) =>
+                            //             total +
+                            //             parseFloat(payment.paidAmount || 0),
+                            //         0
+                            //     );
+                            // const remainingAmountForCourse =
+                            //     paymentsForCourse.reduce(
+                            //         (total, payment) =>
+                            //             total +
+                            //             parseFloat(
+                            //                 payment.remainingAmount || 0
+                            //             ),
+                            //         0
+                            //     );
+
+                            if (!coursePayments[courseName].noOfStudents) {
+                                coursePayments[courseName].noOfStudents = 0;
+                            }
+                            coursePayments[courseName].noOfStudents++;
+
+                            if (!coursePayments[courseName].courseId) {
+                                coursePayments[courseName].courseId =
+                                    courseID;
+                            }
+                            if (!coursePayments[courseName].courseFee) {
+                                coursePayments[courseName].courseFee =
+                                    courseFee;
+                            }
+
+                            // coursePayments[courseName].totalPaidAmount +=
+                            //     paidAmountForCourse;
+
+                            // coursePayments[
+                            //     courseName
+                            // ].totalRemainingAmount +=
+                            //     remainingAmountForCourse;
                         }
                     });
                 }
-
-                courseData.push({
-                    // courseId,
-                    courseName: courseInfo ? courseInfo.courseName : null,
-                    studentCount,
-                });
+            });
+            let formattedCoursePayments = Object.keys(coursePayments).map(
+                (courseName) => {
+                    return {
+                        name: courseName,
+                        id: coursePayments[courseName].courseId,
+                        count: coursePayments[courseName].courseFee*coursePayments[courseName].noOfStudents ,
+                        noOfStudents:
+                            coursePayments[courseName].noOfStudents || 0,
+                        // // totalPaidAmount:
+                        //     coursePayments[courseName].totalPaidAmount,
+                        // totalRemainingAmount:
+                        //     coursePayments[courseName].totalRemainingAmount,
+                    };
+                }
+            );
+            let response={
+                data: formattedCoursePayments,
             }
+            // for (const courseId of courseIds) {
+            //     const courseInfo = await courseModel.findOne({ courseId:courseId, groupId:groupId}, { courseName: 1 });
+            //     // console.log(courseInfo);
+            //     let studentCount = 0;
 
-            console.log(courseData);
-            return courseData;
+            //     const studentData = await studentAdmissionModel.find({ groupId: groupId, academicYear: academicYear });
+
+            //     if (studentData) {
+            //         studentData.forEach(item => {
+            //             if (item.courseDetails && Array.isArray(item.courseDetails)) {
+            //                 item.courseDetails.forEach(element => {
+            //                     if (element.course_id === courseId) {
+            //                         studentCount++;
+            //                     }
+            //                 });
+            //             }
+            //         });
+            //     }
+
+            //     courseData.push({
+            //         // courseId,
+            //         courseName: courseInfo ? courseInfo.courseName : null,
+            //         studentCount,
+            //     });
+            // }
+
+            // console.log(courseData);
+            return response;
         } catch (error) {
             console.error(error);
             throw new Error("Error getting admission listing");
