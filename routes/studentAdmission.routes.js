@@ -447,14 +447,14 @@ router.delete(
 );
 
 router.put(
-    "/groupId/:groupId/studentAdmissionId/:studentAdmissionId",
+    "/groupId/:groupId/studentAdmissionId/:addmissionId",
     async (req, res) => {
         try {
-            const studentAdmissionId = req.params.studentAdmissionId;
+            const addmissionId = req.params.addmissionId;
             const groupId = req.params.groupId;
             const newData = req.body;
             const updatedData = await service.updateStudentsAddmisionById(
-                studentAdmissionId,
+                addmissionId,
                 groupId,
                 newData
             );

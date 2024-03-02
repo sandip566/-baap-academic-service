@@ -117,7 +117,7 @@ router.post(
             addmissionId,
             empId
         );
-
+       
         if (existingRecord.data !== null) {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
@@ -133,7 +133,13 @@ router.post(
                     existingRecord.data.remainingAmount - totalPaidAmount,
                     0
                 ) || 0;
-
+                
+             
+            //     if (pendingInstallment) {
+            //         const updatedInstallmentAmount = Math.max(pendingInstallment.amount - otherAmount, 0);
+            //         await feesInstallmentService.updateInstallmentAmount(pendingInstallment.id, updatedInstallmentAmount);
+            //     }
+    
             const serviceResponse = await service.create(req.body);
             const updateResult = await service.updatePaidAmountInDatabase(
                 feesPaymentId,
@@ -185,6 +191,28 @@ router.post(
                     installmentRecord.data.feesDetails,
                     installmentRecord.data
                 );
+                const pendingInstallment = await feesInstallmentService.getPendingInstallmentByAdmissionId(addmissionId); 
+       
+                let otherAmountRemaining = otherAmount; 
+                
+                pendingInstallment.forEach(pending => {
+                    pending.feesDetails.forEach(feesDetail => {
+                        feesDetail.installment.some(installment => { 
+                            if (installment.status === 'pending') {
+                              
+                                const amountToDeduct = Math.min(otherAmountRemaining, installment.amount);
+                                installment.amount -= amountToDeduct;
+                                otherAmountRemaining -= amountToDeduct; 
+                                 feesInstallmentService.updateInstallmentAmount(installment.installmentNo, installment.amount);
+                                return otherAmountRemaining <= 0; 
+                            }
+                        });
+                    });
+                });
+                
+                console.log("Updated pendingInstallment:", pendingInstallment[0].feesDetails[0].installment);
+                
+                
             }
             if (studentInstallmentRecord) {
                 for (const feesDetail of studentInstallmentRecord.data
@@ -222,6 +250,27 @@ router.post(
                     studentInstallmentRecord.data.feesDetails,
                     studentInstallmentRecord.data
                 );
+                const pendingInstallment = await studentAdmissionServices.getPendingInstallmentByAdmissionId(addmissionId); 
+       
+                let otherAmountRemaining = otherAmount; 
+                
+                pendingInstallment.forEach(pending => {
+                    pending.feesDetails.forEach(feesDetail => {
+                        feesDetail.installment.some(installment => { 
+                            if (installment.status === 'pending') {
+                              
+                                const amountToDeduct = Math.min(otherAmountRemaining, installment.amount);
+                                installment.amount -= amountToDeduct;
+                                otherAmountRemaining -= amountToDeduct; 
+                                 studentAdmissionServices.updateInstallmentAmount(installment.installmentNo, installment.amount);
+                                return otherAmountRemaining <= 0; 
+                            }
+                        });
+                    });
+                });
+                
+                console.log("Updated pendingInstallment:", pendingInstallment[0].feesDetails[0].installment);
+                
             }
             serviceResponse.data.paidAmount = totalPaidAmount;
             serviceResponse.data.remainingAmount = remainingAmount;
@@ -290,6 +339,28 @@ router.post(
                     installmentRecord.data.feesDetails,
                     installmentRecord.data
                 );
+                const pendingInstallment = await feesInstallmentService.getPendingInstallmentByAdmissionId(addmissionId); 
+       
+                let otherAmountRemaining = otherAmount; 
+                
+                pendingInstallment.forEach(pending => {
+                    pending.feesDetails.forEach(feesDetail => {
+                        feesDetail.installment.some(installment => { 
+                            if (installment.status === 'pending') {
+                              
+                                const amountToDeduct = Math.min(otherAmountRemaining, installment.amount);
+                                installment.amount -= amountToDeduct;
+                                otherAmountRemaining -= amountToDeduct; 
+                                 feesInstallmentService.updateInstallmentAmount(installment.installmentNo, installment.amount);
+                                return otherAmountRemaining <= 0; 
+                            }
+                        });
+                    });
+                });
+                
+                console.log("Updated pendingInstallment:", pendingInstallment[0].feesDetails[0].installment);
+                
+                
             }
             //studentAddmission
             if (AddmissioninstallmentRecord) {
@@ -327,6 +398,28 @@ router.post(
                     AddmissioninstallmentRecord.data.feesDetails,
                     AddmissioninstallmentRecord.data
                 );
+                const pendingInstallment = await studentAdmissionServices.getPendingInstallmentByAdmissionId(addmissionId); 
+       
+                let otherAmountRemaining = otherAmount; 
+                
+                pendingInstallment.forEach(pending => {
+                    pending.feesDetails.forEach(feesDetail => {
+                        feesDetail.installment.some(installment => { 
+                            if (installment.status === 'pending') {
+                              
+                                const amountToDeduct = Math.min(otherAmountRemaining, installment.amount);
+                                installment.amount -= amountToDeduct;
+                                otherAmountRemaining -= amountToDeduct; 
+                                 studentAdmissionServices.updateInstallmentAmount(installment.installmentNo, installment.amount);
+                                return otherAmountRemaining <= 0; 
+                            }
+                        });
+                    });
+                });
+                
+                console.log("Updated pendingInstallment:", pendingInstallment[0].feesDetails[0].installment);
+                
+                
             }
             serviceResponse.data.paidAmount = totalPaidAmount;
             serviceResponse.data.remainingAmount = remainingAmount;

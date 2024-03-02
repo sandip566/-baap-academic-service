@@ -36,10 +36,10 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async updateStudentsAddmisionById(studentAdmissionId, groupId, newData) {
+    async updateStudentsAddmisionById(addmissionId, groupId, newData) {
         try {
             const updatedData = await studentAdmissionModel.findOneAndUpdate(
-                { studentAdmissionId: studentAdmissionId, groupId: groupId },
+                { addmissionId: addmissionId, groupId: groupId },
                 newData,
                 { new: true }
             );
@@ -287,17 +287,17 @@ class StudentsAdmmisionService extends BaseService {
                                         let additionalData = {};
 
                                         if (
-                                            courseDetail.course_id &&
-                                            courseDetail.course_id !== "null"
+                                            courseDetail?.course_id &&
+                                            courseDetail?.course_id !== "null"
                                         ) {
                                             console.log(
                                                 "ddddddddddddddddd",
-                                                courseDetail.course_id
+                                                courseDetail?.course_id
                                             );
                                             const course_id =
                                                 await courseModel.findOne({
                                                     courseId:
-                                                        courseDetail.course_id,
+                                                        courseDetail?.course_id,
                                                 });
                                             console.log(course_id);
                                             additionalData.course_id =
@@ -314,9 +314,9 @@ class StudentsAdmmisionService extends BaseService {
                                         //     additionalData.class_id = class_id;
                                         //     console.log(class_id);
                                         // }
-                                        if (courseDetail.class_id) {
+                                        if (courseDetail?.class_id) {
                                             const classId = parseInt(
-                                                courseDetail.class_id
+                                                courseDetail?.class_id
                                             );
                                             if (!isNaN(classId)) {
                                                 const class_id =
@@ -330,7 +330,7 @@ class StudentsAdmmisionService extends BaseService {
                                             } else {
                                                 console.error(
                                                     "courseDetail.class_id is not a valid number:",
-                                                    courseDetail.class_id
+                                                    courseDetail?.class_id
                                                 );
                                             }
                                         }
@@ -344,9 +344,9 @@ class StudentsAdmmisionService extends BaseService {
                                         //     additionalData.division_id =
                                         //         division_id;
                                         // }
-                                        if (courseDetail.division_id) {
+                                        if (courseDetail?.division_id) {
                                             const divisionId = parseInt(
-                                                courseDetail.division_id
+                                                courseDetail?.division_id
                                             );
                                             if (!isNaN(divisionId)) {
                                                 const division_id =
@@ -361,7 +361,7 @@ class StudentsAdmmisionService extends BaseService {
                                             } else {
                                                 console.error(
                                                     "courseDetail.division_id is not a valid number:",
-                                                    courseDetail.division_id
+                                                    courseDetail?.division_id
                                                 );
                                             }
                                         }
@@ -803,7 +803,69 @@ class StudentsAdmmisionService extends BaseService {
             };
         }
     }
-
+    async  getPendingInstallmentByAdmissionId(addmissionId) {
+        try {
+            const pipeline = [
+                {
+                    $match: {
+                        addmissionId: addmissionId
+                    }
+                },
+                {
+                    $project: {
+                        addmissionId: 1,
+                        groupId: 1,
+                        academicYear: 1,
+                        courseDetails: 1,
+                        createdAt: 1,
+                        documents: 1,
+                        updatedAt: 1,
+                        feesDetails: {
+                            $filter: {
+                                input: "$feesDetails",
+                                as: "feesDetail",
+                                cond: {
+                                    $anyElementTrue: {
+                                        $map: {
+                                            input: "$$feesDetail.installment",
+                                            as: "installment",
+                                            in: { $eq: ["$$installment.status", "pending"] }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            ];
+    
+            console.log("Pipeline:", JSON.stringify(pipeline)); // Log the pipeline
+    
+            const result = await studentAdmissionModel.aggregate(pipeline);
+    
+            console.log("Result:", result); // Log the result
+    
+            return result;
+        } catch (error) {
+            console.error("Error retrieving pending installment:", error);
+            throw error;
+        }
+    }
+    async  updateInstallmentAmount(installmentId, newAmount) {
+        console.log(installmentId, newAmount);
+        try {
+            const updateResult = await studentAdmissionModel.findOneAndUpdate(
+                { "feesDetails.installment.installmentNo": installmentId },
+                { $set: { "feesDetails.$[outer].installment.$[inner].amount": newAmount } },
+                { arrayFilters: [{ "outer.installment.installmentNo": installmentId }, { "inner.installmentNo": installmentId }], multi: true, new: true }
+            );
+    
+            console.log("Installment amount updated successfully:", updateResult);
+        } catch (error) {
+            console.error("Error updating installment amount:", error);
+        }
+    }
+    
     // async bulkUpload(headers, dataRows, userId) {
     //     try {
     //         const studentAdmissionId = Date.now();
