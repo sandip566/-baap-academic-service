@@ -350,7 +350,7 @@ class feesPaymentService extends BaseService {
                         return {
                             name: courseName,
                             courseId: coursePayments[courseName].courseId,
-                            courseFee: coursePayments[courseName].courseFee,
+                            courseFee: coursePayments[courseName].courseFee*coursePayments[courseName].noOfStudents ,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
@@ -360,6 +360,7 @@ class feesPaymentService extends BaseService {
                         };
                     }
                 );
+                console.log("hhhhhhhhhhhhhhhhhhhhh",formattedCoursePayments);
                 let totalPaidAmount = 0;
                 let totalRemainingAmount = 0;
 
@@ -724,7 +725,7 @@ class feesPaymentService extends BaseService {
                 }
                 
                 const finalServices = Object.values(groupedServices);
-                
+                console.log("llllllllllllllllllllllll",finalServices.length);
                 // const groupedServices = {};
                 // let paidAmount;
                 // servicesWithData.forEach(async (serviceArray) => {
@@ -762,17 +763,19 @@ class feesPaymentService extends BaseService {
                 // const finalServices = Object.values(groupedServices);
 
                 // console.log(finalServices);
+                const totalCourseFee = formattedCoursePayments.reduce((total, course) => total + course.courseFee, 0);
+                console.log("Total course fee:", totalCourseFee);
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
-                    totalFees: totalFeesData.totalFees,
+                    totalFees: totalCourseFee,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
-
-                    totalItemsCount: await this.model.countDocuments(
-                        // filteredServicesWithData,
-                        formattedCoursePayments
-                    ),
+                    totalItemsCount:finalServices.length
+                    // totalItemsCount: await this.model.countDocuments(
+                    //     // filteredServicesWithData,
+                    //     finalServices
+                    // ),
                 };
 
                 return response;
