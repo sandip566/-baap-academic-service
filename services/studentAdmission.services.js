@@ -711,96 +711,41 @@ class StudentsAdmmisionService extends BaseService {
             return { error: "Failed to find the latest admission." };
         }
     }
-    async getAdmissionListing(groupId, academicYear, criteria) {
-        const query = {
-            groupId: groupId,
-            academicYear: academicYear,
-        };
-
+    async getAdmissionListing(groupId, academicYear) {
         try {
-            const admissionData = await this.preparePaginationAndReturnData(
-                query,
-                criteria
-            );
-            console.log(admissionData.data.items);
+            const courseIds = await courseModel.distinct('courseId', { groupId });
+            const courseData = [];
 
-            const courseIds = [];
+            for (const courseId of courseIds) {
+                const courseInfo = await courseModel.findOne({ courseId, groupId }, { courseName: 1 });
+                let studentCount = 0;
 
-            admissionData.data.items.forEach((admission) => {
-                if (
-                    admission.courseDetails &&
-                    admission.courseDetails.length > 0
-                ) {
-                    admission.courseDetails.forEach((courseDetail) => {
-                        console.log(courseDetail.course_id);
-                        courseIds.push(courseDetail.course_id);
-                    });
-                }
-            });
+                const studentData = await studentAdmissionModel.find({ groupId: groupId, academicYear: academicYear });
 
-            console.log(courseIds);
-
-            const courseCounts = [];
-
-            const courseDetails = await courseModel.find({
-                courseId: { $in: courseIds },
-            });
-
-            console.log("courseDetails", courseDetails);
-
-            admissionData.data.items.forEach((admission) => {
-                if (
-                    admission.courseDetails &&
-                    admission.courseDetails.length > 0
-                ) {
-                    admission.courseDetails.forEach((courseDetail) => {
-                        const matchingCourse = courseDetails.find(
-                            (course) =>
-                                course.courseId.toString() ===
-                                courseDetail.course_id.toString()
-                        ); // Convert to string
-                        if (matchingCourse) {
-                            const courseId = matchingCourse.courseId.toString();
-                            console.log("courseId", courseId);
-                            const courseName =
-                                matchingCourse.CourseName ||
-                                matchingCourse.name;
-                            const existingCourse = courseCounts.find(
-                                (courseCount) =>
-                                    courseCount.courseId === courseId
-                            );
-                            if (existingCourse) {
-                                existingCourse.count += 1;
-                            } else {
-                                courseCounts.push({
-                                    id: courseId,
-                                    name: courseName,
-                                    count: 1,
-                                });
-                            }
+                if (studentData) {
+                    studentData.forEach(item => {
+                        if (item.courseDetails && Array.isArray(item.courseDetails)) {
+                            item.courseDetails.forEach(element => {
+                                if (element.course_id === courseId) {
+                                    studentCount++;
+                                }
+                            });
                         }
                     });
                 }
-            });
 
-            console.log("courseCounts", courseCounts);
+                courseData.push({
+                    // courseId,
+                    courseName: courseInfo ? courseInfo.courseName : null,
+                    studentCount,
+                });
+            }
 
-            let response = {
-                // data: admissionData,
-                // courseData: courseDetails,
-                data: courseCounts,
-            };
-
-            console.log("response", response);
-
-            return response;
+            console.log(courseData);
+            return courseData;
         } catch (error) {
             console.error(error);
-            // Handle the error accordingly
-            return {
-                isError: true,
-                message: "An error occurred during data retrieval",
-            };
+            throw new Error("Error getting admission listing");
         }
     }
     async  getPendingInstallmentByAdmissionId(addmissionId) {

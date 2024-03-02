@@ -405,24 +405,18 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
     }
 });
 
-router.get(
-    "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",
-    async (req, res) => {
-        try {
-            const groupId = req.params.groupId;
-            const academicYear = req.params.academicYear;
-            const criteria = {};
-            const serviceResponse = await service.getAdmissionListing(
-                groupId,
-                academicYear,
-                criteria
-            );
-            requestResponsehelper.sendResponse(res, serviceResponse);
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal Server Error" });
-        }
+router.get("/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const academicYear=req.params.academicYear
+
+        const courseData = await service.getAdmissionListing(groupId,academicYear);
+        res.json(courseData);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
+}
 );
 router.delete(
     "/groupId/:groupId/studentAdmissionId/:studentAdmissionId",
