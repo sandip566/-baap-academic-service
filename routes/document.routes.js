@@ -27,9 +27,8 @@ router.post("/data/save",
         }
         try {
             if (req.body.documentId) {
-                const existingDoc = await service.getByDocumentIdData(req.body.documentId);
-
-                if (existingDoc) {
+                const existingDocument = await service.getByDocumentId(req.body.documentId);
+                if (existingDocument) {
                     const updatedData = {
                         ...req.body,
                         documentUrl: req.body.documentUrl,
@@ -46,7 +45,6 @@ router.post("/data/save",
         }
     }
 );
-
 
 router.get("/documentId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
@@ -129,5 +127,4 @@ router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
 module.exports = router;
