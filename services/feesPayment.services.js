@@ -110,7 +110,7 @@ class feesPaymentService extends BaseService {
 
                 let courseData = await courseModel.find({ groupId: groupId });
                 let courseID;
-                let courseFee;
+                let courseFee=0;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
                 });
@@ -350,7 +350,7 @@ class feesPaymentService extends BaseService {
                         return {
                             name: courseName,
                             courseId: coursePayments[courseName].courseId,
-                            courseFee: coursePayments[courseName].courseFee*coursePayments[courseName].noOfStudents ,
+                            courseFee: coursePayments[courseName].courseFee*coursePayments[courseName].noOfStudents||0 ,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
@@ -369,7 +369,7 @@ let totalCourseFee=0
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
                  totalCourseFee = formattedCoursePayments.reduce((total, course) => total + course.courseFee, 0);
-                console.log("Total course fee:", totalCourseFee);
+                console.log("Total course fee:", totalCourseFee||0);   
                 let totalFeesData =
                     await feesInstallmentServices.getTotalFeesAndPendingFees(
                         groupId,
@@ -768,7 +768,7 @@ let totalCourseFee=0
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
-                    totalFees: totalCourseFee,
+                    totalFees: totalCourseFee||0,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
                     totalItemsCount:finalServices.length
