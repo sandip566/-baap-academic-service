@@ -363,12 +363,13 @@ class feesPaymentService extends BaseService {
                 console.log("hhhhhhhhhhhhhhhhhhhhh",formattedCoursePayments);
                 let totalPaidAmount = 0;
                 let totalRemainingAmount = 0;
-
+let totalCourseFee=0
                 formattedCoursePayments.forEach((course) => {
                     totalPaidAmount += course.totalPaidAmount || 0;
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
-
+                 totalCourseFee = formattedCoursePayments.reduce((total, course) => total + course.courseFee, 0);
+                console.log("Total course fee:", totalCourseFee);
                 let totalFeesData =
                     await feesInstallmentServices.getTotalFeesAndPendingFees(
                         groupId,
@@ -763,8 +764,7 @@ class feesPaymentService extends BaseService {
                 // const finalServices = Object.values(groupedServices);
 
                 // console.log(finalServices);
-                const totalCourseFee = formattedCoursePayments.reduce((total, course) => total + course.courseFee, 0);
-                console.log("Total course fee:", totalCourseFee);
+                
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
