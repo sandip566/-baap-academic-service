@@ -43,7 +43,7 @@ const feesTemplate = mongoose.Schema(
             {
                 name: String,
                 tax: Number,
-                scholarship: String,
+                scholarship: Number,
                 total: Number
             }
         ]

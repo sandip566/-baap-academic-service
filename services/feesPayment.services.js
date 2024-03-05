@@ -110,7 +110,7 @@ class feesPaymentService extends BaseService {
 
                 let courseData = await courseModel.find({ groupId: groupId });
                 let courseID;
-                let courseFee=0;
+                let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
                 });
@@ -310,13 +310,39 @@ class feesPaymentService extends BaseService {
                                             parseFloat(payment.paidAmount || 0),
                                         0
                                     );
+                                //original
+
+                                // console.log("wwwwwwwwwwwwwwwwwwwwwwwwwww",paymentsForCourse);
+                                // const remainingAmountForCourse =
+                                //    paymentsForCourse.reduce(
+                                //         (total, payment) =>
+
+                                //             total +
+                                //             parseFloat(
+                                //                 payment.remainingAmount || 0
+                                //             ),
+
+                                //         0,
+
+                                //     );
+
                                 const remainingAmountForCourse =
                                     paymentsForCourse.reduce(
-                                        (total, payment) =>
-                                            total +
-                                            parseFloat(
-                                                payment.remainingAmount || 0
-                                            ),
+                                        (total, paymentArray) => {
+                                            const lastIndex =
+                                                paymentsForCourse[
+                                                    paymentsForCourse.length - 1
+                                                ];
+
+                                            const remainingAmount = lastIndex
+                                                ? parseFloat(
+                                                      lastIndex.remainingAmount ||
+                                                          0
+                                                  )
+                                                : 0;
+
+                                            return total + remainingAmount;
+                                        },
                                         0
                                     );
 
@@ -350,7 +376,11 @@ class feesPaymentService extends BaseService {
                         return {
                             name: courseName,
                             courseId: coursePayments[courseName].courseId,
-                            courseFee: coursePayments[courseName].courseFee*coursePayments[courseName].noOfStudents||0 ,
+                            courseFee: coursePayments[courseName].courseFee,
+                            TotalCourseFee:
+                                coursePayments[courseName].courseFee *
+                                    coursePayments[courseName].noOfStudents ||
+                                0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
                             totalPaidAmount:
@@ -360,16 +390,22 @@ class feesPaymentService extends BaseService {
                         };
                     }
                 );
-                console.log("hhhhhhhhhhhhhhhhhhhhh",formattedCoursePayments);
+
                 let totalPaidAmount = 0;
                 let totalRemainingAmount = 0;
-let totalCourseFee=0
+                let totalCourseFee = 0;
                 formattedCoursePayments.forEach((course) => {
                     totalPaidAmount += course.totalPaidAmount || 0;
                     totalRemainingAmount += course.totalRemainingAmount || 0;
                 });
-                 totalCourseFee = formattedCoursePayments.reduce((total, course) => total + course.courseFee, 0);
-                console.log("Total course fee:", totalCourseFee||0);   
+
+                totalCourseFee = formattedCoursePayments.reduce(
+                    (total, course) => {
+                        return total + parseFloat(course.courseFee || 0);
+                    },
+                    0
+                );
+
                 let totalFeesData =
                     await feesInstallmentServices.getTotalFeesAndPendingFees(
                         groupId,
@@ -596,10 +632,10 @@ let totalCourseFee=0
                                                         "0" +
                                                         (date.getMonth() + 1)
                                                     ).slice(-2);
-                                                    const day =
+                                                    const day = (
                                                         "0" +
-                                                        date.getDate() -
-                                                        1;
+                                                        (date.getDate() - 1)
+                                                    ).slice(-2);
 
                                                     const formattedDate = `${year}/${month}/${day}`;
 
@@ -626,8 +662,11 @@ let totalCourseFee=0
                                             divisionName: divisionDoc?.Name,
                                             courseName: course_id?.CourseName,
                                             courseFees: course_id?.Fees,
-                                            dueStatus: isDue,
-                                            status: record.status,
+                                            // dueStatus: isDue,
+                                            // status: record.status,
+                                            status: isDue
+                                                ? "overdue"
+                                                : record.status,
                                             paidAmount: service.paidAmount,
                                             remainingAmount:
                                                 service.remainingAmount,
@@ -693,85 +732,46 @@ let totalCourseFee=0
                 // // console.log(groupedServices);
                 const groupedServices = {};
                 const visitedAddmissionIds = new Set();
-                
+
                 // Function to fetch paidAmount for each addmissionId
                 const fetchPaidAmount = async (addmissionId) => {
                     if (!visitedAddmissionIds.has(addmissionId)) {
                         visitedAddmissionIds.add(addmissionId);
-                         a= await this.getPaymentData(groupId, addmissionId);
+                        a = await this.getPaymentData(groupId, addmissionId);
                     }
                     return a;
                 };
-                
+
                 // Iterate over servicesWithData
                 for (const serviceArray of servicesWithData) {
                     if (serviceArray.length > 0) {
                         const addmissionId = serviceArray[0].addmissionId;
-                
+
                         // Fetch paidAmount only once per addmissionId
                         const paidAmount = await fetchPaidAmount(addmissionId);
-                        console.log("pppppppppppppppppppppppppppppp", addmissionId);
-                        console.log("mmmmmmmmmmmmmmmmmmm", paidAmount);
-                
+
                         if (serviceArray.length == 1) {
                             const service = serviceArray[0];
                             service.paidAmount = parseFloat(service.paidAmount);
                             groupedServices[addmissionId] = service;
                         } else {
-                            const lastService = serviceArray[serviceArray.length - 1];
+                            const lastService =
+                                serviceArray[serviceArray.length - 1];
                             lastService.paidAmount = paidAmount;
                             groupedServices[addmissionId] = lastService;
                         }
                     }
                 }
-                
+
                 const finalServices = Object.values(groupedServices);
-                console.log("llllllllllllllllllllllll",finalServices.length);
-                // const groupedServices = {};
-                // let paidAmount;
-                // servicesWithData.forEach(async (serviceArray) => {
-                //     if (serviceArray.length > 0) {
-                //         const addmissionId = serviceArray[0].addmissionId;
-                //         console.log(
-                //             "pppppppppppppppppppppppppppppp",
-                //             addmissionId
-                //         );
 
-                //         if (!visitedAddmissionIds.has(addmissionId)) {
-                //             visitedAddmissionIds.add(addmissionId);
-
-                //             paidAmount = await this.getPaymentData(
-                //                 groupId,
-                //                 addmissionId
-                //             );
-                //             console.log("mmmmmmmmmmmmmmmmmmm", paidAmount);
-                //         }
-                //         if (serviceArray.length == 1) {
-                //             const service = serviceArray[0];
-                //             service.paidAmount = parseFloat(service.paidAmount);
-                //             groupedServices[addmissionId] = service;
-                //         } else {
-                //             const lastService =
-                //                 serviceArray[serviceArray.length - 1];
-                //             lastService.paidAmount = paidAmount;
-                //             groupedServices[addmissionId] = lastService;
-                //         }
-                //         // groupedServices[serviceArray]=paidAmount
-                //     }
-                // });
-
-                // const finalServices = Object.values(groupedServices);
-                // const finalServices = Object.values(groupedServices);
-
-                // console.log(finalServices);
-                
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
-                    totalFees: totalCourseFee||0,
+                    totalFees: totalCourseFee || 0,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
-                    totalItemsCount:finalServices.length
+                    totalItemsCount: finalServices.length,
                     // totalItemsCount: await this.model.countDocuments(
                     //     // filteredServicesWithData,
                     //     finalServices

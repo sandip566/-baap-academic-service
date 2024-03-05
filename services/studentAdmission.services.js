@@ -503,7 +503,7 @@ class StudentsAdmmisionService extends BaseService {
                                             courseAdditionalData.division_id =
                                                 division_id;
                                         }
-
+console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",course_id);
                                         return {
                                             courseName: course_id.CourseName,
                                             courseFee: course_id.Fees,
@@ -581,7 +581,7 @@ class StudentsAdmmisionService extends BaseService {
                                 ...feesDetail,
                                 ...feesAdditionalData,
                             });
-                            console.log("yyyyyyyyyyyyyyyyyyyyyyyyyy", feesAdditionalData);
+                            console.log("feesAdditionalData", feesAdditionalData);
                         }
 
                         const convertedObject =
