@@ -326,26 +326,17 @@ class feesPaymentService extends BaseService {
 
                                 //     );
 
-                                const remainingAmountForCourse =
-                                    paymentsForCourse.reduce(
-                                        (total, paymentArray) => {
-                                            const lastIndex =
-                                                paymentsForCourse[
-                                                    paymentsForCourse.length - 1
-                                                ];
-
-                                            const remainingAmount = lastIndex
-                                                ? parseFloat(
-                                                      lastIndex.remainingAmount ||
-                                                          0
-                                                  )
-                                                : 0;
-
-                                            return total + remainingAmount;
-                                        },
-                                        0
-                                    );
-
+                                const remainingAmountForCourse = paymentsForCourse.reduce(
+                                    (total, paymentArray, currentIndex) => {
+                                        const lastIndex = currentIndex === paymentsForCourse.length - 1 ? paymentArray : null;
+                                
+                                        const remainingAmount = lastIndex ? parseFloat(lastIndex.remainingAmount || 0) : 0;
+                                
+                                        return total + remainingAmount;
+                                    },
+                                    0
+                                );
+                                
                                 if (!coursePayments[courseName].noOfStudents) {
                                     coursePayments[courseName].noOfStudents = 0;
                                 }
@@ -650,6 +641,7 @@ class feesPaymentService extends BaseService {
                                                     }
                                                 }
                                             );
+                                            console.log(isDue);
                                             if (isDue) return;
                                         });
 
