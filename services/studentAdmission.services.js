@@ -9,6 +9,7 @@ const DivisionModel = require("../schema/division.schema");
 const religionModel = require("../schema/religion.schema");
 const feesPaymentModel = require("../schema/feesPayment.schema")
 const SubjectModel = require("../schema/subjects.schema");
+const categoryModel=require("../schema/categories.schema")
 // const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 
