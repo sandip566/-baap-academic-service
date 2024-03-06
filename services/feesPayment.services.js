@@ -644,6 +644,13 @@ class feesPaymentService extends BaseService {
                 }
 
                 const finalServices = Object.values(groupedServices);
+                for (const service of finalServices) {
+                    const installmentStatus = await feesInstallmentServices. getByInstallmentStatus(service.installmentId);
+                    service.status = installmentStatus.status.isDue;
+                }
+                
+                console.log("finalServices", finalServices);
+                
 
                 let response = {
                     coursePayments: formattedCoursePayments,
