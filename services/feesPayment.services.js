@@ -310,21 +310,7 @@ class feesPaymentService extends BaseService {
                                             parseFloat(payment.paidAmount || 0),
                                         0
                                     );
-                                //original
-
-                                // console.log("wwwwwwwwwwwwwwwwwwwwwwwwwww",paymentsForCourse);
-                                // const remainingAmountForCourse =
-                                //    paymentsForCourse.reduce(
-                                //         (total, payment) =>
-
-                                //             total +
-                                //             parseFloat(
-                                //                 payment.remainingAmount || 0
-                                //             ),
-
-                                //         0,
-
-                                //     );
+                               
 
                                 const remainingAmountForCourse = paymentsForCourse.reduce(
                                     (total, paymentArray, currentIndex) => {
@@ -658,7 +644,7 @@ class feesPaymentService extends BaseService {
                                             // status: record.status,
                                             status: isDue
                                                 ? "overdue"
-                                                : record.status,
+                                                : record.status="pending",
                                             paidAmount: service.paidAmount,
                                             remainingAmount:
                                                 service.remainingAmount,

@@ -117,7 +117,7 @@ router.post(
             addmissionId,
             empId
         );
-       
+
         if (existingRecord.data !== null) {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
@@ -133,13 +133,12 @@ router.post(
                     existingRecord.data.remainingAmount - totalPaidAmount,
                     0
                 ) || 0;
-                
-             
+
             //     if (pendingInstallment) {
             //         const updatedInstallmentAmount = Math.max(pendingInstallment.amount - otherAmount, 0);
             //         await feesInstallmentService.updateInstallmentAmount(pendingInstallment.id, updatedInstallmentAmount);
             //     }
-    
+
             const serviceResponse = await service.create(req.body);
             const updateResult = await service.updatePaidAmountInDatabase(
                 feesPaymentId,
@@ -208,15 +207,31 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                feesInstallmentService.updateInstallmentAmount(
-                                    installment.installmentNo,
-                                    installment.amount
-                                );
+                                // feesInstallmentService.updateInstallmentAmount(
+                                //     installment.installmentNo,
+                                //     installment.amount
+
+                                // );
+                                if (installment.amount === 0) {
+                                    installment.status = "paid";
+                                    feesInstallmentService.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "paid"
+                                    );
+                                } else {
+                                    feesInstallmentService.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "pending"
+                                    );
+                                }
+
                                 return otherAmountRemaining <= 0;
                             }
                         });
                     });
-                });            
+                });
             }
             if (studentInstallmentRecord) {
                 for (const feesDetail of studentInstallmentRecord.data
@@ -271,10 +286,25 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                studentAdmissionServices.updateInstallmentAmount(
-                                    installment.installmentNo,
-                                    installment.amount
-                                );
+                                // studentAdmissionServices.updateInstallmentAmount(
+                                //     installment.installmentNo,
+                                //     installment.amount
+                                // );
+                                if (installment.amount === 0) {
+                                    installment.status = "paid";
+                                    studentAdmissionServices.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "paid"
+                                    );
+                                } else {
+                                    studentAdmissionServices.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "pending"
+                                    );
+                                }
+
                                 return otherAmountRemaining <= 0;
                             }
                         });
@@ -365,10 +395,25 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                feesInstallmentService.updateInstallmentAmount(
-                                    installment.installmentNo,
-                                    installment.amount
-                                );
+                                // feesInstallmentService.updateInstallmentAmount(
+                                //     installment.installmentNo,
+                                //     installment.amount
+                                // );
+                                if (installment.amount === 0) {
+                                    installment.status = "paid";
+                                    feesInstallmentService.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "paid"
+                                    );
+                                } else {
+                                    feesInstallmentService.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "pending"
+                                    );
+                                }
+
                                 return otherAmountRemaining <= 0;
                             }
                         });
@@ -428,10 +473,24 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                studentAdmissionServices.updateInstallmentAmount(
-                                    installment.installmentNo,
-                                    installment.amount
-                                );
+                                // studentAdmissionServices.updateInstallmentAmount(
+                                //     installment.installmentNo,
+                                //     installment.amount
+                                // );
+                                if (installment.amount === 0) {
+                                    installment.status = "paid";
+                                    studentAdmissionServices.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "paid"
+                                    );
+                                } else {
+                                    studentAdmissionServices.updateInstallmentAmount(
+                                        installment.installmentNo,
+                                        installment.amount,
+                                        "pending"
+                                    );
+                                }
                                 return otherAmountRemaining <= 0;
                             }
                         });

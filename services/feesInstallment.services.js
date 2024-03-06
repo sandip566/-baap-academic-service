@@ -84,24 +84,62 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-    async  updateInstallmentAmount(installmentId, newAmount) {
+    // async  updateInstallmentAmount(installmentId, newAmount) {
+    //     console.log(installmentId, newAmount);
+    //     try {
+    //         const updateResult = await feesInstallmentModel.findOneAndUpdate(
+    //             { "feesDetails.installment.installmentNo": installmentId },
+    //             { $set: { "feesDetails.$[outer].installment.$[inner].amount": newAmount } },
+    //             { arrayFilters: [{ "outer.installment.installmentNo": installmentId }, { "inner.installmentNo": installmentId }], multi: true, new: true }
+    //         );
+    
+    //         console.log("Installment amount updated successfully:", updateResult);
+    //     } catch (error) {
+    //         console.error("Error updating installment amount:", error);
+    //     }
+    // }
+
+    async updateInstallmentAmount(installmentId, newAmount, newStatus) {
         console.log(installmentId, newAmount);
         try {
             const updateResult = await feesInstallmentModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
-                { $set: { "feesDetails.$[outer].installment.$[inner].amount": newAmount } },
-                { arrayFilters: [{ "outer.installment.installmentNo": installmentId }, { "inner.installmentNo": installmentId }], multi: true, new: true }
+                { 
+                    $set: { "feesDetails.$[outer].installment.$[inner].amount": newAmount, "feesDetails.$[outer].installment.$[inner].status": newStatus }
+                },
+                { 
+                    arrayFilters: [{ "outer.installment.installmentNo": installmentId }, { "inner.installmentNo": installmentId }], 
+                    multi: true, 
+                    new: true 
+                }
             );
     
             console.log("Installment amount updated successfully:", updateResult);
+    
+          
+            const feesDetail = updateResult.feesDetails.find(detail => detail.installment.some(installment => installment.installmentNo === installmentId));
+            const allInstallmentsPaid = feesDetail.installment.every(installment => installment.status === "paid");
+            if (allInstallmentsPaid) {
+                await feesInstallmentModel.findOneAndUpdate(
+                    { "feesDetails._id": feesDetail._id },
+                    { $set: { "feesDetails.$.status": "paid" } }
+                );
+            } else {
+                await feesInstallmentModel.findOneAndUpdate(
+                    { "feesDetails._id": feesDetail._id },
+                    { $set: { "feesDetails.$.status": "pending" } }
+                );
+            }
         } catch (error) {
             console.error("Error updating installment amount:", error);
         }
     }
     
-    // Example usage:
-    // await updateInstallmentAmount(installmentIdToUpdate, newAmount);
+
     
+   
+    
+   
     
     
     
