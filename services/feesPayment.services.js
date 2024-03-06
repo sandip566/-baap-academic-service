@@ -397,109 +397,11 @@ class feesPaymentService extends BaseService {
                 let classDoc;
                 let a;
                 let addmissionId;
-                // const servicesWithData = await Promise.all(
-                //     feesData?.map(async (service) => {
-                //         let additionalData = {};
-                //         let feesAdditionalData = {};
-
-                //         if (service.addmissionId) {
-                //             const matchingAdmission = admissionData.find(
-                //                 (admission) =>
-                //                     admission.addmissionId ===
-                //                     service.addmissionId
-                //             );
-
-                //             if (matchingAdmission) {
-                //                 await Promise.all(
-                //                     matchingAdmission.courseDetails.map(
-                //                         async (admission) => {
-                //                             if (admission.course_id) {
-                //                                 course_id =
-                //                                     await courseModel.findOne({
-                //                                         courseId:
-                //                                             admission.course_id,
-                //                                     });
-                //                                 admission.course_id = course_id;
-                //                             }
-                //                             if (admission.class_id) {
-                //                                 class_id =
-                //                                     await ClassModel.findOne({
-                //                                         feesTemplateId:
-                //                                             admission.class_id,
-                //                                     });
-                //                                 admission.class_id = class_id;
-                //                             }
-                //                             if (admission.division_id) {
-                //                                 division_id =
-                //                                     await DivisionModel.findOne(
-                //                                         {
-                //                                             divisionId:
-                //                                                 admission.division_id,
-                //                                         }
-                //                                     );
-                //                                 admission.division_id =
-                //                                     division_id;
-                //                             }
-                //                         }
-                //                     )
-                //                 );
-                //                 const installmentLengths =
-                //                     matchingAdmission.feesDetails.map((item) =>
-                //                         item.installment
-                //                             ? item.installment.length
-                //                             : 0
-                //                     );
-                //                 const installments =
-                //                     installmentLengths.length > 0
-                //                         ? installmentLengths[0]
-                //                         : 0;
-                //                 console.log(
-                //                     "Lengths of installment arrays:",
-                //                     installmentLengths
-                //                 );
-                //                 console.log(matchingAdmission.feesDetails);
-
-                //                return{
-                //                     candidateName: matchingAdmission.name,
-                //                     className: class_id?.name,
-                //                     phoneNumber: matchingAdmission.phoneNumber,
-                //                     divisionName: division_id?.Name,
-                //                     courseName: course_id?.CourseName,
-                //                     courseFees: course_id?.Fees,
-                //                     installments: installments,
-                //                     paidAmount: service.paidAmount,
-                //                     remainingAmount: service.remainingAmount,
-                //                     feesPaymentId: service.feesPaymentId,
-                //                     addmissionId: service.addmissionId,
-                //                     empId: service.empId,
-                //                     groupId: service.groupId,
-                //                     // courseFee:course_id.Fees,
-                //                 };
-
-                //             }
-
-                //             feesAdditionalData.addmissionId =
-                //                 matchingAdmission || {};
-                //         }
-
-                //         additionalData.addmissionId = feesAdditionalData;
-
-                //         if (
-                //             Object.keys(feesAdditionalData.addmissionId)
-                //                 .length === 0
-                //         ) {
-                //             return {};
-                //         }
-
-                //         return {
-                //             ...service._doc,
-                //             ...additionalData.addmissionId,
-                //         };
-                //     })
-                // )
+              
 
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
+                        
                         let additionalData = {};
                         let feesAdditionalData = {};
 
@@ -639,7 +541,7 @@ class feesPaymentService extends BaseService {
                                                 matchingAdmission.phoneNumber,
                                             divisionName: divisionDoc?.Name,
                                             courseName: course_id?.CourseName,
-                                            courseFees: course_id?.Fees,
+                                            courseFees: service?.courseFee,
                                             // dueStatus: isDue,
                                             // status: record.status,
                                             status: isDue
