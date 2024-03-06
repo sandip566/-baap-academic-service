@@ -304,8 +304,7 @@ router.post(
                                         "pending"
                                     );
                                 }
-
-                                return otherAmountRemaining <= 0;
+                                 return otherAmountRemaining <= 0;
                             }
                         });
                     });
