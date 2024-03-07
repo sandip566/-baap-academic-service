@@ -310,19 +310,28 @@ class feesPaymentService extends BaseService {
                                             parseFloat(payment.paidAmount || 0),
                                         0
                                     );
-                               
 
-                                const remainingAmountForCourse = paymentsForCourse.reduce(
-                                    (total, paymentArray, currentIndex) => {
-                                        const lastIndex = currentIndex === paymentsForCourse.length - 1 ? paymentArray : null;
-                                
-                                        const remainingAmount = lastIndex ? parseFloat(lastIndex.remainingAmount || 0) : 0;
-                                
-                                        return total + remainingAmount;
-                                    },
-                                    0
-                                );
-                                
+                                const remainingAmountForCourse =
+                                    paymentsForCourse.reduce(
+                                        (total, paymentArray, currentIndex) => {
+                                            const lastIndex =
+                                                currentIndex ===
+                                                paymentsForCourse.length - 1
+                                                    ? paymentArray
+                                                    : null;
+
+                                            const remainingAmount = lastIndex
+                                                ? parseFloat(
+                                                      lastIndex.remainingAmount ||
+                                                          0
+                                                  )
+                                                : 0;
+
+                                            return total + remainingAmount;
+                                        },
+                                        0
+                                    );
+
                                 if (!coursePayments[courseName].noOfStudents) {
                                     coursePayments[courseName].noOfStudents = 0;
                                 }
@@ -397,11 +406,9 @@ class feesPaymentService extends BaseService {
                 let classDoc;
                 let a;
                 let addmissionId;
-              
 
                 const servicesWithData = await Promise.all(
                     feesData?.map(async (service) => {
-                        
                         let additionalData = {};
                         let feesAdditionalData = {};
 
@@ -529,7 +536,7 @@ class feesPaymentService extends BaseService {
                                                     }
                                                 }
                                             );
-                                            console.log(isDue);
+
                                             if (isDue) return;
                                         });
 
@@ -546,7 +553,7 @@ class feesPaymentService extends BaseService {
                                             // status: record.status,
                                             status: isDue
                                                 ? "overdue"
-                                                : record.status="pending",
+                                                : (record.status = "pending"),
                                             paidAmount: service.paidAmount,
                                             remainingAmount:
                                                 service.remainingAmount,
@@ -582,38 +589,11 @@ class feesPaymentService extends BaseService {
                     })
                 );
 
-                // Grouping services based on addmissionId and keeping only the last occurrence
-                // const groupedServices = {};
-
-                // servicesWithData.forEach((serviceArray) => {
-
-                //     if (serviceArray.length > 0) {
-                //         const addmissionId =  serviceArray[0].addmissionId;
-                //         console.log("pppppppppppppppppppppppppppppp",addmissionId);
-                //         let totalPaidAmount = 0;
-                //         for (const service of serviceArray) {
-                //             totalPaidAmount += parseFloat(
-                //                 service.paidAmount || 0
-                //             );
-                //         }
-
-                //         if (serviceArray.length == 1) {
-                //             const service = serviceArray[0];
-                //             service.paidAmount = parseFloat(service.paidAmount);
-                //             groupedServices[addmissionId] = service;
-                //         } else {
-                //             const lastService =
-                //                 serviceArray[serviceArray.length - 1];
-                //             lastService.paidAmount = totalPaidAmount;
-                //             groupedServices[addmissionId] = lastService;
-                //         }
-                //     }
-                // });
-                // // console.log(groupedServices);
+               
                 const groupedServices = {};
                 const visitedAddmissionIds = new Set();
 
-                // Function to fetch paidAmount for each addmissionId
+               
                 const fetchPaidAmount = async (addmissionId) => {
                     if (!visitedAddmissionIds.has(addmissionId)) {
                         visitedAddmissionIds.add(addmissionId);
@@ -622,12 +602,12 @@ class feesPaymentService extends BaseService {
                     return a;
                 };
 
-                // Iterate over servicesWithData
+                
                 for (const serviceArray of servicesWithData) {
                     if (serviceArray.length > 0) {
                         const addmissionId = serviceArray[0].addmissionId;
 
-                        // Fetch paidAmount only once per addmissionId
+                       
                         const paidAmount = await fetchPaidAmount(addmissionId);
 
                         if (serviceArray.length == 1) {
@@ -645,12 +625,12 @@ class feesPaymentService extends BaseService {
 
                 const finalServices = Object.values(groupedServices);
                 for (const service of finalServices) {
-                    const installmentStatus = await feesInstallmentServices. getByInstallmentStatus(service.installmentId);
+                    const installmentStatus =
+                        await feesInstallmentServices.getByInstallmentStatus(
+                            service.installmentId
+                        );
                     service.status = installmentStatus.status.isDue;
                 }
-                
-                console.log("finalServices", finalServices);
-                
 
                 let response = {
                     coursePayments: formattedCoursePayments,

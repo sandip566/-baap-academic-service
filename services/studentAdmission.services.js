@@ -759,10 +759,10 @@ async getfeesPayment(groupId, query) {
                                             division_id;
                                     }
                                     return {
-                                        courseName: course_id.courseName,
-                                        courseFee: course_id.fees,
-                                        className: class_id.name,
-                                        divisionName: division_id.Name,
+                                        courseName: course_id?.courseName,
+                                        courseFee: course_id?.fees,
+                                        className: class_id?.name,
+                                        divisionName: division_id?.Name,
                                     };
                                 }
                             )
@@ -878,7 +878,7 @@ async getfeesPayment(groupId, query) {
                 totalItemsCount: filteredData.length,
             },
         };
-
+console.log(response);
         return response;
     } catch (error) {
         console.error("Error:", error);
