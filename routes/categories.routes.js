@@ -31,6 +31,11 @@ router.get("/all", TokenService.checkPermission(["EFC1"]), async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getAllDataUsingLink/all", async (req, res) => {
+  const serviceResponse = await service.getAllByCriteria({});
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/:id", TokenService.checkPermission(["EFC4"]), async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);

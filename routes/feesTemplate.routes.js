@@ -33,8 +33,8 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
 
         if (serviceResponse.data) {
             const totalFees = serviceResponse.data.totalFees;
-            const installmentAmount =Math.round (totalFees / installmentNo);
-           
+            const installmentAmount = Math.round(totalFees / installmentNo);
+
             for (let i = 1; i <= installmentNo; i++) {
                 installmentDetails.push({
                     installmentNo: i,
@@ -43,9 +43,9 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
             }
             serviceResponse.data.installmentDetails = installmentDetails;
         }
-        let response={
-            status:"success",
-            data:installmentDetails,
+        let response = {
+            status: "success",
+            data: installmentDetails,
         }
         requestResponsehelper.sendResponse(res, response);
     } catch (error) {
@@ -81,6 +81,19 @@ router.get("/:id", TokenService.checkPermission(["EMT1"]), async (req, res) => {
 });
 
 router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMT1"]), async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        feesTemplateId: req.query.feesTemplateId,
+        pageNumber: parseInt(req.query.pageNumber) || 1
+    };
+    const serviceResponse = await service.getAllDataByGroupId(
+        groupId,
+        criteria
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/getDataByUsingLink/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         feesTemplateId: req.query.feesTemplateId,

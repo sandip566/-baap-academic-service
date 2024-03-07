@@ -47,7 +47,13 @@ router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
     const serviceResponse = await service.getByInstallmentId(req.params.installmentId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
+router.get("/getByInstallmentStatus/:installmentId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByInstallmentStatus(req.params.installmentId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,

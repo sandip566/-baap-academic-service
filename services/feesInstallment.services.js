@@ -15,17 +15,64 @@ class feesInstallmentService extends BaseService {
             return this.model.findOne({ installmentId: installmentId });
         });
     }
+    async getByInstallmentStatus(installmentId) {
+        let overdue;
+        const installmentData = await this.execute(() => {
+            return this.model.findOne({ installmentId: installmentId });
+        });
+        console.log(installmentData.data);
+
+        if (
+            installmentData.data.feesDetails &&
+            Array.isArray(installmentData.data.feesDetails)
+        ) {
+            installmentData.data.feesDetails.forEach((feesDetailItem) => {
+                if (
+                    feesDetailItem.installment &&
+                    Array.isArray(feesDetailItem.installment)
+                ) {
+                    feesDetailItem.installment.forEach((installment) => {
+                        if (installment.status === "pending") {
+                            let installmentDate = new Date(installment.date);
+                            let currentDate = new Date();
+                            let currentDateFormatted = currentDate
+                                .toISOString()
+                                .slice(0, 10)
+                                .replace(/-/g, "/");
+                            let installmentDateFormat = installmentDate
+                                .toISOString()
+                                .slice(0, 10)
+                                .replace(/-/g, "/");
+
+                            if (installmentDateFormat < currentDateFormatted) {
+                                overdue = installment.overdue = true;
+                                console.log("Installment is overdue");
+                            }
+                        }
+                    });
+                }
+            });
+        }
+
+        return {
+            status: {
+                isDue: overdue ? "overdue" : installmentData.data.status,
+            },
+        };
+    }
 
     async getAllFeesInstallmentByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
 
-        criteria.pageSize = 10
+        criteria.pageSize = 10;
         if (criteria.studentId) query.studentId = criteria.studentId;
-        if (criteria.installmentId) query.installmentId = criteria.installmentId;
+        if (criteria.installmentId)
+            query.installmentId = criteria.installmentId;
         if (criteria.empId) query.empId = criteria.empId;
-        if (criteria.installmentNo) query.installmentNo = criteria.installmentNo;
+        if (criteria.installmentNo)
+            query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -84,27 +131,73 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-    async  updateInstallmentAmount(installmentId, newAmount) {
+    // async  updateInstallmentAmount(installmentId, newAmount) {
+    //     console.log(installmentId, newAmount);
+    //     try {
+    //         const updateResult = await feesInstallmentModel.findOneAndUpdate(
+    //             { "feesDetails.installment.installmentNo": installmentId },
+    //             { $set: { "feesDetails.$[outer].installment.$[inner].amount": newAmount } },
+    //             { arrayFilters: [{ "outer.installment.installmentNo": installmentId }, { "inner.installmentNo": installmentId }], multi: true, new: true }
+    //         );
+
+    //         console.log("Installment amount updated successfully:", updateResult);
+    //     } catch (error) {
+    //         console.error("Error updating installment amount:", error);
+    //     }
+    // }
+
+    async updateInstallmentAmount(installmentId, newAmount, newStatus) {
         console.log(installmentId, newAmount);
         try {
             const updateResult = await feesInstallmentModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
-                { $set: { "feesDetails.$[outer].installment.$[inner].amount": newAmount } },
-                { arrayFilters: [{ "outer.installment.installmentNo": installmentId }, { "inner.installmentNo": installmentId }], multi: true, new: true }
+                {
+                    $set: {
+                        "feesDetails.$[outer].installment.$[inner].amount":
+                            newAmount,
+                        "feesDetails.$[outer].installment.$[inner].status":
+                            newStatus,
+                    },
+                },
+                {
+                    arrayFilters: [
+                        { "outer.installment.installmentNo": installmentId },
+                        { "inner.installmentNo": installmentId },
+                    ],
+                    multi: true,
+                    new: true,
+                }
             );
-    
-            console.log("Installment amount updated successfully:", updateResult);
+
+            console.log(
+                "Installment amount updated successfully:",
+                updateResult
+            );
+
+            const feesDetail = updateResult.feesDetails.find((detail) =>
+                detail.installment.some(
+                    (installment) => installment.installmentNo === installmentId
+                )
+            );
+            const allInstallmentsPaid = feesDetail.installment.every(
+                (installment) => installment.status === "paid"
+            );
+            if (allInstallmentsPaid) {
+                await feesInstallmentModel.findOneAndUpdate(
+                    { "feesDetails._id": feesDetail._id },
+                    { $set: { "feesDetails.$.status": "paid" } }
+                );
+            } else {
+                await feesInstallmentModel.findOneAndUpdate(
+                    { "feesDetails._id": feesDetail._id },
+                    { $set: { "feesDetails.$.status": "pending" } }
+                );
+            }
         } catch (error) {
             console.error("Error updating installment amount:", error);
         }
     }
-    
-    // Example usage:
-    // await updateInstallmentAmount(installmentIdToUpdate, newAmount);
-    
-    
-    
-    
+
     async getStudentById(studentId) {
         try {
             const student = await Student.findOne({ _id: studentId });
@@ -122,8 +215,9 @@ class feesInstallmentService extends BaseService {
 
     async getInstallmentsByStudentId(studentId) {
         try {
-
-            const installments = await feesInstallmentModel.find({ studentId: studentId });
+            const installments = await feesInstallmentModel.find({
+                studentId: studentId,
+            });
             return installments;
         } catch (error) {
             throw error;
@@ -134,13 +228,19 @@ class feesInstallmentService extends BaseService {
         try {
             let installmentData = await this.getByInstallmentId(installmentId);
             console.log(installmentData.data);
-            let Data = installmentData.data
-            const result = await feesInstallmentModel.deleteOne({ installmentId: installmentId });
+            let Data = installmentData.data;
+            const result = await feesInstallmentModel.deleteOne({
+                installmentId: installmentId,
+            });
 
             if (result.deletedCount === 1) {
-                return { success: true, data: Data, message: 'Student deleted successfully' };
+                return {
+                    success: true,
+                    data: Data,
+                    message: "Student deleted successfully",
+                };
             } else {
-                return { success: false, message: 'Student not found' };
+                return { success: false, message: "Student not found" };
             }
         } catch (error) {
             throw error;
@@ -171,7 +271,9 @@ class feesInstallmentService extends BaseService {
 
     async getTotalStudents(courseId) {
         try {
-            const totalStudents = await studentAdmissionModel.countDocuments({ "courseDetails": { $elemMatch: { "course_id": courseId } } });
+            const totalStudents = await studentAdmissionModel.countDocuments({
+                courseDetails: { $elemMatch: { course_id: courseId } },
+            });
             return totalStudents;
         } catch (error) {
             console.error(error);
@@ -232,9 +334,9 @@ class feesInstallmentService extends BaseService {
     //             pendingFees: 0,
     //             paidFees: 0
     //         };
-           
+
     //         if (fee.length > 0) {
-               
+
     //             response.totalFees = fee[0].totalAmountAllStatus;
     //             fee[0].feesDetails.forEach(detail => {
     //                 if (detail.status === 'pending') {
@@ -250,33 +352,46 @@ class feesInstallmentService extends BaseService {
     //         throw error;
     //     }
     // }
-    async  getTotalFeesAndPendingFees(groupId = null, feesTemplateId = null, academicYear = null) {
-        console.log(groupId = null, feesTemplateId = null, academicYear = null);
+    async getTotalFeesAndPendingFees(
+        groupId = null,
+        feesTemplateId = null,
+        academicYear = null
+    ) {
+        console.log(
+            (groupId = null),
+            (feesTemplateId = null),
+            (academicYear = null)
+        );
         try {
             const matchCriteria = {};
-    
+
             if (groupId !== null) matchCriteria["groupId"] = Number(groupId);
-            if (feesTemplateId !== null) matchCriteria["feesDetails.feesTemplateId"] = Number(feesTemplateId);
-            if (academicYear !== null) matchCriteria["academicYear"] = Number(academicYear);
-    
+            if (feesTemplateId !== null)
+                matchCriteria["feesDetails.feesTemplateId"] =
+                    Number(feesTemplateId);
+            if (academicYear !== null)
+                matchCriteria["academicYear"] = Number(academicYear);
+
             const aggregationPipeline = [
                 {
-                    $match: matchCriteria
+                    $match: matchCriteria,
                 },
                 {
-                    $unwind: "$feesDetails"
+                    $unwind: "$feesDetails",
                 },
                 {
-                    $unwind: "$feesDetails.installment"
+                    $unwind: "$feesDetails.installment",
                 },
                 {
                     $group: {
                         _id: {
                             documentId: "$_id",
-                            status: "$feesDetails.installment.status"
+                            status: "$feesDetails.installment.status",
                         },
-                        totalAmount: { $sum: "$feesDetails.installment.amount" }
-                    }
+                        totalAmount: {
+                            $sum: "$feesDetails.installment.amount",
+                        },
+                    },
                 },
                 {
                     $group: {
@@ -284,47 +399,49 @@ class feesInstallmentService extends BaseService {
                         feesDetails: {
                             $push: {
                                 status: "$_id.status",
-                                totalAmount: "$totalAmount"
-                            }
+                                totalAmount: "$totalAmount",
+                            },
                         },
-                        totalAmountAllStatus: { $sum: "$totalAmount" }
-                    }
+                        totalAmountAllStatus: { $sum: "$totalAmount" },
+                    },
                 },
                 {
                     $project: {
                         _id: 1,
                         feesDetails: 1,
-                        totalAmountAllStatus: 1
-                    }
-                }
+                        totalAmountAllStatus: 1,
+                    },
+                },
             ];
-    
-            const fee = await feesInstallmentModel.aggregate(aggregationPipeline);
-    
+
+            const fee = await feesInstallmentModel.aggregate(
+                aggregationPipeline
+            );
+
             const response = {
                 totalFees: 0,
                 pendingFees: 0,
-                paidFees: 0
+                paidFees: 0,
             };
-    
+
             if (fee.length > 0) {
                 console.log(fee);
                 response.totalFees = fee[0].totalAmountAllStatus;
-                fee[0].feesDetails.forEach(detail => {
-                    if (detail.status === 'pending') {
+                fee[0].feesDetails.forEach((detail) => {
+                    if (detail.status === "pending") {
                         response.pendingFees += detail.totalAmount;
-                    } else if (detail.status === 'paid') {
+                    } else if (detail.status === "paid") {
                         response.paidFees += detail.totalAmount;
                     }
                 });
             }
-    
+
             return response;
         } catch (error) {
             throw error;
         }
     }
-    
+
     async getAllDataByCourseId(groupId, courseId) {
         try {
             const classes = await ClassModel.find({ courseId, groupId });
@@ -337,8 +454,8 @@ class feesInstallmentService extends BaseService {
     async getTotalStudentsForClass(classId, groupId) {
         try {
             const totalStudents = await studentAdmissionModel.countDocuments({
-                "courseDetails.class_id": (classId),
-                groupId: groupId
+                "courseDetails.class_id": classId,
+                groupId: groupId,
             });
             return totalStudents;
         } catch (error) {
@@ -347,31 +464,38 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getTotalFeesAndPendingFeesForClass(classId, groupId, feesTemplateId, academicYear) {
+    async getTotalFeesAndPendingFeesForClass(
+        classId,
+        groupId,
+        feesTemplateId,
+        academicYear
+    ) {
         try {
             let fee = await feesInstallmentModel.aggregate([
                 {
                     $match: {
                         "courseDetails.class_id": Number(classId),
-                        "groupId": Number(groupId),
+                        groupId: Number(groupId),
                         "feesDetails.feesTemplateId": Number(feesTemplateId),
-                        "academicYear": Number(academicYear)
-                    }
+                        academicYear: Number(academicYear),
+                    },
                 },
                 {
-                    $unwind: "$feesDetails"
+                    $unwind: "$feesDetails",
                 },
                 {
-                    $unwind: "$feesDetails.installment"
+                    $unwind: "$feesDetails.installment",
                 },
                 {
                     $group: {
                         _id: {
                             documentId: "$_id",
-                            status: "$feesDetails.installment.status"
+                            status: "$feesDetails.installment.status",
                         },
-                        totalAmount: { $sum: "$feesDetails.installment.amount" }
-                    }
+                        totalAmount: {
+                            $sum: "$feesDetails.installment.amount",
+                        },
+                    },
                 },
                 {
                     $group: {
@@ -379,34 +503,34 @@ class feesInstallmentService extends BaseService {
                         feesDetails: {
                             $push: {
                                 status: "$_id.status",
-                                totalAmount: "$totalAmount"
-                            }
+                                totalAmount: "$totalAmount",
+                            },
                         },
                         totalAmountAllStatus: { $sum: "$totalAmount" },
-                        totalStudents: { $sum: 1 }
-                    }
+                        totalStudents: { $sum: 1 },
+                    },
                 },
                 {
                     $project: {
                         _id: 1,
                         feesDetails: 1,
-                        totalAmountAllStatus: 1
-                    }
-                }
+                        totalAmountAllStatus: 1,
+                    },
+                },
             ]);
 
             const response = {
                 totalFees: 0,
                 pendingFees: 0,
-                paidFees: 0
+                paidFees: 0,
             };
 
             if (fee.length > 0) {
                 response.totalFees = fee[0].totalAmountAllStatus;
-                fee[0].feesDetails.forEach(detail => {
-                    if (detail.status === 'pending') {
+                fee[0].feesDetails.forEach((detail) => {
+                    if (detail.status === "pending") {
                         response.pendingFees += detail.totalAmount;
-                    } else if (detail.status === 'paid') {
+                    } else if (detail.status === "paid") {
                         response.paidFees += detail.totalAmount;
                     }
                 });
@@ -417,13 +541,13 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-    async  getPendingInstallmentByAdmissionId(addmissionId) {
+    async getPendingInstallmentByAdmissionId(addmissionId) {
         try {
             const pipeline = [
                 {
                     $match: {
-                        addmissionId: addmissionId
-                    }
+                        addmissionId: addmissionId,
+                    },
                 },
                 {
                     $project: {
@@ -443,32 +567,35 @@ class feesInstallmentService extends BaseService {
                                         $map: {
                                             input: "$$feesDetail.installment",
                                             as: "installment",
-                                            in: { $eq: ["$$installment.status", "pending"] }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                                            in: {
+                                                $eq: [
+                                                    "$$installment.status",
+                                                    "pending",
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             ];
-    
+
             console.log("Pipeline:", JSON.stringify(pipeline)); // Log the pipeline
-    
+
             const result = await feesInstallmentModel.aggregate(pipeline);
-    
+
             console.log("Result:", result); // Log the result
-    
+
             return result;
         } catch (error) {
             console.error("Error retrieving pending installment:", error);
             throw error;
         }
     }
-    
-    
-    
-    
-
 }
-module.exports = new feesInstallmentService(feesInstallmentModel, "FeesInstallation");
+module.exports = new feesInstallmentService(
+    feesInstallmentModel,
+    "FeesInstallation"
+);
