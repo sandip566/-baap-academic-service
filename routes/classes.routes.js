@@ -31,10 +31,7 @@ router.get("/all", TokenService.checkPermission(["EMDC1"]), async (req, res) => 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getAllDataUsingLink/all", async (req, res) => {
-    const serviceResponse = await service.getAllByCriteria(req.query);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+
 
 router.delete("/:id", TokenService.checkPermission(["EMDC4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -52,6 +49,17 @@ router.get("/:id", TokenService.checkPermission(["EMDC1"]), async (req, res) => 
 });
 
 router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMDC1"]), async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        classId: req.query.classId,
+        name: req.query.name,
+        courseId: req.query.courseId,
+        Department: req.query.departmentId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+router.get("/getAllUsingLink/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         classId: req.query.classId,
