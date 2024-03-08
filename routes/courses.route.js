@@ -46,6 +46,7 @@ router.get("/:id", TokenService.checkPermission(["EMC1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getByCourseId/:courseId", TokenService.checkPermission(["EMC1"]), async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
@@ -53,6 +54,7 @@ router.get("/getByCourseId/:courseId", TokenService.checkPermission(["EMC1"]), a
     const serviceResponse = await service.getByCourseId(req.params.courseId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getDataByUsingLink/getByCourseId/:courseId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
@@ -60,6 +62,7 @@ router.get("/getDataByUsingLink/getByCourseId/:courseId", async (req, res, next)
     const serviceResponse = await service.getByCourseId(req.params.courseId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMC3"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -72,8 +75,19 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMC3"]),
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermission(["EMC4"]), async (req, res) => {
+router.get("/getAllUsingLink/getByGroupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        courseId: req.query.courseId,
+        CourseName: req.query.CourseName,
+        University: req.query.University,
+        departmentId: req.query.departmentId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 
+router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermission(["EMC4"]), async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
