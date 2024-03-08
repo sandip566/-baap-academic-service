@@ -23,7 +23,7 @@ class feesInstallmentService extends BaseService {
         console.log(installmentData.data);
 
         if (
-            installmentData.data.feesDetails &&
+            installmentData.data?.feesDetails &&
             Array.isArray(installmentData.data.feesDetails)
         ) {
             installmentData.data.feesDetails.forEach((feesDetailItem) => {
@@ -56,7 +56,7 @@ class feesInstallmentService extends BaseService {
 
         return {
             status: {
-                isDue: overdue ? "overdue" : installmentData.data.status,
+                isDue: overdue ? "overdue" : installmentData.data?.status,
             },
         };
     }
