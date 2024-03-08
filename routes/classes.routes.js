@@ -31,8 +31,6 @@ router.get("/all", TokenService.checkPermission(["EMDC1"]), async (req, res) => 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-
-
 router.delete("/:id", TokenService.checkPermission(["EMDC4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
@@ -59,6 +57,7 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMDC1"])
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getAllUsingLink/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
