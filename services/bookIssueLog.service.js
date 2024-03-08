@@ -55,7 +55,7 @@ class BookIssueLogService extends BaseService {
     async fetchBookIssuesWithOverdue() {
         try {
             const currentDate = new Date();
-            const bookIssues = await bookIssueLogModel.find();
+            const bookIssues = await bookIssueLogModel.find({returned:false});
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
             const bookIds = bookIssues.map((issue) => issue.bookId);
@@ -106,6 +106,20 @@ class BookIssueLogService extends BaseService {
             };
         } catch (error) {
             throw error;
+        }
+    }
+
+
+    async getIssueBooks(addmissionId){
+        try{
+            console.log(addmissionId)
+            const bookIssues = await bookIssueLogModel.countDocuments({returned:false,addmissionId:addmissionId});
+            const returnedBooks=await bookIssueLogModel.countDocuments({returned:true,addmissionId:addmissionId});
+            const totalBooksIssued=await bookIssueLogModel.countDocuments({addmissionId:addmissionId})
+            return {totalIssuedBooks:totalBooksIssued,issuedBooks:bookIssues,returnedBooks:returnedBooks}
+        }
+        catch(error){
+            console.log(error);
         }
     }
 }

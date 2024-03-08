@@ -9,6 +9,7 @@ const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const feesInstallmentServices = require("./feesInstallment.services");
 const AcademicYearModel = require("../schema/academicyear.schema");
 let visitedAddmissionIds = new Set();
+const bookIssueLogService = require("../services/bookIssueLog.service");
 class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -928,5 +929,41 @@ class feesPaymentService extends BaseService {
         };
         return this.preparePaginationAndReturnData(query, criteria);
     }
+
+    async  calculateTotalFeeAndRemaining(groupId, admissionId) {
+        try {
+            const installments = await FeesInstallmentModel.find({ groupId: groupId, addmissionId: admissionId });
+            console.log('Fetched installments:', installments);
+            let totalFee = 0;
+            let remeningAmount = 0;
+            let totalPaid = 0;
+            installments.forEach(installment => {
+                console.log('Fees details:', installment.feesDetails); 
+                installment.feesDetails.forEach(feesDetail => {
+                    feesDetail.installment.forEach(installmentItem => {
+                        totalFee += installmentItem.amount;
+                        if (installmentItem.status === 'pending') {
+                            remeningAmount += installmentItem.amount;
+                        } else if (installmentItem.status === 'paid') {
+                            totalPaid +=parseInt( installmentItem.amount);
+                        }
+                    });
+                });
+            });
+            let books= await bookIssueLogService.getIssueBooks(admissionId)
+            console.log(books)
+            return {
+                totalFee: totalFee,
+                remeningAmount: remeningAmount,
+                totalPaid: totalPaid,
+                books:books
+                
+            };
+        } catch (error) {
+            console.error('Error calculating total fee and remaining amounts:', error);
+            throw error;
+        }
+    }
+
 }
 module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");
