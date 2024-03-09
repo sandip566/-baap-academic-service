@@ -288,7 +288,7 @@ class feesPaymentService extends BaseService {
                         admission.courseDetails.length > 0
                     ) {
                         admission.courseDetails.forEach((courseDetail) => {
-                            const courseId = courseDetail.course_id;
+                            const courseId = courseDetail?.course_id;
 
                             const courseExists = courseData.find(
                                 (course) => course.courseId === courseId
@@ -423,7 +423,7 @@ class feesPaymentService extends BaseService {
                                 await Promise.all(
                                     matchingAdmission.courseDetails.map(
                                         async (admission) => {
-                                            if (admission.course_id) {
+                                            if (admission?.course_id) {
                                                 course_id =
                                                     await courseModel.findOne({
                                                         courseId:
@@ -432,7 +432,7 @@ class feesPaymentService extends BaseService {
                                                 admission.course_id = course_id;
                                             }
 
-                                            if (admission.class_id) {
+                                            if (admission?.class_id) {
                                                 classDoc =
                                                     await ClassModel.findOne({
                                                         classId:
@@ -449,7 +449,7 @@ class feesPaymentService extends BaseService {
                                                 }
                                                 admission.class_id = class_id;
                                             }
-                                            if (admission.division_id) {
+                                            if (admission?.division_id) {
                                                 divisionDoc =
                                                     await DivisionModel.findOne(
                                                         {
