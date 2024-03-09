@@ -1399,13 +1399,13 @@ console.log(response);
                     religionName,
                     groupId
                 );
-                const name = data.name_2;
+                const name = data.feesTemplateName;
                 const { TemplateId } = await this.getTemplateIDbyCourseName(
                     name
                 );
 
                 const phoneNumber = String(data.phoneNumber).trim();
-                const phone = String(data.phone).trim();
+                const phone = String(data.contactDetails_phone).trim();
 
                 if (
                     !phoneNumber ||
@@ -1470,18 +1470,18 @@ console.log(response);
                     contactDetails: [
                         {
                             phone: phone,
-                            email: data.email,
-                            whats_app: data.whats_app,
-                            facebook: data.facebook,
-                            instagram: data.instagram,
-                            linked_in: data.linked_in,
+                            email: data.contactDetails_email,
+                            whats_app: data.contactDetails_whats_app,
+                            facebook: data.contactDetails_facebook,
+                            instagram: data.contactDetails_instagram,
+                            linked_in: data.contactDetails_linked_in,
                         },
                     ],
                     securitySettings: [
                         {
-                            smart_id: data.smart_id,
-                            subscribe_on_whatsapp: data.subscribe_on_whatsapp,
-                            public_profile_url: data.public_profile_url,
+                            smart_id: data.securitySettings_smart_id,
+                            subscribe_on_whatsapp: data.securitySettings_subscribe_on_whatsapp,
+                            public_profile_url: data.securitySettings_public_profile_url,
                         },
                     ],
                     courseDetails: {
@@ -1504,7 +1504,16 @@ console.log(response);
                             ],
                         },
                     ],
+                   
                     installmentId: data.installmentId,
+                    reference: [
+                        {
+                            name: data.reference_Name,
+                            phone_number: data.reference_Mobile,
+                            relationship: data.reference_Relentionship,
+                            email: data.reference_Email,
+                        },
+                    ],
                     createdBy: data.createdBy,
                     updatedBy: data.updatedBy,
                 };
