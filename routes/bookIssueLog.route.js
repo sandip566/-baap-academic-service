@@ -87,7 +87,8 @@ router.post("/return-book", async (req, res) => {
         const { groupId, bookId, addmissionId, returnDate } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
-            addmissionId: addmissionId
+            addmissionId: addmissionId,
+            returned:false
         });
         if (!existingReservation) {
             return res.status(400).json({

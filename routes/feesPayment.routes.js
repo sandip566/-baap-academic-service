@@ -711,4 +711,20 @@ router.get("/fees-summary/:studentId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/studentClearansDetails/:groupId", async (req, res) => {
+    try {
+      const groupId = req.params.groupId;
+      const addmissionId = req.query.addmissionId;
+      if (!addmissionId) {
+        return res.status(400).json({ error: 'Missing required parameter: addmissionId' });
+      }
+      const serviceResponse = await service.calculateTotalFeeAndRemaining(groupId, addmissionId);
+      res.json(serviceResponse);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+  
 module.exports = router;
