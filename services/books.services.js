@@ -311,5 +311,13 @@ class BooksService extends BaseService {
             return { error: "Internal server error" };
         }
     }
+    async getShelfId(bookId) {
+        try {
+            const book = await booksModel.findOne({ bookId: bookId })
+            return book.shelfId;
+        } catch (error) {
+            console.log()
+        }
+    }
 }
 module.exports = new BooksService(booksModel, "books");
