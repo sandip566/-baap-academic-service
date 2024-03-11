@@ -4,7 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/shelf.services");
 const requestResponseHelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const validationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const shelfModel=require("../schema/shelf.schema")
+const shelfModel = require("../schema/shelf.schema")
 
 router.post(
   "/",
@@ -15,36 +15,47 @@ router.post(
     }
     const shelfId = +Date.now();
     req.body.shelfId = shelfId;
+    if (req.body.capacity !== undefined) {
+      req.body.availableCapacity = req.body.capacity;
+    }
+    req.body.currentInventory = req.body.capacity - req.body.availableCapacity;
     const serviceResponse = await service.create(req.body);
     requestResponseHelper.sendResponse(res, serviceResponse);
   }
 );
 
 router.get("/all", async (req, res) => {
-  const serviceResponse = await service.getAllByCriteria({});
+  const pagination = {
+    pageNumber: req.query.pageNumber || 1,
+    pageSize: 10,
+  };
+  const { pageNumber, pageSize, ...query } = req.query;
+  const serviceResponse = await service.getAllByCriteria(query, pagination);
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
   try {
-      const groupId = req.params.groupId;
-      const criteria = {
-          shelfName: req.query.shelfName,
-          search: req.query.search,
-          locationIdentifier: req.query.locationIdentifier,
-      };
-      const searchFilter = service.getAllDataByGroupId(groupId, criteria);
-      const shelf = await shelfModel.find(searchFilter);
-      res.json({
-        status:"success",
-        data:{
-          items:shelf,
-          totalItemsCount:shelf.length
+    const groupId = req.params.groupId;
+    const criteria = {
+      shelfName: req.query.shelfName,
+      shelfType: req.query.shelfType,
+      location: req.query.location,
+      capacity: req.query.capacity,
+      search: req.query.search
+    };
+    const searchFilter = service.getAllDataByGroupId(groupId, criteria);
+    const shelf = await shelfModel.find(searchFilter);
+    res.json({
+      status: "success",
+      data: {
+        items: shelf,
+        totalItemsCount: shelf.length
 
-        }
-      });
+      }
+    });
   } catch (err) {
-      console.error(err);
-      res.status(500).send('Server Error');
+    console.error(err);
+    res.status(500).send('Server Error');
   }
 });
 
@@ -82,6 +93,36 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
   }
 });
 
+router.get("/totalCount", async (req, res) => {
+  try {
+    const totalCount = await shelfModel.countDocuments();
+    res.json({ total: totalCount });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/fullShelfs", async (req, res) => {
+  try {
+    const fullShelfs = await shelfModel.countDocuments({ availableCapacity: 0 });
+    res.json({ fullShelfs: fullShelfs });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
+router.get("/availableShelfs", async (req, res) => {
+  try {
+    const availableShelfs = await shelfModel.countDocuments({ availableCapacity: { $gt: 0 } });
+    res.json({ availableShelfs: availableShelfs });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
+
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponseHelper.sendResponse(res, serviceResponse);
@@ -92,8 +133,4 @@ router.put("/:id", async (req, res) => {
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
-  const serviceResponse = await service.getById(req.params.id);
-  requestResponseHelper.sendResponse(res, serviceResponse);
-});
 module.exports = router;

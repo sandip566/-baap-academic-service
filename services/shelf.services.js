@@ -11,20 +11,21 @@ class ShelfService extends BaseService {
             const searchFilter = {
                 groupId: groupId,
             };
-    
+
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
                     // Numeric search
                     searchFilter.$or = [
-
+                        { capacity: numericSearch }
                     ];
                 } else {
                     // Non-numeric search
                     searchFilter.$or = [
-                        { locationIdentifier: { $regex: criteria.search, $options: "i" } },
+                        { location: { $regex: criteria.search, $options: "i" } },
                         { shelfName: { $regex: criteria.search, $options: "i" } },
-                       
+                        { shelfType: { $regex: criteria.search, $options: "i" } }
+
                     ];
                 }
             }
