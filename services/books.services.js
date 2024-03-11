@@ -314,6 +314,7 @@ class BooksService extends BaseService {
     async getShelfId(bookId) {
         try {
             const book = await booksModel.findOne({ bookId: bookId })
+            console.log(book.shelfId)
             return book.shelfId;
         } catch (error) {
             console.log()

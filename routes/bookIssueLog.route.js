@@ -148,11 +148,6 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-// router.get("/:id", async (req, res) => {
-//     const serviceResponse = await service.getById(req.params.id);
-//     requestResponsehelper.sendResponse(res, serviceResponse);
-// });
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -217,26 +212,6 @@ router.put(
         }
     }
 );
-
-router.get("/issue-books-count",async (req,res)=>{
-    try{
-        const count=await bookIssueLogModel.countDocuments({returned:false});
-        res.json({count:count||0})
-    }
-    catch (error) {
-        console.log(error)
-    }
-})
-
-router.get("/return-books-count",async (req,res)=>{
-    try{
-        const count=await bookIssueLogModel.countDocuments({returned:true});
-        res.json({count:count||0})
-    }
-    catch (error) {
-        console.log(error)
-    }
-})
 
 router.get("/book-issues/overdue", async (req, res) => {
     const bookIssues = await service.fetchBookIssuesWithOverdue();

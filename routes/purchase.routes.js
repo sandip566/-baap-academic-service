@@ -14,11 +14,12 @@ router.post(
         }
         const purchaseId = +Date.now();
         req.body.purchaseId = purchaseId;
-        const items = req.body.items;
-        const totalAmount = items.reduce(
-            (acc, item) => acc + item.quantity * item.unitPrice,
-            0
-        );
+        // const items = req.body.items;
+        // const totalAmount = items.reduce(
+        //     (acc, item) => acc + item.quantity * item.unitPrice,
+        //     0
+        // );
+        const totalAmount=req.body.quantity*req.body.unitPrice;
         req.body.totalAmount = totalAmount;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);

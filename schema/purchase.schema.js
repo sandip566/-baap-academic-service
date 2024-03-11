@@ -28,19 +28,28 @@ const PurchaseSchema = new mongoose.Schema(
             type: String,
             enum: ["upi", "cash", "cheque"]
         },
-        items: [{
-            book: {
-                type: String
-            },
-            quantity: {
-                type: Number,
-                required: false
-            },
-            unitPrice: {
-                type: Number,
-                required: false
-            }
-        }],
+        // items: [{
+        //     book: {
+        //         type: String
+        //     },
+        //     quantity: {
+        //         type: Number,
+        //         required: false
+        //     },
+        //     unitPrice: {
+        //         type: Number,
+        //         required: false
+        //     }
+        // }],
+        book:{
+            type:String
+        },
+        quantity:{
+            type:String
+        },
+        unitPrice:{
+            type:Number
+        },
         orderStatus: {
             type: String,
             enum: ["Delivered", "Shipped", "Pending","Canceled","Processing"]

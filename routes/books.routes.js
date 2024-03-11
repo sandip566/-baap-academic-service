@@ -7,7 +7,8 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const booksModel = require("../schema/books.schema");
 const shelfModel = require("../schema/shelf.schema");
 const deparmentModel = require("../schema/department.schema");
-
+const BookIssueLogService=require("../services/bookIssueLog.service");
+const bookIssueLogService = require("../services/bookIssueLog.service");
 router.post(
     "/",
     checkSchema(require("../dto/books.dto")),
@@ -22,6 +23,9 @@ router.post(
         const shelf = await shelfModel.find({ shelfId });
         if (!shelf) {
             return res.status(404).json({ error: "Shelf not found" });
+        }
+        if (shelf.availableCapacity <= 0) {
+            return res.status(400).json({ error: "This shelf is not available for storing books. Available capacity is zero." });
         }
         await shelfModel.findOneAndUpdate(
             { shelfId: shelfId, availableCapacity: { $gt: 0 } },
@@ -209,29 +213,27 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-router.get("/totalAvailableBooks", async (req, res) => {
-    try {
-        const totalCount = await service.getTotalAvailableBooks();
-        res.json({ totalAvailableBooks: totalCount });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-router.get("/totalBooks", async (req, res) => {
-    try {
+router.get("/getCount",async(req,res)=>{
+    try{
+        const availableCount = await service.getTotalAvailableBooks();
         const books = await booksModel.find();
         let totalCount = 0;
         for (const book of books) {
             totalCount += parseInt(book.totalCopies) || 0;
         }
-        res.json({ total: totalCount });
-    } catch (error) {
+        const count=await bookIssueLogService.getCount();
+        res.json({
+            totalBooks:totalCount,
+            availableBooks:availableCount,
+            issuedBooks:count.bookIssues,
+            returnedBooks:count.returnedBooks
+        })
+    }catch (error) {
         console.error("Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-});
+
+})
 
 router.get("/book-details/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
