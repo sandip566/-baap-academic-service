@@ -5,61 +5,12 @@ const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
+const publisherModel=require("../schema/publisher.schema")
 
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    //    async getAllDataByGroupId(groupId, criteria,skip,limit) {
-
-    //             const searchFilter = {
-    //                 groupId: groupId,
-    //             };
-    //             if (criteria.search) {
-    //                 const numericSearch = parseInt(criteria.search);
-    //                 if (!isNaN(numericSearch)) {
-    //                     searchFilter.$or = [
-    //                         { ISBN: numericSearch },
-    //                         { shelfId: numericSearch },
-    //                         { price: numericSearch },
-    //                         { departmentId: numericSearch },
-    //                         { totalCount: numericSearch },
-    //                         { availableCount: numericSearch },
-    //                     ];
-    //                 } else {
-    //                     searchFilter.$or = [
-    //                         { status: { $regex: criteria.search, $options: "i" } },
-    //                         { name: { $regex: criteria.search, $options: "i" } },
-    //                         { author: { $regex: criteria.search, $options: "i" } },
-    //                         {
-    //                             publisher: {
-    //                                 $regex: criteria.search,
-    //                                 $options: "i",
-    //                             },
-    //                         },
-    //                        // { RFID: criteria.search },
-    //                     ];
-    //                 }
-    //             }
-    //             if (criteria.publisher){
-    //                 searchFilter.publisher=criteria.publisher
-    //             }
-    //             if (criteria.shelfId) {
-    //                 searchFilter.shelfId = criteria.shelfId;
-    //             }
-    //             if (criteria.departmentId) {
-    //                 searchFilter.department = criteria.departmentId;
-    //             }
-    //             if (criteria.departmentId) {
-    //                 searchFilter['departmentId.departmentName'] = { $regex: new RegExp(criteria.departmentName, 'i') };
-    //             }
-    //             console.log(searchFilter)
-    //             return searchFilter;
-    //     //     } catch (error) {
-    //     //         console.log(error);
-    //     //         throw error;
-    //     //     }
-    //     }
     async getAllDataByGroupId(groupId, criteria, skip, limit) {
         try {
             const searchFilter = {
@@ -67,6 +18,7 @@ class BooksService extends BaseService {
             };
             const departmentMap = await this.getDepartmentMap();
             const shelfMap = await this.getShelfMap();
+            const publisherMap=await this.getPublisherMap();
 
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -84,6 +36,7 @@ class BooksService extends BaseService {
                         departmentMap[criteria.search.trim().toLowerCase()];
                     const shelfId =
                         shelfMap[criteria.search.trim().toLowerCase()];
+                    const publisherId=publisherMap[criteria.search.trim().toLowerCase()]
                     searchFilter.$or = [
                         {
                             status: {
@@ -96,8 +49,9 @@ class BooksService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
+                        {publisherId:publisherId},
                         {
-                            publisher: {
+                            publisherName: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
@@ -106,7 +60,7 @@ class BooksService extends BaseService {
                             departmentName: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
-                        }, // Add departmentName search
+                        },
                         { shelfId: shelfId },
                         {
                             shelfName: {
@@ -146,11 +100,17 @@ class BooksService extends BaseService {
                     return { searchFilter: {}, shelfMap: {} };
                 }
             }
+            if(criteria.publisherName){
+                const publishernameLowercase=criteria.publisherName.toLowerCase();
+                const publisherId=publisherMap[publishernameLowercase];
+                if(publisherId){
+                    searchFilter.publisherId=publisherId;
+                }else{
+                    return { searchFilter: {}, publisherMap: {}};
+                }
+            }
 
-            // Remove departmentName from criteria as it's been processed
-            delete criteria.departmentName;
-
-            return { searchFilter, departmentMap };
+            return { searchFilter };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw new Error("An error occurred while processing the request.");
@@ -179,7 +139,6 @@ class BooksService extends BaseService {
             const shelves = await shelfModel.find();
             const shelfMap = {};
             shelves.forEach((shelf) => {
-                // Check if shelfName exists before trimming and converting to lowercase
                 if (shelf.shelfName) {
                     const shelfName = shelf.shelfName.trim().toLowerCase();
                     shelfMap[shelfName] = shelf.shelfId;
@@ -190,6 +149,20 @@ class BooksService extends BaseService {
             console.error("Error fetching shelf map:", error);
             throw new Error("An error occurred while fetching shelf map.");
         }
+    }
+    async getPublisherMap(){
+        const publishers=await shelfModel.find();
+        const publisherMap ={};
+        publishers.forEach((publisher)=>{
+         if(publisher.publisherName){
+          const publisherName =publisher.publisherName.trim().toLowerCase();
+          publisherMap[publisherName]=publisher.publisherId;
+         }
+        })
+        return publisherMap;
+    }catch(error){
+        console.error("Error fetching publisher map:", error);
+        throw new Error("An error occurred while fetching publisher map.");
     }
 
     async deleteBookById(bookId, groupId) {

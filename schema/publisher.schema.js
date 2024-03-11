@@ -10,7 +10,7 @@ const publisherSchema = new mongoose.Schema(
         publisherId:{
           type:Number
         },
-        name: {
+        publisherName: {
             type: String,
             required: false
         },
