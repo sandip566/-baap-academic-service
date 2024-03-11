@@ -19,12 +19,23 @@ router.post(
         if (req.body.totalCopies !== undefined) {
             req.body.availableCount = req.body.totalCopies;
         }
+        const shelfId = req.body.shelfId; // Assuming the shelfId is provided in the request body
+        const shelf = await shelfModel.find({ shelfId });
+        if (!shelf) {
+            return res.status(404).json({ error: "Shelf not found" });
+        }
+        await shelfModel.findOneAndUpdate(
+            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
+            { $inc: { availableCapacity: -1, currentInventory: 1 } },
+            { new: true }
+        );
         const bookId = +Date.now();
         req.body.bookId = bookId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 
 router.get("/all", async (req, res) => {
     const pagination = {
