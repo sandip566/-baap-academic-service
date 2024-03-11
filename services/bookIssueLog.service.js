@@ -122,5 +122,19 @@ class BookIssueLogService extends BaseService {
             console.log(error);
         }
     }
+    async getCount(){
+        try{
+            const bookIssues = await bookIssueLogModel.countDocuments({returned:false})
+            const returnedBooks=await bookIssueLogModel.countDocuments({returned:true});
+            const response={
+                bookIssues:bookIssues,
+                returnedBooks:returnedBooks
+            }
+            return response;
+        }
+        catch(error){
+            console.log(error);
+        }
+    }
 }
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");
