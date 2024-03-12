@@ -17,7 +17,8 @@ class feesPaymentService extends BaseService {
     async getRecoveryData(groupId, skip, limit) {
         return this.execute(async () => {
             let studentRecordCount=await StudentsAdmissionModel.find({groupId:groupId})
-          
+          let totalPaidAmountCount=0
+          let totalRemainingAmountCount=0
             let data = await this.model
                 .find({ groupId: groupId })
                 .skip(skip)
@@ -91,10 +92,24 @@ class feesPaymentService extends BaseService {
             });
 
             const finalServices = Object.values(lastServices);
+            totalPaidAmountCount = finalServices.reduce(
+                (total, course) => {
+                    return total + parseFloat(course.paidAmount || 0);
+                },
+                0
+            );
+            
+            totalRemainingAmountCount = finalServices.reduce(
+                (total, course) => {
+                    return total + parseFloat(course.remainingAmount || 0);
+                },
+                0
+            );
+            
 
             let response = {
-                totalPaidAmount: totalPaidAmount,
-                totalRemainingAmount: totalRemainingAmount,
+                totalPaidAmount: totalPaidAmountCount,
+                totalRemainingAmount: totalRemainingAmountCount,
                 // feesDefaulter: data,
                 //count:count,
                 servicesWithData: finalServices,
