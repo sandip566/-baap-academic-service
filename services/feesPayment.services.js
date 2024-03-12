@@ -384,6 +384,7 @@ class feesPaymentService extends BaseService {
                 let totalPaidAmount = 0;
                 let totalRemainingAmount = 0;
                 let totalCourseFee = 0;
+               let totalCourseFee1=0
                 formattedCoursePayments.forEach((course) => {
                     totalPaidAmount += course.totalPaidAmount || 0;
                     totalRemainingAmount += course.totalRemainingAmount || 0;
@@ -633,11 +634,18 @@ class feesPaymentService extends BaseService {
                         );
                     service.status = installmentStatus.status.isDue;
                 }
-
+                console.log(finalServices);
+                totalCourseFee1 = finalServices.reduce(
+                    (total, course) => {
+                        return total + parseFloat(course.courseFees || 0);
+                    },
+                    0
+                );
+                
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
-                    totalFees: totalCourseFee || 0,
+                    totalFees: totalCourseFee1 || 0,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
                     totalItemsCount: finalServices.length,
