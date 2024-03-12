@@ -107,7 +107,7 @@ router.put("/groupId/:groupId/publisherId/:publisherId", async (req, res) => {
             });
         } else {
             res.status(200).json({
-                updatebook,
+                updatePublisher,
                 message: "data update successfully",
             });
         }
