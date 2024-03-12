@@ -29,9 +29,15 @@ class ShelfService extends BaseService {
                     ];
                 }
             }
-            // if (criteria.shelfName) {
-            //     searchFilter.shelfName = { $regex: criteria.shelfName, $options: "i" };
-            // }
+            if (criteria.shelfName) {
+                searchFilter.shelfName = { $regex: criteria.shelfName, $options: "i" };
+            }
+            if(criteria.location){
+                searchFilter.location={$regex:criteria.location,$options: "i"};
+            }
+            if(criteria.shelfType){
+                searchFilter.shelfType={$regex:criteria.shelfType,$options:"i"};
+            }
             return searchFilter;
         } catch (error) {
             console.log(error);
