@@ -7,7 +7,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const booksModel = require("../schema/books.schema");
 const shelfModel = require("../schema/shelf.schema");
 const deparmentModel = require("../schema/department.schema");
-const BookIssueLogService=require("../services/bookIssueLog.service");
+const publisherModel=require("../schema/publisher.schema")
 const bookIssueLogService = require("../services/bookIssueLog.service");
 router.post(
     "/",
@@ -59,50 +59,6 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-// router.get("/all/getByGroupId/:groupId", async (req, res) => {
-//     try {
-//         const groupId = req.params.groupId;
-//         const criteria = {
-//             name: req.query.name,
-//             author: req.query.author,
-//             totalCount: req.query.totalCount,
-//             availableCount: req.query.availableCount,
-//             search: req.query.search,
-//             shelfId: req.query.shelfId,
-//             departmentId: req.query.departmentId,
-//             publisher: req.query.publisher,
-//             price: req.query.price,
-//             status: req.query.status,
-//             departmentName:req.query.departmentName
-//         };
-//         const page = parseInt(req.query.page) || 1;
-//         const limit = parseInt(req.query.limit) || 10;
-//         const skip = (page - 1) * limit;
-
-//         const searchFilter =await service.getAllDataByGroupId(groupId, criteria, skip, limit);
-//         const totalCount = await booksModel.countDocuments(searchFilter);
-//         const books = await booksModel.find(searchFilter)
-//             .skip(skip)
-//             .limit(limit);
-//         const populatedBooks = await Promise.all(
-//             books.map(async (book) => {
-//                 const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
-//                 const department = await deparmentModel.findOne({ departmentId: book.departmentId });
-//                 return { ...book._doc, shelf, department };
-//             })
-//         );
-//         res.json({
-//             status: "Success",
-//             data: {
-//                 items: populatedBooks,
-//             },
-//             totalCount:totalCount
-//         });
-//     } catch (err) {
-//         console.error(err);
-//         res.status(500).send("Server Error");
-//     }
-// });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
@@ -115,11 +71,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             search: req.query.search,
             shelfId: req.query.shelfId,
             departmentId: req.query.departmentId,
-            publisher: req.query.publisher,
+            publisherId: req.query.publisherId,
             price: req.query.price,
             status: req.query.status,
             shelfName: req.query.shelfName,
             departmentName: req.query.departmentName,
+            publisherName:req.query.publisherName
         };
 
         const page = parseInt(req.query.page) || 1;
@@ -127,6 +84,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const skip = (page - 1) * limit;
         const departmentMap = await service.getDepartmentMap();
         const shelfMap = await service.getShelfMap();
+        const publisherMap=await service.getPublisherMap();
 
         const { searchFilter } = await service.getAllDataByGroupId(
             groupId,
@@ -134,7 +92,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             skip,
             limit,
             departmentMap,
-            shelfMap
+            shelfMap,
+            publisherMap
         );
         const totalCount = await booksModel.countDocuments(searchFilter);
         const books = await booksModel
@@ -151,7 +110,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 const department = await deparmentModel.findOne({
                     departmentId: book.departmentId,
                 });
-                return { ...book._doc, shelf, department };
+                const publisher =await publisherModel.findOne({
+                    publisherId:book.publisherId,
+                });
+                return { ...book._doc, shelf, department,publisher };
             })
         );
 

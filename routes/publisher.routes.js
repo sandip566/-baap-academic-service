@@ -35,7 +35,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
-            name: req.query.name,
+            publisherName: req.query.publisherName,
             publisherId: req.query.publisherId,
             phoneNumber: req.query.phoneNumber,
             search:req.query.search,
@@ -55,7 +55,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         );
         const totalCount = await publisherModel.countDocuments(searchFilter);
         const publisher = await publisherModel.find(searchFilter)
-            .find(searchFilter)
             .skip(skip)
             .limit(limit)
             .exec();
@@ -108,7 +107,7 @@ router.put("/groupId/:groupId/publisherId/:publisherId", async (req, res) => {
             });
         } else {
             res.status(200).json({
-                updatebook,
+                updatePublisher,
                 message: "data update successfully",
             });
         }
