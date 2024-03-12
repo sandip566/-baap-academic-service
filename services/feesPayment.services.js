@@ -16,6 +16,8 @@ class feesPaymentService extends BaseService {
     }
     async getRecoveryData(groupId, skip, limit) {
         return this.execute(async () => {
+            let studentRecordCount=await StudentsAdmissionModel.find({groupId:groupId})
+          
             let data = await this.model
                 .find({ groupId: groupId })
                 .skip(skip)
@@ -46,6 +48,7 @@ class feesPaymentService extends BaseService {
                     if (service.addmissionId) {
                         const feesTemplateId =
                             await StudentsAdmissionModel.findOne({
+                                groupId:groupId,
                                 addmissionId: service.addmissionId,
                             });
                         feesAdditionalData.addmissionId = feesTemplateId;
@@ -95,7 +98,7 @@ class feesPaymentService extends BaseService {
                 // feesDefaulter: data,
                 //count:count,
                 servicesWithData: finalServices,
-                StudentRecords: await this.model.countDocuments(data),
+                StudentRecords: studentRecordCount.length,
             };
             return response;
         });
@@ -606,9 +609,7 @@ class feesPaymentService extends BaseService {
                 
                 for (const serviceArray of servicesWithData) {
                     if (serviceArray.length > 0) {
-                        const addmissionId = serviceArray[0].addmissionId;
-
-                       
+                        const addmissionId = serviceArray[0].addmissionId;                      
                         const paidAmount = await fetchPaidAmount(addmissionId);
 
                         if (serviceArray.length == 1) {
