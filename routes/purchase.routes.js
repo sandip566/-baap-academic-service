@@ -16,11 +16,12 @@ router.post(
         }
         const purchaseId = +Date.now();
         req.body.purchaseId = purchaseId;
-        const items = req.body.items;
-        const totalAmount = items.reduce(
-            (acc, item) => acc + item.quantity * item.unitPrice,
-            0
-        );
+        // const items = req.body.items;
+        // const totalAmount = items.reduce(
+        //     (acc, item) => acc + item.quantity * item.unitPrice,
+        //     0
+        // );
+        const totalAmount=req.body.quantity*req.body.unitPrice;
         req.body.totalAmount = totalAmount;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
@@ -117,7 +118,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             limit,
         );
         const totalCount = await PurchaseModel.countDocuments(searchFilter);
-        const publisher = await PurchaseModel.find(searchFilter)
+        const purchase = await PurchaseModel.find(searchFilter)
             .skip(skip)
             .limit(limit)
             .exec();
@@ -125,7 +126,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.json({
             status: "Success",
             data: {
-                items: publisher,
+                items: purchase,
                 totalCount: totalCount,
             },
         });
