@@ -93,35 +93,10 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
   }
 });
 
-router.get("/totalCount", async (req, res) => {
-  try {
-    const totalCount = await shelfModel.countDocuments();
-    res.json({ total: totalCount });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.get("/fullShelfs", async (req, res) => {
-  try {
-    const fullShelfs = await shelfModel.countDocuments({ availableCapacity: 0 });
-    res.json({ fullShelfs: fullShelfs });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.get("/availableShelfs", async (req, res) => {
-  try {
-    const availableShelfs = await shelfModel.countDocuments({ availableCapacity: { $gt: 0 } });
-    res.json({ availableShelfs: availableShelfs });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
+router.get("/get-shelf-count",async(req,res)=>{
+  const serviceResponse=await service.getCount();
+  requestResponseHelper.sendResponse(res,serviceResponse)
+})
 
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);

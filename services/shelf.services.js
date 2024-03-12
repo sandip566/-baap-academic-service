@@ -55,5 +55,21 @@ class ShelfService extends BaseService {
             throw error;
         }
     }
+
+    async getCount(){
+        try {
+            const totalShelf=await ShelfModel.countDocuments();
+            const filledShelfs=await ShelfModel.countDocuments({ availableCapacity: 0 });
+            const availableShelfs=await ShelfModel.countDocuments({ availableCapacity: { $gt: 0 } });
+            const response={
+                totalShelf:totalShelf,
+                fulledShelf:filledShelfs,
+                availableShelfs:availableShelfs
+            }
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    }
 }
 module.exports = new ShelfService(ShelfModel, 'shelf');
