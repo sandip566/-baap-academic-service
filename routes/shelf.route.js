@@ -45,11 +45,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     };
     const searchFilter = service.getAllDataByGroupId(groupId, criteria);
     const shelf = await shelfModel.find(searchFilter);
+    const count=await service.getCount();
     res.json({
       status: "success",
       data: {
         items: shelf,
-        totalItemsCount: shelf.length
+        totalItemsCount: shelf.length,
+        count:count
 
       }
     });
@@ -92,11 +94,6 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
     res.status(500).json({ error: 'Internal Server Error' });
   }
 });
-
-router.get("/get-shelf-count",async(req,res)=>{
-  const serviceResponse=await service.getCount();
-  requestResponseHelper.sendResponse(res,serviceResponse)
-})
 
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
