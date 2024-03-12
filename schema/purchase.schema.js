@@ -45,7 +45,7 @@ const PurchaseSchema = new mongoose.Schema(
             type:String
         },
         quantity:{
-            type:String
+            type:Number
         },
         unitPrice:{
             type:Number
