@@ -40,7 +40,8 @@ const booksSchema = new mongoose.Schema(
             type:Number
         },
         publisherId:{
-            type:Number
+            type:Number,
+            required:false
         },
         departmentId:{
             type:Number,

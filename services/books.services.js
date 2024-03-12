@@ -5,7 +5,7 @@ const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
-const publisherModel=require("../schema/publisher.schema")
+const publisherModel = require("../schema/publisher.schema")
 
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
@@ -18,7 +18,7 @@ class BooksService extends BaseService {
             };
             const departmentMap = await this.getDepartmentMap();
             const shelfMap = await this.getShelfMap();
-            const publisherMap=await this.getPublisherMap();
+            const publisherMap = await this.getPublisherMap();
 
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -36,7 +36,8 @@ class BooksService extends BaseService {
                         departmentMap[criteria.search.trim().toLowerCase()];
                     const shelfId =
                         shelfMap[criteria.search.trim().toLowerCase()];
-                    const publisherId=publisherMap[criteria.search.trim().toLowerCase()]
+                    const publisherId =
+                        publisherMap[criteria.search.trim().toLowerCase()]
                     searchFilter.$or = [
                         {
                             status: {
@@ -49,7 +50,7 @@ class BooksService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-                        {publisherId:publisherId},
+                        { publisherId: publisherId },
                         {
                             publisherName: {
                                 $regex: new RegExp(criteria.search, "i"),
@@ -71,13 +72,11 @@ class BooksService extends BaseService {
                 }
             }
 
-            if (criteria.publisher) {
-                searchFilter.publisher = {
-                    $regex: new RegExp(criteria.publisher, "i"),
-                };
-            }
-
-            // const departmentMap = await this.getDepartmentMap();
+            // if (criteria.publisher) {
+            //     searchFilter.publisher = {
+            //         $regex: new RegExp(criteria.publisher, "i"),
+            //     };
+            // }
 
             if (criteria.departmentName) {
                 const departmentNameLowerCase =
@@ -100,15 +99,17 @@ class BooksService extends BaseService {
                     return { searchFilter: {}, shelfMap: {} };
                 }
             }
-            if(criteria.publisherName){
-                const publishernameLowercase=criteria.publisherName.toLowerCase();
-                const publisherId=publisherMap[publishernameLowercase];
-                if(publisherId){
-                    searchFilter.publisherId=publisherId;
-                }else{
-                    return { searchFilter: {}, publisherMap: {}};
+            if (criteria.publisherName) {
+                const publishernameLowercase = criteria.publisherName.toLowerCase();
+                const publisherId = publisherMap[publishernameLowercase];
+                if (publisherId) {
+                    searchFilter.publisherId = publisherId;
+                } else {
+                    return { searchFilter: {}, publisherMap: {} };
                 }
             }
+            console.log(publisherMap)
+
 
             return { searchFilter };
         } catch (error) {
@@ -150,17 +151,17 @@ class BooksService extends BaseService {
             throw new Error("An error occurred while fetching shelf map.");
         }
     }
-    async getPublisherMap(){
-        const publishers=await shelfModel.find();
-        const publisherMap ={};
-        publishers.forEach((publisher)=>{
-         if(publisher.publisherName){
-          const publisherName =publisher.publisherName.trim().toLowerCase();
-          publisherMap[publisherName]=publisher.publisherId;
-         }
+    async getPublisherMap() {
+        const publishers = await publisherModel.find();
+        const publisherMap = {};
+        publishers.forEach((publisher) => {
+            if (publisher.publisherName) {
+                const publisherName = publisher.publisherName.trim().toLowerCase();
+                publisherMap[publisherName] = publisher.publisherId;
+            }
         })
         return publisherMap;
-    }catch(error){
+    } catch(error) {
         console.error("Error fetching publisher map:", error);
         throw new Error("An error occurred while fetching publisher map.");
     }
