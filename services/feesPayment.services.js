@@ -16,6 +16,9 @@ class feesPaymentService extends BaseService {
     }
     async getRecoveryData(groupId, skip, limit) {
         return this.execute(async () => {
+            let studentRecordCount=await StudentsAdmissionModel.find({groupId:groupId})
+          let totalPaidAmountCount=0
+          let totalRemainingAmountCount=0
             let data = await this.model
                 .find({ groupId: groupId })
                 .skip(skip)
@@ -46,6 +49,7 @@ class feesPaymentService extends BaseService {
                     if (service.addmissionId) {
                         const feesTemplateId =
                             await StudentsAdmissionModel.findOne({
+                                groupId:groupId,
                                 addmissionId: service.addmissionId,
                             });
                         feesAdditionalData.addmissionId = feesTemplateId;
@@ -88,14 +92,28 @@ class feesPaymentService extends BaseService {
             });
 
             const finalServices = Object.values(lastServices);
+            totalPaidAmountCount = finalServices.reduce(
+                (total, course) => {
+                    return total + parseFloat(course.paidAmount || 0);
+                },
+                0
+            );
+            
+            totalRemainingAmountCount = finalServices.reduce(
+                (total, course) => {
+                    return total + parseFloat(course.remainingAmount || 0);
+                },
+                0
+            );
+            
 
             let response = {
-                totalPaidAmount: totalPaidAmount,
-                totalRemainingAmount: totalRemainingAmount,
+                totalPaidAmount: totalPaidAmountCount,
+                totalRemainingAmount: totalRemainingAmountCount,
                 // feesDefaulter: data,
                 //count:count,
                 servicesWithData: finalServices,
-                StudentRecords: await this.model.countDocuments(data),
+                StudentRecords: studentRecordCount.length,
             };
             return response;
         });
@@ -381,6 +399,7 @@ class feesPaymentService extends BaseService {
                 let totalPaidAmount = 0;
                 let totalRemainingAmount = 0;
                 let totalCourseFee = 0;
+               let totalCourseFee1=0
                 formattedCoursePayments.forEach((course) => {
                     totalPaidAmount += course.totalPaidAmount || 0;
                     totalRemainingAmount += course.totalRemainingAmount || 0;
@@ -606,9 +625,7 @@ class feesPaymentService extends BaseService {
                 
                 for (const serviceArray of servicesWithData) {
                     if (serviceArray.length > 0) {
-                        const addmissionId = serviceArray[0].addmissionId;
-
-                       
+                        const addmissionId = serviceArray[0].addmissionId;                      
                         const paidAmount = await fetchPaidAmount(addmissionId);
 
                         if (serviceArray.length == 1) {
@@ -632,11 +649,18 @@ class feesPaymentService extends BaseService {
                         );
                     service.status = installmentStatus.status.isDue;
                 }
-
+                console.log(finalServices);
+                totalCourseFee1 = finalServices.reduce(
+                    (total, course) => {
+                        return total + parseFloat(course.courseFees || 0);
+                    },
+                    0
+                );
+                
                 let response = {
                     coursePayments: formattedCoursePayments,
                     servicesWithData: [finalServices],
-                    totalFees: totalCourseFee || 0,
+                    totalFees: totalCourseFee1 || 0,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
                     totalItemsCount: finalServices.length,
