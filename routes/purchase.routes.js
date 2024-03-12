@@ -4,6 +4,8 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/purchase.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const publisherModel = require("../schema/publisher.schema");
+const PurchaseModel = require("../schema/purchase.schema");
 
 router.post(
     "/",
@@ -92,16 +94,45 @@ router.put("/groupId/:groupId/purchaseId/:purchaseId", async (req, res) => {
 });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        vendorId: req.query.vendorId,
-        purchaseId: req.query.purchaseId,
-    };
-    const serviceResponse = await service.getAllDataByGroupId(
-        groupId,
-        criteria
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            vendorId: req.query.vendorId,
+            purchaseId: req.query.purchaseId,
+            search:req.query.search,
+            orderStatus:req.query.orderStatus,
+            book:req.query.book,
+            unitPrice:req.query.unitPrice,
+            quantity:req.query.quantity
+          
+        };
 
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100;
+        const skip = (page - 1) * limit;
+
+        const { searchFilter } = await service.getAllDataByGroupId(
+            groupId,
+            criteria,
+            skip,
+            limit,
+        );
+        const totalCount = await PurchaseModel.countDocuments(searchFilter);
+        const purchase = await PurchaseModel.find(searchFilter)
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        res.json({
+            status: "Success",
+            data: {
+                items: purchase,
+                totalCount: totalCount,
+            },
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
 module.exports = router;
