@@ -57,7 +57,7 @@ class PurchaseService extends BaseService {
           }
           if(criteria.orderStatus){
             searchFilter.orderStatus={
-                $regex:new RegExp(criteria.book, "i")
+                $regex:new RegExp(criteria.orderStatus, "i")
             }
           }
             if (criteria.book) {
