@@ -176,11 +176,6 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-router.get("/getCount",async(req,res)=>{
-    const serviceResponse=await service.getBooksCount();
-    requestResponsehelper.sendResponse(res,serviceResponse)
-
-})
 
 router.get("/book-details/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
