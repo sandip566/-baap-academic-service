@@ -45,11 +45,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     };
     const searchFilter = service.getAllDataByGroupId(groupId, criteria);
     const shelf = await shelfModel.find(searchFilter);
+    const count=await service.getCount();
     res.json({
       status: "success",
       data: {
         items: shelf,
-        totalItemsCount: shelf.length
+        totalItemsCount: shelf.length,
+        count:count
 
       }
     });
@@ -90,36 +92,6 @@ router.put("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Internal Server Error' });
-  }
-});
-
-router.get("/totalCount", async (req, res) => {
-  try {
-    const totalCount = await shelfModel.countDocuments();
-    res.json({ total: totalCount });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.get("/fullShelfs", async (req, res) => {
-  try {
-    const fullShelfs = await shelfModel.countDocuments({ availableCapacity: 0 });
-    res.json({ fullShelfs: fullShelfs });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
-
-router.get("/availableShelfs", async (req, res) => {
-  try {
-    const availableShelfs = await shelfModel.countDocuments({ availableCapacity: { $gt: 0 } });
-    res.json({ availableShelfs: availableShelfs });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
