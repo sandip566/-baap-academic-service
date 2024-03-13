@@ -13,8 +13,8 @@ const PurchaseSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        customerId: {
-            type: Number,
+        customerName: {
+            type: String,
             required: false
         },
         purchaseDate: {
