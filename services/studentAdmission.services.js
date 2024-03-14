@@ -1588,7 +1588,7 @@ console.log(response);
 
     async getTemplateIDbyCourseName(name) {
         let name1 = await feesTemplateModel.findOne({ name: name });
-        const TemplateId = name1.feesTemplateId;
+        const TemplateId = name1?.feesTemplateId;
         return {
             TemplateId,
         };
