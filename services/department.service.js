@@ -18,7 +18,8 @@ class DepartmentService extends BaseService {
                 if (!isNaN(numericSearch)) {
                  
                     searchFilter.$or = [
-
+                        { academicYearId: numericSearch },
+                        {departmentId:numericSearch}
                     ];
                 } else {
                     
@@ -29,9 +30,7 @@ class DepartmentService extends BaseService {
                     ];
                 }
             }
-            if (criteria.academicYearId) {
-                searchFilter.academicYearId = criteria.academicYearId;
-            }
+            //if (criteria.academicYearId) query.academicYearId = criteria.academicYearId;
             return searchFilter;
         } catch (error) {
             console.log(error);

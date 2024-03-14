@@ -49,15 +49,14 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.check
 });
 
 
-router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"])
-
- ,async (req, res) => {
+router.get("/all/getByGroupId/:groupId" , //TokenService.checkPermission(["EMD1"]),
+async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
             departmentName: req.query.departmentName,
             search: req.query.search,
-            departmentHead:req.query.departmentHead,
+            //departmentHead:req.query.departmentHead,
             academicYearId:req.query.academicYearId
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
