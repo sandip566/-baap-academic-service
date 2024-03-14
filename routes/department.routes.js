@@ -49,9 +49,8 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.check
 });
 
 
-router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"])
-
- ,async (req, res) => {
+router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"]),
+async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
