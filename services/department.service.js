@@ -18,7 +18,7 @@ class DepartmentService extends BaseService {
                 if (!isNaN(numericSearch)) {
                  
                     searchFilter.$or = [
-                        { academicYearId: numericSearch },
+                        {academicYearId:numericSearch},
                         {departmentId:numericSearch}
                     ];
                 } else {

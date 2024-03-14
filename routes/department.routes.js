@@ -56,7 +56,7 @@ async (req, res) => {
         const criteria = {
             departmentName: req.query.departmentName,
             search: req.query.search,
-            //departmentHead:req.query.departmentHead,
+            departmentHead:req.query.departmentHead,
             academicYearId:req.query.academicYearId
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
