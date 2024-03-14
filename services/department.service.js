@@ -22,7 +22,6 @@ class DepartmentService extends BaseService {
                         {departmentId:numericSearch}
                     ];
                 } else {
-                    
                     searchFilter.$or = [
                         { departmentHead: { $regex: criteria.search, $options: "i" } },
                         { departmentName: { $regex: criteria.search, $options: "i" } },
@@ -30,7 +29,11 @@ class DepartmentService extends BaseService {
                     ];
                 }
             }
-            //if (criteria.academicYearId) query.academicYearId = criteria.academicYearId;
+
+            if (criteria.academicYearId) {
+                searchFilter.academicYearId = criteria.academicYearId;
+            }
+            
             return searchFilter;
         } catch (error) {
             console.log(error);
