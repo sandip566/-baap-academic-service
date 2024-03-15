@@ -3,7 +3,7 @@ const bookIssueLogSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: true
         },
         labmembershipNumber: {
             type: Number,

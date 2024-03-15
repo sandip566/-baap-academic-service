@@ -175,15 +175,16 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-router.get("/getCount",async(req,res)=>{
+router.get("/getCount/groupId/:groupId",async(req,res)=>{
     try{
-        const availableCount = await service.getTotalAvailableBooks();
+        groupId = req.params.groupId;
+        const availableCount = await service.getTotalAvailableBooks(groupId);
         const books = await booksModel.find();
         let totalCount = 0;
         for (const book of books) {
             totalCount += parseInt(book.totalCopies) || 0;
         }
-        const count=await bookIssueLogService.getCount();
+        const count=await bookIssueLogService.getCount(groupId);
         res.json({
             totalBooks:totalCount,
             availableBooks:availableCount,
