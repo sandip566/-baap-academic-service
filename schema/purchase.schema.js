@@ -26,7 +26,7 @@ const PurchaseSchema = new mongoose.Schema(
         },
         paymentMethod: {
             type: String,
-            enum: ["upi", "cash", "cheque"]
+            enum: ["Upi", "Cash", "Cheque"]
         },
         // items: [{
         //     book: {
