@@ -25,12 +25,13 @@ router.get("/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo", 
     }
 
     const feesTemplateId = req.params.feesTemplateId;
+    console.log(feesTemplateId);
     const installmentNo = parseInt(req.params.installmentNo);
 
     try {
         const installmentDetails = [];
         const serviceResponse = await service.getByfeesTemplateId(feesTemplateId);
-
+console.log(serviceResponse);
         if (serviceResponse.data) {
             const totalFees = serviceResponse.data.totalFees;
             const installmentAmount = Math.round(totalFees / installmentNo);
