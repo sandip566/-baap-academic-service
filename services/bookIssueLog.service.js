@@ -89,6 +89,7 @@ class BookIssueLogService extends BaseService {
                     const book = books.find(
                         (book) => book.bookId === bookIssue.bookId
                     );
+                    bookIssueLogModel.updateMany({ _id: bookIssue._id }, { $set: { isFine: true } });
                     let bookIssueDate = bookIssue.issueDate;
                     var response = {
                         bookIssueDate,

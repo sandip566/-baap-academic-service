@@ -116,12 +116,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 return { ...book._doc, shelf, department,publisher };
             })
         );
-
+        const count=await service.getBooksCount();
         res.json({
             status: "Success",
             data: {
                 items: populatedBooks,
                 totalCount: totalCount,
+                booksCount:count
             },
         });
     } catch (err) {
@@ -175,28 +176,6 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-router.get("/getCount/groupId/:groupId",async(req,res)=>{
-    try{
-        groupId = req.params.groupId;
-        const availableCount = await service.getTotalAvailableBooks(groupId);
-        const books = await booksModel.find();
-        let totalCount = 0;
-        for (const book of books) {
-            totalCount += parseInt(book.totalCopies) || 0;
-        }
-        const count=await bookIssueLogService.getCount(groupId);
-        res.json({
-            totalBooks:totalCount,
-            availableBooks:availableCount,
-            issuedBooks:count.bookIssues,
-            returnedBooks:count.returnedBooks
-        })
-    }catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-
-})
 
 router.get("/book-details/:groupId", async (req, res) => {
     const groupId = req.params.groupId;

@@ -13,8 +13,8 @@ const PurchaseSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        customerId: {
-            type: Number,
+        customerName: {
+            type: String,
             required: false
         },
         purchaseDate: {
@@ -26,7 +26,7 @@ const PurchaseSchema = new mongoose.Schema(
         },
         paymentMethod: {
             type: String,
-            enum: ["upi", "cash", "cheque"]
+            enum: ["Upi", "Cash", "Cheque"]
         },
         // items: [{
         //     book: {

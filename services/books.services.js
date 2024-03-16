@@ -6,7 +6,7 @@ const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
 const publisherModel = require("../schema/publisher.schema")
-
+const bookIssueLogService=require("../services/bookIssueLog.service")
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -186,18 +186,29 @@ class BooksService extends BaseService {
             throw error;
         }
     }
-    async getTotalAvailableBooks(groupId) {
+    async getBooksCount() {
         try {
             const books = await booksModel.find({groupId:groupId});
             if (!books) {
                 console.log("No books found in the database.");
                 return 0;
             }
-            let totalCount = 0;
+            let totalAvailableCount = 0;
+            let totalCount=0;
             for (const book of books) {
-                totalCount += book.availableCount || 0;
+                totalAvailableCount += book.availableCount || 0;
             }
-            return totalCount;
+            for (const book of books) {
+                totalCount += book.totalCopies || 0;
+            }
+            const count=await bookIssueLogService.getCount();
+            const response={
+                totalCount:totalCount,
+                totalAvailableCount:totalAvailableCount,
+                totalIssuedBooks:count.bookIssues,
+                totalReturnedBooks:count.returnedBooks
+            }
+            return response;
         } catch (error) {
             console.error("Error in getTotalAvailableBooks:", error);
             throw error;
