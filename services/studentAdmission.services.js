@@ -14,6 +14,8 @@ const categoryModel=require("../schema/categories.schema")
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 
 const FeesPaymentModel = require("../schema/feesPayment.schema");
+const CategoriesModel = require("../schema/categories.schema");
+const AcademicYearModel = require("../schema/academicyear.schema");
 
 class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -1399,6 +1401,16 @@ console.log(response);
                     religionName,
                     groupId
                 );
+                const casteName = data.caste;
+                const { categoriseId } = await this.getCategoryId(
+                    casteName,
+                    groupId
+                );
+                const academicYear = data.academicYear;
+                const { academicYearId } = await this.getAcademicYear(
+                    academicYear,
+                    groupId
+                );
                 const name = data.feesTemplateName;
                 const { TemplateId } = await this.getTemplateIDbyCourseName(
                     name
@@ -1428,9 +1440,9 @@ console.log(response);
                 const studentAdmissionId =
                     Date.now() + Math.floor(Math.random() * 1000000);
                 const query = {
-                    studentAdmissionId: studentAdmissionId,
-                    academicYear: data.adcedemicYear,
-                    caste: data.caste,
+                    addmissionId: studentAdmissionId,
+                    academicYear: academicYearId,
+                    caste: categoriseId,
                     groupId: data.groupId,
                     dateOfBirth: data.dateOfBirth,
                     document: [data.document],
@@ -1445,8 +1457,8 @@ console.log(response);
                     password: data.password,
                     phoneNumber: phoneNumber,
                     profile_img: data.profile_img,
-                    religion: data.religion,
-                    religionId: religionId,
+                    // religion: data.religion,
+                    religion: religionId,
                     roleId: data.roleId,
                     title: data.title,
                     userId: data.userId,
@@ -1484,12 +1496,12 @@ console.log(response);
                             public_profile_url: data.securitySettings_public_profile_url,
                         },
                     ],
-                    courseDetails: {
+                    courseDetails: [{
                         course_id: courseId,
                         class_id: classId,
                         division_id: divisionId,
                         subjects: data.subjects.split(","),
-                    },
+                    }],
                     feesDetails: [
                         {
                             feesTemplateId: TemplateId,
@@ -1585,10 +1597,56 @@ console.log(response);
             religionId,
         };
     }
+    async getCategoryId(name, groupId) {
+        name = name;
+        groupId = groupId;
+        console.log(
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            name,
+            groupId
+        );
+        let casteName = await CategoriesModel.findOne({
+            name: { $regex: new RegExp(name, "i") },
+            groupId: groupId,
+        });
+
+        if (!casteName) {
+            throw new Error(`caste with provided criteria not found`);
+        }
+
+       
+        const categoriseId = casteName.categoriseId;
+        return {
+            categoriseId,
+        };
+    }
+    async getAcademicYear(year, groupId) {
+        year = year;
+        groupId = groupId;
+        console.log(
+            "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            year,
+            groupId
+        );
+        let academicYearName = await AcademicYearModel.findOne({
+            year: { $regex: new RegExp(year, "i") },
+            groupId: groupId,
+        });
+
+        if (!academicYearName) {
+            throw new Error(`academicYear with provided criteria not found`);
+        }
+
+       
+        const academicYearId = academicYearName.academicYearId;
+        return {
+            academicYearId,
+        };
+    }
 
     async getTemplateIDbyCourseName(name) {
         let name1 = await feesTemplateModel.findOne({ name: name });
-        const TemplateId = name1.feesTemplateId;
+        const TemplateId = name1?.feesTemplateId;
         return {
             TemplateId,
         };

@@ -188,7 +188,7 @@ class BooksService extends BaseService {
     }
     async getBooksCount() {
         try {
-            const books = await booksModel.find();
+            const books = await booksModel.find({groupId:groupId});
             if (!books) {
                 console.log("No books found in the database.");
                 return 0;

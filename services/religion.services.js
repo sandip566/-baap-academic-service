@@ -6,8 +6,8 @@ class Service extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getByCourseIdAndGroupId(name) {
-        const result = await this.model.findOne({ religion: name });
+    async getByCourseIdAndGroupId(groupId,name) {
+        const result = await this.model.findOne({groupId:groupId, religion: name });
         return new ServiceResponse({
             data: result,
         });

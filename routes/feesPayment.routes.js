@@ -544,7 +544,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
         criteria,
         // skip,
         page,
-        limit
+        limit  
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

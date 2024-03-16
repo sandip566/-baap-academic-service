@@ -123,10 +123,10 @@ class BookIssueLogService extends BaseService {
             console.log(error);
         }
     }
-    async getCount(){
+    async getCount(groupId){
         try{
-            const bookIssues = await bookIssueLogModel.countDocuments({returned:false})
-            const returnedBooks=await bookIssueLogModel.countDocuments({returned:true});
+            const bookIssues = await bookIssueLogModel.countDocuments({groupId:groupId,returned:false})
+            const returnedBooks=await bookIssueLogModel.countDocuments({groupId:groupId,returned:true});
             const response={
                 bookIssues:bookIssues,
                 returnedBooks:returnedBooks
