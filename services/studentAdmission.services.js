@@ -907,6 +907,7 @@ console.log(response);
             // console.log(courseIds);
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
+                
 
             });
             let coursePayments = {};
