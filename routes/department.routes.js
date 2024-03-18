@@ -34,11 +34,12 @@ router.get("/all", async (req, res) => {
 
 router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.checkPermission(["EMD4"]), async (req, res) => {
     try {
-        const departmentId = req.params.departmentId;
+        
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(departmentId, groupId);
+        const departmentId = req.params.departmentId;
+        const Data = await service.deleteByDataId(groupId,departmentId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(404).json({ error: 'Department already exist for the provided course' });
         } else {
             res.status(201).json(Data);
         }

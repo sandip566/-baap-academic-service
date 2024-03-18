@@ -95,9 +95,10 @@ router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermissi
             courseId: courseId,
             groupId: groupId,
         });
+        
         if (!courseData) {
             res.status(404).json({
-                error: "course data not found to delete",
+                error: "Course already exist for the provided course.",
             });
         } else {
             res.status(201).json(courseData);
