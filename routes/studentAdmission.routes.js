@@ -366,6 +366,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
             // phoneNumber: req.query.phoneNumber,
+            academicYear:req.query.academicYear,
             firstName: req.query.firstName,
             phoneNumber: req.query.phoneNumber,
             lastName: req.query.lastName,
