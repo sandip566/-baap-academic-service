@@ -323,7 +323,7 @@ class StudentsAdmmisionService extends BaseService {
                                             );
                                             if (!isNaN(classId)) {
                                                 const class_id =
-                                                    await DivisionModel.findOne(
+                                                    await ClassModel.findOne(
                                                         {
                                                             classId: classId,
                                                         }
@@ -369,7 +369,7 @@ class StudentsAdmmisionService extends BaseService {
                                             }
                                         }
 
-                                        return {
+                                        return { 
                                             ...courseDetail,
                                             ...additionalData,
                                         };
@@ -761,7 +761,7 @@ async getfeesPayment(groupId, query) {
                                             division_id;
                                     }
                                     return {
-                                        courseName: course_id?.courseName,
+                                        courseName: course_id?.CourseName,
                                         courseFee: course_id?.fees,
                                         className: class_id?.name,
                                         divisionName: division_id?.Name,
@@ -1551,10 +1551,11 @@ console.log(response);
             const courseId = course ? course.courseId : null;
 
             const classInfo = await ClassModel.findOne({
+                // courseId:course.courseId,
                 groupId: groupId,
                 name: className,
             });
-
+console.log("yyyyyyyyyyyyyyyyyyyyyy",classInfo);
             const classId = classInfo ? classInfo.classId : null;
 
             const divisionInfo = await DivisionModel.findOne({
