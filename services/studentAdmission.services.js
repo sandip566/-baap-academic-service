@@ -323,7 +323,7 @@ class StudentsAdmmisionService extends BaseService {
                                             );
                                             if (!isNaN(classId)) {
                                                 const class_id =
-                                                    await DivisionModel.findOne(
+                                                    await ClassModel.findOne(
                                                         {
                                                             classId: classId,
                                                         }
@@ -880,7 +880,7 @@ async getfeesPayment(groupId, query) {
                 totalItemsCount: filteredData.length,
             },
         };
-console.log(response);
+
         return response;
     } catch (error) {
         console.error("Error:", error);
@@ -907,7 +907,7 @@ console.log(response);
             // console.log(courseIds);
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
-                
+
 
             });
             let coursePayments = {};
