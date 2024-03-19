@@ -24,10 +24,10 @@ class feesPaymentService extends BaseService {
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
-                .find({ groupId: groupId,academicYear: academicYear })
+                .find({ groupId: groupId,academicYear: academicYear,isShowInAccounting: true  })
                 .skip(skip)
                 .limit(limit)
-                .exec();
+                .exec();    
             //const count = await .countDocuments(data);
             const totalPaidAmount = data.reduce((total, item) => {
                 if (item.paidAmount) {
@@ -138,7 +138,7 @@ class feesPaymentService extends BaseService {
                 });
 
                 let feesData = await this.model
-                    .find({ groupId: groupId })
+                    .find({ groupId: groupId,isShowInAccounting: true })
                     .skip(skip)
                     .limit(limit);
 
@@ -703,11 +703,12 @@ class feesPaymentService extends BaseService {
         });
     }
 
-    async getByAdmissionAndEmpId(addmissionId, empId) {
+    async getByAdmissionAndEmpId(addmissionId,feesDetailsId, empId) {
         return this.execute(() => {
             return this.model
                 .findOne({
                     addmissionId: addmissionId,
+                    feesDetailsId:feesDetailsId,
                     empId: empId,
                 })
                 .sort({ _id: -1 });

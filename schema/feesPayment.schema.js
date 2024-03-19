@@ -46,10 +46,10 @@ const feesPaymentSchema = new mongoose.Schema(
         // paidAmount: {
         //     type: Number,
         // },
-        // installmentId: {
-        //     type:Number,
-        //     required: false
-        // },
+        installmentId: {
+            type:Number,
+            required: false
+        },
         // paymentDate: {
         //     type: Date,
         // },

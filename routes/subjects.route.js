@@ -12,7 +12,7 @@ router.post(
     if (ValidationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const existingRecord = await service.getBySubjectIdAndGroupId(req.body.groupId, req.body.name);
+    const existingRecord = await service.getBySubjectIdAndGroupId(req.body.groupId, req.body.name,req.body.classId);
     console.log(existingRecord);
     if (existingRecord.data) {
       return res.status(404).json({ error: "Name,Code With The Same GroupId Already Exists." });

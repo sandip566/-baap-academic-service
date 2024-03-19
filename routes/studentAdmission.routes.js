@@ -110,6 +110,7 @@ router.post("/data/save", async (req, res, next) => {
 
                             return {
                                 ...feesDetail,
+                                feesDetailsId:installNo,
                                 installment: updatedInstallments,
                             };
                         }

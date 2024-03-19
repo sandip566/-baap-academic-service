@@ -99,6 +99,7 @@ router.post(
         }
 
         const addmissionId = req.body.addmissionId;
+        const feesDetailsId = req.body.feesDetailsId;
         const empId = req.body.empId;
         const installmentDetails = req.body.installment;
         const otherAmount = parseFloat(req.body.other_amount) || 0;
@@ -115,6 +116,7 @@ router.post(
 
         const existingRecord = await service.getByAdmissionAndEmpId(
             addmissionId,
+            feesDetailsId,
             empId
         );
 
