@@ -14,15 +14,17 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId, skip, limit) {
+    async getRecoveryData(groupId,academicYear, skip, limit) {
         return this.execute(async () => {
             let studentRecordCount = await StudentsAdmissionModel.find({
                 groupId: groupId,
+                academicYear:academicYear
+
             });
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
-                .find({ groupId: groupId })
+                .find({ groupId: groupId,academicYear: academicYear })
                 .skip(skip)
                 .limit(limit)
                 .exec();

@@ -513,6 +513,7 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
     const skip = (page - 1) * limit;
     const serviceResponse = await service.getRecoveryData(
         req.params.groupId,
+        req.query.academicYear,
         skip,
         limit,
         page
