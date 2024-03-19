@@ -186,7 +186,7 @@ class BooksService extends BaseService {
             throw error;
         }
     }
-    async getBooksCount() {
+    async getBooksCount(groupId) {
         try {
             const books = await booksModel.find({groupId:groupId});
             if (!books) {

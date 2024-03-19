@@ -246,6 +246,10 @@ class StudentsAdmmisionService extends BaseService {
                 searchFilter.phoneNumber = query.phoneNumber;
             }
 
+            if(query.academicYear){
+                searchFilter.academicYear=query.academicYear
+            }
+
             if (query.firstName) {
                 searchFilter.firstName = {
                     $regex: query.firstName,
@@ -880,7 +884,7 @@ async getfeesPayment(groupId, query) {
                 totalItemsCount: filteredData.length,
             },
         };
-console.log(response);
+
         return response;
     } catch (error) {
         console.error("Error:", error);
@@ -907,7 +911,7 @@ console.log(response);
             // console.log(courseIds);
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
-
+                academicYear:academicYear
             });
             let coursePayments = {};
             let courseID;
