@@ -17,7 +17,7 @@ router.post(
         console.log(existingRecord);
         if (existingRecord.data) {
 
-            return res.status(409).json({ error: "Data With The Same GroupId Already Exists." });
+            return res.status(409).json({ error: "Data  Already Exists." });
         }
         if (req.body.startDate > req.body.endDate) {
             return res.status(404).json({ error: "Start Year must be greater than End Year." });

@@ -13,7 +13,7 @@ router.post(
     if (validationHelper.requestValidationErrors(req, res)) {
       return;
     }
-    const existingRecord = await service.getByCourseIdAndGroupId(req.body.religion);
+    const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.religion);
     console.log(existingRecord);
     if (existingRecord.data) {
 
@@ -49,6 +49,21 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMR1"]),
   );
   requestResponseHelper.sendResponse(res, serviceResponse);
 });
+
+router.get("/getDataByUsingLink/all/getByGroupId/:groupId", async (req, res) => {
+  const groupId = req.params.groupId;
+  const criteria = {
+    religionId: req.query.religionId,
+    name: req.query.name,
+    pageNumber: parseInt(req.query.pageNumber) || 1
+  };
+  const serviceResponse = await service.getAllDataByGroupId(
+    groupId,
+    criteria
+  );
+  requestResponseHelper.sendResponse(res, serviceResponse);
+});
+
 
 router.delete("/religionId/:religionId", TokenService.checkPermission(["EMR4"]), async (req, res) => {
   try {

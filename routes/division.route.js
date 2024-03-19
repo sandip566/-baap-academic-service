@@ -86,7 +86,8 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMDD1"])
     courseId: req.query.courseId,
     classId: req.query.classId,
     divisionId: req.query.divisionId,
-    incharge: req.query.incharge
+    incharge: req.query.incharge,
+    Department: req.query.departmentId
   };
   const serviceResponse = await service.getAllDataByGroupId(
     groupId,
@@ -94,4 +95,22 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMDD1"])
   );
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
+router.get("/getDataByUsingLink/all/getByGroupId/:groupId", async (req, res) => {
+  const groupId = req.params.groupId;
+  const criteria = {
+    Name: req.query.Name,
+    courseId: req.query.courseId,
+    classId: req.query.classId,
+    divisionId: req.query.divisionId,
+    incharge: req.query.incharge,
+    Department: req.query.departmentId
+  };
+  const serviceResponse = await service.getAllDataByGroupId(
+    groupId,
+    criteria
+  );
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 module.exports = router;

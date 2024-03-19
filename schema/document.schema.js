@@ -29,9 +29,11 @@ const DocumentSchema = new mongoose.Schema(
         category: {
             type: String
         },
+        documentUrl: {
+            type: String
+        }
     },
     { strict: false, timestamps: true }
 );
-
 const DocumentModel = mongoose.model("document", DocumentSchema);
 module.exports = DocumentModel;

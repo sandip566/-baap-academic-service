@@ -10,11 +10,19 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        Department:{
+            type: Number,
+            required: false,
+        },
         courseId: {
             type: Number,
             required: true,
         },
-        name: {
+        // name: {
+        //     type: String,
+        //     required: false,
+        // },
+        Name: {
             type: String,
             required: false,
         },

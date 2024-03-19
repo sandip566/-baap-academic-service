@@ -1,5 +1,6 @@
 const DocumentModel = require("../schema/document.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class DocumentService extends BaseService {
     constructor(dbModel, entityName) {
@@ -57,14 +58,12 @@ class DocumentService extends BaseService {
         if (paginationErrors) {
             return paginationErrors;
         }
-
         try {
             const items = await this.model.find(query, {}, {
                 skip: pagination.pageSize * (pagination.pageNumber - 1),
                 limit: pagination.pageSize,
             });
             const totalItemsCount = await this.model.countDocuments(query);
-
             return { items, totalItemsCount };
         } catch (error) {
             console.error("Error fetching items:", error);
@@ -83,6 +82,29 @@ class DocumentService extends BaseService {
             throw error;
         }
     }
-}
 
+    async updateDocument(documentId, data) {
+        try {
+            const updateDocument = await DocumentModel.findOneAndUpdate(
+                { documentId: documentId },
+                data,
+                { upsert: true, new: true }
+            );
+            return new ServiceResponse({
+                data: updateDocument,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
+
+    async getByDocumentId(documentId) {
+        return this.execute(() => {
+            return DocumentModel.findOne({ documentId: documentId });
+        });
+    }
+}
 module.exports = new DocumentService(DocumentModel, 'document');

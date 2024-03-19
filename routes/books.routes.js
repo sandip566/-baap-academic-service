@@ -7,7 +7,8 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const booksModel = require("../schema/books.schema");
 const shelfModel = require("../schema/shelf.schema");
 const deparmentModel = require("../schema/department.schema");
-
+const publisherModel=require("../schema/publisher.schema")
+const bookIssueLogService = require("../services/bookIssueLog.service");
 router.post(
     "/",
     checkSchema(require("../dto/books.dto")),
@@ -15,12 +16,29 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        if (req.body.totalCopies !== undefined) {
+            req.body.availableCount = req.body.totalCopies;
+        }
+        const shelfId = req.body.shelfId; // Assuming the shelfId is provided in the request body
+        const shelf = await shelfModel.find({ shelfId });
+        if (!shelf) {
+            return res.status(404).json({ error: "Shelf not found" });
+        }
+        if (shelf.availableCapacity <= 0) {
+            return res.status(400).json({ error: "This shelf is not available for storing books. Available capacity is zero." });
+        }
+        await shelfModel.findOneAndUpdate(
+            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
+            { $inc: { availableCapacity: -1, currentInventory: 1 } },
+            { new: true }
+        );
         const bookId = +Date.now();
         req.body.bookId = bookId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 
 router.get("/all", async (req, res) => {
     const pagination = {
@@ -41,6 +59,7 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -51,31 +70,59 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             availableCount: req.query.availableCount,
             search: req.query.search,
             shelfId: req.query.shelfId,
-            department: req.query.department,
-            publisher: req.query.publisher,
+            departmentId: req.query.departmentId,
+            publisherId: req.query.publisherId,
             price: req.query.price,
             status: req.query.status,
+            shelfName: req.query.shelfName,
+            departmentName: req.query.departmentName,
+            publisherName:req.query.publisherName
         };
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10; 
-        const skip = (page - 1) * limit;
 
-        const searchFilter = service.getAllDataByGroupId(groupId, criteria, skip, limit);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100;
+        const skip = (page - 1) * limit;
+        const departmentMap = await service.getDepartmentMap();
+        const shelfMap = await service.getShelfMap();
+        const publisherMap=await service.getPublisherMap();
+
+        const { searchFilter } = await service.getAllDataByGroupId(
+            groupId,
+            criteria,
+            skip,
+            limit,
+            departmentMap,
+            shelfMap,
+            publisherMap
+        );
         const totalCount = await booksModel.countDocuments(searchFilter);
-        const books = await booksModel.find(searchFilter)
+        const books = await booksModel
+            .find(searchFilter)
             .skip(skip)
-            .limit(limit);
+            .limit(limit)
+            .exec();
+
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
-                const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
-                const department = await deparmentModel.findOne({ departmentId: book.departmentId });
-                return { ...book._doc, shelf, department };
+                const shelf = await shelfModel.findOne({
+                    shelfId: book.shelfId,
+                });
+                const department = await deparmentModel.findOne({
+                    departmentId: book.departmentId,
+                });
+                const publisher =await publisherModel.findOne({
+                    publisherId:book.publisherId,
+                });
+                return { ...book._doc, shelf, department,publisher };
             })
         );
+        const count=await service.getBooksCount(req.body.groupId);
         res.json({
             status: "Success",
             data: {
                 items: populatedBooks,
+                totalCount: totalCount,
+                booksCount:count
             },
         });
     } catch (err) {
@@ -83,8 +130,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
-
-
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;
@@ -131,37 +176,14 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     }
 });
 
-router.get("/totalAvailableBooks", async (req, res) => {
-    try {
-        const totalCount = await service.getTotalAvailableBooks();
-        res.json({ totalAvailableBooks: totalCount });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
-
-router.get("/totalBooks", async (req, res) => {
-    try {
-        const books = await booksModel.find();
-        let totalCount = 0;
-        for (const book of books) {
-            totalCount += parseInt(book.totalCopies) || 0;
-        }
-        res.json({ total: totalCount });
-    } catch (error) {
-        console.error("Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
 
 router.get("/book-details/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         search: req.query.search,
     };
-    const result = await service.getBookDetails(groupId, criteria);
-    requestResponsehelper.sendResponse(res, result);
+    const searchFilter = await service.getBookDetails(groupId, criteria);
+    requestResponsehelper.sendResponse(res, searchFilter);
 });
 
 module.exports = router;

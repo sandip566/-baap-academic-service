@@ -47,7 +47,13 @@ router.get("/getByInstallmentId/:installmentId", async (req, res, next) => {
     const serviceResponse = await service.getByInstallmentId(req.params.installmentId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
+router.get("/getByInstallmentStatus/:installmentId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByInstallmentStatus(req.params.installmentId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
@@ -209,7 +215,7 @@ router.get("/get-remainingFees", async (req, res) => {
 
 router.get('/get-fees-summary', async (req, res) => {
     try {
-        const { groupId, feesTemplateId, academicYear } = req.query;
+        const { groupId, feesTemplateId, academicYear,currentYear,month,startDate,endDate} = req.query;
 
         const courses = await service.getAllDataByGroupId(groupId);
 

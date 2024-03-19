@@ -3,13 +3,13 @@ const bookIssueLogSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: true
         },
         labmembershipNumber: {
             type: Number,
             require: false
         },
-        studentId: {
+        addmissionId: {
             type: Number,
             required: false
         },
@@ -31,6 +31,14 @@ const bookIssueLogSchema = new mongoose.Schema(
         bookIssueLogId: {
             type: Number
         },
+        addmissionId:{
+            type:Number,
+            required:false
+        },
+        isFine:{
+            type:Boolean,
+            default:false
+        }
     },
     { strict: false, timestamps: true }
 );

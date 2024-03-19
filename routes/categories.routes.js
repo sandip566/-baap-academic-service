@@ -31,6 +31,23 @@ router.get("/all", TokenService.checkPermission(["EFC1"]), async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getAllDataUsingLink/all", async (req, res) => {
+  const serviceResponse = await service.getAllByCriteria({});
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EFC1"]), async (req, res) => {
+  const groupId = req.params.groupId;
+  const criteria = {
+    categoriesId: req.query.categoriesId,
+    name: req.query.name,
+    // pageNumber: parseInt(req.query.pageNumber) || 1
+  };
+  const serviceResponse = await service.getAllDataByGroupId(
+    groupId,
+    criteria
+  );
+  requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.delete("/:id", TokenService.checkPermission(["EFC4"]), async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);

@@ -30,6 +30,10 @@ const feesTemplate = mongoose.Schema(
             type: Number,
             required: false
         },
+        addmissionId:{
+            type:Number,
+            required:false
+        },
         checklist: [{
             type: String,
             // enum: checklistOptions,
@@ -39,7 +43,7 @@ const feesTemplate = mongoose.Schema(
             {
                 name: String,
                 tax: Number,
-                scholarship: String,
+                scholarship: Number,
                 total: Number
             }
         ]

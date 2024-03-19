@@ -34,11 +34,12 @@ router.get("/all", async (req, res) => {
 
 router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.checkPermission(["EMD4"]), async (req, res) => {
     try {
-        const departmentId = req.params.departmentId;
+        
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(departmentId, groupId);
+        const departmentId = req.params.departmentId;
+        const Data = await service.deleteByDataId(groupId,departmentId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(404).json({ error: 'Department already exist for the provided course' });
         } else {
             res.status(201).json(Data);
         }
@@ -48,17 +49,16 @@ router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.check
     }
 });
 
-// , TokenService.checkPermission(["EMD1"]),
-router.get("/all/getByGroupId/:groupId"
-// , TokenService.checkPermission(["EMD1"])
 
- ,async (req, res) => {
+router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"]),
+async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
             departmentName: req.query.departmentName,
             search: req.query.search,
-            departmentHead:req.query.departmentHead
+            departmentHead:req.query.departmentHead,
+            academicYearId:req.query.academicYearId
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
         const departments = await departmentModel.find(searchFilter);

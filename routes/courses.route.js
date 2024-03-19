@@ -8,15 +8,15 @@ const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require('../dto/courses.dto')),TokenService.checkPermission(["EMC2"]),
+    checkSchema(require('../dto/courses.dto')), TokenService.checkPermission(["EMC2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId,req.body.Code,req.body.CourseName);
+        const existingRecord = await service.getByCourseIdAndGroupId(req.body.groupId, req.body.Code, req.body.CourseName);
         console.log(existingRecord);
         if (existingRecord.data) {
-           
+
             return res.status(404).json({ error: "Code with Same Name Already Exists." });
         }
         const courseId = +Date.now();
@@ -32,40 +32,62 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id",TokenService.checkPermission(["EMC4"]), async (req, res) => {
+router.delete("/:id", TokenService.checkPermission(["EMC4"]), async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.put("/:id",TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
+router.put("/:id", TokenService.checkPermission(["ERPSA3"]), async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id",TokenService.checkPermission(["EMC1"]), async (req, res) => {
+router.get("/:id", TokenService.checkPermission(["EMC1"]), async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/getByCourseId/:courseId",TokenService.checkPermission(["EMC1"]), async (req, res, next) => {
+
+router.get("/getByCourseId/:courseId", TokenService.checkPermission(["EMC1"]), async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
     const serviceResponse = await service.getByCourseId(req.params.courseId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["EMC1"]), async (req, res) => {
+
+router.get("/getDataByUsingLink/getByCourseId/:courseId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByCourseId(req.params.courseId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMC3"]), async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         courseId: req.query.courseId,
         CourseName: req.query.CourseName,
         University: req.query.University,
+        departmentId: req.query.departmentId
     };
     const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/courseId/:courseId",TokenService.checkPermission(["EMC4"]), async (req, res) => {
-   
+router.get("/getAllUsingLink/getByGroupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        courseId: req.query.courseId,
+        CourseName: req.query.CourseName,
+        University: req.query.University,
+        departmentId: req.query.departmentId
+    };
+    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermission(["EMC4"]), async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
@@ -73,9 +95,10 @@ router.delete("/groupId/:groupId/courseId/:courseId",TokenService.checkPermissio
             courseId: courseId,
             groupId: groupId,
         });
+        
         if (!courseData) {
             res.status(404).json({
-                error: "course data not found to delete",
+                error: "Course already exist for the provided course.",
             });
         } else {
             res.status(201).json(courseData);
@@ -86,7 +109,7 @@ router.delete("/groupId/:groupId/courseId/:courseId",TokenService.checkPermissio
     }
 });
 
-router.put("/groupId/:groupId/courseId/:courseId",TokenService.checkPermission(["EMC3"]), async (req, res) => {
+router.put("/groupId/:groupId/courseId/:courseId", TokenService.checkPermission(["EMC3"]), async (req, res) => {
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;

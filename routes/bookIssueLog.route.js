@@ -6,6 +6,9 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const Book = require("../schema/books.schema");
 const bookIssueLogModel = require("../schema/bookIssueLog.schema");
+const booksServices=require("../services/books.services");
+const shelfModel=require("../schema/shelf.schema");
+
 
 router.post(
     "/",
@@ -28,10 +31,16 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, title, studentId, dueDate, issuedDate } =
-            req.body;
+        const { groupId, bookId, addmissionId, dueDate, issuedDate } = req.body;
+
+        const existingReservation = await bookIssueLogModel.findOne({ addmissionId: addmissionId, bookId: bookId, returned: false });
+        if (existingReservation) {
+            return res.status(400).json({
+                success: false,
+                error: "There is already an unreturned reservation for this book and admission ID.",
+            });
+        }
         const isBookAvailable = await service.isBookAvailableForIssuing(bookId);
-        console.log(isBookAvailable);
         if (!isBookAvailable) {
             return res.status(400).json({
                 success: false,
@@ -39,22 +48,31 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const book = await Book.findOne({ bookId: bookId });
-        console.log(book);
-        console.log(book.availableCount);
         if (!book || book.availableCount <= 0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for issuing. Available count is zero.",
             });
         }
+        const shelfId = await booksServices.getShelfId(req.body.bookId);
+        const shelf = await shelfModel.find({ shelfId });
+        if (!shelf) {
+            return res.status(404).json({ error: "Shelf not found" });
+        }
+        await shelfModel.findOneAndUpdate(
+            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
+            { $inc: { availableCapacity: 1, currentInventory: -1 } },
+            { new: true }
+        );
         const bookIssueLogId = +Date.now();
         const newReservation = {
             groupId: groupId,
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
-            studentId: studentId,
+            addmissionId: addmissionId,
             dueDate: dueDate,
             issuedDate: issuedDate,
+            shelfId: shelfId
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -77,10 +95,11 @@ router.post("/issue-book", async (req, res) => {
 
 router.post("/return-book", async (req, res) => {
     try {
-        const { groupId, bookId, studentId, returnDate } = req.body;
+        const { bookId, addmissionId } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
-            studentId:studentId
+            addmissionId: addmissionId,
+            returned:false
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -88,6 +107,16 @@ router.post("/return-book", async (req, res) => {
                 error: "The book is not currently issued to the specified group.",
             });
         }
+        const shelfId = await booksServices.getShelfId(bookId);
+        const shelf = await shelfModel.find({ shelfId });
+        if (!shelf) {
+            return res.status(404).json({ error: "Shelf not found" });
+        }
+        await shelfModel.findOneAndUpdate(
+            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
+            { $inc: { availableCapacity: -1, currentInventory: 1 } },
+            { new: true }
+        );
         const updatedReservation = await service.updateBookIssueLogById(
             existingReservation.bookIssueLogId,
             { returned: true, returnDate: new Date() }
@@ -118,11 +147,6 @@ router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-// router.get("/:id", async (req, res) => {
-//     const serviceResponse = await service.getById(req.params.id);
-//     requestResponsehelper.sendResponse(res, serviceResponse);
-// });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
@@ -189,18 +213,8 @@ router.put(
     }
 );
 
-router.get("/issue-books-count",async (req,res)=>{
-    try{
-        const count=await bookIssueLogModel.countDocuments({returned:false});
-        res.json({count:count})
-    }
-    catch(error){
-        console.log(error)
-    }
-})
-
 router.get("/book-issues/overdue", async (req, res) => {
-        const bookIssues = await service.fetchBookIssuesWithOverdue();
-        requestResponsehelper.sendResponse(res,bookIssues);
+    const bookIssues = await service.fetchBookIssuesWithOverdue();
+    requestResponsehelper.sendResponse(res, bookIssues);
 });
 module.exports = router;
