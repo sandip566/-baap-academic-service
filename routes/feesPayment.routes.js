@@ -306,7 +306,7 @@ router.post(
                                         "pending"
                                     );
                                 }
-                                 return otherAmountRemaining <= 0;
+                                return otherAmountRemaining <= 0;
                             }
                         });
                     });
@@ -547,7 +547,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
         criteria,
         // skip,
         page,
-        limit  
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -717,17 +717,22 @@ router.get("/fees-summary/:studentId", async (req, res) => {
 
 router.get("/studentClearansDetails/:groupId", async (req, res) => {
     try {
-      const groupId = req.params.groupId;
-      const addmissionId = req.query.addmissionId;
-      if (!addmissionId) {
-        return res.status(400).json({ error: 'Missing required parameter: addmissionId' });
-      }
-      const serviceResponse = await service.calculateTotalFeeAndRemaining(groupId, addmissionId);
-      res.json(serviceResponse);
+        const groupId = req.params.groupId;
+        const addmissionId = req.query.addmissionId;
+        if (!addmissionId) {
+            return res
+                .status(400)
+                .json({ error: "Missing required parameter: addmissionId" });
+        }
+        const serviceResponse = await service.calculateTotalFeeAndRemaining(
+            groupId,
+            addmissionId
+        );
+        res.json(serviceResponse);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
     }
-  });
-  
+});
+
 module.exports = router;

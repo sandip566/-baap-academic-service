@@ -11,7 +11,7 @@ const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
-const Student=require("../schema/studentAdmission.schema")
+const Student = require("../schema/studentAdmission.schema");
 router.post(
     "/",
     checkSchema(require("../dto/studentAdmission.dto")),
@@ -110,7 +110,7 @@ router.post("/data/save", async (req, res, next) => {
 
                             return {
                                 ...feesDetail,
-                                feesDetailsId:installNo,
+                                feesDetailsId: installNo,
                                 installment: updatedInstallments,
                             };
                         }
@@ -309,22 +309,22 @@ router.get("/:id", async (req, res) => {
 });
 router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
     try {
-    //     const authHeader = req.headers.authorization;
-    //   console.log("gggggggggggggggg",authHeader);
+        //     const authHeader = req.headers.authorization;
+        //   console.log("gggggggggggggggg",authHeader);
 
-    //     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    //         return res.status(401).json({ message: 'Unauthorized - Token is Not Found' });
-    //     }
+        //     if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        //         return res.status(401).json({ message: 'Unauthorized - Token is Not Found' });
+        //     }
 
-    //     const token = authHeader.split(' ')[1];
-    //     const decodedToken = await TokenService.decodeToken(token);
+        //     const token = authHeader.split(' ')[1];
+        //     const decodedToken = await TokenService.decodeToken(token);
 
-    //     if (!decodedToken || !decodedToken.userId) {
-    //         return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
-    //     }
+        //     if (!decodedToken || !decodedToken.userId) {
+        //         return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
+        //     }
 
-    //     const userId = decodedToken.userId;
-    //     console.group(userId)
+        //     const userId = decodedToken.userId;
+        //     console.group(userId)
 
         // if (!req.file) {
         //     return res.status(400).json({ error: 'No file uploaded' });
@@ -343,11 +343,11 @@ router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
 
         // // const headers = excelData[0];
         // const dataRows = excelData
-let dataRows=req.body.dataRows
-console.log("ccccccccccccc",dataRows);
+        let dataRows = req.body.dataRows;
+        console.log("ccccccccccccc", dataRows);
 
-        const result = await service.bulkUpload( dataRows);
-        
+        const result = await service.bulkUpload(dataRows);
+
         if (!result) {
             throw new Error(`Smart ID already exists`);
         }
@@ -367,7 +367,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
             // phoneNumber: req.query.phoneNumber,
-            academicYear:req.query.academicYear,
+            academicYear: req.query.academicYear,
             firstName: req.query.firstName,
             phoneNumber: req.query.phoneNumber,
             lastName: req.query.lastName,
@@ -407,18 +407,23 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
     }
 });
 
-router.get("/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear", async (req, res) => {
-    try {
-        const groupId = req.params.groupId;
-        const academicYear=req.params.academicYear
+router.get(
+    "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const academicYear = req.params.academicYear;
 
-        const courseData = await service.getAdmissionListing(groupId,academicYear);
-        res.json(courseData);
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+            const courseData = await service.getAdmissionListing(
+                groupId,
+                academicYear
+            );
+            res.json(courseData);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
-}
 );
 router.delete(
     "/groupId/:groupId/studentAdmissionId/:studentAdmissionId",
@@ -466,27 +471,33 @@ router.put(
     }
 );
 
-router.get("/autocomplete/students",async(req,res)=>{
-    const firstName=req.query.firstName;
-    try{
-        const students=await Student.find({firstName:{$regex:firstName,$options:"i"}}).limit(10)
-        const suggestedNames=students.map((student)=>student.name)
-        res.json({data:students});
+router.get("/autocomplete/students", async (req, res) => {
+    const firstName = req.query.firstName;
+    try {
+        const students = await Student.find({
+            firstName: { $regex: firstName, $options: "i" },
+        }).limit(10);
+        const suggestedNames = students.map((student) => student.name);
+        res.json({ data: students });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch(error){
-        res.status(500).json({message:error.message})
-    }
-})
+});
 
 router.get("/all/getByGroupId/searching/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        search: req.query.search
+        search: req.query.search,
     };
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
-    const result = await service.getAllSearchDataByGroupId(groupId, criteria,skip,limit);
+    const result = await service.getAllSearchDataByGroupId(
+        groupId,
+        criteria,
+        skip,
+        limit
+    );
     requestResponsehelper.sendResponse(res, result);
 });
 module.exports = router;
