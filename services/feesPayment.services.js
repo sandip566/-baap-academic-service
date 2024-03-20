@@ -463,11 +463,11 @@ class feesPaymentService extends BaseService {
                         let additionalData = {};
                         let feesAdditionalData = {};
 
-                        if (service.addmissionId) {
+                        if (service.addmissionId&& service.isShowInAccounting) {
                             const matchingAdmission = admissionData.find(
                                 (admission) =>
                                     admission.addmissionId ===
-                                    service.addmissionId
+                                    service.addmissionId && service.isShowInAccounting
                             );
 
                             if (matchingAdmission) {
@@ -715,7 +715,7 @@ class feesPaymentService extends BaseService {
         });
     }
 
-    async getPaymentData(groupId, addmissionId) {
+    async getPaymentData(groupId, addmissionId,isShowInAccounting) {
         console.log(groupId, addmissionId);
         try {
             // Convert single addmissionId into an array if it's not already an array
@@ -728,6 +728,7 @@ class feesPaymentService extends BaseService {
                     $match: {
                         groupId: Number(groupId),
                         addmissionId: { $in: addmissionIdArray.map(Number) },
+                        isShowInAccounting:true
                     },
                 },
                 {
