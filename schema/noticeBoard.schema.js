@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const moment = require("moment");
 const noticeBoardSchema = new mongoose.Schema(
     {
@@ -10,32 +10,32 @@ const noticeBoardSchema = new mongoose.Schema(
             require: false,
         },
         title: {
-            type: String
+            type: String,
         },
         content: {
             type: String,
-            required: false
+            required: false,
         },
         noticePostDate: {
             type: Date,
-            default: Date.now()
+            default: Date.now(),
         },
         noticeExpiryDate: {
-            type: String
+            type: String,
         },
         isActive: {
             type: Boolean,
-            default: false
+            default: false,
         },
         createNotice: {
-            type: String
-        }
+            type: String,
+        },
     },
     { strict: false, timestamps: true }
 );
-noticeBoardSchema.pre('save', function (next) {
-    const today = moment().startOf('day');
-    const expiryDate = moment(this.noticeExpiryDate).startOf('day');
+noticeBoardSchema.pre("save", function (next) {
+    const today = moment().startOf("day");
+    const expiryDate = moment(this.noticeExpiryDate).startOf("day");
     // Check if the current date is the same as the expiration_date or if it's in the future
     this.isActive = today.isSameOrBefore(expiryDate);
     next();

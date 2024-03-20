@@ -3,18 +3,18 @@ const religionSchema = new mongoose.Schema(
     {
         religionId: {
             type: Number,
-            required: false
+            required: false,
         },
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
-        religion:{
-            type:String,
-            required:false
-        }
+        religion: {
+            type: String,
+            required: false,
+        },
     },
     { strict: false, timestamps: true }
 );
 const religionModel = mongoose.model("religion", religionSchema);
-module.exports = religionModel;     
+module.exports = religionModel;

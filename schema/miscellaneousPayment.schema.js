@@ -1,54 +1,57 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const miscellaneousPaymentSchema = new mongoose.Schema(
     {
         miscellaneousPaymentId: {
             type: Number,
-            require: false
+            require: false,
         },
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         amount: {
             type: Number,
         },
         installmentId: {
             type: Number,
-            required: false
+            required: false,
         },
         paymentDate: {
             type: Date,
-            default: Date.now()
+            default: Date.now(),
         },
         paymentMode: {
             type: String,
-            enum: ['online', 'cash', 'creditCard', 'bank transfer'],
+            enum: ["online", "cash", "creditCard", "bank transfer"],
         },
         transactionId: {
             type: Number,
-            required: false
+            required: false,
         },
         receivedBy: {
             empId: {
                 type: Number,
-                required: false
-            }
+                required: false,
+            },
         },
         feesTemplateId: {
             type: Number,
-            required: false
+            required: false,
         },
         academicYearsId: {
             type: Number,
-            required: false
+            required: false,
         },
         studentId: {
             type: Number,
-            required: false
+            required: false,
         },
     },
     { strict: false, timestamps: true }
 );
-miscellaneousPaymentSchema.plugin(require("mongoose-autopopulate"))
-const miscellaneousPaymentModel = mongoose.model("miscellaneousPayment", miscellaneousPaymentSchema);
+miscellaneousPaymentSchema.plugin(require("mongoose-autopopulate"));
+const miscellaneousPaymentModel = mongoose.model(
+    "miscellaneousPayment",
+    miscellaneousPaymentSchema
+);
 module.exports = miscellaneousPaymentModel;

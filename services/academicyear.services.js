@@ -9,7 +9,9 @@ class AcademicYearService extends BaseService {
 
     async getByDataId(academicYearId) {
         return this.execute(() => {
-            return AcademicYearModel.findOne({ academicYearId: academicYearId });
+            return AcademicYearModel.findOne({
+                academicYearId: academicYearId,
+            });
         });
     }
 
@@ -20,7 +22,11 @@ class AcademicYearService extends BaseService {
 
     async updateDataById(academicYearId, groupId, newData) {
         try {
-            const updatedData = await AcademicYearModel.findOneAndUpdate({ academicYearId: academicYearId, groupId: groupId }, newData, { new: true });
+            const updatedData = await AcademicYearModel.findOneAndUpdate(
+                { academicYearId: academicYearId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatedData;
         } catch (error) {
             throw error;
@@ -36,7 +42,10 @@ class AcademicYearService extends BaseService {
     }
 
     async getByCourseIdAndGroupId(groupId, year) {
-        const result = await this.model.findOne({ groupId: groupId, year: year });
+        const result = await this.model.findOne({
+            groupId: groupId,
+            year: year,
+        });
         return new ServiceResponse({
             data: result,
         });
@@ -44,7 +53,10 @@ class AcademicYearService extends BaseService {
 
     async deleteByDataId(groupId, academicYearId) {
         try {
-            const deleteData = await AcademicYearModel.deleteOne({ groupId: groupId, academicYearId: academicYearId });
+            const deleteData = await AcademicYearModel.deleteOne({
+                groupId: groupId,
+                academicYearId: academicYearId,
+            });
             console.log(deleteData);
             return deleteData;
         } catch (error) {
@@ -52,4 +64,4 @@ class AcademicYearService extends BaseService {
         }
     }
 }
-module.exports = new AcademicYearService(AcademicYearModel, 'academicyear');
+module.exports = new AcademicYearService(AcademicYearModel, "academicyear");

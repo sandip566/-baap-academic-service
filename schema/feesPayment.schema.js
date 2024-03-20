@@ -12,12 +12,12 @@ const feesPaymentSchema = new mongoose.Schema(
         status: {
             type: String,
             required: false,
-            default: "paid"
+            default: "paid",
         },
         paidAmount: {
             type: String,
             required: false,
-            default: "0"
+            default: "0",
         },
         remainingAmount: {
             type: String,
@@ -43,19 +43,17 @@ const feesPaymentSchema = new mongoose.Schema(
             required: false,
         },
 
-        
         installmentId: {
-            type:Number,
-            required: false
+            type: Number,
+            required: false,
         },
-        
+
         receivedBy: {
             empId: {
                 type: Number,
-                required: false
+                required: false,
             },
         },
-      
     },
     { strict: false, timestamps: true }
 );

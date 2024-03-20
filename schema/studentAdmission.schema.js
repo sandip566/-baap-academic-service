@@ -3,7 +3,7 @@ const studentsAdmissionSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         studentAdmissionId: {
             type: Number,
@@ -14,42 +14,42 @@ const studentsAdmissionSchema = new mongoose.Schema(
         },
         courseName: {
             type: String,
-            required: false
+            required: false,
         },
         location: {
             type: String,
-            required: false
+            required: false,
         },
         academicYear: {
             type: String,
-            required: false
+            required: false,
         },
-        installmentId:{
+        installmentId: {
             type: Number,
-            required: false
+            required: false,
         },
         studentId: {
             type: Number,
-            required: false
+            required: false,
         },
         courseId: {
             type: Number,
-            required: false
+            required: false,
         },
         divisionId: {
             type: Number,
-            required: false
+            required: false,
         },
         feesTemplateId: {
             type: Number,
-            required: false
+            required: false,
         },
-        phoneNumber:{
+        phoneNumber: {
             type: Number,
         },
-        phone:{
-            type:Number
-        }
+        phone: {
+            type: Number,
+        },
     },
     { strict: false, timestamps: true }
 );

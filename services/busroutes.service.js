@@ -10,9 +10,11 @@ class BusRoutesService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10
-        if (criteria.routeName) query.routeName = new RegExp(criteria.routeName, "i");
-        if (criteria.schedule) query.schedule = new RegExp(criteria.schedule, "i");
+        criteria.pageSize = 10;
+        if (criteria.routeName)
+            query.routeName = new RegExp(criteria.routeName, "i");
+        if (criteria.schedule)
+            query.schedule = new RegExp(criteria.schedule, "i");
         if (criteria.routeId) query.routeId = criteria.routeId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
@@ -38,4 +40,4 @@ class BusRoutesService extends BaseService {
         }
     }
 }
-module.exports = new BusRoutesService(BusRoutesModel, 'busroutes');
+module.exports = new BusRoutesService(BusRoutesModel, "busroutes");

@@ -10,7 +10,7 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        Department:{
+        Department: {
             type: Number,
             required: false,
         },
@@ -18,10 +18,7 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        // name: {
-        //     type: String,
-        //     required: false,
-        // },
+
         Name: {
             type: String,
             required: false,
@@ -30,7 +27,6 @@ const DivisionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-
     },
     { strict: false, timestamps: true }
 );

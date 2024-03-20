@@ -4,29 +4,29 @@ const PurchaseSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         purchaseId: {
-            type: Number
+            type: Number,
         },
         vendorId: {
             type: Number,
-            required: false
+            required: false,
         },
         customerName: {
             type: String,
-            required: false
+            required: false,
         },
         purchaseDate: {
             type: Date,
-            default: Date.now()
+            default: Date.now(),
         },
         totalAmount: {
-            type: Number
+            type: Number,
         },
         paymentMethod: {
             type: String,
-            enum: ["Upi", "Cash", "Cheque"]
+            enum: ["Upi", "Cash", "Cheque"],
         },
         // items: [{
         //     book: {
@@ -41,21 +41,21 @@ const PurchaseSchema = new mongoose.Schema(
         //         required: false
         //     }
         // }],
-        book:{
-            type:String
+        book: {
+            type: String,
         },
-        quantity:{
-            type:Number
+        quantity: {
+            type: Number,
         },
-        unitPrice:{
-            type:Number
+        unitPrice: {
+            type: Number,
         },
         orderStatus: {
             type: String,
-            enum: ["Delivered", "Shipped", "Pending","Canceled","Processing"]
-        }
+            enum: ["Delivered", "Shipped", "Pending", "Canceled", "Processing"],
+        },
     },
-    { strict:false,timestamps: true }
+    { strict: false, timestamps: true }
 );
 
 const PurchaseModel = mongoose.model("purchase", PurchaseSchema);
