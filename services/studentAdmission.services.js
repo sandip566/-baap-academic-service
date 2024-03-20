@@ -80,28 +80,6 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-    //     async addInstallment(groupId, addmissionId, memberObject) {
-    //         const newMember = await feesInstallmentServices.create(memberObject);
-    // console.log(newMember);
-    //         const updatedGroup = await studentAdmissionModel
-    //             .findOneAndUpdate(
-    //                 // groupId,
-    //                 addmissionId,
-    //                 { $push: { feesDetails: newMember.data._id } },
-    //                 { new: true }
-    //             )
-    //             .lean();
-
-    //         const response = {
-    //             status: "Success",
-    //             data: updatedGroup,
-    //             message: "installment updated successfully",
-    //         };
-
-    //         delete response.data; // Remove the memberObject from the response
-
-    //         return response;
-    //     }
 
     async getRecoveryData(groupId) {
         return this.execute(() => {
@@ -263,23 +241,6 @@ class StudentsAdmmisionService extends BaseService {
                     $options: "i",
                 };
             }
-
-            // if (query.userId) {
-            //     searchFilter.userId = query.userId;
-            // }
-            // if (query.role) {
-            //     searchFilter.role = query.role;
-            // }
-            // if (query.department) {
-            //     searchFilter.department = query.department;
-            // }
-
-            // if (query.location) {
-            //     searchFilter.location = query.location;
-            // }
-            // if (query.type) {
-            //     searchFilter.type = query.type;
-            // }
             const services = await studentAdmissionModel.find(searchFilter);
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
@@ -310,17 +271,6 @@ class StudentsAdmmisionService extends BaseService {
                                             additionalData.course_id =
                                                 course_id;
                                         }
-
-                                        // if (courseDetail.class_id) {
-                                        //     console.log(courseDetail.class_id);
-                                        //     const class_id =
-                                        //         await ClassModel.findOne({
-                                        //             classId:
-                                        //                 courseDetail.class_id,
-                                        //         });
-                                        //     additionalData.class_id = class_id;
-                                        //     console.log(class_id);
-                                        // }
                                         if (courseDetail?.class_id) {
                                             const classId = parseInt(
                                                 courseDetail?.class_id
@@ -339,16 +289,6 @@ class StudentsAdmmisionService extends BaseService {
                                                 );
                                             }
                                         }
-
-                                        // if (courseDetail.division_id) {
-                                        //     const division_id =
-                                        //         await DivisionModel.findOne({
-                                        //             divisionId:
-                                        //                 courseDetail.division_id,
-                                        //         });
-                                        //     additionalData.division_id =
-                                        //         division_id;
-                                        // }
                                         if (courseDetail?.division_id) {
                                             const divisionId = parseInt(
                                                 courseDetail?.division_id
@@ -399,254 +339,13 @@ class StudentsAdmmisionService extends BaseService {
                     totalItemsCount: services.length,
                 },
             };
-
-            // let results = await studentAdmissionModel.find(servicesWithData).sort({ createdAt: reverseOrder ? -1 : 1 });
             return response;
         } catch (error) {
             console.error("Error:", error);
             throw error;
         }
     }
-    //     async getfeesPayment(groupId, query) {
-    //         try {
-    //             const searchFilter = {
-    //                 groupId: groupId,
-    //             };
 
-    //             if (query.search) {
-    //                 const numericSearch = parseInt(query.search);
-    //                 if (!isNaN(numericSearch)) {
-    //                     searchFilter.$or = [
-    //                         { firstName: { $regex: query.search, $options: "i" } },
-    //                         { lastName: { $regex: query.search, $options: "i" } },
-    //                         { phoneNumber: numericSearch },
-    //                     ];
-    //                 } else {
-    //                     searchFilter.$or = [
-    //                         { firstName: { $regex: query.search, $options: "i" } },
-    //                         { lastName: { $regex: query.search, $options: "i" } },
-    //                     ];
-    //                 }
-    //             }
-
-    //             if (query.phoneNumber) {
-    //                 searchFilter.phoneNumber = query.phoneNumber;
-    //             }
-    //             if (query.addmissionId) {
-    //                 searchFilter.addmissionId = query.addmissionId;
-    //             }
-
-    //             if (query.firstName) {
-    //                 searchFilter.firstName = {
-    //                     $regex: query.firstName,
-    //                     $options: "i",
-    //                 };
-    //             }
-
-    //             if (query.lastName) {
-    //                 searchFilter.lastName = {
-    //                     $regex: query.lastName,
-    //                     $options: "i",
-    //                 };
-    //             }
-
-    //             const services = await studentAdmissionModel.find(searchFilter);
-    //             const servicesWithData = await Promise.all(
-    //                 services.map(async (service) => {
-    //                     let additionalData = {};
-
-    //                     // Process course details
-    //                     if (
-    //                         service.courseDetails &&
-    //                         service.courseDetails.length > 0
-    //                     ) {
-    //                         const courseDetailsWithAdditionalData =
-    //                             await Promise.all(
-    //                                 service.courseDetails.map(
-    //                                     async (courseDetail) => {
-    //                                         let courseAdditionalData = {};
-    //                                         let course_id;
-    //                                         let class_id;
-    //                                         let division_id;
-    //                                         if (courseDetail.course_id) {
-
-    //                                             course_id =
-    //                                                 await courseModel.findOne({
-    //                                                     courseId:
-    //                                                         courseDetail.course_id,
-    //                                                 });
-
-    //                                             courseAdditionalData.course_id =
-    //                                                 course_id;
-    //                                             console.log(
-    //                                                 "course_iddddddddddddddddddddddddd",
-    //                                                 course_id
-    //                                             );
-    //                                         }
-
-    //                                         if (courseDetail.class_id) {
-    //                                             class_id = await ClassModel.findOne(
-    //                                                 {
-    //                                                     classId:
-    //                                                         courseDetail.class_id,
-    //                                                 }
-    //                                             );
-    //                                             courseAdditionalData.class_id =
-    //                                                 class_id;
-    //                                         }
-
-    //                                         if (courseDetail.division_id) {
-    //                                             division_id =
-    //                                                 await DivisionModel.findOne({
-    //                                                     divisionId:
-    //                                                         courseDetail.division_id,
-    //                                                 });
-    //                                             console.log(
-    //                                                 "division_id",
-    //                                                 division_id.Name
-    //                                             );
-    //                                             courseAdditionalData.division_id =
-    //                                                 division_id;
-    //                                         }
-    // console.log("qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq",course_id);
-    //                                         return {
-    //                                             courseName: course_id.CourseName,
-    //                                             courseFee: course_id.Fees,
-    //                                             className: class_id.name,
-    //                                             divisionName: division_id.Name,
-    //                                         };
-    //                                     }
-    //                                 )
-    //                             );
-
-    //                         additionalData.courseDetails =
-    //                             courseDetailsWithAdditionalData;
-    //                     }
-
-    //                     // Process fees details
-    //                     if (service.feesDetails && service.feesDetails.length > 0) {
-    //                         const feesDetailsWithAdditionalData = await Promise.all(
-    //                             service.feesDetails.map(async (feesDetail) => {
-    //                                 let feesAdditionalData = {};
-
-    //                                 if (feesDetail.feesTemplateId) {
-    //                                     const feesTemplateId =
-    //                                         await feesTemplateModel.findOne({
-    //                                             feesTemplateId:
-    //                                                 feesDetail.feesTemplateId,
-    //                                         });
-    //                                     feesAdditionalData.feesTemplateId =
-    //                                         feesTemplateId;
-    //                                 }
-
-    //                                 return { ...feesDetail, ...feesAdditionalData };
-    //                             })
-    //                         );
-
-    //                         additionalData.feesDetails =
-    //                             feesDetailsWithAdditionalData;
-    //                     }
-
-    //                     return { ...service._doc, ...additionalData };
-    //                 })
-    //             );
-    //             // Fetch feesPayment data based on specific IDs
-    //             const feesPaymentData = await FeesPaymentModel.find({
-    //                 groupId: groupId,
-    //                 empId: query.empId,
-    //                 addmissionId: query.addmissionId,
-    //             });
-
-    //             // let response1;
-    //             let modifiedFeesPaymentData = [];
-    //             let response1 = [];
-
-    //             for (const feesPayment of feesPaymentData) {
-    //                 try {
-    //                     const addmissionData = await studentAdmissionModel.findOne({
-    //                         addmissionId: feesPayment.addmissionId,
-    //                     });
-
-    //                     if (addmissionData) {
-    //                         const feesDetailsWithAdditionalData = [];
-    //                         for (const feesDetail of addmissionData.courseDetails) {
-    //                             let feesAdditionalData = {};
-
-    //                             if (feesDetail.course_id) {
-    //                                 const courseData = await courseModel.findOne({
-    //                                     courseId: feesDetail.course_id,
-    //                                 });
-    //                                 console.log("courseDatacourseDatacourseDatacourseDatacourseData", courseData);
-    //                                 feesAdditionalData.course_id = courseData
-    //                                     ? courseData.CourseName
-    //                                     : "";
-    //                             }
-
-    //                             feesDetailsWithAdditionalData.push({
-    //                                 ...feesDetail,
-    //                                 ...feesAdditionalData,
-    //                             });
-    //                             console.log("feesAdditionalData", feesAdditionalData);
-    //                         }
-
-    //                         const convertedObject =
-    //                             feesDetailsWithAdditionalData.reduce(
-    //                                 (acc, course) => {
-    //                                     console.log("fffffffffffffffffff", course);
-    //                                     acc = { courseName: course.course_id };
-    //                                     return acc;
-    //                                 },
-    //                                 {}
-    //                             );
-    //                         console.log("tttttttttttttttttttttttttttttttttt", convertedObject);
-    //                         response1.push({
-    //                             ...feesPayment._doc,
-    //                             courseName: convertedObject.courseName,
-    //                         });
-    //                         modifiedFeesPaymentData.push(
-    //                             ...feesDetailsWithAdditionalData
-    //                         );
-    //                     }
-    //                 } catch (error) {
-    //                     console.error(
-    //                         "Error fetching data from studentAdmissionModel:",
-    //                         error
-    //                     );
-    //                     modifiedFeesPaymentData.push(feesPayment);
-    //                 }
-    //             }
-
-    //             console.log(
-    //                 "feesDetailsWithAdditionalData:",
-    //                 modifiedFeesPaymentData
-    //             );
-    //             console.log("Response1:", response1);
-
-    //             console.log("Modified Fees Payment Data:", modifiedFeesPaymentData);
-    //             const filteredData = servicesWithData.filter((data) => {
-    //                 return (
-    //                     data.groupId === parseInt(groupId) &&
-    //                     data.empId === query.empId &&
-    //                     data.addmissionId == query.addmissionId,
-    //                     true
-    //                 );
-    //             });
-
-    //             const response = {
-    //                 status: "Success",
-    //                 data: {
-    //                     items: filteredData,
-    //                     feesPaymentData: response1,
-    //                     totalItemsCount: filteredData.length,
-    //                 },
-    //             };
-
-    //             return response;
-    //         } catch (error) {
-    //             console.error("Error:", error);
-    //             throw error;
-    //         }
-    //     }
     async getfeesPayment(groupId, query) {
         try {
             const searchFilter = {
@@ -893,7 +592,6 @@ class StudentsAdmmisionService extends BaseService {
 
     async findLatestAdmission() {
         try {
-            // Find the latest student admission based on the createdAt field in descending order
             const latestAdmission = await studentAdmissionModel
                 .findOne()
                 .sort({ createdAt: -1 });
@@ -907,7 +605,7 @@ class StudentsAdmmisionService extends BaseService {
     async getAdmissionListing(groupId, academicYear) {
         try {
             let courseData = await courseModel.find({ groupId: groupId });
-            // console.log(courseIds);
+
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
@@ -940,29 +638,6 @@ class StudentsAdmmisionService extends BaseService {
 
                         if (courseExists) {
                             const courseName = courseExists.CourseName;
-                            //    console.log("uuuuuuuuuuuuuuuuuuu",courseName);
-
-                            // const paymentsForCourse = feesData.filter(
-                            //     (payment) =>
-                            //         payment.addmissionId ===
-                            //         admission.addmissionId
-                            // );
-                            // const paidAmountForCourse =
-                            //     paymentsForCourse.reduce(
-                            //         (total, payment) =>
-                            //             total +
-                            //             parseFloat(payment.paidAmount || 0),
-                            //         0
-                            //     );
-                            // const remainingAmountForCourse =
-                            //     paymentsForCourse.reduce(
-                            //         (total, payment) =>
-                            //             total +
-                            //             parseFloat(
-                            //                 payment.remainingAmount || 0
-                            //             ),
-                            //         0
-                            //     );
 
                             if (!coursePayments[courseName].noOfStudents) {
                                 coursePayments[courseName].noOfStudents = 0;
@@ -976,14 +651,6 @@ class StudentsAdmmisionService extends BaseService {
                                 coursePayments[courseName].courseFee =
                                     courseFee;
                             }
-
-                            // coursePayments[courseName].totalPaidAmount +=
-                            //     paidAmountForCourse;
-
-                            // coursePayments[
-                            //     courseName
-                            // ].totalRemainingAmount +=
-                            //     remainingAmountForCourse;
                         }
                     });
                 }
@@ -998,43 +665,13 @@ class StudentsAdmmisionService extends BaseService {
                             coursePayments[courseName].noOfStudents,
                         noOfStudents:
                             coursePayments[courseName].noOfStudents || 0,
-                        // // totalPaidAmount:
-                        //     coursePayments[courseName].totalPaidAmount,
-                        // totalRemainingAmount:
-                        //     coursePayments[courseName].totalRemainingAmount,
                     };
                 }
             );
             let response = {
                 data: formattedCoursePayments,
             };
-            // for (const courseId of courseIds) {
-            //     const courseInfo = await courseModel.findOne({ courseId:courseId, groupId:groupId}, { courseName: 1 });
-            //     // console.log(courseInfo);
-            //     let studentCount = 0;
 
-            //     const studentData = await studentAdmissionModel.find({ groupId: groupId, academicYear: academicYear });
-
-            //     if (studentData) {
-            //         studentData.forEach(item => {
-            //             if (item.courseDetails && Array.isArray(item.courseDetails)) {
-            //                 item.courseDetails.forEach(element => {
-            //                     if (element.course_id === courseId) {
-            //                         studentCount++;
-            //                     }
-            //                 });
-            //             }
-            //         });
-            //     }
-
-            //     courseData.push({
-            //         // courseId,
-            //         courseName: courseInfo ? courseInfo.courseName : null,
-            //         studentCount,
-            //     });
-            // }
-
-            // console.log(courseData);
             return response;
         } catch (error) {
             console.error(error);
@@ -1095,7 +732,7 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
     async updateInstallmentAmount(installmentId, newAmount) {
-        console.log(installmentId, newAmount);
+      
         try {
             const updateResult = await studentAdmissionModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
@@ -1124,284 +761,6 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    // async bulkUpload(headers, dataRows, userId) {
-    //     try {
-    //         const studentAdmissionId = Date.now();
-    //         for (const row of dataRows) {
-    //             if (row.every(value => value === null || value === '')) {
-    //                 continue;
-    //             }
-
-    //             const obj = {};
-    //             headers.forEach((header, index) => {
-    //                 obj[header] = row[index];
-    //             });
-
-    //             // Validate smart_id uniqueness
-    //             const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": obj.smart_id });
-    //             if (existingSmartIdRecord) {
-    //                 throw new Error(`${ obj.smart_id } Smart ID already exists`);
-    //             }
-
-    //             const courseName = obj.courseName;
-    //             const { courseId, classId, divisionId } = await this.getIdsByCourseName(courseName);
-    //             const religionName = obj.religion;
-    //             const { religionId } = await this.getReligionId(religionName,obj.groupId);
-    //             console.log(religionId)
-    //             const name = obj.name;
-    //             const { TemplateId } = await this.getTemplateIDbyCourseName(name);
-    //             const subjectsArray = obj.subjects.split(',');
-
-    //             const phoneNumber = String(obj.phoneNumber).trim();
-    //             const phone = String(obj.phone).trim();
-
-    //             // Validate phone numbers
-    //             if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
-    //                 throw new Error('Invalid phone number');
-
-    //             }
-
-    //             // Check if phone number already exists in the database
-    //             const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
-    //             if (existingPhoneNumberRecord) {
-    //                 throw new Error('Phone number already exists');
-    //             }
-    //             console.log(existingPhoneNumberRecord)
-
-    //             // Construct payload
-    //             const payload = {
-    //                 studentAdmissionId: studentAdmissionId,
-    //                 academicYear: obj.adcedemicYear,
-    //                 caste: obj.caste,
-    //                 dateOfBirth: obj.dateOfBirth,
-    //                 document: [obj.document],
-    //                 email: obj.email,
-    //                 firstName: obj.firstName,
-    //                 lastName: obj.lastName,
-    //                 middleName: obj.middleName,
-    //                 empId: obj.empId,
-    //                 gender: obj.gender,
-    //                 location: obj.location,
-    //                 name: obj.name,
-    //                 password: obj.password,
-    //                 phoneNumber: phoneNumber,
-    //                 profile_img: obj.profile_img,
-    //                 religion: obj.religion,
-    //                 religionId: religionId,
-    //                 roleId: obj.roleId,
-    //                 title: obj.title,
-    //                 userId: obj.userId,
-    //                 familyDetails: [
-    //                     {
-    //                         father_name: obj.father_name,
-    //                         mother_name: obj.mother_name,
-    //                         guardian_name: obj.guardian_name,
-    //                         father_phone_number: obj.father_phone_number,
-    //                         mother_phone_number: obj.mother_phone_number,
-    //                         guardian_phone_number: obj.guardian_phone_number,
-    //                         emergency_contact: [
-    //                             {
-    //                                 contact_name: obj.contact_name,
-    //                                 phone_number: obj.phone_number,
-    //                                 relationship: obj.relationship,
-    //                             },
-    //                         ],
-    //                     },
-    //                 ],
-    //                 contactDetails: [
-    //                     {
-    //                         phone: phone,
-    //                         email: obj.email,
-    //                         whats_app: obj.whats_app,
-    //                         facebook: obj.facebook,
-    //                         instagram: obj.instagram,
-    //                         linked_in: obj.linked_in,
-    //                     },
-    //                 ],
-    //                 securitySettings: [
-    //                     {
-    //                         smart_id: obj.smart_id,
-    //                         subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
-    //                         public_profile_url: obj.public_profile_url,
-    //                     },
-    //                 ],
-    //                 courseDetails: {
-    //                     course_id: courseId,
-    //                     class_id: classId,
-    //                     division_id: divisionId,
-    //                     subjects: subjectsArray,
-    //                 },
-    //                 feesDetails: [
-    //                     {
-    //                         feesTemplateId: TemplateId,
-    //                         installment: [
-    //                             {
-    //                                 amount: obj.amount,
-    //                                 date: obj.date,
-    //                                 numberOfInstalment: obj.numberOfInstalment,
-    //                                 installmentNo: obj.installmentNo,
-    //                                 status: obj.status,
-    //                             },
-    //                         ],
-    //                     },
-    //                 ],
-    //                 installmentId: obj.installmentId,
-    //                 createdBy: userId,
-    //                 updatedBy: userId,
-    //             };
-
-    //             // Insert payload into the database
-    //             const result = await studentAdmissionModel.insertMany(payload);
-
-    //             return {
-    //                 message: 'Data uploaded successfully',
-    //                 data: result,
-    //             };
-    //         }
-    //     } catch (error) {
-    //         throw error;
-    //     }
-    // }
-
-    //original
-
-    //     async  bulkUpload(dataRows,userId) {
-    //         try {
-
-    //             let data;
-    // //   console.log("ddddddddddddddddddddd", dataRows);
-    //   dataRows.forEach((row) => { data=row})
-
-    // console.log("jjjjjjjjjjjjjjjjjjjjjjj",data);
-    //             const existingSmartIdRecord = await studentAdmissionModel.findOne({ "securitySettings.smart_id": data.smart_id });
-    //             if (existingSmartIdRecord) {
-    //                 throw new Error(`${ data.smart_id } Smart ID already exists`);
-    //             }
-
-    //             const CourseName = data.courseName;
-    //             let groupId=data.groupId
-    //             console.log("courseName",CourseName);
-    //             const { courseId, classId, divisionId } = await this.getIdsByCourseName(groupId,CourseName);
-    //             console.log(" courseId, classId, divisionId  courseId, classId, divisionId  courseId, classId, divisionId ", courseId, classId, divisionId );
-    //             const religionName = data.religion;
-
-    //             const { religionId } = await this.getReligionId(religionName,data.groupId);
-    //             console.log(religionId)
-    //             const name = data.name_2;
-
-    //             const { TemplateId } = await this.getTemplateIDbyCourseName(name);
-    //             const subjectsArray = data.subjects.split(',');
-
-    //             const phoneNumber = String(data.phoneNumber).trim();
-    //             const phone = String(data.phone).trim();
-
-    //             // Validate phone numbers
-    //             if (!phoneNumber || !phone || phoneNumber.length !== 10 || phone.length !== 10) {
-    //                 throw new Error('Invalid phone number');
-
-    //             }
-
-    //             // Check if phone number already exists in the database
-    //             const existingPhoneNumberRecord = await studentAdmissionModel.findOne({ $or: [{ phoneNumber: phoneNumber }, { phone: phone }] });
-    //             if (existingPhoneNumberRecord) {
-    //                 throw new Error('Phone number already exists');
-    //             }
-    //             console.log(existingPhoneNumberRecord)
-    //             const queries = dataRows.map((obj) => {
-    //                 const studentAdmissionId = Date.now() + Math.floor(Math.random() * 1000000);
-    //                 return {
-
-    //                             studentAdmissionId: studentAdmissionId,
-    //                             academicYear: obj.adcedemicYear,
-    //                             caste: obj.caste,
-    //                             groupId: obj.groupId,
-    //                             dateOfBirth: obj.dateOfBirth,
-    //                             document: [obj.document],
-    //                             email: obj.email,
-    //                             firstName: obj.firstName,
-    //                             lastName: obj.lastName,
-    //                             middleName: obj.middleName,
-    //                             empId: obj.empId,
-    //                             gender: obj.gender,
-    //                             location: obj.location,
-    //                             name: obj.name,
-    //                             password: obj.password,
-    //                             phoneNumber: phoneNumber,
-    //                             profile_img: obj.profile_img,
-    //                             religion: obj.religion,
-    //                             religionId: religionId,
-    //                             roleId: obj.roleId,
-    //                             title: obj.title,
-    //                             userId: obj.userId,
-    //                             familyDetails: [
-    //                                 {
-    //                                     father_name: obj.father_name,
-    //                                     mother_name: obj.mother_name,
-    //                                     guardian_name: obj.guardian_name,
-    //                                     father_phone_number: obj.father_phone_number,
-    //                                     mother_phone_number: obj.mother_phone_number,
-    //                                     guardian_phone_number: obj.guardian_phone_number,
-    //                                     emergency_contact: [
-    //                                         {
-    //                                             contact_name: obj.contact_name,
-    //                                             phone_number: obj.phone_number,
-    //                                             relationship: obj.relationship,
-    //                                         },
-    //                                     ],
-    //                                 },
-    //                             ],
-    //                             contactDetails: [
-    //                                 {
-    //                                     phone: phone,
-    //                                     email: obj.email,
-    //                                     whats_app: obj.whats_app,
-    //                                     facebook: obj.facebook,
-    //                                     instagram: obj.instagram,
-    //                                     linked_in: obj.linked_in,
-    //                                 },
-    //                             ],
-    //                             securitySettings: [
-    //                                 {
-    //                                     smart_id: obj.smart_id,
-    //                                     subscribe_on_whatsapp: obj.subscribe_on_whatsapp,
-    //                                     public_profile_url: obj.public_profile_url,
-    //                                 },
-    //                             ],
-    //                             courseDetails: {
-    //                                 course_id: courseId,
-    //                                 class_id: classId,
-    //                                 division_id: divisionId,
-    //                                 subjects: subjectsArray,
-    //                             },
-    //                             feesDetails: [
-    //                                 {
-    //                                     feesTemplateId: TemplateId,
-    //                                     installment: [
-    //                                         {
-    //                                             amount: obj.amount,
-    //                                             date: obj.date,
-    //                                             numberOfInstalment: obj.numberOfInstalment,
-    //                                             installmentNo: obj.installmentNo,
-    //                                             status: obj.status,
-    //                                         },
-    //                                     ],
-    //                                 },
-    //                             ],
-    //                             installmentId: obj.installmentId,
-    //                             createdBy: obj.createdBy,
-    //                             updatedBy: obj.updatedBy,
-
-    //                 };
-    //             });
-    //             const result = await studentAdmissionModel.insertMany(queries);
-    //     // console.log("gggggggggggggggggggggggggggg",result);
-    //                 return result
-    //         } catch (error) {
-    //             console.log(error);
-    //             throw error;
-    //         }
-    //     }
-
     async bulkUpload(dataRows, userId) {
         try {
             let results = [];
@@ -1412,7 +771,7 @@ class StudentsAdmmisionService extends BaseService {
                 const className = data.class;
                 const divisionName = data.division;
                 const groupId = data.groupId;
-                console.log("divisionNamedddddddddddddddd", divisionName);
+
                 const { courseId, classId, divisionId } =
                     await this.getIdsByCourseName(
                         groupId,
@@ -1583,7 +942,7 @@ class StudentsAdmmisionService extends BaseService {
                 groupId: groupId,
                 name: className,
             });
-            console.log("classInformation", classInfo);
+          
             const classId = classInfo ? classInfo.classId : null;
 
             const divisionInfo = await DivisionModel.findOne({

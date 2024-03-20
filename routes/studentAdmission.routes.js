@@ -49,7 +49,6 @@ router.get("/all", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-//original
 
 router.post("/data/save", async (req, res, next) => {
     try {
@@ -141,10 +140,9 @@ router.post("/data/save", async (req, res, next) => {
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
-                    console.log(req.body.feesDetails);
+
                     const feesinstallment =
                         await feesInstallmentServices.create(req.body);
-                    console.log(feesinstallment);
 
                     const updatedInstallments = req.body.feesDetails.map(
                         (detail, index) => ({
@@ -152,16 +150,10 @@ router.post("/data/save", async (req, res, next) => {
                             installNo: index + 1,
                         })
                     );
-                    console.log(updatedInstallments);
+
                     req.body.feesDetails = updatedInstallments;
                 }
 
-                // if(req.body.feesDetails){
-                // const installmentId = +Date.now();
-                // req.body.installmentId = installmentId;
-                // const feesinstallment = await feesInstallmentServices.create(req.body);
-                // console.log(feesinstallment);
-                // }
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
         }
@@ -170,95 +162,6 @@ router.post("/data/save", async (req, res, next) => {
         res.status(500).json({ error: "Internal server error" });
     }
 });
-
-// router.post("/data/save", async (req, res, next) => {
-//     try {
-//         if (ValidationHelper.requestValidationErrors(req, res)) {
-//             return;
-//         }
-
-//         if (req.body.addmissionId) {
-//             const existingDocument = await service.getByAddmissionIdData(
-//                 req.body.addmissionId
-//             );
-
-//             if (existingDocument) {
-//                 req.body.documents = req.body.documents
-//                     ? req.body.documents.map((documentData) => {
-//                           const documentId =
-//                               +Date.now() + Math.floor(Math.random() * 1000);
-//                           return {
-//                               _id: new mongoose.Types.ObjectId(),
-//                               documentId: documentId,
-//                               documents: documentData,
-//                           };
-//                       })
-//                     : existingDocument.data?.documents || [];
-
-//                 if (req.body.feesDetails) {
-//                     const installmentId = +Date.now();
-//                                         req.body.installmentId = installmentId;
-//                     const installments = req.body.feesDetails.flatMap((feesDetail) => {
-//                         // return feesDetail.installment.map((installment) => {
-//                             return {
-//                                 feesDetail,
-//                                 installmentId:installmentId,
-//                                 addmissionId: req.body.addmissionId,
-//                                 groupId: req.body.groupId,
-//                                 empId: req.body.empId,
-//                             };
-//                         // });
-//                     });
-
-//                     // // Create or update fees installment records
-//                     // await Promise.all(installments.map(async (installment) => {
-//                     //     const feesinstallment = await feesInstallmentServices.create(installment);
-//                     //     console.log(feesinstallment);
-//                     // }));
-
-//                     // // // Remove installment details from the request body
-//                     // // delete req.body.feesDetails;
-//                 }
-
-//                 const serviceResponse = await service.updateUser(
-//                     req.body.addmissionId,
-//                     req.body
-//                 );
-
-//                 requestResponsehelper.sendResponse(res, serviceResponse);
-//             } else {
-//                 const serviceResponse = await service.create(req.body);
-
-//                 if (req.body.feesDetails) {
-//                     const installmentId = +Date.now();
-//                     req.body.installmentId = installmentId;
-//                     const installments = req.body.feesDetails.flatMap((feesDetail) => {
-//                         // return feesDetail.installment.map((installment) => {
-//                             return {
-//                                 feesDetail,
-//                                 installmentId:installmentId,
-//                                 addmissionId: req.body.addmissionId,
-//                                 groupId: req.body.groupId,
-//                                 empId: req.body.empId,
-//                             };
-//                         // });
-//                     });
-
-//                     // Create fees installment records
-//                     await Promise.all(installments.map(async (installment) => {
-//                         const feesinstallment = await feesInstallmentServices.create(installment);
-//                         console.log(feesinstallment);
-//                     }));
-//                 }
-
-//                 requestResponsehelper.sendResponse(res, serviceResponse);
-//             }
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal server error" });
-//     }
-// });
 
 router.delete(
     "/installmentDetails/addmissionId/:addmissionId/installmentId/:installmentId",
@@ -309,42 +212,7 @@ router.get("/:id", async (req, res) => {
 });
 router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
     try {
-        //     const authHeader = req.headers.authorization;
-        //   console.log("gggggggggggggggg",authHeader);
-
-        //     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        //         return res.status(401).json({ message: 'Unauthorized - Token is Not Found' });
-        //     }
-
-        //     const token = authHeader.split(' ')[1];
-        //     const decodedToken = await TokenService.decodeToken(token);
-
-        //     if (!decodedToken || !decodedToken.userId) {
-        //         return res.status(401).json({ message: 'Unauthorized - Invalid Token' });
-        //     }
-
-        //     const userId = decodedToken.userId;
-        //     console.group(userId)
-
-        // if (!req.file) {
-        //     return res.status(400).json({ error: 'No file uploaded' });
-        // }
-
-        // const excelBuffer = req.file.buffer;
-        // const workbook = xlsx.read(excelBuffer, { type: 'buffer' });
-        // // console.log("uuuuuuuuuuuuuuuuuuuuuuuuu", workbook.Sheets[workbook.SheetNames[0]]);
-        // const sheet = workbook.Sheets[workbook.SheetNames[0]];
-
-        // const excelData = xlsx.utils.sheet_to_json(sheet);
-        //  console.log("yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy",excelData)
-        // if (!excelData || excelData.length < 2) {
-        //     return res.status(400).json({ error: 'Invalid Excel format' });
-        // }
-
-        // // const headers = excelData[0];
-        // const dataRows = excelData
         let dataRows = req.body.dataRows;
-        console.log("ccccccccccccc", dataRows);
 
         const result = await service.bulkUpload(dataRows);
 

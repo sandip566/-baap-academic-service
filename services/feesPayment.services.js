@@ -541,10 +541,6 @@ class feesPaymentService extends BaseService {
                                     installmentLengths.length > 0
                                         ? installmentLengths[0]
                                         : 0;
-                                // console.log(
-                                //     "Lengths of installment arrays:",
-                                //     installmentLengths
-                                // );
 
                                 const installmentIds = feesData.map(
                                     (service) => service.installmentId
@@ -695,10 +691,6 @@ class feesPaymentService extends BaseService {
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
                     totalItemsCount: finalServices.length,
-                    // totalItemsCount: await this.model.countDocuments(
-                    //     // filteredServicesWithData,
-                    //     finalServices
-                    // ),
                 };
 
                 return response;
@@ -724,7 +716,6 @@ class feesPaymentService extends BaseService {
     async getPaymentData(groupId, addmissionId, isShowInAccounting) {
         console.log(groupId, addmissionId);
         try {
-            // Convert single addmissionId into an array if it's not already an array
             const addmissionIdArray = Array.isArray(addmissionId)
                 ? addmissionId
                 : [addmissionId];
@@ -740,15 +731,13 @@ class feesPaymentService extends BaseService {
                 {
                     $group: {
                         _id: "$addmissionId",
-                        lastRecord: { $last: "$$ROOT" }, // Get the last record for each addmissionId
-                        paidAmount: { $sum: { $toDouble: "$paidAmount" } }, // Calculate total paidAmount
+                        lastRecord: { $last: "$$ROOT" },
+                        paidAmount: { $sum: { $toDouble: "$paidAmount" } },
                     },
                 },
             ];
 
             const paymentData = await this.model.aggregate(pipeline);
-
-            // console.log("Payment Data:", paymentData[0]._id);
 
             return paymentData[0].paidAmount;
         } catch (error) {

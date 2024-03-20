@@ -56,16 +56,6 @@ class DepartmentService extends BaseService {
             data: result,
         });
     }
-
-    // async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
-    //     let code = departmentHead.code;
-    //     const result = await this.model.findOne({ groupId: groupId, departmentName: departmentName,code: code});
-    //     // const codeResult = await this.model.findOne({ groupId: groupId, code: code });
-    //     return new ServiceResponse({
-    //         data: result,
-    //         // code: codeResult
-    //     });
-    // }
     async deleteByDataId( groupId,departmentId) {
         try {
 

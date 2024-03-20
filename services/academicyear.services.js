@@ -32,14 +32,11 @@ class AcademicYearService extends BaseService {
             groupId: groupId,
         };
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        // if (criteria.location) query.location = new RegExp(criteria.location, "i");
-        // if (criteria.courseId) query.courseId = criteria.courseId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async getByCourseIdAndGroupId(groupId, year) {
         const result = await this.model.findOne({ groupId: groupId, year: year });
-        console.log("aaaaaaaaaaaaaaa", result);
         return new ServiceResponse({
             data: result,
         });
