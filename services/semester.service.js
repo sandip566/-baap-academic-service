@@ -9,11 +9,11 @@ class SemesterService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        
+
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        
+
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }
 
-module.exports = new SemesterService(SemesterModel, 'semester');
+module.exports = new SemesterService(SemesterModel, "semester");
