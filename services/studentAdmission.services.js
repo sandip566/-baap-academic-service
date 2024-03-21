@@ -140,33 +140,7 @@ class StudentsAdmmisionService extends BaseService {
 
             let additionalData = {};
 
-            // Process course details
-            // if (studentAdmission.courseDetails && studentAdmission.courseDetails.length > 0) {
-            //     additionalData.courseDetails = await Promise.all(
-            //         studentAdmission.courseDetails.map(async (courseDetail) => {
-            //             let courseAdditionalData = {};
-
-            //             if (courseDetail.courseId) {
-            //                 const course = await courseModel.findOne({ course_id: courseDetail.courseId });
-            //                 courseAdditionalData.courseName = course ? course.CourseName : "";
-            //                 courseAdditionalData.courseFee = course ? course.Fees : "";
-            //             }
-
-            //             if (courseDetail.classId) {
-            //                 const classInfo = await ClassModel.findOne({ class_id: courseDetail.classId });
-            //                 courseAdditionalData.className = classInfo ? classInfo.name : "";
-            //             }
-
-            //             if (courseDetail.divisionId) {
-            //                 const divisionInfo = await DivisionModel.findOne({ division_id: courseDetail.divisionId });
-            //                 courseAdditionalData.divisionName = divisionInfo ? divisionInfo.Name : "";
-            //             }
-
-            //             return courseAdditionalData;
-            //         })
-            //     );
-            // }
-
+           
             // Process fees details
             if (
                 studentAdmission.feesDetails &&

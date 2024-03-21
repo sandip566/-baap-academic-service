@@ -320,7 +320,7 @@ class feesPaymentService extends BaseService {
 
                             if (courseExists) {
                                 const courseName = courseExists.CourseName;
-                                //    console.log("uuuuuuuuuuuuuuuuuuu",courseName);
+                              
 
                                 const paymentsForCourse = feesData.filter(
                                     (payment) =>
