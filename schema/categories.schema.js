@@ -3,16 +3,16 @@ const CategoriesSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         categoriesId: {
             type: Number,
-            required: false
+            required: false,
         },
         name: {
             type: String,
-            required: false
-        }
+            required: false,
+        },
     },
     { strict: false, timestamps: true }
 );

@@ -9,87 +9,6 @@ const feesInstallmentService = require("../services/feesInstallment.services");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const studentAdmissionServices = require("../services/studentAdmission.services");
 
-// router.post(
-//   "/",
-//   checkSchema(require("../dto/feesPayment.dto")),
-//   async (req, res, next) => {
-//     if (ValidationHelper.requestValidationErrors(req, res)) {
-//       return;
-//     }
-//     const addmissionId = req.body.addmissionId;
-//     const empId = req.body.empId;
-
-//     const existingRecord = await service.getByAdmissionAndEmpId(addmissionId, empId);
-
-//     if (existingRecord.data!==null) {
-//       const feesPaymentId = +Date.now();
-//       req.body.feesPaymentId = feesPaymentId;
-
-//       const installmentDetails = req.body.installment;
-//       const otherAmount = parseFloat(req.body.other_amount) || 0;
-
-//       let totalPaidAmount = 0;
-
-//       for (const installment of installmentDetails) {
-//         if (installment.radio) {
-//           totalPaidAmount += parseFloat(installment.amount);
-//         }
-//       }
-//       totalPaidAmount += otherAmount;
-//       if (totalPaidAmount > existingRecord.data.remainingAmount) {
-//         return res.status(400).json({ error: "You have paid extra amount." });
-//       }
-//       console.log(totalPaidAmount);
-
-//       // let remainingAmount = existingRecord.data.remainingAmount - totalPaidAmount || 0;
-//       let remainingAmount = Math.max(existingRecord.data.remainingAmount - totalPaidAmount, 0) ||0;
-
-//       const serviceResponse = await service.create(req.body);
-
-//       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
-//       console.log(a);
-
-//       serviceResponse.data.paidAmount = totalPaidAmount;
-//       serviceResponse.data.remainingAmount = remainingAmount;
-
-//       // Send the response
-//       requestResponsehelper.sendResponse(res, serviceResponse);
-//     } else {
-//       const feesPaymentId = +Date.now();
-//       req.body.feesPaymentId = feesPaymentId;
-
-//       const installmentDetails = req.body.installment;
-//       const otherAmount = parseFloat(req.body.other_amount) || 0;
-
-//       let totalPaidAmount = 0;
-
-//       for (const installment of installmentDetails) {
-//         if (installment.radio) {
-//           totalPaidAmount += parseFloat(installment.amount);
-//         }
-//       }
-//       totalPaidAmount += otherAmount;
-//       if (totalPaidAmount >req.body.courseFee) {
-//         return res.status(400).json({ error: "You have paid extra amount." });
-//       }
-//       console.log(totalPaidAmount);
-
-//       let remainingAmount =Math.max(req.body.courseFee - totalPaidAmount,0) || 0;
-
-//       const serviceResponse = await service.create(req.body);
-
-//       let a = await service.updatePaidAmountInDatabase(feesPaymentId, totalPaidAmount, remainingAmount);
-//       console.log(a);
-
-//       serviceResponse.data.paidAmount = totalPaidAmount;
-//       serviceResponse.data.remainingAmount = remainingAmount;
-
-//       // Send the response
-//       requestResponsehelper.sendResponse(res, serviceResponse);
-//     }
-//   }
-// );
-
 router.post(
     "/",
     checkSchema(require("../dto/feesPayment.dto")),
@@ -99,6 +18,7 @@ router.post(
         }
 
         const addmissionId = req.body.addmissionId;
+        const feesDetailsId = req.body.feesDetailsId;
         const empId = req.body.empId;
         const installmentDetails = req.body.installment;
         const otherAmount = parseFloat(req.body.other_amount) || 0;
@@ -115,6 +35,7 @@ router.post(
 
         const existingRecord = await service.getByAdmissionAndEmpId(
             addmissionId,
+            feesDetailsId,
             empId
         );
 
@@ -304,7 +225,7 @@ router.post(
                                         "pending"
                                     );
                                 }
-                                 return otherAmountRemaining <= 0;
+                                return otherAmountRemaining <= 0;
                             }
                         });
                     });
@@ -513,6 +434,7 @@ router.get("/getRecoveryData/:groupId", async (req, res, next) => {
     const skip = (page - 1) * limit;
     const serviceResponse = await service.getRecoveryData(
         req.params.groupId,
+        req.query.academicYear,
         skip,
         limit,
         page
@@ -544,7 +466,7 @@ router.get("/getFeesStatData/:groupId", async (req, res, next) => {
         criteria,
         // skip,
         page,
-        limit  
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -714,17 +636,22 @@ router.get("/fees-summary/:studentId", async (req, res) => {
 
 router.get("/studentClearansDetails/:groupId", async (req, res) => {
     try {
-      const groupId = req.params.groupId;
-      const addmissionId = req.query.addmissionId;
-      if (!addmissionId) {
-        return res.status(400).json({ error: 'Missing required parameter: addmissionId' });
-      }
-      const serviceResponse = await service.calculateTotalFeeAndRemaining(groupId, addmissionId);
-      res.json(serviceResponse);
+        const groupId = req.params.groupId;
+        const addmissionId = req.query.addmissionId;
+        if (!addmissionId) {
+            return res
+                .status(400)
+                .json({ error: "Missing required parameter: addmissionId" });
+        }
+        const serviceResponse = await service.calculateTotalFeeAndRemaining(
+            groupId,
+            addmissionId
+        );
+        res.json(serviceResponse);
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal server error' });
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
     }
-  });
-  
+});
+
 module.exports = router;

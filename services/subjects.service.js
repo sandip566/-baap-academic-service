@@ -16,9 +16,9 @@ class SubjectService extends BaseService {
         }
     }
 
-    async getBySubjectIdAndGroupId(groupId, name) {
+    async getBySubjectIdAndGroupId(groupId, name,classId) {
 
-        const result = await this.model.findOne({ groupId: groupId, name: name });
+        const result = await this.model.findOne({ groupId: groupId, name: name ,classId:classId});
         return new ServiceResponse({
             data: result
         })

@@ -6,9 +6,8 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const Book = require("../schema/books.schema");
 const bookIssueLogModel = require("../schema/bookIssueLog.schema");
-const booksServices=require("../services/books.services");
-const shelfModel=require("../schema/shelf.schema");
-
+const booksServices = require("../services/books.services");
+const shelfModel = require("../schema/shelf.schema");
 
 router.post(
     "/",
@@ -33,7 +32,11 @@ router.post("/issue-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, dueDate, issuedDate } = req.body;
 
-        const existingReservation = await bookIssueLogModel.findOne({ addmissionId: addmissionId, bookId: bookId, returned: false });
+        const existingReservation = await bookIssueLogModel.findOne({
+            addmissionId: addmissionId,
+            bookId: bookId,
+            returned: false,
+        });
         if (existingReservation) {
             return res.status(400).json({
                 success: false,
@@ -72,7 +75,7 @@ router.post("/issue-book", async (req, res) => {
             addmissionId: addmissionId,
             dueDate: dueDate,
             issuedDate: issuedDate,
-            shelfId: shelfId
+            shelfId: shelfId,
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -99,7 +102,7 @@ router.post("/return-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             addmissionId: addmissionId,
-            returned:false
+            returned: false,
         });
         if (!existingReservation) {
             return res.status(400).json({

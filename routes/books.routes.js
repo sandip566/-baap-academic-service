@@ -7,7 +7,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const booksModel = require("../schema/books.schema");
 const shelfModel = require("../schema/shelf.schema");
 const deparmentModel = require("../schema/department.schema");
-const publisherModel=require("../schema/publisher.schema")
+const publisherModel = require("../schema/publisher.schema");
 const bookIssueLogService = require("../services/bookIssueLog.service");
 router.post(
     "/",
@@ -25,7 +25,11 @@ router.post(
             return res.status(404).json({ error: "Shelf not found" });
         }
         if (shelf.availableCapacity <= 0) {
-            return res.status(400).json({ error: "This shelf is not available for storing books. Available capacity is zero." });
+            return res
+                .status(400)
+                .json({
+                    error: "This shelf is not available for storing books. Available capacity is zero.",
+                });
         }
         await shelfModel.findOneAndUpdate(
             { shelfId: shelfId, availableCapacity: { $gt: 0 } },
@@ -38,7 +42,6 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
 
 router.get("/all", async (req, res) => {
     const pagination = {
@@ -76,7 +79,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             status: req.query.status,
             shelfName: req.query.shelfName,
             departmentName: req.query.departmentName,
-            publisherName:req.query.publisherName
+            publisherName: req.query.publisherName,
         };
 
         const page = parseInt(req.query.page) || 1;
@@ -84,7 +87,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const skip = (page - 1) * limit;
         const departmentMap = await service.getDepartmentMap();
         const shelfMap = await service.getShelfMap();
-        const publisherMap=await service.getPublisherMap();
+        const publisherMap = await service.getPublisherMap();
 
         const { searchFilter } = await service.getAllDataByGroupId(
             groupId,
@@ -110,19 +113,19 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 const department = await deparmentModel.findOne({
                     departmentId: book.departmentId,
                 });
-                const publisher =await publisherModel.findOne({
-                    publisherId:book.publisherId,
+                const publisher = await publisherModel.findOne({
+                    publisherId: book.publisherId,
                 });
-                return { ...book._doc, shelf, department,publisher };
+                return { ...book._doc, shelf, department, publisher };
             })
         );
-        const count=await service.getBooksCount(req.body.groupId);
+        const count = await service.getBooksCount(req.body.groupId);
         res.json({
             status: "Success",
             data: {
                 items: populatedBooks,
                 totalCount: totalCount,
-                booksCount:count
+                booksCount: count,
             },
         });
     } catch (err) {
@@ -175,7 +178,6 @@ router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 
 router.get("/book-details/:groupId", async (req, res) => {
     const groupId = req.params.groupId;

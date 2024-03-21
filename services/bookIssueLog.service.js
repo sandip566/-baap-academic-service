@@ -55,7 +55,9 @@ class BookIssueLogService extends BaseService {
     async fetchBookIssuesWithOverdue() {
         try {
             const currentDate = new Date();
-            const bookIssues = await bookIssueLogModel.find({returned:false});
+            const bookIssues = await bookIssueLogModel.find({
+                returned: false,
+            });
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
             const bookIds = bookIssues.map((issue) => issue.bookId);
@@ -84,12 +86,16 @@ class BookIssueLogService extends BaseService {
 
                     // Find corresponding student and book
                     const student = students.find(
-                        (student) => student.addmissionId === bookIssue.addmissionId
+                        (student) =>
+                            student.addmissionId === bookIssue.addmissionId
                     );
                     const book = books.find(
                         (book) => book.bookId === bookIssue.bookId
                     );
-                    bookIssueLogModel.updateMany({ _id: bookIssue._id }, { $set: { isFine: true } });
+                    bookIssueLogModel.updateMany(
+                        { _id: bookIssue._id },
+                        { $set: { isFine: true } }
+                    );
                     let bookIssueDate = bookIssue.issueDate;
                     var response = {
                         bookIssueDate,
@@ -110,30 +116,45 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-
-    async getIssueBooks(addmissionId){
-        try{
-            console.log(addmissionId)
-            const bookIssues = await bookIssueLogModel.countDocuments({returned:false,addmissionId:addmissionId});
-            const returnedBooks=await bookIssueLogModel.countDocuments({returned:true,addmissionId:addmissionId});
-            const totalBooksIssued=await bookIssueLogModel.countDocuments({addmissionId:addmissionId})
-            return {totalIssuedBooks:totalBooksIssued,issuedBooks:bookIssues,returnedBooks:returnedBooks}
-        }
-        catch(error){
+    async getIssueBooks(addmissionId) {
+        try {
+            console.log(addmissionId);
+            const bookIssues = await bookIssueLogModel.countDocuments({
+                returned: false,
+                addmissionId: addmissionId,
+            });
+            const returnedBooks = await bookIssueLogModel.countDocuments({
+                returned: true,
+                addmissionId: addmissionId,
+            });
+            const totalBooksIssued = await bookIssueLogModel.countDocuments({
+                addmissionId: addmissionId,
+            });
+            return {
+                totalIssuedBooks: totalBooksIssued,
+                issuedBooks: bookIssues,
+                returnedBooks: returnedBooks,
+            };
+        } catch (error) {
             console.log(error);
         }
     }
-    async getCount(groupId){
-        try{
-            const bookIssues = await bookIssueLogModel.countDocuments({groupId:groupId,returned:false})
-            const returnedBooks=await bookIssueLogModel.countDocuments({groupId:groupId,returned:true});
-            const response={
-                bookIssues:bookIssues,
-                returnedBooks:returnedBooks
-            }
+    async getCount(groupId) {
+        try {
+            const bookIssues = await bookIssueLogModel.countDocuments({
+                groupId: groupId,
+                returned: false,
+            });
+            const returnedBooks = await bookIssueLogModel.countDocuments({
+                groupId: groupId,
+                returned: true,
+            });
+            const response = {
+                bookIssues: bookIssues,
+                returnedBooks: returnedBooks,
+            };
             return response;
-        }
-        catch(error){
+        } catch (error) {
             console.log(error);
         }
     }

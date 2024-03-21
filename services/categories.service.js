@@ -24,7 +24,10 @@ class CategoriesService extends BaseService {
 
     async deleteCategories(categoriesId, groupId) {
         try {
-            return await this.dbModel.deleteOne({ categoriesId: categoriesId, groupId: groupId });
+            return await this.dbModel.deleteOne({
+                categoriesId: categoriesId,
+                groupId: groupId,
+            });
         } catch (error) {
             throw error;
         }
@@ -53,11 +56,15 @@ class CategoriesService extends BaseService {
 
     async updateCategoriesById(categoriesId, newData) {
         try {
-            const updateData = await CategoriesModel.findOneAndUpdate({ categoriesId: categoriesId }, newData, { new: true });
+            const updateData = await CategoriesModel.findOneAndUpdate(
+                { categoriesId: categoriesId },
+                newData,
+                { new: true }
+            );
             return updateData;
         } catch (error) {
             throw error;
         }
     }
 }
-module.exports = new CategoriesService(CategoriesModel, 'categories');
+module.exports = new CategoriesService(CategoriesModel, "categories");

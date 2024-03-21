@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const booksSchema = new mongoose.Schema(
     {
         bookId: Number,
         name: {
             type: String,
-            required: false
+            required: false,
         },
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         author: {
             type: String,
@@ -16,41 +16,41 @@ const booksSchema = new mongoose.Schema(
         },
         genre: {
             type: Number,
-            require: false
+            require: false,
         },
         ISBN: {
             type: Number,
-            require: false
+            require: false,
         },
         totalCopies: {
             type: Number,
         },
-        availableCount:{
-            type:Number
+        availableCount: {
+            type: Number,
         },
         RFID: {
             type: String,
-            required: false
+            required: false,
         },
         shelfId: {
             type: Number,
-            required: false
+            required: false,
         },
-        price:{
-            type:Number
+        price: {
+            type: Number,
         },
-        publisherId:{
-            type:Number,
-            required:false
+        publisherId: {
+            type: Number,
+            required: false,
         },
-        departmentId:{
-            type:Number,
-            require:false
+        departmentId: {
+            type: Number,
+            require: false,
         },
         status: {
             type: String,
-            enum: ["Available", "Lost", "Loaned", "Reserved", "NotAvailable"]
-        }
+            enum: ["Available", "Lost", "Loaned", "Reserved", "NotAvailable"],
+        },
     },
     { strict: false, timestamps: true }
 );

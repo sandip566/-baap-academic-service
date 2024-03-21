@@ -10,7 +10,11 @@ class AttendanceService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.reasonOfLateArrival) query.reasonOfLateArrival = new RegExp(criteria.reasonOfLateArrival, "i");
+        if (criteria.reasonOfLateArrival)
+            query.reasonOfLateArrival = new RegExp(
+                criteria.reasonOfLateArrival,
+                "i"
+            );
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         if (criteria.attendanceId) query.attendanceId = criteria.attendanceId;
         return this.preparePaginationAndReturnData(query, criteria);

@@ -3,7 +3,7 @@ const SubjectSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         subjectId: {
             type: Number,

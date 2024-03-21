@@ -4,16 +4,16 @@ const DocumentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         documentId: {
             type: Number,
         },
         memberId: {
-            type: Number
+            type: Number,
         },
         rollId: {
-            type: Number
+            type: Number,
         },
         title: {
             type: String,
@@ -21,17 +21,17 @@ const DocumentSchema = new mongoose.Schema(
         },
         description: {
             type: String,
-            required: false
+            required: false,
         },
         compulsory: {
-            type: Boolean
+            type: Boolean,
         },
         category: {
-            type: String
+            type: String,
         },
         documentUrl: {
-            type: String
-        }
+            type: String,
+        },
     },
     { strict: false, timestamps: true }
 );

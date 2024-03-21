@@ -12,12 +12,12 @@ const feesPaymentSchema = new mongoose.Schema(
         status: {
             type: String,
             required: false,
-            default: "paid"
+            default: "paid",
         },
         paidAmount: {
             type: String,
             required: false,
-            default: "0"
+            default: "0",
         },
         remainingAmount: {
             type: String,
@@ -43,34 +43,17 @@ const feesPaymentSchema = new mongoose.Schema(
             required: false,
         },
 
-        // paidAmount: {
-        //     type: Number,
-        // },
-        // installmentId: {
-        //     type:Number,
-        //     required: false
-        // },
-        // paymentDate: {
-        //     type: Date,
-        // },
-        // mode: {
-        //     type: String,
-        //     enum: ["ONLINE", "CASH", "creditCard", "bank transfer"],
-        // },
+        installmentId: {
+            type: Number,
+            required: false,
+        },
+
         receivedBy: {
             empId: {
                 type: Number,
-                required: false
+                required: false,
             },
         },
-        // feesTemplateId: {
-        //     type:Number,
-        //     required: false
-        // },
-        // academicYearsId: {
-        //     type:Number,
-        //     required: false
-        // }
     },
     { strict: false, timestamps: true }
 );
