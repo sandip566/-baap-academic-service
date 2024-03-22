@@ -18,6 +18,7 @@ class CategoriesService extends BaseService {
             groupId: groupId,
         };
         if (criteria.categoriesId) query.categoriesId = criteria.categoriesId;
+        if (criteria.religionId) query.religionId = criteria.religionId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }

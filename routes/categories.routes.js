@@ -39,6 +39,7 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EFC1"]),
   const groupId = req.params.groupId;
   const criteria = {
     categoriesId: req.query.categoriesId,
+    religionId: req.query.religionId,
     name: req.query.name,
     // pageNumber: parseInt(req.query.pageNumber) || 1
   };
