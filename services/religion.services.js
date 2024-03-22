@@ -18,6 +18,7 @@ class Service extends BaseService {
         };
         criteria.pageSize = 10;
         if (criteria.religionId) query.religionId = criteria.religionId;
+        if (criteria.categoriesId) query.categoriesId = criteria.categoriesId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }

@@ -41,6 +41,7 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMR1"]),
   const criteria = {
     religionId: req.query.religionId,
     name: req.query.name,
+    categoriesId:req.query.categoriesId,
     pageNumber: parseInt(req.query.pageNumber) || 1
   };
   const serviceResponse = await service.getAllDataByGroupId(
