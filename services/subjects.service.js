@@ -39,6 +39,7 @@ class SubjectService extends BaseService {
         if (criteria.subjectName) query.subjectName = new RegExp(criteria.subjectName, "i");
         if (criteria.subjectId) query.subjectId = criteria.subjectId;
         if (criteria.courseId) query.courseId = criteria.courseId;
+        if (criteria.semesterId) query.semesterId = criteria.semesterId;
         if (criteria.divisionId) query.divisionId = criteria.divisionId;
         if (criteria.classId) query.classId = criteria.classId;
         if (criteria.Department) query.Department = criteria.Department;
