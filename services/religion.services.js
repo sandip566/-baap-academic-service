@@ -6,8 +6,11 @@ class Service extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getByCourseIdAndGroupId(groupId,name) {
-        const result = await this.model.findOne({groupId:groupId, religion: name });
+    async getByCourseIdAndGroupId(groupId, name) {
+        const result = await this.model.findOne({
+            groupId: groupId,
+            religion: name,
+        });
         return new ServiceResponse({
             data: result,
         });
@@ -33,7 +36,11 @@ class Service extends BaseService {
 
     async updateReligionById(religionId, newData) {
         try {
-            const updateData = await religionModel.findOneAndUpdate({ religionId: religionId }, newData, { new: true });
+            const updateData = await religionModel.findOneAndUpdate(
+                { religionId: religionId },
+                newData,
+                { new: true }
+            );
             return updateData;
         } catch (error) {
             throw error;
