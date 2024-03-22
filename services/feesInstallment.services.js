@@ -364,6 +364,83 @@ class feesInstallmentService extends BaseService {
         }
     }
 
+    // async getTotalFeesAndPendingFeesForClass(
+    //     classId,
+    //     groupId,
+    //     feesTemplateId,
+    //     academicYear
+    // ) {
+    //     try {
+    //         let fee = await feesInstallmentModel.aggregate([
+    //             {
+    //                 $match: {
+    //                     "courseDetails.class_id": Number(classId),
+    //                     groupId: Number(groupId),
+    //                     "feesDetails.feesTemplateId": Number(feesTemplateId),
+    //                     academicYear: Number(academicYear),
+    //                 },
+    //             },
+    //             {
+    //                 $unwind: "$feesDetails",
+    //             },
+    //             {
+    //                 $unwind: "$feesDetails.installment",
+    //             },
+    //             {
+    //                 $group: {
+    //                     _id: {
+    //                         documentId: "$_id",
+    //                         status: "$feesDetails.installment.status",
+    //                     },
+    //                     totalAmount: {
+    //                         $sum: "$feesDetails.installment.amount",
+    //                     },
+    //                 },
+    //             },
+    //             {
+    //                 $group: {
+    //                     _id: "$_id.documentId",
+    //                     feesDetails: {
+    //                         $push: {
+    //                             status: "$_id.status",
+    //                             totalAmount: "$totalAmount",
+    //                         },
+    //                     },
+    //                     totalAmountAllStatus: { $sum: "$totalAmount" },
+    //                     totalStudents: { $sum: 1 },
+    //                 },
+    //             },
+    //             {
+    //                 $project: {
+    //                     _id: 1,
+    //                     feesDetails: 1,
+    //                     totalAmountAllStatus: 1,
+    //                 },
+    //             },
+    //         ]);
+
+    //         const response = {
+    //             totalFees: 0,
+    //             pendingFees: 0,
+    //             paidFees: 0,
+    //         };
+
+    //         if (fee.length > 0) {
+    //             response.totalFees = fee[0].totalAmountAllStatus;
+    //             fee[0].feesDetails.forEach((detail) => {
+    //                 if (detail.status === "pending") {
+    //                     response.pendingFees += detail.totalAmount;
+    //                 } else if (detail.status === "paid") {
+    //                     response.paidFees += detail.totalAmount;
+    //                 }
+    //             });
+    //         }
+
+    //         return response;
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
     async getTotalFeesAndPendingFeesForClass(
         classId,
         groupId,
@@ -376,12 +453,16 @@ class feesInstallmentService extends BaseService {
                     $match: {
                         "courseDetails.class_id": Number(classId),
                         groupId: Number(groupId),
-                        "feesDetails.feesTemplateId": Number(feesTemplateId),
                         academicYear: Number(academicYear),
                     },
                 },
                 {
                     $unwind: "$feesDetails",
+                },
+                {
+                    $match: {
+                        "feesDetails.feesTemplateId": Number(feesTemplateId),
+                    },
                 },
                 {
                     $unwind: "$feesDetails.installment",
@@ -418,13 +499,13 @@ class feesInstallmentService extends BaseService {
                     },
                 },
             ]);
-
+    
             const response = {
                 totalFees: 0,
                 pendingFees: 0,
                 paidFees: 0,
             };
-
+    
             if (fee.length > 0) {
                 response.totalFees = fee[0].totalAmountAllStatus;
                 fee[0].feesDetails.forEach((detail) => {
@@ -435,12 +516,13 @@ class feesInstallmentService extends BaseService {
                     }
                 });
             }
-
+    
             return response;
         } catch (error) {
             throw error;
         }
     }
+    
     async getPendingInstallmentByAdmissionId(addmissionId) {
         try {
             const pipeline = [
