@@ -294,13 +294,13 @@ router.get(
     }
 );
 router.delete(
-    "/groupId/:groupId/studentAdmissionId/:studentAdmissionId",
+    "/groupId/:groupId/studentAdmissionId/:addmissionId",
     async (req, res) => {
         try {
-            const studentAdmissionId = req.params.studentAdmissionId;
+            const addmissionId = req.params.addmissionId;
             const groupId = req.params.groupId;
             const Data = await service.deleteByStudentsAddmisionId({
-                studentAdmissionId: studentAdmissionId,
+                addmissionId: addmissionId,
                 groupId: groupId,
             });
             if (!Data) {
