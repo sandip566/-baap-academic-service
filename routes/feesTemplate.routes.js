@@ -40,6 +40,7 @@ console.log(serviceResponse);
                 installmentDetails.push({
                     installmentNo: i,
                     amount: installmentAmount,
+                    totalInstallmentAmount:installmentAmount
                 });
             }
             serviceResponse.data.installmentDetails = installmentDetails;

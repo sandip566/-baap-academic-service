@@ -30,7 +30,8 @@ const feesTemplate = mongoose.Schema(
             type: Number,
             required: false,
         },
-        academicYearId: {
+
+        academicYear: {
             type: Number,
             required: false,
         },

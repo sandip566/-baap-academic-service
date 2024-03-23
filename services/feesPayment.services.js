@@ -137,6 +137,7 @@ class feesPaymentService extends BaseService {
                 let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
+                    status:"Confirm"
                 });
 
                 let feesData = await this.model

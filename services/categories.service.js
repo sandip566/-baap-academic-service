@@ -7,8 +7,12 @@ class CategoriesService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async getByCourseIdAndGroupId(name) {
-        const result = await this.model.findOne({ name: name });
+    async getByCourseIdAndGroupId(groupId, name, religionId) {
+        const result = await this.model.findOne({
+            groupId: groupId,
+            name: name,
+            religionId: religionId,
+        });
         return new ServiceResponse({
             data: result,
         });
