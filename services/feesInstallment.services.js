@@ -3,7 +3,7 @@ const BaseService = require("@baapcompany/core-api/services/base.service");
 const Student = require("../schema/student.schema");
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const studentAdmissionModel = require("../schema/studentAdmission.schema");
-const FeesTemplateModel=require("../schema/feesTemplate.schema");
+const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const courseModel = require("../schema/courses.schema");
 const ClassModel = require("../schema/classes.schema");
 
@@ -352,12 +352,13 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getTotalStudentsForClass(classId,feesTemplateId, groupId) {
+    async getTotalStudentsForClass(classId, feesTemplateId, groupId) {
         try {
             const totalStudents = await studentAdmissionModel.countDocuments({
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
+                status: "Confirm",
             });
             return totalStudents;
         } catch (error) {
@@ -366,7 +367,6 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-   
     async getTotalFeesAndPendingFeesForClass(
         classId,
         groupId,
@@ -377,45 +377,54 @@ class feesInstallmentService extends BaseService {
             const feeTemplates = await FeesTemplateModel.find({
                 groupId: groupId,
                 feesTemplateId: feesTemplateId,
-                academicYear: academicYear
+                academicYear: academicYear,
             });
-    
+
             let totalAmountFromTemplate = 0;
-    
-            feeTemplates.forEach(template => {
+
+            feeTemplates.forEach((template) => {
                 totalAmountFromTemplate += template.totalFees;
             });
-    
+
             const fee = await feesInstallmentModel.aggregate([
                 {
                     $match: {
                         "courseDetails.class_id": Number(classId),
                         groupId: Number(groupId),
                         academicYear: Number(academicYear),
-                        "feesDetails.feesTemplateId": Number(feesTemplateId)
-                    }
+                        "feesDetails.feesTemplateId": Number(feesTemplateId),
+                        admission: "Confirm",
+                    },
                 },
                 {
-                    $unwind: "$feesDetails"
+                    $unwind: "$feesDetails",
                 },
                 {
                     $match: {
-                        "feesDetails.feesTemplateId": Number(feesTemplateId)
-                    }
+                        "feesDetails.feesTemplateId": Number(feesTemplateId),
+                    },
                 },
                 {
-                    $unwind: "$feesDetails.installment"
+                    $unwind: "$feesDetails.installment",
                 },
                 {
                     $group: {
                         _id: {
                             documentId: "$_id",
-                            status: "$feesDetails.installment.status"
+                            status: "$feesDetails.installment.status",
                         },
                         totalAmount: {
-                            $sum: "$feesDetails.installment.amount"
-                        }
-                    }
+                            $sum: "$feesDetails.installment.amount",
+                        },
+                        totalInstallmentAmount: {
+                            $sum: {
+                                $subtract: [
+                                    "$feesDetails.installment.totalInstallmentAmount",
+                                    "$feesDetails.installment.amount",
+                                ],
+                            },
+                        },
+                    },
                 },
                 {
                     $group: {
@@ -423,52 +432,52 @@ class feesInstallmentService extends BaseService {
                         feesDetails: {
                             $push: {
                                 status: "$_id.status",
-                                totalAmount: "$totalAmount"
-                            }
+                                totalAmount: "$totalAmount",
+                                totalInstallmentAmount:
+                                    "$totalInstallmentAmount",
+                            },
                         },
                         totalAmountAllStatus: { $sum: "$totalAmount" },
-                        totalStudents: { $sum: 1 }
-                    }
+                        totalStudents: { $sum: 1 },
+                    },
                 },
                 {
                     $project: {
                         _id: 1,
                         feesDetails: 1,
-                        totalAmountAllStatus: 1
-                    }
-                }
+                        totalAmountAllStatus: 1,
+                    },
+                },
             ]);
-   
+
             const response = {
                 totalFees: totalAmountFromTemplate,
                 pendingFees: 0,
-                paidFees: 0
+                paidFees: 0,
             };
-    
+
             if (fee.length > 0) {
                 fee.forEach((feeItem) => {
                     feeItem.feesDetails.forEach((detail) => {
+                        console.log(detail);
                         if (detail.status === "pending") {
                             response.pendingFees += detail.totalAmount;
                         } else if (detail.status === "paid") {
                             response.paidFees += detail.totalAmount;
                         }
+                        // Add pendingTotalInstallmentAmount to paidFees
+                        response.paidFees += detail.totalInstallmentAmount;
                     });
                 });
             }
-            
-          
+
             return response;
         } catch (error) {
             console.log(error);
             throw error;
         }
     }
-    
-    
-    
-    
-    
+
     async getPendingInstallmentByAdmissionId(addmissionId) {
         try {
             const pipeline = [

@@ -73,27 +73,26 @@ class StudentsAdmmisionService extends BaseService {
     }
     async deleteByStudentsAddmisionId(addmissionId, groupId) {
         try {
-           
-            const studentDeletionResult = await studentAdmissionModel.deleteOne({
-                addmissionId: addmissionId,
-                groupId: groupId
-            });
-    
-           
+            const studentDeletionResult = await studentAdmissionModel.deleteOne(
+                {
+                    addmissionId: addmissionId,
+                    groupId: groupId,
+                }
+            );
+
             const feesDeletionResult = await FeesInstallmentModel.deleteMany({
                 addmissionId: addmissionId,
-                groupId: groupId
+                groupId: groupId,
             });
-    
+
             return {
                 studentDeletionResult: studentDeletionResult,
-                feesDeletionResult: feesDeletionResult
+                feesDeletionResult: feesDeletionResult,
             };
         } catch (error) {
             throw error;
         }
     }
-    
 
     async getRecoveryData(groupId) {
         return this.execute(() => {
@@ -154,7 +153,6 @@ class StudentsAdmmisionService extends BaseService {
 
             let additionalData = {};
 
-           
             // Process fees details
             if (
                 studentAdmission.feesDetails &&
@@ -720,7 +718,6 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
     async updateInstallmentAmount(installmentId, newAmount) {
-      
         try {
             const updateResult = await studentAdmissionModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
@@ -930,7 +927,7 @@ class StudentsAdmmisionService extends BaseService {
                 groupId: groupId,
                 name: className,
             });
-          
+
             const classId = classInfo ? classInfo.classId : null;
 
             const divisionInfo = await DivisionModel.findOne({

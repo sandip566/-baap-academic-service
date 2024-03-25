@@ -9,6 +9,7 @@ const feesInstallmentService = require("../services/feesInstallment.services");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const studentAdmissionServices = require("../services/studentAdmission.services");
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
+const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 
 router.post(
     "/",
@@ -56,16 +57,18 @@ router.post(
                     0
                 ) || 0;
 
-            //     if (pendingInstallment) {
-            //         const updatedInstallmentAmount = Math.max(pendingInstallment.amount - otherAmount, 0);
-            //         await feesInstallmentService.updateInstallmentAmount(pendingInstallment.id, updatedInstallmentAmount);
-            //     }
             if (req.body.addmissionId) {
                 const admission = await StudentsAdmissionModel.findOneAndUpdate(
                     { addmissionId: req.body.addmissionId },
                     { status: "Confirm" },
                     { new: true }
                 );
+                const UpdateinstallmentStatus =
+                    await FeesInstallmentModel.findOneAndUpdate(
+                        { addmissionId: req.body.addmissionId },
+                        { admission: "Confirm" },
+                        { new: true }
+                    );
             }
 
             const serviceResponse = await service.create(req.body);
@@ -136,11 +139,7 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                // feesInstallmentService.updateInstallmentAmount(
-                                //     installment.installmentNo,
-                                //     installment.amount
 
-                                // );
                                 if (installment.amount === 0) {
                                     installment.status = "paid";
                                     feesInstallmentService.updateInstallmentAmount(
@@ -215,10 +214,7 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                // studentAdmissionServices.updateInstallmentAmount(
-                                //     installment.installmentNo,
-                                //     installment.amount
-                                // );
+
                                 if (installment.amount === 0) {
                                     installment.status = "paid";
                                     studentAdmissionServices.updateInstallmentAmount(
@@ -261,6 +257,12 @@ router.post(
                     { status: "Confirm" },
                     { new: true }
                 );
+                const UpdateinstallmentStatus =
+                    await FeesInstallmentModel.findOneAndUpdate(
+                        { addmissionId: req.body.addmissionId },
+                        { admission: "Confirm" },
+                        { new: true }
+                    );
             }
             const serviceResponse = await service.create(req.body);
             const updateResult = await service.updatePaidAmountInDatabase(
@@ -329,10 +331,7 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                                // feesInstallmentService.updateInstallmentAmount(
-                                //     installment.installmentNo,
-                                //     installment.amount
-                                // );
+
                                 if (installment.amount === 0) {
                                     installment.status = "paid";
                                     feesInstallmentService.updateInstallmentAmount(

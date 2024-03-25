@@ -373,12 +373,13 @@ router.get("/get-classes-fees", async (req, res) => {
                 groupId
             );
 
-            const totalFeesObj = await service.getTotalFeesAndPendingFeesForClass(
-                classObj.classId,
-                groupId,
-                feesTemplateId,
-                academicYear
-            );
+            const totalFeesObj =
+                await service.getTotalFeesAndPendingFeesForClass(
+                    classObj.classId,
+                    groupId,
+                    feesTemplateId,
+                    academicYear
+                );
 
             let totalFees = 0;
             let pendingFees = 0;
@@ -389,7 +390,7 @@ router.get("/get-classes-fees", async (req, res) => {
                 pendingFees = 0;
                 paidFees = 0;
             } else {
-                totalFees = totalFeesObj.totalFees* totalStudents;
+                totalFees = totalFeesObj.totalFees * totalStudents;
                 pendingFees = totalFeesObj.pendingFees;
                 paidFees = totalFeesObj.paidFees;
             }
@@ -398,7 +399,7 @@ router.get("/get-classes-fees", async (req, res) => {
                 name: classObj.name,
                 classId: classObj.classId,
                 totalStudents,
-                totalFees, 
+                totalFees,
                 pendingFees,
                 paidFees,
             });
@@ -409,7 +410,5 @@ router.get("/get-classes-fees", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-
 
 module.exports = router;
