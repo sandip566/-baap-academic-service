@@ -17,6 +17,10 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        semesterId:{
+            type: Number,
+            required: false,
+        },
         name: {
             type: String,
         },

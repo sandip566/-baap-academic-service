@@ -82,6 +82,7 @@ router.get("/all/getByGroupId/:groupId", TokenService.checkPermission(["EMS1"]),
   const criteria = {
     subjectName: req.query.subjectName,
     courseId: req.query.courseId,
+    semesterId:req.query.semesterId,
     divisionId: req.query.divisionId,
     classId: req.query.classId,
     subjectId: req.query.subjectId,

@@ -137,6 +137,7 @@ class feesPaymentService extends BaseService {
                 let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
+                    status:"Confirm"
                 });
 
                 let feesData = await this.model
@@ -679,7 +680,7 @@ class feesPaymentService extends BaseService {
                         );
                     service.status = installmentStatus.status.isDue;
                 }
-                console.log(finalServices);
+              
                 totalCourseFee1 = finalServices.reduce((total, course) => {
                     return total + parseFloat(course.courseFees || 0);
                 }, 0);
@@ -714,7 +715,7 @@ class feesPaymentService extends BaseService {
     }
 
     async getPaymentData(groupId, addmissionId, isShowInAccounting) {
-        console.log(groupId, addmissionId);
+      
         try {
             const addmissionIdArray = Array.isArray(addmissionId)
                 ? addmissionId
@@ -771,7 +772,7 @@ class feesPaymentService extends BaseService {
                         (element) => {
                             course_id = element.course_id;
                             class_id = element.class_id;
-                            console.log(course_id);
+                          
                         }
                     );
                     let templateIds = addmissionId1.feesDetails.forEach(
@@ -891,12 +892,12 @@ class feesPaymentService extends BaseService {
                 groupId: groupId,
                 addmissionId: admissionId,
             });
-            console.log("Fetched installments:", installments);
+         
             let totalFee = 0;
             let remeningAmount = 0;
             let totalPaid = 0;
             installments.forEach((installment) => {
-                console.log("Fees details:", installment.feesDetails);
+             
                 installment.feesDetails.forEach((feesDetail) => {
                     feesDetail.installment.forEach((installmentItem) => {
                         totalFee += installmentItem.amount;

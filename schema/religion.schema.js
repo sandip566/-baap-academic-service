@@ -5,6 +5,9 @@ const religionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        categoriesId: {
+            type: Number,
+        },
         groupId: {
             type: Number,
             required: false,

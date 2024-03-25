@@ -7,8 +7,12 @@ class CategoriesService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async getByCourseIdAndGroupId(name) {
-        const result = await this.model.findOne({ name: name });
+    async getByCourseIdAndGroupId(groupId, name, religionId) {
+        const result = await this.model.findOne({
+            groupId: groupId,
+            name: name,
+            religionId: religionId,
+        });
         return new ServiceResponse({
             data: result,
         });
@@ -18,6 +22,7 @@ class CategoriesService extends BaseService {
             groupId: groupId,
         };
         if (criteria.categoriesId) query.categoriesId = criteria.categoriesId;
+        if (criteria.religionId) query.religionId = criteria.religionId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
