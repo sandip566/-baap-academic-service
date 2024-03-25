@@ -11,7 +11,7 @@ class SemesterService extends BaseService {
         };
 
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-if(criteria.classId)query.classId=criteria.classId;
+        if (criteria.classId) query.classId = criteria.classId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }

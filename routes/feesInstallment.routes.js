@@ -308,50 +308,6 @@ router.get("/get-fees-summary", async (req, res) => {
     }
 });
 
-// router.get("/get-classes-fees", async (req, res) => {
-//     try {
-//         const { groupId, feesTemplateId, academicYear, courseId } = req.query;
-
-//         const classes = await service.getAllDataByCourseId(groupId, courseId);
-
-//         const response = {
-//             groupId,
-//             feesTemplateId,
-//             academicYear,
-//             courseId,
-//             classes: [],
-//         };
-
-//         for (const classObj of classes) {
-//             const totalStudents = await service.getTotalStudentsForClass(
-//                 classObj.classId,
-//                 groupId
-//             );
-//             const totalFeesObj =
-//                 await service.getTotalFeesAndPendingFeesForClass(
-//                     classObj.classId,
-//                     groupId,
-//                     feesTemplateId,
-//                     academicYear
-//                 );
-
-//             const paidFees = totalFeesObj.totalFees - totalFeesObj.pendingFees;
-
-//             response.classes.push({
-//                 name: classObj.name,
-//                 classId: classObj.classId,
-//                 totalStudents,
-//                 totalFees: totalFeesObj.totalFees,
-//                 pendingFees: totalFeesObj.pendingFees,
-//                 paidFees,
-//             });
-//         }
-
-//         res.json(response);
-//     } catch (error) {
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
 router.get("/get-classes-fees", async (req, res) => {
     try {
         const { groupId, feesTemplateId, academicYear, courseId } = req.query;

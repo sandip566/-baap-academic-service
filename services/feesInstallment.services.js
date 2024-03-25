@@ -473,7 +473,7 @@ class feesInstallmentService extends BaseService {
 
             return response;
         } catch (error) {
-            console.log(error);
+            console.log(" An error occured", error);
             throw error;
         }
     }
