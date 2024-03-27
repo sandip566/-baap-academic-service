@@ -4,7 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/feesInstallment.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const { MongoClient } = require("mongodb");
+const { MongoClient, Long } = require("mongodb");
 const coursesService = require("../services/courses.service");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const mongoURI = "mongodb://127.0.0.1:27017/baap-acadamic-dev";
@@ -325,8 +325,10 @@ router.get("/get-classes-fees", async (req, res) => {
         for (const classObj of classes) {
             const totalStudents = await service.getTotalStudentsForClass(
                 classObj.classId,
+                feesTemplateId,
                 groupId
             );
+
             const totalFeesObj =
                 await service.getTotalFeesAndPendingFeesForClass(
                     classObj.classId,
@@ -335,14 +337,26 @@ router.get("/get-classes-fees", async (req, res) => {
                     academicYear
                 );
 
-            const paidFees = totalFeesObj.totalFees - totalFeesObj.pendingFees;
+            let totalFees = 0;
+            let pendingFees = 0;
+            let paidFees = 0;
+
+            if (totalStudents == 0 || !totalFeesObj) {
+                totalFees = 0;
+                pendingFees = 0;
+                paidFees = 0;
+            } else {
+                totalFees = totalFeesObj.totalFees * totalStudents;
+                pendingFees = totalFeesObj.pendingFees;
+                paidFees = totalFeesObj.paidFees;
+            }
 
             response.classes.push({
                 name: classObj.name,
                 classId: classObj.classId,
                 totalStudents,
-                totalFees: totalFeesObj.totalFees,
-                pendingFees: totalFeesObj.pendingFees,
+                totalFees,
+                pendingFees,
                 paidFees,
             });
         }

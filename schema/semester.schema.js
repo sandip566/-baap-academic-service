@@ -10,9 +10,9 @@ const SemesterSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        classId:{
+        classId: {
             type: Number,
-            required:false
+            required: false,
         },
         courseId: {
             type: Number,

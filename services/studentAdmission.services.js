@@ -16,6 +16,7 @@ const feesTemplateModel = require("../schema/feesTemplate.schema");
 const FeesPaymentModel = require("../schema/feesPayment.schema");
 const CategoriesModel = require("../schema/categories.schema");
 const AcademicYearModel = require("../schema/academicyear.schema");
+const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 
 class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -70,12 +71,24 @@ class StudentsAdmmisionService extends BaseService {
             });
         }
     }
-    async deleteByStudentsAddmisionId(studentAdmissionId, groupId) {
+    async deleteByStudentsAddmisionId(addmissionId, groupId) {
         try {
-            return await studentAdmissionModel.deleteOne(
-                studentAdmissionId,
-                groupId
+            const studentDeletionResult = await studentAdmissionModel.deleteOne(
+                {
+                    addmissionId: addmissionId,
+                    groupId: groupId,
+                }
             );
+
+            const feesDeletionResult = await FeesInstallmentModel.deleteMany({
+                addmissionId: addmissionId,
+                groupId: groupId,
+            });
+
+            return {
+                studentDeletionResult: studentDeletionResult,
+                feesDeletionResult: feesDeletionResult,
+            };
         } catch (error) {
             throw error;
         }
@@ -140,7 +153,6 @@ class StudentsAdmmisionService extends BaseService {
 
             let additionalData = {};
 
-           
             // Process fees details
             if (
                 studentAdmission.feesDetails &&
@@ -706,7 +718,6 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
     async updateInstallmentAmount(installmentId, newAmount) {
-      
         try {
             const updateResult = await studentAdmissionModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
@@ -916,7 +927,7 @@ class StudentsAdmmisionService extends BaseService {
                 groupId: groupId,
                 name: className,
             });
-          
+
             const classId = classInfo ? classInfo.classId : null;
 
             const divisionInfo = await DivisionModel.findOne({
