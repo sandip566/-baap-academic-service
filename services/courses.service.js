@@ -79,13 +79,24 @@ class CourseService extends BaseService {
 
     async deleteCourseById(courseId, groupId) {
         try {
-            const classRecord = await ClassModel.findOne({ courseId: courseId, groupId: groupId });
-            const divisionRecord = await DivisionModel.findOne({ courseId: courseId, groupId: groupId });
+            const classRecord = await ClassModel.findOne({
+                courseId: courseId,
+                groupId: groupId,
+            });
+            const divisionRecord = await DivisionModel.findOne({
+                courseId: courseId,
+                groupId: groupId,
+            });
 
             if (classRecord || divisionRecord) {
-                return { error: "Cannot delete course. Related records exist." };
+                return {
+                    error: "Cannot delete course. Related records exist.",
+                };
             }
-            const updateCourse = await courseModel.findOneAndDelete({ courseId: courseId, groupId: groupId });
+            const updateCourse = await courseModel.findOneAndDelete({
+                courseId: courseId,
+                groupId: groupId,
+            });
             return updateCourse;
         } catch (error) {
             throw error;

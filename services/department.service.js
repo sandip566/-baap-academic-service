@@ -12,7 +12,7 @@ class DepartmentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
- 
+
     getAllDataByGroupId(groupId, criteria) {
         try {
             const searchFilter = {
@@ -22,16 +22,24 @@ class DepartmentService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-
                     searchFilter.$or = [
                         { academicYearId: numericSearch },
-                        { departmentId: numericSearch }
+                        { departmentId: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { departmentHead: { $regex: criteria.search, $options: "i" } },
-                        { departmentName: { $regex: criteria.search, $options: "i" } },
-
+                        {
+                            departmentHead: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
+                        },
+                        {
+                            departmentName: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
+                        },
                     ];
                 }
             }
@@ -47,13 +55,14 @@ class DepartmentService extends BaseService {
         }
     }
 
-
-
     async getByCourseIdAndGroupId(groupId, departmentName, departmentHead) {
-        const codeValue = departmentHead.code instanceof Object ? departmentHead.code.code : departmentHead.code;
+        const codeValue =
+            departmentHead.code instanceof Object
+                ? departmentHead.code.code
+                : departmentHead.code;
         const result = await this.model.findOne({
             groupId: groupId,
-            'departmentHead.code': codeValue,
+            "departmentHead.code": codeValue,
         });
         return new ServiceResponse({
             data: result,
@@ -61,79 +70,84 @@ class DepartmentService extends BaseService {
     }
     async deleteByDataId(groupId, departmentId) {
         try {
-
-            const classRecord = await ClassModel.findOne({ groupId: groupId, Department: departmentId, });
-            const courseRecord = await courseModel.findOne({ groupId: groupId, departmentId: departmentId, });
-            const divisionRecord = await DivisionModel.findOne({ groupId: groupId, Department: departmentId, });
-
+            const classRecord = await ClassModel.findOne({
+                groupId: groupId,
+                Department: departmentId,
+            });
+            const courseRecord = await courseModel.findOne({
+                groupId: groupId,
+                departmentId: departmentId,
+            });
+            const divisionRecord = await DivisionModel.findOne({
+                groupId: groupId,
+                Department: departmentId,
+            });
 
             if (classRecord || divisionRecord || courseRecord) {
                 return null;
             }
 
-
-            return await DepartmentModel.deleteOne({ departmentId: departmentId, groupId: groupId });
+            return await DepartmentModel.deleteOne({
+                departmentId: departmentId,
+                groupId: groupId,
+            });
         } catch (error) {
             throw error;
         }
     }
 
-
     async updateDataById(departmentId, groupId, newData) {
         try {
-            const updatedData = await DepartmentModel.findOneAndUpdate({ departmentId: departmentId, groupId: groupId }, newData, { new: true });
+            const updatedData = await DepartmentModel.findOneAndUpdate(
+                { departmentId: departmentId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatedData;
         } catch (error) {
             throw error;
         }
     }
 
-
-    async  bulkUploadDepartment(data) {
+    async bulkUploadDepartment(data) {
         try {
-            const {
-                code,
-                firstName,
-                groupId,
-                departmentName
-            } = data;
-    
+            const { code, firstName, groupId, departmentName } = data;
+
             const departmentHead = {
                 code: code,
-                firstName: firstName
+                firstName: firstName,
             };
-    
+
             console.log("Query", {
                 groupId: groupId,
                 departmentName: departmentName,
                 "departmentHead.code": code,
-                "departmentHead.firstName": firstName
+                "departmentHead.firstName": firstName,
             });
-    
+
             const existingDepartment = await DepartmentModel.findOne({
                 groupId: groupId,
                 departmentName: departmentName,
                 "departmentHead.code": code,
-                "departmentHead.firstName": firstName
+                "departmentHead.firstName": firstName,
             });
-    
+
             if (existingDepartment) {
                 return {
-                    message:"Department already exists with the same details.",
-                   existingDepartment
-                }
+                    message: "Department already exists with the same details.",
+                    existingDepartment,
+                };
             }
-    
+
             const document = new DepartmentModel(data);
             document.departmentHead = departmentHead;
             const department = await document.save();
-    
+
             return department;
         } catch (error) {
             console.error("Error uploading to MongoDB:", error.message);
             throw error;
         }
     }
-    
 }
-module.exports = new DepartmentService(DepartmentModel, 'department');
+module.exports = new DepartmentService(DepartmentModel, "department");
