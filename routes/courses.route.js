@@ -91,10 +91,10 @@ router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermissi
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
-        const courseData = await service.deleteCourseById({
-            courseId: courseId,
-            groupId: groupId,
-        });
+        const courseData = await service.deleteCourseById(
+             courseId,
+             groupId,
+        );
         
         if (!courseData) {
             res.status(404).json({
