@@ -4,12 +4,15 @@ const BaseService = require("@baapcompany/core-api/services/base.service");
 const ClassModel = require("../schema/classes.schema");
 const DivisionModel = require("../schema/division.schema");
 const courseModel = require("../schema/courses.schema");
+const multer = require("multer");
+const upload = multer();
+const xlsx = require("xlsx");
 
 class DepartmentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
+ 
     getAllDataByGroupId(groupId, criteria) {
         try {
             const searchFilter = {
@@ -56,15 +59,15 @@ class DepartmentService extends BaseService {
             data: result,
         });
     }
-    async deleteByDataId( groupId,departmentId) {
+    async deleteByDataId(groupId, departmentId) {
         try {
 
-            const classRecord = await ClassModel.findOne({  groupId: groupId ,Department: departmentId, });
-            const courseRecord = await courseModel.findOne({  groupId: groupId ,departmentId: departmentId, });
-            const divisionRecord = await DivisionModel.findOne({  groupId: groupId ,Department: departmentId, });
+            const classRecord = await ClassModel.findOne({ groupId: groupId, Department: departmentId, });
+            const courseRecord = await courseModel.findOne({ groupId: groupId, departmentId: departmentId, });
+            const divisionRecord = await DivisionModel.findOne({ groupId: groupId, Department: departmentId, });
 
 
-            if (classRecord ||divisionRecord || courseRecord) {
+            if (classRecord || divisionRecord || courseRecord) {
                 return null;
             }
 
@@ -84,5 +87,53 @@ class DepartmentService extends BaseService {
             throw error;
         }
     }
+
+
+    async  bulkUploadDepartment(data) {
+        try {
+            const {
+                code,
+                firstName,
+                groupId,
+                departmentName
+            } = data;
+    
+            const departmentHead = {
+                code: code,
+                firstName: firstName
+            };
+    
+            console.log("Query", {
+                groupId: groupId,
+                departmentName: departmentName,
+                "departmentHead.code": code,
+                "departmentHead.firstName": firstName
+            });
+    
+            const existingDepartment = await DepartmentModel.findOne({
+                groupId: groupId,
+                departmentName: departmentName,
+                "departmentHead.code": code,
+                "departmentHead.firstName": firstName
+            });
+    
+            if (existingDepartment) {
+                return {
+                    message:"Department already exists with the same details.",
+                   existingDepartment
+                }
+            }
+    
+            const document = new DepartmentModel(data);
+            document.departmentHead = departmentHead;
+            const department = await document.save();
+    
+            return department;
+        } catch (error) {
+            console.error("Error uploading to MongoDB:", error.message);
+            throw error;
+        }
+    }
+    
 }
 module.exports = new DepartmentService(DepartmentModel, 'department');
