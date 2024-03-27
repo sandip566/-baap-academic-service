@@ -33,9 +33,7 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/departmentId/:departmentId",
- //TokenService.checkPermission(["EMD4"]), 
- async (req, res) => {
+router.delete("/groupId/:groupId/departmentId/:departmentId",TokenService.checkPermission(["EMD4"]), async (req, res) => {
     try {
       const groupId = req.params.groupId;
       const departmentId = req.params.departmentId;
