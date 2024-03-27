@@ -6,6 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
 const departmentModel = require("../schema/department.schema");
+const courseModel=require("../schema/courses.schema")
 
 router.post(
     "/",
@@ -32,22 +33,27 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/departmentId/:departmentId", TokenService.checkPermission(["EMD4"]), async (req, res) => {
+router.delete("/groupId/:groupId/departmentId/:departmentId",
+ //TokenService.checkPermission(["EMD4"]), 
+ async (req, res) => {
     try {
-        
-        const groupId = req.params.groupId;
-        const departmentId = req.params.departmentId;
-        const Data = await service.deleteByDataId(groupId,departmentId);
-        if (!Data) {
-            res.status(404).json({ error: 'Department already exist for the provided course' });
-        } else {
-            res.status(201).json(Data);
-        }
+      const groupId = req.params.groupId;
+      const departmentId = req.params.departmentId;
+  
+      const hasAssignedCourses = await courseModel.exists({ groupId, departmentId });
+  
+      if (hasAssignedCourses) {
+        return res.status(401).json({ error: 'Department has assigned courses ' });
+      }
+  
+      const data = await service.deleteByDataId(groupId, departmentId);
+      res.status(201).json(data);
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+  });
+  
 
 
 router.get("/all/getByGroupId/:groupId" , TokenService.checkPermission(["EMD1"]),
