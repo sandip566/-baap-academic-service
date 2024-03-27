@@ -299,10 +299,10 @@ router.delete(
         try {
             const addmissionId = req.params.addmissionId;
             const groupId = req.params.groupId;
-            const Data = await service.deleteByStudentsAddmisionId({
-                addmissionId: addmissionId,
-                groupId: groupId,
-            });
+            const Data = await service.deleteByStudentsAddmisionId(
+               addmissionId,
+                 groupId,
+            );
             if (!Data) {
                 res.status(404).json({ error: "data not found to delete" });
             } else {
