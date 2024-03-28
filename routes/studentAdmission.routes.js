@@ -52,7 +52,7 @@ router.get("/all", async (req, res) => {
 
 router.post(
     "/data/save",
-    TokenService.checkPermission(["ENAS2"]),
+
     async (req, res, next) => {
         try {
             if (ValidationHelper.requestValidationErrors(req, res)) {
@@ -241,7 +241,7 @@ router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
 
 router.get(
     "/all/getByGroupId/:groupId",
-    TokenService.checkPermission(["ENAS1"]),
+    TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
@@ -308,7 +308,7 @@ router.get(
 );
 router.delete(
     "/groupId/:groupId/studentAdmissionId/:addmissionId",
-    TokenService.checkPermission(["ENAS4"]),
+    TokenService.checkPermission(["EAC4"]),
     async (req, res) => {
         try {
             const addmissionId = req.params.addmissionId;
@@ -331,7 +331,7 @@ router.delete(
 
 router.put(
     "/groupId/:groupId/studentAdmissionId/:addmissionId",
-    TokenService.checkPermission(["ENAS3"]),
+    TokenService.checkPermission(["EAC3"]),
     async (req, res) => {
         try {
             const addmissionId = req.params.addmissionId;

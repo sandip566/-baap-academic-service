@@ -438,7 +438,7 @@ router.post(
 
 router.get(
     "/getRecoveryData/:groupId",
-    TokenService.checkPermission(["EFCS1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -458,7 +458,7 @@ router.get(
 );
 router.get(
     "/getFeesStatData/:groupId",
-    TokenService.checkPermission(["EFCS1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -496,7 +496,7 @@ router.get("/all", async (req, res) => {
 });
 router.get(
     "/getByfeesPaymentId/groupId/:groupId/feesPaymentId/:feesPaymentId",
-    TokenService.checkPermission(["EFCS1"]),
+
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -525,7 +525,7 @@ router.get("/:id", async (req, res) => {
 
 router.get(
     "/getAllFeesPayment/groupId/:groupId",
-    TokenService.checkPermission(["EFCS1"]),
+
     async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -545,7 +545,7 @@ router.get(
 
 router.delete(
     "/groupId/:groupId/feesPaymentId/:feesPaymentId",
-    TokenService.checkPermission(["EFCS4"]),
+    TokenService.checkPermission(["EFCDD4"]),
     async (req, res) => {
         try {
             const feesPaymentId = req.params.feesPaymentId;
@@ -570,7 +570,7 @@ router.delete(
 
 router.put(
     "/groupId/:groupId/feesPaymentId/:feesPaymentId",
-    TokenService.checkPermission(["EFCS3"]),
+
     async (req, res) => {
         try {
             const feesPaymentId = req.params.feesPaymentId;
