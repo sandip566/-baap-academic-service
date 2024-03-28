@@ -37,7 +37,7 @@ router.get("/:id", async (req, res) => {
 router.get("/all/busRoutes", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10
+        pageSize: 10,
     };
     const { pageNumber, pageSize, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria(query, pagination);
@@ -50,9 +50,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         routeId: req.query.routeId,
         routeName: req.query.routeName,
         schedule: req.query.schedule,
-        pageNumber: parseInt(req.query.pageNumber) || 1
+        pageNumber: parseInt(req.query.pageNumber) || 1,
     };
-    const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+    const serviceResponse = await service.getAllDataByGroupId(
+        groupId,
+        criteria
+    );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -92,7 +95,10 @@ router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
                 error: " data not found to update",
             });
         } else {
-            res.status(200).json({ updateroute, message: "data update successfully" });
+            res.status(200).json({
+                updateroute,
+                message: "data update successfully",
+            });
         }
     } catch (error) {
         console.error(error);

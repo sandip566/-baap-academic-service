@@ -8,7 +8,7 @@ const { MongoClient, Long } = require("mongodb");
 const coursesService = require("../services/courses.service");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const mongoURI = "mongodb://127.0.0.1:27017/baap-acadamic-dev";
-const FeesTemplateModel = require("../schema/feesTemplate.schema")
+const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const { Aggregate, match, project, sum } = require("mongoose").Aggregate;
 let totalAmount = 0;
 let collectedAmount = 0;
@@ -167,7 +167,6 @@ router.get("/installments/:addmissionId", async (req, res) => {
         let remeningAmount = 0;
         let totalPaid = 0;
         installments.forEach((installment) => {
-
             installment.feesDetails.forEach((feesDetail) => {
                 feesDetail.installment.forEach((installmentItem) => {
                     totalFee += installmentItem.amount;
@@ -188,24 +187,26 @@ router.get("/installments/:addmissionId", async (req, res) => {
             })
         );
 
-        const populatedFeesTempletObject = populatedFeesTemplet.reduce((acc, curr) => {
-            acc[curr._id] = curr;
-            return acc;
-        }, {});
+        const populatedFeesTempletObject = populatedFeesTemplet.reduce(
+            (acc, curr) => {
+                acc[curr._id] = curr;
+                return acc;
+            },
+            {}
+        );
 
         const response = {
             totalFee: totalFee,
             totalPaid: totalPaid,
-            remeningAmount: remeningAmount
-
-        }
+            remeningAmount: remeningAmount,
+        };
         res.json({
             status: "Success",
             data: {
                 addmissionId: addmissionId,
                 student: student,
                 feesTemplet: populatedFeesTempletObject,
-                amountDetails: response
+                amountDetails: response,
             },
         });
     } catch (error) {

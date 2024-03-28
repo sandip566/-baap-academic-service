@@ -19,7 +19,8 @@ router.post(
     }
 );
 
-router.post("/data/save",
+router.post(
+    "/data/save",
     checkSchema(require("../dto/document.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
@@ -27,13 +28,18 @@ router.post("/data/save",
         }
         try {
             if (req.body.documentId) {
-                const existingDocument = await service.getByDocumentId(req.body.documentId);
+                const existingDocument = await service.getByDocumentId(
+                    req.body.documentId
+                );
                 if (existingDocument) {
                     const updatedData = {
                         ...req.body,
                         documentUrl: req.body.documentUrl,
                     };
-                    const serviceResponse = await service.updateDocument(req.body.documentId, updatedData);
+                    const serviceResponse = await service.updateDocument(
+                        req.body.documentId,
+                        updatedData
+                    );
                     requestResponsehelper.sendResponse(res, serviceResponse);
                 } else {
                     res.status(404).json({ error: "Document not found" });
@@ -61,7 +67,12 @@ router.get("/all", async (req, res) => {
     const { user, headers } = req;
     const pagination = { pageNumber, pageSize };
 
-    const serviceResponse = await service.getAll({ user, headers, query, pagination });
+    const serviceResponse = await service.getAll({
+        user,
+        headers,
+        query,
+        pagination,
+    });
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -71,7 +82,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         roleId: req.query.roleId,
         title: req.query.title,
         description: req.query.description,
-        category: req.query.category
+        category: req.query.category,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -101,13 +112,13 @@ router.delete("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         const groupId = req.params.groupId;
         const Data = await service.deleteByDataId(documentId, groupId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(404).json({ error: "Data not found to delete" });
         } else {
             res.status(201).json(Data);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
@@ -118,13 +129,13 @@ router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         const newData = req.body;
         const Data = await service.updateDataById(documentId, groupId, newData);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to update' });
+            res.status(404).json({ error: "Data not found to update" });
         } else {
             res.status(201).json(Data);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 module.exports = router;

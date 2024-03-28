@@ -30,13 +30,13 @@ router.delete("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
         const groupId = req.params.groupId;
         const Data = await service.deleteByDataId(hostelerId, groupId);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
+            res.status(404).json({ error: "Data not found to delete" });
         } else {
             res.status(201).json(Data);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
@@ -47,13 +47,13 @@ router.put("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
         const newData = req.body;
         const Data = await service.updateDataById(hostelerId, groupId, newData);
         if (!Data) {
-            res.status(404).json({ error: 'Data not found to update' });
+            res.status(404).json({ error: "Data not found to update" });
         } else {
             res.status(201).json(Data);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
