@@ -1,14 +1,14 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const attendanceSchema = new mongoose.Schema(
     {
         attendanceId: Number,
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         name: {
             type: Number,
-            required: false
+            required: false,
         },
         timeIn: {
             type: Number,

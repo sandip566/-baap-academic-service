@@ -1,52 +1,59 @@
 const mongoose = require("mongoose");
-const checklistOptions = ["Installement Allowed", "Show in Accounting", "Discount Allowed"];
+const checklistOptions = [
+    "Installement Allowed",
+    "Show in Accounting",
+    "Discount Allowed",
+];
 const feesTemplate = mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: true
+            required: true,
         },
         feesTemplateId: {
             type: Number,
         },
-        name:{
-            type:String,
+        name: {
+            type: String,
         },
         cast: {
             type: String,
-            required: false
+            required: false,
         },
         totalFees: {
-            type: Number
+            type: Number,
         },
         originalFees: {
-            type: Number
+            type: Number,
         },
         classId: {
             type: Number,
-            required: false
+            required: false,
         },
-        academicYearId: {
+
+        academicYear: {
             type: Number,
-            required: false
+            required: false,
         },
-        addmissionId:{
-            type:Number,
-            required:false
+        addmissionId: {
+            type: Number,
+            required: false,
         },
-        checklist: [{
-            type: String,
-            // enum: checklistOptions,
-            default: []
-        }],
+        checklist: [
+            {
+                type: String,
+                // enum: checklistOptions,
+                default: [],
+            },
+        ],
         components: [
             {
                 name: String,
                 tax: Number,
                 scholarship: Number,
-                total: Number
-            }
-        ]
+                total: Number,
+            },
+        ],
     },
     { strict: false, timestamps: true }
 );

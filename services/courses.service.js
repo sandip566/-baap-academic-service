@@ -1,6 +1,8 @@
 const courseModel = require("../schema/courses.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const DepartmentModel = require("../schema/department.schema");
+const ClassModel = require("../schema/classes.schema");
+const DivisionModel = require("../schema/division.schema");
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 class CourseService extends BaseService {
     constructor(dbModel, entityName) {
@@ -17,21 +19,22 @@ class CourseService extends BaseService {
             if (criteria.University)
                 query.University = new RegExp(criteria.University, "i");
             if (criteria.courseId) query.courseId = criteria.courseId;
-            if (criteria.departmentId) query.departmentId = criteria.departmentId;
+            if (criteria.departmentId)
+                query.departmentId = criteria.departmentId;
             const services = await courseModel.find(query);
-            // console.log(services);
 
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
                     let additionalData = {};
-                    // console.log(additionalData);
+
                     let departmentDetails;
                     if (service.Department && service.Department == null) {
                         departmentDetails = await DepartmentModel.findOne({
                             departmentId: service.Department,
                         });
                         if (departmentDetails) {
-                            additionalData.Department = departmentDetails.departmentName
+                            additionalData.Department =
+                                departmentDetails.departmentName;
                         }
                     }
                     return {
@@ -64,7 +67,11 @@ class CourseService extends BaseService {
     }
 
     async getByCourseIdAndGroupId(groupId, Code, name) {
-        const result = await this.model.findOne({ groupId: groupId, Code: Code, CourseName: name });
+        const result = await this.model.findOne({
+            groupId: groupId,
+            Code: Code,
+            CourseName: name,
+        });
         return new ServiceResponse({
             data: result,
         });
@@ -72,7 +79,25 @@ class CourseService extends BaseService {
 
     async deleteCourseById(courseId, groupId) {
         try {
-            return await courseModel.deleteOne(courseId, groupId);
+            const classRecord = await ClassModel.findOne({
+                courseId: courseId,
+                groupId: groupId,
+            });
+            const divisionRecord = await DivisionModel.findOne({
+                courseId: courseId,
+                groupId: groupId,
+            });
+
+            if (classRecord || divisionRecord) {
+                return {
+                    error: "Cannot delete course. Related records exist.",
+                };
+            }
+            const updateCourse = await courseModel.findOneAndDelete({
+                courseId: courseId,
+                groupId: groupId,
+            });
+            return updateCourse;
         } catch (error) {
             throw error;
         }

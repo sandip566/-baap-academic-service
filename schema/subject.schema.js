@@ -3,7 +3,7 @@ const SubjectSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         courseId: {
             type: Number,
@@ -11,9 +11,13 @@ const SubjectSchema = new mongoose.Schema(
         },
         Department: {
             type: Number,
-            required: false
+            required: false,
         },
         classId: {
+            type: Number,
+            required: false,
+        },
+        semesterId:{
             type: Number,
             required: false,
         },
@@ -21,7 +25,7 @@ const SubjectSchema = new mongoose.Schema(
             type: String,
         },
         description: {
-            type: String
+            type: String,
         },
         credits: {
             type: Number,
@@ -31,4 +35,3 @@ const SubjectSchema = new mongoose.Schema(
 );
 const SubjectModel = mongoose.model("subject", SubjectSchema);
 module.exports = SubjectModel;
-

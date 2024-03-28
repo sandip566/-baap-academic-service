@@ -17,16 +17,7 @@ const feesInstallmentSchema = new mongoose.Schema(
         installmentId: {
             type: Number,
         },
-        // courseId: {
-        //     type:Number,
-        //     required: false
-        // },
-        // dueDate: {
-        //     type: Date,
-        // },
-        // installmentAmount: {
-        //     type: Number,
-        // },
+
         isPaid: {
             type: Boolean,
             default: false,

@@ -3,9 +3,13 @@ const SubjectSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         subjectId: {
+            type: Number,
+            required: false,
+        },
+        semesterId:{
             type: Number,
             required: false,
         },

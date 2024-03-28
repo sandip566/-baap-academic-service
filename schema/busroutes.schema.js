@@ -3,24 +3,24 @@ const BusRoutesSchema = new mongoose.Schema(
     {
         routeId: {
             type: Number,
-            unique: true
+            unique: true,
         },
         routeName: {
-            type: String
+            type: String,
         },
         stops: {
-            type: [Number]
+            type: [Number],
         },
         busId: {
-            type: Number
+            type: Number,
         },
         schedule: {
-            type: String
+            type: String,
         },
-       
+
         groupId: {
-            type: Number
-        }
+            type: Number,
+        },
     },
     { strict: false, timestamps: true }
 );

@@ -3,7 +3,7 @@ const LatefeepaymentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         lateFeePaymentId: {
             type: Number,
@@ -11,24 +11,27 @@ const LatefeepaymentSchema = new mongoose.Schema(
         },
         empId: {
             type: Number,
-            required: false
+            required: false,
         },
         lateFeeAmount: {
             type: Number,
-            required: false
+            required: false,
         },
         paymentDate: {
             type: Date,
-            required: false
+            required: false,
         },
         paymentStatus: {
             type: String,
             enum: ["paid", "Pending", "Failed", "Refunded"],
-            default: "pending"
-        }
+            default: "pending",
+        },
     },
     { strict: false, timestamps: true }
 );
 LatefeepaymentSchema.plugin(require("mongoose-autopopulate"));
-const LatefeepaymentModel = mongoose.model("latefeepayment", LatefeepaymentSchema);
+const LatefeepaymentModel = mongoose.model(
+    "latefeepayment",
+    LatefeepaymentSchema
+);
 module.exports = LatefeepaymentModel;

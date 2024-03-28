@@ -24,7 +24,7 @@ class publisherService extends BaseService {
                 } else {
                     searchFilter.$or = [
                         {
-                            name: {
+                            publisherName: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
@@ -46,9 +46,9 @@ class publisherService extends BaseService {
           if(criteria.phoneNumber){
            searchFilter.phoneNumber=criteria.phoneNumber
           }
-            if (criteria.name) {
-                searchFilter.name = {
-                    $regex: new RegExp(criteria.name, "i"),
+            if (criteria.publisherName) {
+                searchFilter.publisherName = {
+                    $regex: new RegExp(criteria.publisherName, "i"),
                 };
             }
             

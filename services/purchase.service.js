@@ -21,15 +21,58 @@ class PurchaseService extends BaseService {
             throw error;
         }
     }
+    async getAllDataByGroupId(groupId, criteria, skip, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
 
-    getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.purchaseId) query.purchaseId = criteria.purchaseId;
-        return this.preparePaginationAndReturnData(query, criteria);
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { vendorId: numericSearch },
+                       {purchaseId:numericSearch},
+                       {unitPrice:numericSearch},
+                       {quantity:numericSearch}
+
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        {
+                            book: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                        { orderStatus: { $regex: new RegExp(criteria.search, "i") } },
+                        
+                    ];
+                }
+            }
+          if(criteria.quantity){
+           searchFilter.quantity=criteria.quantity
+          }
+          if(criteria.unitPrice){
+            searchFilter.unitPrice=criteria.unitPrice
+          }
+          if(criteria.orderStatus){
+            searchFilter.orderStatus={
+                $regex:new RegExp(criteria.orderStatus, "i")
+            }
+          }
+            if (criteria.book) {
+                searchFilter.book = {
+                    $regex: new RegExp(criteria.book, "i"),
+                };
+            }
+            
+            return { searchFilter };
+        } catch (error) {
+            console.error("Error in getAllDataByGroupId:", error);
+            throw new Error("An error occurred while processing the request.");
+        }
     }
+   
 }
 
 module.exports = new PurchaseService(PurchaseModel, 'purchase');

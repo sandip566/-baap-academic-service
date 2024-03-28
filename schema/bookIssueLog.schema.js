@@ -1,25 +1,25 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const bookIssueLogSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: true,
         },
         labmembershipNumber: {
             type: Number,
-            require: false
+            require: false,
         },
         addmissionId: {
             type: Number,
-            required: false
+            required: false,
         },
         issueDate: {
             type: Date,
             default: Date.now(),
-            require: true
+            require: true,
         },
         dueDate: {
-            type: Date
+            type: Date,
         },
         returnDate: {
             type: Date,
@@ -29,12 +29,16 @@ const bookIssueLogSchema = new mongoose.Schema(
             default: false,
         },
         bookIssueLogId: {
-            type: Number
+            type: Number,
         },
-        addmissionId:{
-            type:Number,
-            required:false
-        }
+        addmissionId: {
+            type: Number,
+            required: false,
+        },
+        isFine: {
+            type: Boolean,
+            default: false,
+        },
     },
     { strict: false, timestamps: true }
 );

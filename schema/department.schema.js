@@ -3,7 +3,7 @@ const departmentSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         departmentName: {
             type: String,
@@ -20,9 +20,9 @@ const departmentSchema = new mongoose.Schema(
         departmentHead: {
             code: {
                 type: String,
-                required: false
-            }
-        }
+                required: false,
+            },
+        },
     },
     { strict: false, timestamps: true }
 );

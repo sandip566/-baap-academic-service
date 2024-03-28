@@ -1,30 +1,27 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const publisherSchema = new mongoose.Schema(
     {
-       
-        
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
-        publisherId:{
-          type:Number
+        publisherId: {
+            type: Number,
         },
-        name: {
+        publisherName: {
             type: String,
-            required: false
+            required: false,
         },
-       address:{
-        type:String,
-       },
-       phoneNumber:{
-          type:Number,
-       },
-       website:String,
-       discription:{
-        type:String,
-       }
-       
+        address: {
+            type: String,
+        },
+        phoneNumber: {
+            type: Number,
+        },
+        website: String,
+        discription: {
+            type: String,
+        },
     },
     { strict: false, timestamps: true }
 );

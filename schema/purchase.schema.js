@@ -4,49 +4,58 @@ const PurchaseSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         purchaseId: {
-            type: Number
+            type: Number,
         },
         vendorId: {
             type: Number,
-            required: false
+            required: false,
         },
-        customerId: {
-            type: Number,
-            required: false
+        customerName: {
+            type: String,
+            required: false,
         },
         purchaseDate: {
             type: Date,
-            default: Date.now()
+            default: Date.now(),
         },
         totalAmount: {
-            type: Number
+            type: Number,
         },
         paymentMethod: {
             type: String,
-            enum: ["upi", "cash", "cheque"]
+            enum: ["Upi", "Cash", "Cheque"],
         },
-        items: [{
-            book: {
-                type: String
-            },
-            quantity: {
-                type: Number,
-                required: false
-            },
-            unitPrice: {
-                type: Number,
-                required: false
-            }
-        }],
+        // items: [{
+        //     book: {
+        //         type: String
+        //     },
+        //     quantity: {
+        //         type: Number,
+        //         required: false
+        //     },
+        //     unitPrice: {
+        //         type: Number,
+        //         required: false
+        //     }
+        // }],
+        book: {
+            type: String,
+        },
+        quantity: {
+            type: Number,
+        },
+        unitPrice: {
+            type: Number,
+        },
         orderStatus: {
             type: String,
-            enum: ["Delivered", "Shipped", "Pending","Canceled","Processing"]
-        }
+            enum: ["Delivered", "Shipped", "Pending", "Canceled", "Processing"],
+        },
     },
-    { strict:false,timestamps: true }
+    { strict: false, timestamps: true }
 );
 
 const PurchaseModel = mongoose.model("purchase", PurchaseSchema);

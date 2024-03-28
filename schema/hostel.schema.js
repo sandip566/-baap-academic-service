@@ -3,32 +3,32 @@ const HostelSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         hostelId: {
             type: Number,
-            default: 11,
+           required: false,
         },
         hostelerId: {
             type: Number,
-            required: false
+            required: false,
         },
         empId: {
             type: Number,
-            required: false
+            required: false,
         },
         admissionDate: {
             type: Date,
-            default: Date.now()
+            default: Date.now(),
         },
         bedNumber: {
             type: String,
-            required: false
+            required: false,
         },
         admissionStatus: {
             type: String,
-            enum: ['Pending', 'Approved', 'Rejected'],
-            default: 'Pending'
+            enum: ["Pending", "Approved", "Rejected"],
+            default: "Pending",
         },
     },
     { strict: false, timestamps: true }

@@ -3,26 +3,26 @@ const product = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
         productId: {
-            type: Number
+            type: Number,
         },
         name: {
-            type: String
+            type: String,
         },
         description: {
-            type: String
+            type: String,
         },
         unitCost: {
-            type: Number
+            type: Number,
         },
         unitPrice: {
-            type: Number
+            type: Number,
         },
         stockQuantity: {
-            type: Number
-        }
+            type: Number,
+        },
     },
     { strict: false, timestamps: true }
 );

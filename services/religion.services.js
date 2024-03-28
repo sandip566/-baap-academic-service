@@ -6,8 +6,11 @@ class Service extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getByCourseIdAndGroupId(name) {
-        const result = await this.model.findOne({ religion: name });
+    async getByCourseIdAndGroupId(groupId, name) {
+        const result = await this.model.findOne({
+            groupId: groupId,
+            religion: name,
+        });
         return new ServiceResponse({
             data: result,
         });
@@ -18,6 +21,7 @@ class Service extends BaseService {
         };
         criteria.pageSize = 10;
         if (criteria.religionId) query.religionId = criteria.religionId;
+        if (criteria.categoriesId) query.categoriesId = criteria.categoriesId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
@@ -32,7 +36,11 @@ class Service extends BaseService {
 
     async updateReligionById(religionId, newData) {
         try {
-            const updateData = await religionModel.findOneAndUpdate({ religionId: religionId }, newData, { new: true });
+            const updateData = await religionModel.findOneAndUpdate(
+                { religionId: religionId },
+                newData,
+                { new: true }
+            );
             return updateData;
         } catch (error) {
             throw error;

@@ -91,13 +91,14 @@ router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermissi
     try {
         const courseId = req.params.courseId;
         const groupId = req.params.groupId;
-        const courseData = await service.deleteCourseById({
-            courseId: courseId,
-            groupId: groupId,
-        });
+        const courseData = await service.deleteCourseById(
+             courseId,
+             groupId,
+        );
+        
         if (!courseData) {
             res.status(404).json({
-                error: "course data not found to delete",
+                error: "Course already exist for the provided course.",
             });
         } else {
             res.status(201).json(courseData);

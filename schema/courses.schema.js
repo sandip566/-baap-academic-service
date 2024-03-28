@@ -1,19 +1,19 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const courseSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: true
+            required: true,
         },
         courseId: Number,
-        courseName:String,
+        CourseName: String,
         name: {
             required: false,
-            type: String
+            type: String,
         },
         departmentId: {
             type: Number,
-            required: false
+            required: false,
         },
         Code: {
             type: String,
@@ -25,15 +25,15 @@ const courseSchema = new mongoose.Schema(
         },
         mode: {
             type: String,
-            required: false
+            required: false,
         },
         university: {
             type: String,
-            required: false
+            required: false,
         },
         fees: {
-            type: Number
-        }
+            type: Number,
+        },
     },
     { strict: false, timestamps: true }
 );

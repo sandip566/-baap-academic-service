@@ -5,61 +5,12 @@ const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
-
+const publisherModel = require("../schema/publisher.schema");
+const bookIssueLogService = require("../services/bookIssueLog.service");
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    //    async getAllDataByGroupId(groupId, criteria,skip,limit) {
-
-    //             const searchFilter = {
-    //                 groupId: groupId,
-    //             };
-    //             if (criteria.search) {
-    //                 const numericSearch = parseInt(criteria.search);
-    //                 if (!isNaN(numericSearch)) {
-    //                     searchFilter.$or = [
-    //                         { ISBN: numericSearch },
-    //                         { shelfId: numericSearch },
-    //                         { price: numericSearch },
-    //                         { departmentId: numericSearch },
-    //                         { totalCount: numericSearch },
-    //                         { availableCount: numericSearch },
-    //                     ];
-    //                 } else {
-    //                     searchFilter.$or = [
-    //                         { status: { $regex: criteria.search, $options: "i" } },
-    //                         { name: { $regex: criteria.search, $options: "i" } },
-    //                         { author: { $regex: criteria.search, $options: "i" } },
-    //                         {
-    //                             publisher: {
-    //                                 $regex: criteria.search,
-    //                                 $options: "i",
-    //                             },
-    //                         },
-    //                        // { RFID: criteria.search },
-    //                     ];
-    //                 }
-    //             }
-    //             if (criteria.publisher){
-    //                 searchFilter.publisher=criteria.publisher
-    //             }
-    //             if (criteria.shelfId) {
-    //                 searchFilter.shelfId = criteria.shelfId;
-    //             }
-    //             if (criteria.departmentId) {
-    //                 searchFilter.department = criteria.departmentId;
-    //             }
-    //             if (criteria.departmentId) {
-    //                 searchFilter['departmentId.departmentName'] = { $regex: new RegExp(criteria.departmentName, 'i') };
-    //             }
-    //             console.log(searchFilter)
-    //             return searchFilter;
-    //     //     } catch (error) {
-    //     //         console.log(error);
-    //     //         throw error;
-    //     //     }
-    //     }
     async getAllDataByGroupId(groupId, criteria, skip, limit) {
         try {
             const searchFilter = {
@@ -67,6 +18,7 @@ class BooksService extends BaseService {
             };
             const departmentMap = await this.getDepartmentMap();
             const shelfMap = await this.getShelfMap();
+            const publisherMap = await this.getPublisherMap();
 
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -84,6 +36,8 @@ class BooksService extends BaseService {
                         departmentMap[criteria.search.trim().toLowerCase()];
                     const shelfId =
                         shelfMap[criteria.search.trim().toLowerCase()];
+                    const publisherId =
+                        publisherMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
                         {
                             status: {
@@ -96,8 +50,9 @@ class BooksService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
+                        { publisherId: publisherId },
                         {
-                            publisher: {
+                            publisherName: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
@@ -106,7 +61,7 @@ class BooksService extends BaseService {
                             departmentName: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
-                        }, // Add departmentName search
+                        },
                         { shelfId: shelfId },
                         {
                             shelfName: {
@@ -117,14 +72,6 @@ class BooksService extends BaseService {
                 }
             }
 
-            if (criteria.publisher) {
-                searchFilter.publisher = {
-                    $regex: new RegExp(criteria.publisher, "i"),
-                };
-            }
-
-            // const departmentMap = await this.getDepartmentMap();
-
             if (criteria.departmentName) {
                 const departmentNameLowerCase =
                     criteria.departmentName.toLowerCase();
@@ -132,7 +79,6 @@ class BooksService extends BaseService {
                 if (departmentId) {
                     searchFilter.departmentId = departmentId;
                 } else {
-                    // If the provided department name doesn't exist in the department map, return empty result
                     return { searchFilter: {}, departmentMap: {} };
                 }
             }
@@ -146,11 +92,19 @@ class BooksService extends BaseService {
                     return { searchFilter: {}, shelfMap: {} };
                 }
             }
+            if (criteria.publisherName) {
+                const publishernameLowercase =
+                    criteria.publisherName.toLowerCase();
+                const publisherId = publisherMap[publishernameLowercase];
+                if (publisherId) {
+                    searchFilter.publisherId = publisherId;
+                } else {
+                    return { searchFilter: {}, publisherMap: {} };
+                }
+            }
+            console.log(publisherMap);
 
-            // Remove departmentName from criteria as it's been processed
-            delete criteria.departmentName;
-
-            return { searchFilter, departmentMap };
+            return { searchFilter };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw new Error("An error occurred while processing the request.");
@@ -179,7 +133,6 @@ class BooksService extends BaseService {
             const shelves = await shelfModel.find();
             const shelfMap = {};
             shelves.forEach((shelf) => {
-                // Check if shelfName exists before trimming and converting to lowercase
                 if (shelf.shelfName) {
                     const shelfName = shelf.shelfName.trim().toLowerCase();
                     shelfMap[shelfName] = shelf.shelfId;
@@ -190,6 +143,23 @@ class BooksService extends BaseService {
             console.error("Error fetching shelf map:", error);
             throw new Error("An error occurred while fetching shelf map.");
         }
+    }
+    async getPublisherMap() {
+        const publishers = await publisherModel.find();
+        const publisherMap = {};
+        publishers.forEach((publisher) => {
+            if (publisher.publisherName) {
+                const publisherName = publisher.publisherName
+                    .trim()
+                    .toLowerCase();
+                publisherMap[publisherName] = publisher.publisherId;
+            }
+        });
+        return publisherMap;
+    }
+    catch(error) {
+        console.error("Error fetching publisher map:", error);
+        throw new Error("An error occurred while fetching publisher map.");
     }
 
     async deleteBookById(bookId, groupId) {
@@ -212,18 +182,29 @@ class BooksService extends BaseService {
             throw error;
         }
     }
-    async getTotalAvailableBooks() {
+    async getBooksCount(groupId) {
         try {
-            const books = await booksModel.find();
+            const books = await booksModel.find({ groupId: groupId });
             if (!books) {
                 console.log("No books found in the database.");
                 return 0;
             }
+            let totalAvailableCount = 0;
             let totalCount = 0;
             for (const book of books) {
-                totalCount += book.availableCount || 0;
+                totalAvailableCount += book.availableCount || 0;
             }
-            return totalCount;
+            for (const book of books) {
+                totalCount += book.totalCopies || 0;
+            }
+            const count = await bookIssueLogService.getCount();
+            const response = {
+                totalCount: totalCount,
+                totalAvailableCount: totalAvailableCount,
+                totalIssuedBooks: count.bookIssues,
+                totalReturnedBooks: count.returnedBooks,
+            };
+            return response;
         } catch (error) {
             console.error("Error in getTotalAvailableBooks:", error);
             throw error;
@@ -313,11 +294,10 @@ class BooksService extends BaseService {
     }
     async getShelfId(bookId) {
         try {
-            const book = await booksModel.findOne({ bookId: bookId })
+            const book = await booksModel.findOne({ bookId: bookId });
+
             return book.shelfId;
-        } catch (error) {
-            console.log()
-        }
+        } catch (error) {}
     }
 }
 module.exports = new BooksService(booksModel, "books");
