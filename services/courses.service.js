@@ -89,7 +89,7 @@ class CourseService extends BaseService {
             });
 
             if (classRecord || divisionRecord) {
-                return null
+                return null;
             }
             const updateCourse = await courseModel.findOneAndDelete({
                 courseId: courseId,
