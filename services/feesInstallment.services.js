@@ -170,9 +170,9 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getStudentById(studentId) {
+    async getStudentById(addmissionId) {
         try {
-            const student = await Student.findOne({ _id: studentId });
+            const student = await studentAdmissionModel.findOne({ addmissionId: addmissionId });
             return student;
         } catch (error) {
             throw error;
@@ -185,10 +185,10 @@ class feesInstallmentService extends BaseService {
         });
     }
 
-    async getInstallmentsByStudentId(studentId) {
+    async getInstallmentsByStudentId(addmissionId) {
         try {
             const installments = await feesInstallmentModel.find({
-                studentId: studentId,
+                addmissionId: addmissionId,
             });
             return installments;
         } catch (error) {
