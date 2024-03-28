@@ -50,7 +50,7 @@ router.get("/all", async (req, res) => {
     }
 });
 
-router.post("/data/save", async (req, res, next) => {
+router.post("/data/save",TokenService.checkPermission(["ENAS2"]), async (req, res, next) => {
     try {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -230,7 +230,7 @@ router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
     }
 });
 
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
+router.get("/all/getByGroupId/:groupId",TokenService.checkPermission(["ENAS1"]), async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const criteria = {
@@ -294,7 +294,7 @@ router.get(
     }
 );
 router.delete(
-    "/groupId/:groupId/studentAdmissionId/:addmissionId",
+    "/groupId/:groupId/studentAdmissionId/:addmissionId",TokenService.checkPermission(["ENAS4"]),
     async (req, res) => {
         try {
             const addmissionId = req.params.addmissionId;
@@ -316,7 +316,7 @@ router.delete(
 );
 
 router.put(
-    "/groupId/:groupId/studentAdmissionId/:addmissionId",
+    "/groupId/:groupId/studentAdmissionId/:addmissionId",TokenService.checkPermission(["ENAS3"]),
     async (req, res) => {
         try {
             const addmissionId = req.params.addmissionId;

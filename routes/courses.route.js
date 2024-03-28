@@ -93,9 +93,9 @@ router.delete("/groupId/:groupId/courseId/:courseId", TokenService.checkPermissi
         const groupId = req.params.groupId;
         const courseData = await service.deleteCourseById(
              courseId,
-             groupId,
+             groupId, 
         );
-        
+        console.log(courseData);
         if (!courseData) {
             res.status(404).json({
                 error: "Course already exist for the provided course.",

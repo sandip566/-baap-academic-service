@@ -89,9 +89,7 @@ class CourseService extends BaseService {
             });
 
             if (classRecord || divisionRecord) {
-                return {
-                    error: "Cannot delete course. Related records exist.",
-                };
+                return null
             }
             const updateCourse = await courseModel.findOneAndDelete({
                 courseId: courseId,
