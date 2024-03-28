@@ -8,6 +8,7 @@ const { MongoClient, Long } = require("mongodb");
 const coursesService = require("../services/courses.service");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const mongoURI = "mongodb://127.0.0.1:27017/baap-acadamic-dev";
+const FeesTemplateModel=require("../schema/feesTemplate.schema")
 const { Aggregate, match, project, sum } = require("mongoose").Aggregate;
 let totalAmount = 0;
 let collectedAmount = 0;
@@ -149,31 +150,79 @@ router.put(
     }
 );
 
-router.get("/installments/:studentId", async (req, res) => {
+router.get("/installments/:addmissionId", async (req, res) => {
     try {
-        const studentId = req.params.studentId;
-
-        const student = await service.getStudentById(studentId);
+        const addmissionId = req.params.addmissionId;
+        
+        const student = await service.getStudentById(addmissionId);
         if (!student) {
             return res.status(404).json({ error: "Student not found" });
         }
-
+         
         const installments = await service.getInstallmentsByStudentId(
-            studentId
+            addmissionId
         );
+        
+        let totalFee = 0;
+            let remeningAmount = 0;
+            let totalPaid = 0;
+            installments.forEach((installment) => {
+             
+                installment.feesDetails.forEach((feesDetail) => {
+                    feesDetail.installment.forEach((installmentItem) => {
+                        totalFee += installmentItem.amount;
+                        if (installmentItem.status === "pending") {
+                            remeningAmount += installmentItem.amount;
+                        } else if (installmentItem.status === "paid") {
+                            totalPaid += parseInt(installmentItem.amount);
+                        }
+                    });
+                });
+            });
+            // const populatedFeesTemplet = await Promise.all(
+            //     installments.map(async (feesInstallment) => {
+            //         const feesTemplet = await FeesTemplateModel.findOne({
+            //             feesTemplateId: feesInstallment.feesTemplateId,
+            //         });
+            //         return { ...feesInstallment._doc, feesTemplet};
+            //     })
+            // );
+           
 
-        const formattedInstallments = installments.map((installment) => ({
-            _id: installment._id,
-            installmentAmount: installment.installmentAmount,
-            dueDate: installment.dueDate,
-            isPaid: installment.isPaid,
-            reciptNo: installment.reciptNo,
-            installmentId: installment.installmentId,
-            courseId: installment.courseId,
-            academicYearsId: installment.academicYearsId,
-            installmentNo: installment.installmentNo,
-        }));
-        res.json({ studentId, student, installments: formattedInstallments });
+            const populatedFeesTemplet = await Promise.all(
+                installments.map(async (feesInstallment) => {
+                    const feesTemplet = await FeesTemplateModel.findOne({
+                        feesTemplateId: feesInstallment.feesTemplateId,
+                    });
+                    return { ...feesInstallment._doc, feesTemplet };
+                })
+            );
+            
+            // Converting the array into a single object
+            const populatedFeesTempletObject = populatedFeesTemplet.reduce((acc, curr) => {
+                acc[curr._id] = curr;
+                return acc;
+            }, {});
+            
+            // console.log(populatedFeesTempletObject);
+            
+            
+        const response={
+            totalFee:totalFee,
+            totalPaid:totalPaid,
+            remeningAmount:remeningAmount
+
+        }
+
+       res.json({
+        status: "Success",
+        data: {
+            addmissionId:addmissionId,
+            student:student,
+            feesTemplet:populatedFeesTempletObject,
+            amountDetails:response
+        },
+    });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
