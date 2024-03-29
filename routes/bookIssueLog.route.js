@@ -98,7 +98,7 @@ router.post("/issue-book", async (req, res) => {
 
 router.post("/return-book", async (req, res) => {
     try {
-        const { bookId, addmissionId } = req.body;
+        const { groupId, bookId, addmissionId, returnDate } = req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             addmissionId: addmissionId,
@@ -110,16 +110,6 @@ router.post("/return-book", async (req, res) => {
                 error: "The book is not currently issued to the specified group.",
             });
         }
-        const shelfId = await booksServices.getShelfId(bookId);
-        const shelf = await shelfModel.find({ shelfId });
-        if (!shelf) {
-            return res.status(404).json({ error: "Shelf not found" });
-        }
-        await shelfModel.findOneAndUpdate(
-            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
-            { $inc: { availableCapacity: -1, currentInventory: 1 } },
-            { new: true }
-        );
         const updatedReservation = await service.updateBookIssueLogById(
             existingReservation.bookIssueLogId,
             { returned: true, returnDate: new Date() }
