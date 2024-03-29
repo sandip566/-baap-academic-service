@@ -42,7 +42,7 @@ class BookIssueLogService extends BaseService {
     async isBookAvailableForIssuing(addmissionId) {
         try {
             const existingReservation = await Book.findOne({
-                addmissionId:addmissionId,
+                addmissionId: addmissionId,
                 returned: false,
             });
             return !existingReservation;

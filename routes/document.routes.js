@@ -82,7 +82,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         roleId: req.query.roleId,
         title: req.query.title,
         description: req.query.description,
-        category: req.query.category,
+        category: req.query.category
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
