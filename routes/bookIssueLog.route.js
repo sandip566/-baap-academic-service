@@ -44,10 +44,10 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const isBookAvailable = await service.isBookAvailableForIssuing(bookId);
-        if (!isBookAvailable) {
+        if (isBookAvailable) {
             return res.status(400).json({
                 success: false,
-                error: "The book is not available for issuing.",
+                error: "Overdue book returned needed",
             });
         }
         const book = await Book.findOne({ bookId: bookId });
