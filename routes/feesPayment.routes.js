@@ -10,6 +10,7 @@ const feesTemplateModel = require("../schema/feesTemplate.schema");
 const studentAdmissionServices = require("../services/studentAdmission.services");
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
+const TokenService = require("../services/token.services");
 
 router.post(
     "/",
@@ -406,7 +407,7 @@ router.post(
                                 );
                                 installment.amount -= amountToDeduct;
                                 otherAmountRemaining -= amountToDeduct;
-                               
+
                                 if (installment.amount === 0) {
                                     installment.status = "paid";
                                     studentAdmissionServices.updateInstallmentAmount(
@@ -435,51 +436,59 @@ router.post(
     }
 );
 
-router.get("/getRecoveryData/:groupId", async (req, res, next) => {
-    if (ValidationHelper.requestValidationErrors(req, res)) {
-        return;
+router.get(
+    "/getRecoveryData/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const serviceResponse = await service.getRecoveryData(
+            req.params.groupId,
+            req.query.academicYear,
+            skip,
+            limit,
+            page
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
     }
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-    const serviceResponse = await service.getRecoveryData(
-        req.params.groupId,
-        req.query.academicYear,
-        skip,
-        limit,
-        page
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
-router.get("/getFeesStatData/:groupId", async (req, res, next) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        currentDate: req.query.currentDate,
-        academicYear: req.query.academicYear,
-        startDate: req.query.startDate,
-        endDate: req.query.endDate,
-        location: req.query.location,
-        course: req.query.course,
-        class: req.query.class,
-        department: req.query.department,
-        feesTemplateId: req.query.feesTemplateId,
-        division: req.query.division,
-        month: req.query.month,
-        search: req.query.search,
-    };
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100;
-    // const skip = (page - 1) * limit;
-    // const skip=(page-1)*limit;
-    const serviceResponse = await service.getFeesStatData(
-        groupId,
-        criteria,
-        // skip,
-        page,
-        limit
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+);
+router.get(
+    "/getFeesStatData/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            currentDate: req.query.currentDate,
+            academicYear: req.query.academicYear,
+            startDate: req.query.startDate,
+            endDate: req.query.endDate,
+            location: req.query.location,
+            course: req.query.course,
+            class: req.query.class,
+            department: req.query.department,
+            feesTemplateId: req.query.feesTemplateId,
+            division: req.query.division,
+            month: req.query.month,
+            search: req.query.search,
+        };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 100;
+        // const skip = (page - 1) * limit;
+        // const skip=(page-1)*limit;
+        const serviceResponse = await service.getFeesStatData(
+            groupId,
+            criteria,
+            // skip,
+            page,
+            limit
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
@@ -487,6 +496,7 @@ router.get("/all", async (req, res) => {
 });
 router.get(
     "/getByfeesPaymentId/groupId/:groupId/feesPaymentId/:feesPaymentId",
+
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -513,24 +523,29 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getAllFeesPayment/groupId/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        feesPaymentId: req.query.feesPaymentId,
-        empId: req.query.empId,
-        userId: req.query.userId,
-        installmentId: req.query.installmentId,
-        search: req.query.search,
-    };
-    const serviceResponse = await service.getAllFeesPaymentByGroupId(
-        groupId,
-        criteria
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+router.get(
+    "/getAllFeesPayment/groupId/:groupId",
+
+    async (req, res) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            feesPaymentId: req.query.feesPaymentId,
+            empId: req.query.empId,
+            userId: req.query.userId,
+            installmentId: req.query.installmentId,
+            search: req.query.search
+        };
+        const serviceResponse = await service.getAllFeesPaymentByGroupId(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 
 router.delete(
     "/groupId/:groupId/feesPaymentId/:feesPaymentId",
+    TokenService.checkPermission(["EFCDD4"]),
     async (req, res) => {
         try {
             const feesPaymentId = req.params.feesPaymentId;
@@ -555,6 +570,7 @@ router.delete(
 
 router.put(
     "/groupId/:groupId/feesPaymentId/:feesPaymentId",
+
     async (req, res) => {
         try {
             const feesPaymentId = req.params.feesPaymentId;

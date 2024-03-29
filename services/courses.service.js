@@ -77,24 +77,24 @@ class CourseService extends BaseService {
         });
     }
 
-    async deleteCourseById(courseId, groupId, newData) {
+    async deleteCourseById(courseId, groupId) {
         try {
-            const classRecord = await ClassModel.find(courseId, groupId);
-
-            const divisionRecord = await DivisionModel.findOne(
-                courseId,
-                groupId
-            );
+            const classRecord = await ClassModel.findOne({
+                courseId: courseId,
+                groupId: groupId,
+            });
+            const divisionRecord = await DivisionModel.findOne({
+                courseId: courseId,
+                groupId: groupId,
+            });
 
             if (classRecord || divisionRecord) {
                 return null;
             }
-
-            const updateCourse = await courseModel.findOneAndUpdate(
-                { courseId: courseId, groupId: groupId },
-                newData,
-                { new: true }
-            );
+            const updateCourse = await courseModel.findOneAndDelete({
+                courseId: courseId,
+                groupId: groupId,
+            });
             return updateCourse;
         } catch (error) {
             throw error;

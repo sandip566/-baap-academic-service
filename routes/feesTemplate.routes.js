@@ -1,10 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const service = require("../services/feesTemplate.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 
 router.post(
     "/",
@@ -132,16 +134,31 @@ router.delete(
     TokenService.checkPermission(["EMT4"]),
     async (req, res) => {
         try {
-            const feesTemplateId = req.params.feesTemplateId;
             const groupId = req.params.groupId;
-            const Data = await service.deletefeesTemplateById({
-                feesTemplateId: feesTemplateId,
+            const feesTemplateId = req.params.feesTemplateId;
+            const feesInstallment = await FeesInstallmentModel.find({
                 groupId: groupId,
             });
-            if (!Data) {
-                res.status(404).json({ error: "data not found to delete" });
+
+            let findId = false;
+            for (const data of feesInstallment) {
+                for (const data1 of data.feesDetails) {
+                    if (data1.feesTemplateId == feesTemplateId) {
+                        findId = true;
+                        break;
+                    }
+                }
+            }
+
+            if (findId) {
+                console.log("Fees Template is assigned to Fees Details");
+                res.send("Fees Template is assigned to Fees Details");
             } else {
-                res.status(201).json(Data);
+                const data = await service.deletefeesTemplateById(
+                    groupId,
+                    feesTemplateId
+                );
+                res.status(201).json(data);
             }
         } catch (error) {
             console.error(error);

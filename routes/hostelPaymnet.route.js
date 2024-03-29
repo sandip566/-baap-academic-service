@@ -22,10 +22,14 @@ router.post(
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10 
+        pageSize: 10,
     };
     const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria({req,query,pagination});
+    const serviceResponse = await service.getAllByCriteria({
+        req,
+        query,
+        pagination,
+    });
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -51,7 +55,7 @@ router.get("/getAllupdateHostelPaymnet/groupId/:groupId", async (req, res) => {
         studentId: req.query.studentId,
         mmemberId: req.query.memberId,
         hostelId: req.query.hostelId,
-        pageNumber:parseInt(req.query.pageNumber) || 1
+        pageNumber: parseInt(req.query.pageNumber) || 1,
     };
     const serviceResponse = await service.getAllHostelPaymnetByGroupId(
         groupId,
@@ -66,11 +70,10 @@ router.delete(
         try {
             const hostelPaymnetId = req.params.hostelPaymnetId;
             const groupId = req.params.groupId;
-            const deleteHostelPaymnet =
-                await service.deleteHostelPaymnetById({
-                    hostelPaymnetId: hostelPaymnetId,
-                    groupId: groupId,
-                });
+            const deleteHostelPaymnet = await service.deleteHostelPaymnetById({
+                hostelPaymnetId: hostelPaymnetId,
+                groupId: groupId,
+            });
             if (!deleteHostelPaymnet) {
                 res.status(404).json({
                     error: "HostelPaymnet data not found to delete",
@@ -92,12 +95,11 @@ router.put(
             const hostelPaymnetId = req.params.hostelPaymnetId;
             const groupId = req.params.groupId;
             const newData = req.body;
-            const updateHostelPaymnet =
-                await service.updateHostelPaymnetById(
-                    hostelPaymnetId,
-                    groupId,
-                    newData
-                );
+            const updateHostelPaymnet = await service.updateHostelPaymnetById(
+                hostelPaymnetId,
+                groupId,
+                newData
+            );
             if (!updateHostelPaymnet) {
                 res.status(404).json({
                     error: "HostelPaymnet data not found to update",

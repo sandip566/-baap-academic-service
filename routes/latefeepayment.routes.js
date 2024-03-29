@@ -24,38 +24,51 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/lateFeePaymentId/:lateFeePaymentId", async (req, res) => {
-    try {
-        const lateFeePaymentId = req.params.lateFeePaymentId;
-        const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(lateFeePaymentId, groupId);
-        if (!Data) {
-            res.status(404).json({ error: 'Data not found to delete' });
-        } else {
-            res.status(201).json(Data);
+router.delete(
+    "/groupId/:groupId/lateFeePaymentId/:lateFeePaymentId",
+    async (req, res) => {
+        try {
+            const lateFeePaymentId = req.params.lateFeePaymentId;
+            const groupId = req.params.groupId;
+            const Data = await service.deleteByDataId(
+                lateFeePaymentId,
+                groupId
+            );
+            if (!Data) {
+                res.status(404).json({ error: "Data not found to delete" });
+            } else {
+                res.status(201).json(Data);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+);
 
-router.put("/groupId/:groupId/lateFeePaymentId/:lateFeePaymentId", async (req, res) => {
-    try {
-        const lateFeePaymentId = req.params.lateFeePaymentId;
-        const groupId = req.params.groupId;
-        const newData = req.body;
-        const Data = await service.updateDataById(lateFeePaymentId, groupId, newData);
-        if (!Data) {
-            res.status(404).json({ error: 'Data not found to update' });
-        } else {
-            res.status(201).json(Data);
+router.put(
+    "/groupId/:groupId/lateFeePaymentId/:lateFeePaymentId",
+    async (req, res) => {
+        try {
+            const lateFeePaymentId = req.params.lateFeePaymentId;
+            const groupId = req.params.groupId;
+            const newData = req.body;
+            const Data = await service.updateDataById(
+                lateFeePaymentId,
+                groupId,
+                newData
+            );
+            if (!Data) {
+                res.status(404).json({ error: "Data not found to update" });
+            } else {
+                res.status(201).json(Data);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal Server Error' });
     }
-});
+);
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;

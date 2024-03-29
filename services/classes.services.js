@@ -12,14 +12,19 @@ class ClassService extends BaseService {
             groupId: groupId,
         };
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        if (criteria.location) query.location = new RegExp(criteria.location, "i");
+        if (criteria.location)
+            query.location = new RegExp(criteria.location, "i");
         if (criteria.courseId) query.courseId = criteria.courseId;
         if (criteria.Department) query.Department = criteria.Department;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async getByCourseIdAndGroupId(groupId, name, courseId) {
-        const result = await this.model.findOne({ groupId: groupId, name: name, courseId: courseId });
+        const result = await this.model.findOne({
+            groupId: groupId,
+            name: name,
+            courseId: courseId,
+        });
         return new ServiceResponse({
             data: result,
         });
@@ -27,7 +32,10 @@ class ClassService extends BaseService {
 
     async deleteClassById(classId, groupId) {
         try {
-            return await ClassModel.deleteOne({ classId: classId, groupId: groupId });
+            return await ClassModel.deleteOne({
+                classId: classId,
+                groupId: groupId,
+            });
         } catch (error) {
             throw error;
         }

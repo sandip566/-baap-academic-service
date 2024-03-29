@@ -25,11 +25,9 @@ router.post(
             return res.status(404).json({ error: "Shelf not found" });
         }
         if (shelf.availableCapacity <= 0) {
-            return res
-                .status(400)
-                .json({
-                    error: "This shelf is not available for storing books. Available capacity is zero.",
-                });
+            return res.status(400).json({
+                error: "This shelf is not available for storing books. Available capacity is zero.",
+            });
         }
         await shelfModel.findOneAndUpdate(
             { shelfId: shelfId, availableCapacity: { $gt: 0 } },

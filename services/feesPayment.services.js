@@ -137,7 +137,7 @@ class feesPaymentService extends BaseService {
                 let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
-                    status:"Confirm"
+                    status: "Confirm",
                 });
 
                 let feesData = await this.model
@@ -321,7 +321,6 @@ class feesPaymentService extends BaseService {
 
                             if (courseExists) {
                                 const courseName = courseExists.CourseName;
-                              
 
                                 const paymentsForCourse = feesData.filter(
                                     (payment) =>
@@ -680,7 +679,7 @@ class feesPaymentService extends BaseService {
                         );
                     service.status = installmentStatus.status.isDue;
                 }
-              
+
                 totalCourseFee1 = finalServices.reduce((total, course) => {
                     return total + parseFloat(course.courseFees || 0);
                 }, 0);
@@ -715,7 +714,6 @@ class feesPaymentService extends BaseService {
     }
 
     async getPaymentData(groupId, addmissionId, isShowInAccounting) {
-      
         try {
             const addmissionIdArray = Array.isArray(addmissionId)
                 ? addmissionId
@@ -772,7 +770,6 @@ class feesPaymentService extends BaseService {
                         (element) => {
                             course_id = element.course_id;
                             class_id = element.class_id;
-                          
                         }
                     );
                     let templateIds = addmissionId1.feesDetails.forEach(
@@ -892,12 +889,11 @@ class feesPaymentService extends BaseService {
                 groupId: groupId,
                 addmissionId: admissionId,
             });
-         
+
             let totalFee = 0;
             let remeningAmount = 0;
             let totalPaid = 0;
             installments.forEach((installment) => {
-             
                 installment.feesDetails.forEach((feesDetail) => {
                     feesDetail.installment.forEach((installmentItem) => {
                         totalFee += installmentItem.amount;
