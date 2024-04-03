@@ -67,15 +67,15 @@ router.post(
                 if (existingDocument) {
                     req.body.documents = req.body.documents
                         ? req.body.documents.map((documentData) => {
-                              const documentId =
-                                  +Date.now() +
-                                  Math.floor(Math.random() * 1000);
-                              return {
-                                  _id: new mongoose.Types.ObjectId(),
-                                  documentId: documentId,
-                                  documents: documentData,
-                              };
-                          })
+                            const documentId =
+                                +Date.now() +
+                                Math.floor(Math.random() * 1000);
+                            return {
+                                _id: new mongoose.Types.ObjectId(),
+                                documentId: documentId,
+                                documents: documentData,
+                            };
+                        })
                         : existingDocument.data?.documents || [];
 
                     if (req.body.feesDetails) {

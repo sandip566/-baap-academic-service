@@ -152,49 +152,49 @@ router.put(
 );
 router.get("/installments/:addmissionId", async (req, res) => {
     try {
-      const addmissionId = req.params.addmissionId;
-  
-      const student = await service.getStudentById(addmissionId);
-      if (!student) {
-        return res.status(404).json({ error: "Student not found" });
-      }
-  
-      const installments = await service.getInstallmentsByStudentId(
-        addmissionId
-      );
-      let paidAmt = await feesPaymentModel.getPaidAmount(addmissionId);
-      let totalAmount = 0;
-      let totalPaidAmount = 0;
-  
-      if (paidAmt && paidAmt.length > 0) {
-        paidAmt.forEach(item => {
-          totalAmount = parseInt(item.courseFee);
-          totalPaidAmount += parseInt(item.paidAmount);
-        });
-      }
-  
-      const remainingAmount = totalAmount - totalPaidAmount;
-  
-      const response = {
-        paidAmount: paidAmt,
-        totalAmount: totalAmount,
-        remainingAmount: remainingAmount,
-        PaidAmount: totalPaidAmount
-      };
-  
-      res.json({
-        status: "Success",
-        data: {
-          addmissionId: addmissionId,
-          student: student,
-          amountDetails: response
+        const addmissionId = req.params.addmissionId;
+
+        const student = await service.getStudentById(addmissionId);
+        if (!student) {
+            return res.status(404).json({ error: "Student not found" });
         }
-    })
+
+        const installments = await service.getInstallmentsByStudentId(
+            addmissionId
+        );
+        let paidAmt = await feesPaymentModel.getPaidAmount(addmissionId);
+        let totalAmount = 0;
+        let totalPaidAmount = 0;
+
+        if (paidAmt && paidAmt.length > 0) {
+            paidAmt.forEach(item => {
+                totalAmount = parseInt(item.courseFee);
+                totalPaidAmount += parseInt(item.paidAmount);
+            });
+        }
+
+        const remainingAmount = totalAmount - totalPaidAmount;
+
+        const response = {
+            paidAmount: paidAmt,
+            totalAmount: totalAmount,
+            remainingAmount: remainingAmount,
+            PaidAmount: totalPaidAmount
+        };
+
+        res.json({
+            status: "Success",
+            data: {
+                addmissionId: addmissionId,
+                student: student,
+                amountDetails: response
+            }
+        })
     } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: "Internal Server Error" });
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-  });
+});
 router.get("/get-total-amount", async (req, res) => {
     try {
         const client = new MongoClient(mongoURI);
