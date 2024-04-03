@@ -111,16 +111,17 @@ class BooksService extends BaseService {
         }
     }
 
-    async getDepartmentMap() {
+    async getDepartmentMap(groupId) {
         try {
-            const departments = await departmentModel.find();
+            const departments = await departmentModel.find({groupId:groupId});
             const departmentMap = {};
             departments.forEach((department) => {
-                // Trim and convert to lowercase before adding to the map
-                const departmentName = department.departmentName
-                    .trim()
-                    .toLowerCase();
-                departmentMap[departmentName] = department.departmentId;
+                if (department.departmentName) {
+                    const departmentName = department.departmentName
+                        .trim()
+                        .toLowerCase();
+                    departmentMap[departmentName] = department.departmentId;
+                }
             });
             return departmentMap;
         } catch (error) {

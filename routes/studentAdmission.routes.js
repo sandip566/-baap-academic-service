@@ -78,15 +78,6 @@ router.post(
                           })
                         : existingDocument.data?.documents || [];
 
-                    // req.body.feesDetails = req.body.feesDetails
-                    //     ? req.body.feesDetails.map((feesDetailsData) => {
-                    //           const feesDetailsId = +Date.now();
-                    //           return {
-                    //               _id: new mongoose.Types.ObjectId(),
-                    //               feesDetailsId: feesDetailsId,
-                    //               feesDetails: feesDetailsData,
-                    //           };
-                    //       })
                     if (req.body.feesDetails) {
                         const installmentId = +Date.now();
                         req.body.installmentId = installmentId;
@@ -140,11 +131,10 @@ router.post(
                         req.body
                     );
 
-                    // console.log("serviceResponse", serviceResponse);
                     requestResponsehelper.sendResponse(res, serviceResponse);
                 } else {
                     const serviceResponse = await service.create(req.body);
-                    // console.log(serviceResponse);
+
                     if (req.body.feesDetails) {
                         const installmentId = +Date.now();
                         req.body.installmentId = installmentId;
