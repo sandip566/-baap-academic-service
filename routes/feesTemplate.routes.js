@@ -7,7 +7,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
-const StudentAdmissionModel=require("../schema/studentAdmission.schema");
+const StudentAdmissionModel = require("../schema/studentAdmission.schema");
 
 router.post(
     "/",
