@@ -59,6 +59,22 @@ router.get(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+router.get(
+    "/getAllDataUsingLink/all/getByGroupId/:groupId",
+    async (req, res) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            categoriesId: req.query.categoriesId,
+            religionId: req.query.religionId,
+            name: req.query.name,
+        };
+        const serviceResponse = await service.getAllDataByGroupId(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.delete(
     "/:id",
     TokenService.checkPermission(["EFC4"]),
