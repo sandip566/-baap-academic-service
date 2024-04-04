@@ -198,7 +198,7 @@ router.get("/installments/:addmissionId", async (req, res) => {
         const response = {
             totalFee: totalFee,
             totalPaid: totalPaid,
-            remeningAmount: remeningAmount
+            remeningAmount: remeningAmount,
         };
         res.json({
             status: "Success",
@@ -206,7 +206,7 @@ router.get("/installments/:addmissionId", async (req, res) => {
                 addmissionId: addmissionId,
                 student: student,
                 feesTemplet: populatedFeesTempletObject,
-                amountDetails: response
+                amountDetails: response,
             },
         });
     } catch (error) {
@@ -288,7 +288,7 @@ router.get("/get-fees-summary", async (req, res) => {
             currentYear,
             month,
             startDate,
-            endDate
+            endDate,
         } = req.query;
 
         const courses = await service.getAllDataByGroupId(groupId);
@@ -313,7 +313,7 @@ router.get("/get-fees-summary", async (req, res) => {
                     totalStudents: totalStudents,
                     totalFees: totalFeesObj.totalFees,
                     pendingFees: totalFeesObj.pendingFees,
-                    paidFees: totalFeesObj.paidFees
+                    paidFees: totalFeesObj.paidFees,
                 };
             })
         );
@@ -334,7 +334,7 @@ router.get("/get-fees-summary", async (req, res) => {
             courses: coursesWithTotalStudents,
             totalFees,
             totalPaidFees,
-            totalPendingFees
+            totalPendingFees,
         };
 
         res.json(response);
@@ -398,6 +398,7 @@ router.get("/get-classes-fees", async (req, res) => {
 
         res.json(response);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

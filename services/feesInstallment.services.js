@@ -172,7 +172,9 @@ class feesInstallmentService extends BaseService {
 
     async getStudentById(addmissionId) {
         try {
-            const student = await studentAdmissionModel.findOne({ addmissionId: addmissionId });
+            const student = await studentAdmissionModel.findOne({
+                addmissionId: addmissionId,
+            });
             return student;
         } catch (error) {
             throw error;
@@ -352,12 +354,18 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getTotalStudentsForClass(classId, feesTemplateId, groupId) {
+    async getTotalStudentsForClass(
+        classId,
+        feesTemplateId,
+        groupId,
+        academicYear
+    ) {
         try {
             const totalStudents = await studentAdmissionModel.countDocuments({
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
+
                 status: "Confirm",
             });
             return totalStudents;

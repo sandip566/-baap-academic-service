@@ -7,6 +7,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
+const StudentAdmissionModel=require("../schema/studentAdmission.schema");
 
 router.post(
     "/",
@@ -136,7 +137,7 @@ router.delete(
         try {
             const groupId = req.params.groupId;
             const feesTemplateId = req.params.feesTemplateId;
-            const feesInstallment = await FeesInstallmentModel.find({
+            const feesInstallment = await StudentAdmissionModel.find({
                 groupId: groupId,
             });
 
@@ -152,7 +153,7 @@ router.delete(
 
             if (findId) {
                 console.log("Fees Template is assigned to Fees Details");
-                res.send("Fees Template is assigned to Fees Details");
+                res.send("Fees Template is assigned to Fees     ");
             } else {
                 const data = await service.deletefeesTemplateById(
                     groupId,
