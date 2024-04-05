@@ -178,8 +178,8 @@ router.get("/installments/:addmissionId", async (req, res) => {
         const response = {
             paidAmount: paidAmt,
             totalAmount: totalAmount,
-            remainingAmount: remainingAmount,
-            PaidAmount: totalPaidAmount
+            PaidAmount: totalPaidAmount,
+            remainingAmount: remainingAmount
         };
 
         res.json({
