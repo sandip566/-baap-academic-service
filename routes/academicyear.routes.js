@@ -74,6 +74,20 @@ router.get(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+router.get(
+    "/getAllDataUsingLink/all/getByGroupId/:groupId",
+    async (req, res) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            name: req.query.name,
+        };
+        const serviceResponse = await service.getAllDataByGroupId(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.put(
     "/groupId/:groupId/academicYearId/:academicYearId",
     TokenService.checkPermission(["EMA3"]),
