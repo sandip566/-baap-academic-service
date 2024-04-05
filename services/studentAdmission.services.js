@@ -750,7 +750,7 @@ class StudentsAdmmisionService extends BaseService {
         try {
             let results = [];
 
-            for (let i = 0; i < dataRows.length; i++) {
+            for (let i = 0; i < dataRows?.length; i++) {
                 const data = dataRows[i];
                 const CourseName = data.courseName;
                 const className = data.class;
