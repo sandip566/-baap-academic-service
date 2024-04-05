@@ -12,6 +12,9 @@ const DocumentSchema = new mongoose.Schema(
         memberId: {
             type: Number,
         },
+        userId: {
+            type: Number
+        },
         rollId: {
             type: Number,
         },
