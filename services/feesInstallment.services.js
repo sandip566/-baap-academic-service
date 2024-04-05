@@ -365,7 +365,7 @@ class feesInstallmentService extends BaseService {
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
-                status: "Confirm",
+                admissionStatus:"Confirm",
             });
             return totalStudents;
         } catch (error) {

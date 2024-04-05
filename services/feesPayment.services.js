@@ -19,6 +19,7 @@ class feesPaymentService extends BaseService {
             let studentRecordCount = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
+                admissionStatus:"Confirm"
             });
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
@@ -137,7 +138,7 @@ class feesPaymentService extends BaseService {
                 let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
-                    status: "Confirm",
+                    admissionStatus: "Confirm",
                 });
 
                 let feesData = await this.model

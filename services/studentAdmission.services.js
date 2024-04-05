@@ -596,6 +596,7 @@ class StudentsAdmmisionService extends BaseService {
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
+                admissionStatus:"Confirm"
             });
             let coursePayments = {};
             let courseID;

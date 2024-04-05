@@ -61,7 +61,7 @@ router.post(
             if (req.body.addmissionId) {
                 const admission = await StudentsAdmissionModel.findOneAndUpdate(
                     { addmissionId: req.body.addmissionId },
-                    { status: "Confirm" },
+                    { admissionStatus: "Confirm" },
                     { new: true }
                 );
                 const UpdateinstallmentStatus =
@@ -255,7 +255,7 @@ router.post(
             if (req.body.addmissionId) {
                 const admission = await StudentsAdmissionModel.findOneAndUpdate(
                     { addmissionId: req.body.addmissionId },
-                    { status: "Confirm" },
+                    { admissionStatus: "Confirm" },
                     { new: true }
                 );
                 const UpdateinstallmentStatus =
