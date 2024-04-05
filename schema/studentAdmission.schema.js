@@ -50,6 +50,11 @@ const studentsAdmissionSchema = new mongoose.Schema(
         phone: {
             type: Number,
         },
+        status:{
+            type:String,
+            required:false,
+            default:"Draft"
+        }
     },
     { strict: false, timestamps: true }
 );
