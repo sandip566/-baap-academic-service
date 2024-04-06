@@ -197,6 +197,7 @@ class StudentsAdmmisionService extends BaseService {
                         { firstName: { $regex: query.search, $options: "i" } },
                         { lastName: { $regex: query.search, $options: "i" } },
                         { phoneNumber: numericSearch },
+                        
                     ];
                 } else {
                     searchFilter.$or = [

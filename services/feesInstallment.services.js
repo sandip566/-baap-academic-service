@@ -365,7 +365,6 @@ class feesInstallmentService extends BaseService {
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
-
                 status: "Confirm",
             });
             return totalStudents;
@@ -427,8 +426,12 @@ class feesInstallmentService extends BaseService {
                         totalInstallmentAmount: {
                             $sum: {
                                 $subtract: [
-                                    "$feesDetails.installment.totalInstallmentAmount",
-                                    "$feesDetails.installment.amount",
+                                    {
+                                        $toInt: "$feesDetails.installment.totalInstallmentAmount",
+                                    },
+                                    {
+                                        $toInt: "$feesDetails.installment.amount",
+                                    },
                                 ],
                             },
                         },
