@@ -3,13 +3,37 @@ const documentConfigrationModel = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: false,
         },
-       documents:[{
-       documntConfigurationId:Number
-    }] ,
+        academicYear: {
+            type: Number,
+            required: false,
+        },
+        empId: {
+            type: Number,
+            required: false,
+        },
+        addmissionId: {
+            type: Number,
+            required: false,
+        },
+
+        userId: {
+            type: Number,
+        },
+        roleId: {
+            type: Number,
+        },
+        documents: [
+            {
+                documntConfigurationId: Number,
+            },
+        ],
     },
     { strict: false, timestamps: true }
 );
-const documentConfigrationSchema = mongoose.model("documentConfigration", documentConfigrationModel);
+const documentConfigrationSchema = mongoose.model(
+    "documentConfigration",
+    documentConfigrationModel
+);
 module.exports = documentConfigrationSchema;

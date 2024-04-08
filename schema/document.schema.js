@@ -15,7 +15,7 @@ const DocumentSchema = new mongoose.Schema(
         userId: {
             type: Number
         },
-        rollId: {
+        roleId: {
             type: Number,
         },
         title: {

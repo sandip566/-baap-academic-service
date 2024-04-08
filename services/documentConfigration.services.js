@@ -91,6 +91,11 @@ class documentConfigration extends BaseService {
             groupId: groupId,
         };
         if (criteria.documentConfigrationId) query.documentConfigrationId = criteria.documentConfigrationId;
+        if (criteria.userId) query.userId = criteria.userId;
+        if (criteria.roleId) query.roleId = criteria.roleId;
+        if (criteria.addmissionId) query.addmissionId = criteria.addmissionId;
+        if (criteria.academicYear) query.academicYear = criteria.academicYear;
+        if (criteria.empId) query.empId = criteria.empId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }
