@@ -70,21 +70,21 @@ class DepartmentService extends BaseService {
     }
     async deleteByDataId(groupId, departmentId) {
         try {
-            const classRecord = await ClassModel.findOne({
-                groupId: groupId,
-                Department: departmentId,
-            });
+            // const classRecord = await ClassModel.findOne({
+            //     groupId: groupId,
+            //     Department: departmentId,
+            // });
             const courseRecord = await courseModel.findOne({
                 groupId: groupId,
                 departmentId: departmentId,
             });
-            const divisionRecord = await DivisionModel.findOne({
-                groupId: groupId,
-                Department: departmentId,
-            });
+            // const divisionRecord = await DivisionModel.findOne({
+            //     groupId: groupId,
+            //     Department: departmentId,
+            // });
 
-            if (classRecord || divisionRecord || courseRecord) {
-                return  "this deparment is assing to class or division or course";
+            if ( courseRecord) {
+                return res.status(401).json({ error: "This Deparment Is Assing To Class Or Division Or Course" });
             }
 
             return await DepartmentModel.deleteOne({
