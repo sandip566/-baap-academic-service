@@ -90,7 +90,7 @@ router.delete("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         return res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-router.put("/groupId/:groupId/documntConfigurationId/documntConfigurationId", async (req, res) => {
+router.put("/groupId/:groupId/documntConfigurationId/:documntConfigurationId", async (req, res) => {
     try {
         const documntConfigurationId = req.params.documntConfigurationId;
         const groupId = req.params.groupId;
