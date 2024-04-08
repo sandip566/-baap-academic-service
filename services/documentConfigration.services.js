@@ -43,7 +43,7 @@ class documentConfigration extends BaseService {
                         "documents.$[elem].documentTitle": updateData.documentTitle,
                         "documents.$[elem].expiryDate": updateData.expiryDate,
                         "documents.$[elem].formDate": updateData.formDate,
-                        "documents.$[elem].documentId": updateData.newDocumentId
+                        "documents.$[elem].documentUrl": updateData.documentUrl
                     }
                 },
                 {
