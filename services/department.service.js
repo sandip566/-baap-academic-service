@@ -84,7 +84,7 @@ class DepartmentService extends BaseService {
             });
 
             if (classRecord || divisionRecord || courseRecord) {
-                return null;
+                return  "this deparment is assing to class or division or course";
             }
 
             return await DepartmentModel.deleteOne({
