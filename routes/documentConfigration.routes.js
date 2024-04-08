@@ -5,6 +5,7 @@ const service = require("../services/documentConfigration.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const documentConfigrationModel=require("../schema/documentConfigration.schema")
+const documntModel=require("../schema/document.schema")
 router.post(
     "/",
     checkSchema(require("../dto/visitor.dto")),
@@ -25,20 +26,36 @@ router.post(
 );
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        documntConfigurationId: req.query.documntConfigurationId,
-        userId: req.query.userId,
-        roleId: req.query.roleId,
-        addmissionId: req.query.addmissionId,
-        academicYear:req.query.academicYear,
-        empId:req.query.empId
-    };
-    const serviceResponse = await service.getAllDataByGroupId(
-        groupId,
-        criteria
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            documntConfigurationId: req.query.documntConfigurationId,
+            userId: req.query.userId,
+            roleId: req.query.roleId,
+            addmissionId: req.query.addmissionId,
+            academicYear: req.query.academicYear,
+            empId: req.query.empId
+        };
+        const {query} = await service.getAllDataByGroupId(groupId, criteria);
+        const documentConfigurations = await documentConfigrationModel.find(query);
+        const populatedDocuments = await Promise.all(
+            documentConfigurations.map(async (documentConfigration) => {
+                const document = await documntModel.findOne({
+                    roleId: documentConfigration.roleId,
+                });
+                return { ...documentConfigration._doc, document };
+            })
+        );
+        res.json({
+            data: {
+                items: populatedDocuments,
+            }
+        });
+    } catch (err) {
+        console.error('Error:', err);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+
 });
 
 router.delete("/groupId/:groupId/documntConfigurationId/:documntConfigurationId", async (req, res) => {
@@ -57,7 +74,7 @@ router.delete("/groupId/:groupId/documntConfigurationId/:documntConfigurationId"
     }
 });
 
-router.delete("update/groupId/:groupId/documentId/:documentId", async (req, res) => {
+router.delete("/groupId/:groupId/documentId/:documentId", async (req, res) => {
     try {
         const { groupId, documentId } = req.params;
 
@@ -71,6 +88,22 @@ router.delete("update/groupId/:groupId/documentId/:documentId", async (req, res)
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+router.put("/groupId/:groupId/documntConfigurationId/documntConfigurationId", async (req, res) => {
+    try {
+        const documntConfigurationId = req.params.documntConfigurationId;
+        const groupId = req.params.groupId;
+        const newData = req.body;
+        const updateData = await service.updateDocumntConfigrationByConfigrationId(documntConfigurationId, groupId, newData);
+        if (!updateData) {
+            res.status(404).json({ error: 'data not found to update' });
+        } else {
+            res.status(200).json(updateData);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Internal Server Error' });
     }
 });
 

@@ -25,9 +25,9 @@ class documentConfigration extends BaseService {
             });
         }
     }
-    async deleteDocumentConfigrationId(documentConfigrationId, groupId) {
+    async deletedocumntConfigurationId(documentConfigrationId, groupId) {
         try {
-            return await documentConfigrationModel.deleteOne({ visitorId: visitorId, groupId: groupId });
+            return await documentConfigrationModel.deleteOne({ documentConfigrationId: documentConfigrationId, groupId: groupId });
         } catch (error) {
             throw error;
         }
@@ -56,6 +56,21 @@ class documentConfigration extends BaseService {
         }
     }
     
+
+    async updateDocumntConfigrationByConfigrationId(documntConfigurationId, groupId, newData) {
+        try {
+            const updatedDocumntConfigration = await this.dbModel.findOneAndUpdate(
+                { documntConfigurationId: documntConfigurationId, groupId: groupId },
+                newData,
+                { new: true }
+            );
+            return updatedDocumntConfigration;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 
     async deleteById({ groupId, documentId }) {
         try {
