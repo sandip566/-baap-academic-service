@@ -14,7 +14,7 @@ const xlsx = require("xlsx");
 router.post(
     "/",
     checkSchema(require("../dto/department.dto")),
-    TokenService.checkPermission(["EMD2"]),
+   // TokenService.checkPermission(["EMD2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -44,7 +44,7 @@ router.get("/all", async (req, res) => {
 
 router.delete(
     "/groupId/:groupId/departmentId/:departmentId",
-    TokenService.checkPermission(["EMD4"]),
+   // TokenService.checkPermission(["EMD4"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
@@ -56,13 +56,12 @@ router.delete(
             });
 
             if (hasAssignedCourses) {
-                return res
-                    .status(401)
-                    .json({ error: "Department has assigned courses " });
+                return res.status(401).json({ error: "Department has assigned courses " });
             }
 
             const data = await service.deleteByDataId(groupId, departmentId);
             res.status(201).json(data);
+            console.log(data)
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: "Internal Server Error" });

@@ -25,37 +25,56 @@ class documentConfigration extends BaseService {
             });
         }
     }
-    async deleteDocumentConfigrationId(documentConfigrationId, groupId) {
+    async deletedocumntConfigurationId(documentConfigrationId, groupId) {
         try {
-            return await documentConfigrationModel.deleteOne({ visitorId: visitorId, groupId: groupId });
+            return await documentConfigrationModel.deleteOne({ documentConfigrationId: documentConfigrationId, groupId: groupId });
         } catch (error) {
             throw error;
         }
     }
     async updateById({ groupId, documentId, updateData }) {
         try {
-            const documentConfiguration = await documentConfigrationModel.findOne({ groupId: groupId });
-           
-            if (!documentConfiguration) {
-                return null; 
-            }
 
-            const documentToUpdate = documentConfiguration.documents.find(doc => {
-                console.log(doc.documentId)
-                doc.documentId == documentId}
-            )
-            if (!documentToUpdate) {
-                return null; 
-            }
-            Object.assign(documentToUpdate, updateData);
-            await documentConfiguration.save();
-    
-            return documentToUpdate;
+
+            const updateResult1 = await documentConfigrationModel.updateMany(
+                { "documents.documentId": documentId },
+                {
+                    $set: {
+                        "documents.$[elem].documentTitle": updateData.documentTitle,
+                        "documents.$[elem].expiryDate": updateData.expiryDate,
+                        "documents.$[elem].formDate": updateData.formDate,
+                        "documents.$[elem].documentUrl": updateData.documentUrl
+                    }
+                },
+                {
+                    arrayFilters: [{ "elem.documentId": documentId }]
+                }
+            );
+
+
+
+
+            return updateResult1;
         } catch (error) {
             throw error;
         }
     }
     
+
+    async updateDocumntConfigrationByConfigrationId(documntConfigurationId, groupId, newData) {
+        try {
+            const updatedDocumntConfigration = await this.dbModel.findOneAndUpdate(
+                { documntConfigurationId: documntConfigurationId, groupId: groupId },
+                newData,
+                { new: true }
+            );
+            return updatedDocumntConfigration;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+
 
     async deleteById({ groupId, documentId }) {
         try {
