@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const documentConfigrationModel = require("../schema/documentConfigration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -5,7 +6,25 @@ class documentConfigration extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async updateUser(addmissionId, groupId, data) {
+        try {
+            const resp = await documentConfigrationModel.findOneAndUpdate(
+                { addmissionId: addmissionId, groupId: groupId },
 
+                data,
+                { upsert: true, new: true }
+            );
+
+            return new ServiceResponse({
+                data: resp,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
     async deleteDocumentConfigrationId(documentConfigrationId, groupId) {
         try {
             return await documentConfigrationModel.deleteOne({ visitorId: visitorId, groupId: groupId });
