@@ -94,7 +94,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -169,7 +169,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -287,7 +287,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -362,7 +362,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";

@@ -113,7 +113,7 @@ class BooksService extends BaseService {
 
     async getDepartmentMap(groupId) {
         try {
-            const departments = await departmentModel.find({groupId:groupId});
+            const departments = await departmentModel.find({ groupId: groupId });
             const departmentMap = {};
             departments.forEach((department) => {
                 if (department.departmentName) {
@@ -298,7 +298,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) {}
+        } catch (error) { }
     }
 }
 module.exports = new BooksService(booksModel, "books");

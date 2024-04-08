@@ -22,9 +22,9 @@ class Service extends BaseService {
         });
     }
 
-    async deletefeesTemplateById( groupId,feesTemplateId) {
+    async deletefeesTemplateById(groupId, feesTemplateId) {
         try {
-            return await feesTemplateModel.deleteOne({groupId:groupId,feesTemplateId:feesTemplateId});
+            return await feesTemplateModel.deleteOne({ groupId: groupId, feesTemplateId: feesTemplateId });
         } catch (error) {
             throw error;
         }

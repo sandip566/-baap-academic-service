@@ -216,7 +216,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -231,7 +231,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -249,7 +249,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -269,7 +269,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -288,7 +288,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -341,15 +341,15 @@ class feesPaymentService extends BaseService {
                                         (total, paymentArray, currentIndex) => {
                                             const lastIndex =
                                                 currentIndex ===
-                                                paymentsForCourse.length - 1
+                                                    paymentsForCourse.length - 1
                                                     ? paymentArray
                                                     : null;
 
                                             const remainingAmount = lastIndex
                                                 ? parseFloat(
-                                                      lastIndex.remainingAmount ||
-                                                          0
-                                                  )
+                                                    lastIndex.remainingAmount ||
+                                                    0
+                                                )
                                                 : 0;
 
                                             return total + remainingAmount;
@@ -407,9 +407,9 @@ class feesPaymentService extends BaseService {
 
                         console.log(
                             "Total fee for course '" +
-                                courseName +
-                                "': " +
-                                totalFee
+                            courseName +
+                            "': " +
+                            totalFee
                         );
 
                         return {
@@ -418,7 +418,7 @@ class feesPaymentService extends BaseService {
                             courseFee: totalFee,
                             TotalCourseFee:
                                 coursePayments[courseName].courseFee *
-                                    coursePayments[courseName].noOfStudents ||
+                                coursePayments[courseName].noOfStudents ||
                                 0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
@@ -473,7 +473,7 @@ class feesPaymentService extends BaseService {
                             const matchingAdmission = admissionData.find(
                                 (admission) =>
                                     admission.addmissionId ===
-                                        service.addmissionId &&
+                                    service.addmissionId &&
                                     service.isShowInAccounting
                             );
 
@@ -581,9 +581,9 @@ class feesPaymentService extends BaseService {
 
                                                     if (
                                                         item.status ==
-                                                            "pending" &&
+                                                        "pending" &&
                                                         formattedDate <
-                                                            criteria.currentDate
+                                                        criteria.currentDate
                                                     ) {
                                                         isDue = true;
                                                         return;
@@ -922,5 +922,16 @@ class feesPaymentService extends BaseService {
             throw error;
         }
     }
+
+    async getPaidAmount(addmissionId) {
+        try {
+            const paidamount = await feesPaymentModel.find({ addmissionId: addmissionId });
+            return paidamount;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+
 }
 module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");
