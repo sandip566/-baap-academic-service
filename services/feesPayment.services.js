@@ -162,7 +162,7 @@ class feesPaymentService extends BaseService {
                     ).padStart(2, "0");
                     const day = String(currentDateObj.getDate()).padStart(
                         2,
-                        "0"
+                        "0" 
                     );
                     const formattedDate = `${year}/${month}/${day}`;
 
