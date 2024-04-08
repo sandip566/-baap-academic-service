@@ -68,16 +68,18 @@ router.post(
                     req.body.documents = req.body.documents
                         ? req.body.documents.map((documentData) => {
                               const documentId =
-                                  +Date.now() +
-                                  Math.floor(Math.random() * 1000);
+                                  Date.now() + Math.floor(Math.random() * 1000);
                               return {
-                                  _id: new mongoose.Types.ObjectId(),
-                                  documentId: documentId,
-                                  documents: documentData,
+                                  documentTitle:
+                                      documentData.documentTitle || "",
+                                  expiryDate: documentData.expiryDate || "",
+                                  formDate: documentData.formDate || "",
+                                  documentUrl: documentData.documentUrl || "",
+                                  documentId: documentId, 
                               };
                           })
                         : existingDocument.data?.documents || [];
-
+                        // await feesInstallmentServices.create(req.body);
                     if (req.body.feesDetails) {
                         const installmentId = +Date.now();
                         req.body.installmentId = installmentId;

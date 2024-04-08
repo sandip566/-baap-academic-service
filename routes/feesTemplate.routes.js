@@ -140,20 +140,28 @@ router.delete(
             const feesInstallment = await StudentAdmissionModel.find({
                 groupId: groupId,
             });
+            console.log(feesInstallment[0].feesDetails);
 
             let findId = false;
             for (const data of feesInstallment) {
-                for (const data1 of data.feesDetails) {
-                    if (data1.feesTemplateId == feesTemplateId) {
-                        findId = true;
-                        break;
+                console.log(data);
+                // Check if feesDetails exists and is iterable
+                if (
+                    data.feesDetails &&
+                    typeof data.feesDetails[Symbol.iterator] === "function"
+                ) {
+                    for (const data1 of data.feesDetails) {
+                        if (data1.feesTemplateId == feesTemplateId) {
+                            findId = true;
+                            break;
+                        }
                     }
                 }
             }
 
             if (findId) {
                 console.log("Fees Template is assigned to Fees Details");
-                res.send("Fees Template is assigned to Fees     ");
+                res.status(409).send({error:"Fees Template is assigned"});
             } else {
                 const data = await service.deletefeesTemplateById(
                     groupId,
