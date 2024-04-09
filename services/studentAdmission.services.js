@@ -198,7 +198,6 @@ class StudentsAdmmisionService extends BaseService {
                         { lastName: { $regex: query.search, $options: "i" } },
                         { phoneNumber: numericSearch },
                         { addmissionId: numericSearch },
-                        
                     ];
                 } else {
                     searchFilter.$or = [
@@ -470,6 +469,15 @@ class StudentsAdmmisionService extends BaseService {
                             service.feesDetails.map(async (feesDetail) => {
                                 let feesAdditionalData = {};
 
+                                let totalPendingInstallmentAmount = 0;
+
+                                for (const installment of feesDetail.installment) {
+                                    if (installment.status === "pending") {
+                                        totalPendingInstallmentAmount +=
+                                            installment.amount;
+                                    }
+                                }
+
                                 if (feesDetail.feesTemplateId) {
                                     const feesTemplateId =
                                         await feesTemplateModel.findOne({
@@ -480,7 +488,12 @@ class StudentsAdmmisionService extends BaseService {
                                         feesTemplateId;
                                 }
 
-                                return { ...feesDetail, ...feesAdditionalData };
+                                return {
+                                    ...feesDetail,
+                                    ...feesAdditionalData,
+                                    totalPendingInstallmentAmount:
+                                        totalPendingInstallmentAmount,
+                                };
                             })
                         );
 
@@ -597,7 +610,7 @@ class StudentsAdmmisionService extends BaseService {
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
-                admissionStatus:"Confirm"
+                admissionStatus: "Confirm",
             });
             let coursePayments = {};
             let courseID;
