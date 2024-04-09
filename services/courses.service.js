@@ -83,12 +83,12 @@ class CourseService extends BaseService {
                 courseId: courseId,
                 groupId: groupId,
             });
-            const divisionRecord = await DivisionModel.findOne({
-                courseId: courseId,
-                groupId: groupId,
-            });
+            // const divisionRecord = await DivisionModel.findOne({
+            //     courseId: courseId,
+            //     groupId: groupId,
+            // });
 
-            if (classRecord || divisionRecord) {
+            if (classRecord ) {
                 return null;
             }
             const updateCourse = await courseModel.findOneAndDelete({
