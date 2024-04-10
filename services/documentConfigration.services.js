@@ -103,19 +103,35 @@ class documentConfigration extends BaseService {
 
 
 
-
-
     getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.documentConfigrationId) query.documentConfigrationId = criteria.documentConfigrationId;
-        if (criteria.userId) query.userId = criteria.userId;
-        if (criteria.roleId) query.roleId = criteria.roleId;
-        if (criteria.addmissionId) query.addmissionId = criteria.addmissionId;
-        if (criteria.academicYear) query.academicYear = criteria.academicYear;
-        if (criteria.empId) query.empId = criteria.empId;
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const searchFilter = {
+                groupId: groupId,
+              
+            };
+
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { documentConfigrationId: numericSearch },
+                        { userId: numericSearch },
+                        { roleId: numericSearch },
+                        { addmissionId: numericSearch },
+                        { empId: numericSearch }
+                    ];
+                } else {
+                    searchFilter.$or = [
+                      
+                    ];
+                }
+            }
+           
+            return searchFilter;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
 }
 module.exports = new documentConfigration(documentConfigrationModel, 'documentConfigration');

@@ -28,6 +28,7 @@ router.post(
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
+        
         const criteria = {
             documntConfigurationId: req.query.documntConfigurationId,
             userId: req.query.userId,
@@ -36,27 +37,40 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             academicYear: req.query.academicYear,
             empId: req.query.empId
         };
-        const {query} = await service.getAllDataByGroupId(groupId, criteria);
-        const documentConfigurations = await documentConfigrationModel.find(query);
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria); // Corrected variable name
+        
+        const documentConfigurations = await documentConfigrationModel.find(searchFilter); 
+        
         const populatedDocuments = await Promise.all(
-            documentConfigurations.map(async (documentConfigration) => {
-                const document = await documntModel.findOne({
-                    roleId: documentConfigration.roleId,
-                });
-                return { ...documentConfigration._doc, document };
+            documentConfigurations.map(async (documentConfiguration) => { 
+                if (documentConfiguration.userId == criteria.userId) {
+                    const document = await documntModel.find({
+                        userId: documentConfiguration.userId
+                    });
+                    return { ...documentConfiguration._doc, document }; 
+                }
+                return null; 
             })
         );
+        console.log(populatedDocuments)
+        
+        const filteredDocuments = populatedDocuments.filter(doc => doc !== null);
+
+        const count = filteredDocuments.length; 
+        
         res.json({
             data: {
-                items: populatedDocuments,
+                items: filteredDocuments,
+                totalItem: count
             }
         });
     } catch (err) {
         console.error('Error:', err);
         res.status(500).json({ error: 'Internal Server Error' });
     }
-
 });
+
+
 
 router.delete("/groupId/:groupId/documntConfigurationId/:documntConfigurationId", async (req, res) => {
     try {
