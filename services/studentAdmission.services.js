@@ -472,9 +472,11 @@ class StudentsAdmmisionService extends BaseService {
                                 let totalPendingInstallmentAmount = 0;
 
                                 for (const installment of feesDetail.installment) {
-                                    if (installment.status === "pending") {
-                                        totalPendingInstallmentAmount +=
-                                            installment.amount;
+                                    if (installment.status == "pending") {
+                                        const amount = parseFloat(
+                                            installment.amount
+                                        );
+                                        totalPendingInstallmentAmount += amount;
                                     }
                                 }
 
