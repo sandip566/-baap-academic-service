@@ -172,7 +172,7 @@ class feesInstallmentService extends BaseService {
 
     async getStudentById(groupId,addmissionId) {
         try {
-            const student = await studentAdmissionModel.findOne({
+            const student = await feesInstallmentModel.findOne({
                 groupId:groupId,
                 addmissionId: addmissionId,
             });

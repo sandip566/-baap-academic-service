@@ -93,11 +93,9 @@ router.delete("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         });
 
         if (!deletedDocument) {
-            return res
-                .status(404)
-                .json({
-                    error: "Document not found with the provided document ID and group ID.",
-                });
+            return res.status(404).json({
+                error: "Document not found with the provided document ID and group ID.",
+            });
         }
 
         return res
@@ -144,18 +142,14 @@ router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         });
 
         if (!updatedDocument) {
-            return res
-                .status(404)
-                .json({
-                    error: "Document not found with the provided document ID.",
-                });
-        }
-        return res
-            .status(200)
-            .json({
-                message: "Document updated successfully.",
-                updatedDocument,
+            return res.status(404).json({
+                error: "Document not found with the provided document ID.",
             });
+        }
+        return res.status(200).json({
+            message: "Document updated successfully.",
+            updatedDocument,
+        });
     } catch (error) {
         console.error(error);
         return res.status(500).json({ error: "Internal Server Error" });
