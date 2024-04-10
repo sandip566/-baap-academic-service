@@ -35,7 +35,6 @@ class documentConfigration extends BaseService {
     async updateById({ groupId, documentId, updateData }) {
         try {
 
-
             const updateResult1 = await documentConfigrationModel.updateMany(
                 { "documents.documentId": documentId },
                 {
@@ -50,16 +49,11 @@ class documentConfigration extends BaseService {
                     arrayFilters: [{ "elem.documentId": documentId }]
                 }
             );
-
-
-
-
             return updateResult1;
         } catch (error) {
             throw error;
         }
     }
-    
 
     async updateDocumntConfigrationByConfigrationId(documntConfigurationId, groupId, newData) {
         try {
@@ -73,8 +67,6 @@ class documentConfigration extends BaseService {
             throw error;
         }
     }
-
-
 
     async deleteById({ groupId, documentId }) {
         try {
@@ -100,14 +92,11 @@ class documentConfigration extends BaseService {
         }
     }
 
-
-
-
     getAllDataByGroupId(groupId, criteria) {
         try {
             const searchFilter = {
                 groupId: groupId,
-              
+
             };
 
             if (criteria.search) {
@@ -122,11 +111,11 @@ class documentConfigration extends BaseService {
                     ];
                 } else {
                     searchFilter.$or = [
-                      
+
                     ];
                 }
             }
-           
+
             return searchFilter;
         } catch (error) {
             console.log(error);

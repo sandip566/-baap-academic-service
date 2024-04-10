@@ -19,7 +19,7 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-
+        const tolerance = 0.01;
         const addmissionId = req.body.addmissionId;
         const feesDetailsId = req.body.feesDetailsId;
         const empId = req.body.empId;
@@ -45,8 +45,8 @@ router.post(
         if (existingRecord.data !== null) {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
-
-            if (totalPaidAmount > existingRecord.data.remainingAmount) {
+console.log(totalPaidAmount , existingRecord.data.remainingAmount);
+            if (totalPaidAmount > existingRecord.data.remainingAmount+tolerance) {
                 return res
                     .status(400)
                     .json({ error: "You have paid extra amount." });
@@ -94,7 +94,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -132,33 +132,35 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        feesDetail.installment.some((installment) => {
-                            if (installment.status === "pending") {
-                                const amountToDeduct = Math.min(
-                                    otherAmountRemaining,
-                                    installment.amount
-                                );
-                                installment.amount -= amountToDeduct;
-                                otherAmountRemaining -= amountToDeduct;
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
+                            feesDetail.installment.some((installment) => {
+                                if (installment.status === "pending") {
+                                    const amountToDeduct = Math.min(
+                                        otherAmountRemaining,
+                                        installment.amount
+                                    );
+                                    installment.amount -= amountToDeduct;
+                                    otherAmountRemaining -= amountToDeduct;
 
-                                if (installment.amount === 0) {
-                                    installment.status = "paid";
-                                    feesInstallmentService.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "paid"
-                                    );
-                                } else {
-                                    feesInstallmentService.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "pending"
-                                    );
+                                    if (installment.amount === 0) {
+                                        installment.status = "paid";
+                                        feesInstallmentService.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "paid"
+                                        );
+                                    } else {
+                                        feesInstallmentService.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "pending"
+                                        );
+                                    }
+
+                                    return otherAmountRemaining <= 0;
                                 }
-
-                                return otherAmountRemaining <= 0;
-                            }
-                        });
+                            });
+                        }
                     });
                 });
             }
@@ -169,7 +171,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -207,32 +209,34 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        feesDetail.installment.some((installment) => {
-                            if (installment.status === "pending") {
-                                const amountToDeduct = Math.min(
-                                    otherAmountRemaining,
-                                    installment.amount
-                                );
-                                installment.amount -= amountToDeduct;
-                                otherAmountRemaining -= amountToDeduct;
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
+                            feesDetail.installment.some((installment) => {
+                                if (installment.status === "pending") {
+                                    const amountToDeduct = Math.min(
+                                        otherAmountRemaining,
+                                        installment.amount
+                                    );
+                                    installment.amount -= amountToDeduct;
+                                    otherAmountRemaining -= amountToDeduct;
 
-                                if (installment.amount === 0) {
-                                    installment.status = "paid";
-                                    studentAdmissionServices.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "paid"
-                                    );
-                                } else {
-                                    studentAdmissionServices.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "pending"
-                                    );
+                                    if (installment.amount === 0) {
+                                        installment.status = "paid";
+                                        studentAdmissionServices.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "paid"
+                                        );
+                                    } else {
+                                        studentAdmissionServices.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "pending"
+                                        );
+                                    }
+                                    return otherAmountRemaining <= 0;
                                 }
-                                return otherAmountRemaining <= 0;
-                            }
-                        });
+                            });
+                        }
                     });
                 });
             }
@@ -243,7 +247,7 @@ router.post(
         } else {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
-
+console.log("mm",totalPaidAmount , req.body.courseFee);
             if (totalPaidAmount > req.body.courseFee) {
                 return res
                     .status(400)
@@ -287,7 +291,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -324,33 +328,35 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        feesDetail.installment.some((installment) => {
-                            if (installment.status === "pending") {
-                                const amountToDeduct = Math.min(
-                                    otherAmountRemaining,
-                                    installment.amount
-                                );
-                                installment.amount -= amountToDeduct;
-                                otherAmountRemaining -= amountToDeduct;
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
+                            feesDetail.installment.some((installment) => {
+                                if (installment.status === "pending") {
+                                    const amountToDeduct = Math.min(
+                                        otherAmountRemaining,
+                                        installment.amount
+                                    );
+                                    installment.amount -= amountToDeduct;
+                                    otherAmountRemaining -= amountToDeduct;
 
-                                if (installment.amount === 0) {
-                                    installment.status = "paid";
-                                    feesInstallmentService.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "paid"
-                                    );
-                                } else {
-                                    feesInstallmentService.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "pending"
-                                    );
+                                    if (installment.amount === 0) {
+                                        installment.status = "paid";
+                                        feesInstallmentService.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "paid"
+                                        );
+                                    } else {
+                                        feesInstallmentService.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "pending"
+                                        );
+                                    }
+
+                                    return otherAmountRemaining <= 0;
                                 }
-
-                                return otherAmountRemaining <= 0;
-                            }
-                        });
+                            });
+                        }
                     });
                 });
             }
@@ -362,7 +368,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -399,32 +405,34 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        feesDetail.installment.some((installment) => {
-                            if (installment.status === "pending") {
-                                const amountToDeduct = Math.min(
-                                    otherAmountRemaining,
-                                    installment.amount
-                                );
-                                installment.amount -= amountToDeduct;
-                                otherAmountRemaining -= amountToDeduct;
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
+                            feesDetail.installment.some((installment) => {
+                                if (installment.status === "pending") {
+                                    const amountToDeduct = Math.min(
+                                        otherAmountRemaining,
+                                        installment.amount
+                                    );
+                                    installment.amount -= amountToDeduct;
+                                    otherAmountRemaining -= amountToDeduct;
 
-                                if (installment.amount === 0) {
-                                    installment.status = "paid";
-                                    studentAdmissionServices.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "paid"
-                                    );
-                                } else {
-                                    studentAdmissionServices.updateInstallmentAmount(
-                                        installment.installmentNo,
-                                        installment.amount,
-                                        "pending"
-                                    );
+                                    if (installment.amount === 0) {
+                                        installment.status = "paid";
+                                        studentAdmissionServices.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "paid"
+                                        );
+                                    } else {
+                                        studentAdmissionServices.updateInstallmentAmount(
+                                            installment.installmentNo,
+                                            installment.amount,
+                                            "pending"
+                                        );
+                                    }
+                                    return otherAmountRemaining <= 0;
                                 }
-                                return otherAmountRemaining <= 0;
-                            }
-                        });
+                            });
+                        }
                     });
                 });
             }
@@ -533,7 +541,7 @@ router.get(
             empId: req.query.empId,
             userId: req.query.userId,
             installmentId: req.query.installmentId,
-            search: req.query.search
+            search: req.query.search,
         };
         const serviceResponse = await service.getAllFeesPaymentByGroupId(
             groupId,

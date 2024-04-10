@@ -162,7 +162,7 @@ class feesPaymentService extends BaseService {
                     ).padStart(2, "0");
                     const day = String(currentDateObj.getDate()).padStart(
                         2,
-                        "0"
+                        "0" 
                     );
                     const formattedDate = `${year}/${month}/${day}`;
 
@@ -923,9 +923,9 @@ class feesPaymentService extends BaseService {
         }
     }
 
-    async getPaidAmount(addmissionId) {
+    async getPaidAmount(groupId,addmissionId) {
         try {
-            const paidamount = await feesPaymentModel.find({ addmissionId: addmissionId });
+            const paidamount = await feesPaymentModel.find({groupId:groupId, addmissionId: addmissionId,isShowInAccounting:true });
             return paidamount;
         } catch (err) {
             throw err;
