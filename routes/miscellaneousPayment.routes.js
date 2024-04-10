@@ -22,10 +22,10 @@ router.post(
 router.get("/all", async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: 10 
+        pageSize: 10
     };
     const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria({req,query,pagination});
+    const serviceResponse = await service.getAllByCriteria({ req, query, pagination });
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
@@ -51,7 +51,7 @@ router.get("/getAllmiscellaneousPayment/groupId/:groupId", async (req, res) => {
         studentId: req.query.studentId,
         empId: req.query.empId,
         installmentId: req.query.installmentId,
-        pageNumber:parseInt(req.query.pageNumber) || 1
+        pageNumber: parseInt(req.query.pageNumber) || 1
     };
     const serviceResponse = await service.getAllMiscellaneousPaymentByGroupId(
         groupId,

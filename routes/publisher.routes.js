@@ -38,7 +38,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             publisherName: req.query.publisherName,
             publisherId: req.query.publisherId,
             phoneNumber: req.query.phoneNumber,
-            search:req.query.search,
+            search: req.query.search,
             address: req.query.address,
             website: req.query.website
         };

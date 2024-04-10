@@ -6,6 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { default: mongoose } = require("mongoose");
 const feesInstallmentServices = require("../services/feesInstallment.services");
+const documentConfigurationService = require("../services/documentConfigration.services");
 const TokenService = require("../services/token.services");
 const multer = require("multer");
 const upload = multer();
@@ -65,19 +66,31 @@ router.post(
                 );
 
                 if (existingDocument) {
-                    req.body.documents = req.body.documents
-                        ? req.body.documents.map((documentData) => {
-                              const documentId =
-                                  +Date.now() +
-                                  Math.floor(Math.random() * 1000);
-                              return {
-                                  _id: new mongoose.Types.ObjectId(),
-                                  documentId: documentId,
-                                  documents: documentData,
-                              };
-                          })
-                        : existingDocument.data?.documents || [];
+                    if (req.body.documents) {
+                        req.body.documents = req.body.documents.map(
+                            (documentData) => {
+                                const documentId =
+                                    Date.now() +
+                                    Math.floor(Math.random() * 1000);
+                                return {
+                                    documentTitle:
+                                        documentData.documentTitle || "",
+                                    expiryDate: documentData.expiryDate || "",
+                                    formDate: documentData.formDate || "",
+                                    documentUrl: documentData.documentUrl || "",
+                                    documentId: documentId,
+                                };
+                            }
+                        );
 
+                        // Save documents using documentConfigurationService
+                        const documentData =
+                            await documentConfigurationService.updateUser(
+                                req.body.addmissionId,
+                                req.body.groupId,
+                                req.body
+                            );
+                    }
                     if (req.body.feesDetails) {
                         const installmentId = +Date.now();
                         req.body.installmentId = installmentId;
@@ -134,6 +147,27 @@ router.post(
                     requestResponsehelper.sendResponse(res, serviceResponse);
                 } else {
                     const serviceResponse = await service.create(req.body);
+
+                    if (req.body.documents) {
+                        req.body.documents = req.body.documents.map(
+                            (documentData) => {
+                                const documentId =
+                                    Date.now() +
+                                    Math.floor(Math.random() * 1000);
+                                return {
+                                    documentTitle:
+                                        documentData.documentTitle || "",
+                                    expiryDate: documentData.expiryDate || "",
+                                    formDate: documentData.formDate || "",
+                                    documentUrl: documentData.documentUrl || "",
+                                    documentId: documentId,
+                                };
+                            }
+                        );
+
+                        // Save documents using documentConfigurationService
+                        await documentConfigurationService.create(req.body);
+                    }
 
                     if (req.body.feesDetails) {
                         const installmentId = +Date.now();
