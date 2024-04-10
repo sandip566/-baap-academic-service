@@ -150,19 +150,22 @@ router.put(
         }
     }
 );
-router.get("/installments/:addmissionId", async (req, res) => {
+router.get("/installments/groupId/:groupId/addmission/:addmissionId", async (req, res) => {
     try {
+        const groupId = req.params.groupId;
         const addmissionId = req.params.addmissionId;
 
-        const student = await service.getStudentById(addmissionId);
+        const student = await service.getStudentById(groupId,addmissionId);
         if (!student) {
             return res.status(404).json({ error: "Student not found" });
         }
 
         const installments = await service.getInstallmentsByStudentId(
+            groupId,
             addmissionId
         );
-        let paidAmt = await feesPaymentModel.getPaidAmount(addmissionId);
+        
+        let paidAmt = await feesPaymentModel.getPaidAmount(groupId,addmissionId);
         let totalAmount = 0;
         let totalPaidAmount = 0;
 
@@ -172,8 +175,8 @@ router.get("/installments/:addmissionId", async (req, res) => {
                 totalPaidAmount += parseInt(item.paidAmount);
             });
         }
-
-        const remainingAmount = totalAmount - totalPaidAmount;
+let remainingAmount=0
+         remainingAmount = totalAmount - totalPaidAmount;
 
         const response = {
             paidAmount: paidAmt,

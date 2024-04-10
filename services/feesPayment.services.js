@@ -923,9 +923,9 @@ class feesPaymentService extends BaseService {
         }
     }
 
-    async getPaidAmount(addmissionId) {
+    async getPaidAmount(groupId,addmissionId) {
         try {
-            const paidamount = await feesPaymentModel.find({ addmissionId: addmissionId });
+            const paidamount = await feesPaymentModel.find({groupId:groupId, addmissionId: addmissionId,isShowInAccounting:true });
             return paidamount;
         } catch (err) {
             throw err;

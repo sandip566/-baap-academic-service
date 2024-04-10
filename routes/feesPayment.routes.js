@@ -45,7 +45,7 @@ router.post(
         if (existingRecord.data !== null) {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
-
+console.log(totalPaidAmount , existingRecord.data.remainingAmount);
             if (totalPaidAmount > existingRecord.data.remainingAmount) {
                 return res
                     .status(400)
@@ -132,7 +132,7 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        if (feesDetail.feesDetailsId === feesDetailsId) {
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
                             feesDetail.installment.some((installment) => {
                                 if (installment.status === "pending") {
                                     const amountToDeduct = Math.min(
@@ -209,7 +209,7 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        if (feesDetail.feesDetailsId === feesDetailsId) {
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
                             feesDetail.installment.some((installment) => {
                                 if (installment.status === "pending") {
                                     const amountToDeduct = Math.min(
@@ -247,7 +247,7 @@ router.post(
         } else {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
-
+console.log("mm",totalPaidAmount , req.body.courseFee);
             if (totalPaidAmount > req.body.courseFee) {
                 return res
                     .status(400)
@@ -328,7 +328,7 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        if (feesDetail.feesDetailsId === feesDetailsId) {
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
                             feesDetail.installment.some((installment) => {
                                 if (installment.status === "pending") {
                                     const amountToDeduct = Math.min(
@@ -405,7 +405,7 @@ router.post(
 
                 pendingInstallment.forEach((pending) => {
                     pending.feesDetails.forEach((feesDetail) => {
-                        if (feesDetail.feesDetailsId === feesDetailsId) {
+                        if (feesDetail.feesDetailsId == feesDetailsId) {
                             feesDetail.installment.some((installment) => {
                                 if (installment.status === "pending") {
                                     const amountToDeduct = Math.min(
