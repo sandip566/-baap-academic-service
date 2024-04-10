@@ -19,7 +19,7 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-
+        const tolerance = 0.01;
         const addmissionId = req.body.addmissionId;
         const feesDetailsId = req.body.feesDetailsId;
         const empId = req.body.empId;
@@ -46,7 +46,7 @@ router.post(
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
 console.log(totalPaidAmount , existingRecord.data.remainingAmount);
-            if (totalPaidAmount > existingRecord.data.remainingAmount) {
+            if (totalPaidAmount > existingRecord.data.remainingAmount+tolerance) {
                 return res
                     .status(400)
                     .json({ error: "You have paid extra amount." });
