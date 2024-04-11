@@ -139,4 +139,17 @@ router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+router.get("/all/groupId/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        rollId: req.query.roleId
+    }
+    const serviceResponse = await service.getAllDataByGroupIdAndRollId(
+        groupId,
+        criteria
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 module.exports = router;

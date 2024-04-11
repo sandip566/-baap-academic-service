@@ -129,5 +129,14 @@ class DocumentService extends BaseService {
             return DocumentModel.findOne({ documentId: documentId });
         });
     }
+      getAllDataByGroupIdAndRollId(groupId, criteria) {
+        const query = {
+            groupId: groupId,
+        };
+        if (criteria.roleId) query.roleId = criteria.roleId;
+        return this.preparePaginationAndReturnData(query, criteria);
+    }
+
+
 }
 module.exports = new DocumentService(DocumentModel, "document");

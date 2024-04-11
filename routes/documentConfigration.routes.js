@@ -4,8 +4,8 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/documentConfigration.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const documentConfigrationModel=require("../schema/documentConfigration.schema")
-const documntModel=require("../schema/document.schema")
+const documentConfigrationModel = require("../schema/documentConfigration.schema")
+const documntModel = require("../services/document.service")
 router.post(
     "/",
     checkSchema(require("../dto/visitor.dto")),
@@ -14,10 +14,10 @@ router.post(
             return;
         }
 
-       const documntConfigurationId=Date.now()
-       req.body.documntConfigurationId=documntConfigurationId
+        const documntConfigurationId = Date.now()
+        req.body.documntConfigurationId = documntConfigurationId
         req.body.documents.forEach((doc, index) => {
-            const documentId = Date.now() + index; 
+            const documentId = Date.now() + index;
             doc.documentId = documentId;
         });
         const serviceResponse = await service.create(req.body);
@@ -28,7 +28,7 @@ router.post(
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        
+
         const criteria = {
             documntConfigurationId: req.query.documntConfigurationId,
             userId: req.query.userId,
@@ -38,26 +38,26 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             empId: req.query.empId
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria); // Corrected variable name
-        
-        const documentConfigurations = await documentConfigrationModel.find(searchFilter); 
-        
+
+        const documentConfigurations = await documentConfigrationModel.find(searchFilter);
+
         const populatedDocuments = await Promise.all(
-            documentConfigurations.map(async (documentConfiguration) => { 
+            documentConfigurations.map(async (documentConfiguration) => {
                 if (documentConfiguration.userId == criteria.userId) {
                     const document = await documntModel.find({
                         userId: documentConfiguration.userId
                     });
-                    return { ...documentConfiguration._doc, document }; 
+                    return { ...documentConfiguration._doc, document };
                 }
-                return null; 
+                return null;
             })
         );
         console.log(populatedDocuments)
-        
+
         const filteredDocuments = populatedDocuments.filter(doc => doc !== null);
 
-        const count = filteredDocuments.length; 
-        
+        const count = filteredDocuments.length;
+
         res.json({
             data: {
                 items: filteredDocuments,
@@ -69,9 +69,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).json({ error: 'Internal Server Error' });
     }
 });
-
-
-
 router.delete("/groupId/:groupId/documntConfigurationId/:documntConfigurationId", async (req, res) => {
     try {
         const documntConfigurationId = req.params.documntConfigurationId
@@ -97,7 +94,7 @@ router.delete("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         if (!deletedDocument) {
             return res.status(404).json({ error: 'Document not found with the provided document ID and group ID.' });
         }
-        
+
         return res.status(200).json({ message: 'Document deleted successfully.' });
     } catch (error) {
         console.error(error);
@@ -124,9 +121,9 @@ router.put("/groupId/:groupId/documntConfigurationId/:documntConfigurationId", a
 router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
     try {
         const { groupId, documentId } = req.params;
-        const updateData = req.body; 
+        const updateData = req.body;
         const updatedDocument = await service.updateById({ groupId, documentId, updateData });
-  
+
         if (!updatedDocument) {
             return res.status(404).json({ error: 'Document not found with the provided document ID.' });
         }
