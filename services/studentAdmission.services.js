@@ -260,7 +260,7 @@ class StudentsAdmmisionService extends BaseService {
                                             courseDetail?.course_id !== "null"
                                         ) {
                                             console.log(
-                                                "ddddddddddddddddd",
+                                                " courseDetail?.course_id",
                                                 courseDetail?.course_id
                                             );
                                             const course_id =
