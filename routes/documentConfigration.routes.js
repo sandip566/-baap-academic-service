@@ -5,7 +5,7 @@ const service = require("../services/documentConfigration.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const documentConfigrationModel = require("../schema/documentConfigration.schema")
-const documntModel = require("../services/document.service")
+const documntModel = require("../schema/document.schema")
 router.post(
     "/",
     checkSchema(require("../dto/documentCongigration.dto")),
@@ -13,7 +13,6 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-
         const documntConfigurationId = Date.now()
         req.body.documntConfigurationId = documntConfigurationId
         req.body.documents.forEach((doc, index) => {
@@ -24,7 +23,6 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -37,38 +35,62 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             academicYear: req.query.academicYear,
             empId: req.query.empId
         };
-        const searchFilter = service.getAllDataByGroupId(groupId, criteria); // Corrected variable name
+        const searchFilter = service.getAllDataByGroupId(groupId, criteria);
 
         const documentConfigurations = await documentConfigrationModel.find(searchFilter);
 
-        const populatedDocuments = await Promise.all(
-            documentConfigurations.map(async (documentConfiguration) => {
-                if (documentConfiguration.userId == criteria.userId) {
-                    const document = await documntModel.find({
-                        userId: documentConfiguration.userId
+        let filteredDocuments = documentConfigurations;
+        let populatedDocuments = [];
+        if (criteria.roleId) {
+            filteredDocuments = documentConfigurations.filter(documentConfiguration => {
+                return documentConfiguration.roleId == criteria.roleId;
+            });
+            populatedDocuments = await Promise.all(
+                filteredDocuments.map(async (documentConfiguration) => {
+                    const documents = await documntModel.find({
+                        roleId: documentConfiguration.roleId,
                     });
-                    return { ...documentConfiguration._doc, document };
-                }
-                return null;
-            })
-        );
-        console.log(populatedDocuments)
-
-        const filteredDocuments = populatedDocuments.filter(doc => doc !== null);
-
+                    return { ...documentConfiguration._doc, documents };
+                })
+            );
+        }
+        if (criteria.roleId && criteria.userId) {
+            filteredDocuments = documentConfigurations.filter(documentConfiguration => {
+                return documentConfiguration.userId == criteria.userId && documentConfiguration.roleId == criteria.roleId;
+            });
+            populatedDocuments = await Promise.all(
+                filteredDocuments.map(async (documentConfiguration) => {
+                    const documents = await documntModel.find({
+                        userId: documentConfiguration.userId,
+                    });
+                    return { ...documentConfiguration._doc, documents };
+                })
+            );
+        }
+        else {
+            if (criteria.roleId) {
+                filteredDocuments = documentConfigurations.filter(documentConfiguration => {
+                    return documentConfiguration.roleId == criteria.roleId;
+                });
+            } else if (criteria.userId) {
+                filteredDocuments = documentConfigurations.filter(documentConfiguration => {
+                    return documentConfiguration.userId == criteria.userId;
+                });
+            }
+        }
         const count = filteredDocuments.length;
-
         res.json({
             data: {
                 items: filteredDocuments,
-                totalItem: count
+                populatedDocuments: populatedDocuments,
+                totalItem: count,
             }
         });
     } catch (err) {
-        console.error('Error:', err);
-        res.status(500).json({ error: 'Internal Server Error' });
+        throw err
     }
-});
+
+})
 router.delete("/groupId/:groupId/documntConfigurationId/:documntConfigurationId", async (req, res) => {
     try {
         const documntConfigurationId = req.params.documntConfigurationId

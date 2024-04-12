@@ -14,7 +14,6 @@ class documentConfigration extends BaseService {
                 data,
                 { upsert: true, new: true }
             );
-
             return new ServiceResponse({
                 data: resp,
             });
