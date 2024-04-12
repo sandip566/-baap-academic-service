@@ -39,7 +39,9 @@ router.get(
             const serviceResponse = await service.getByfeesTemplateId(
                 feesTemplateId
             );
-
+if(!serviceResponse){
+    res.status(409).json({ error: 'Operation not allowed due to conflict.' });  
+}
             if (serviceResponse.data) {
                 const totalFees = serviceResponse.data.totalFees;
                 const installmentAmount = Math.round(totalFees / installmentNo);

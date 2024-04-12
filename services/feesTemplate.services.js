@@ -16,7 +16,7 @@ class Service extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
     async getByfeesTemplateId(feesTemplateId) {
-        const result = await this.model.findOne({ feesTemplateId });
+        const result = await this.model.findOne({ feesTemplateId,isInstallmentAllowed:true });
         return new ServiceResponse({
             data: result,
         });
