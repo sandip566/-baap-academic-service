@@ -51,6 +51,14 @@ class AcademicYearService extends BaseService {
         });
     }
 
+    async updateCurrentYearFalseByGroupId(groupId) {
+        const year = await AcademicYearModel.updateMany(
+            { groupId: groupId },
+            { $set: { currentYear: false } }
+        )
+        return year
+    }
+
     async deleteByDataId(groupId, academicYearId) {
         try {
             const deleteData = await AcademicYearModel.deleteOne({
