@@ -23,6 +23,7 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
