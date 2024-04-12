@@ -8,7 +8,7 @@ const documentConfigrationModel = require("../schema/documentConfigration.schema
 const documntModel = require("../services/document.service")
 router.post(
     "/",
-    checkSchema(require("../dto/visitor.dto")),
+    checkSchema(require("../dto/documentCongigration.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
