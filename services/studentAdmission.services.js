@@ -862,9 +862,9 @@ class StudentsAdmmisionService extends BaseService {
                         $or: [{ phoneNumber: phoneNumber }, { phone: phone }],
                     });
 
-                if (existingPhoneNumberRecord) {
-                    throw new Error("Phone number already exists");
-                }
+                // if (existingPhoneNumberRecord) {
+                //     throw new Error("Phone number already exists");
+                // }
 
                 const studentAdmissionId =
                     Date.now() + Math.floor(Math.random() * 1000000);
