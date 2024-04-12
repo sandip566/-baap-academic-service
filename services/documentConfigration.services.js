@@ -35,7 +35,6 @@ class documentConfigration extends BaseService {
     async updateById({ groupId, documentId, updateData }) {
         try {
 
-
             const updateResult1 = await documentConfigrationModel.updateMany(
                 { "documents.documentId": documentId },
                 {
@@ -50,16 +49,11 @@ class documentConfigration extends BaseService {
                     arrayFilters: [{ "elem.documentId": documentId }]
                 }
             );
-
-
-
-
             return updateResult1;
         } catch (error) {
             throw error;
         }
     }
-    
 
     async updateDocumntConfigrationByConfigrationId(documntConfigurationId, groupId, newData) {
         try {
@@ -73,8 +67,6 @@ class documentConfigration extends BaseService {
             throw error;
         }
     }
-
-
 
     async deleteById({ groupId, documentId }) {
         try {
@@ -101,16 +93,34 @@ class documentConfigration extends BaseService {
     }
 
     getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.documentConfigrationId) query.documentConfigrationId = criteria.documentConfigrationId;
-        if (criteria.userId) query.userId = criteria.userId;
-        if (criteria.roleId) query.roleId = criteria.roleId;
-        if (criteria.addmissionId) query.addmissionId = criteria.addmissionId;
-        if (criteria.academicYear) query.academicYear = criteria.academicYear;
-        if (criteria.empId) query.empId = criteria.empId;
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const searchFilter = {
+                groupId: groupId,
+
+            };
+
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { documentConfigrationId: numericSearch },
+                        { userId: numericSearch },
+                        { roleId: numericSearch },
+                        { addmissionId: numericSearch },
+                        { empId: numericSearch }
+                    ];
+                } else {
+                    searchFilter.$or = [
+
+                    ];
+                }
+            }
+
+            return searchFilter;
+        } catch (error) {
+            console.log(error);
+            return null;
+        }
     }
 }
 module.exports = new documentConfigration(documentConfigrationModel, 'documentConfigration');
