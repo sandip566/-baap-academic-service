@@ -8,17 +8,18 @@ const TokenService = require("../services/token.services");
 
 router.post(
     "/",
-    checkSchema(require("../dto/academicyear.dto")),
-    TokenService.checkPermission(["EMA2"]),
+    checkSchema(require("../dto/academicyear.dto")), TokenService.checkPermission(["EMA2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
+        }
+        if (req.body.currentYear === true) {
+            await service.updateCurrentYearFalseByGroupId(req.body.groupId);
         }
         const existingRecord = await service.getByCourseIdAndGroupId(
             req.body.groupId,
             req.body.year
         );
-        console.log(existingRecord);
         if (existingRecord.data) {
             return res.status(409).json({ error: "Data  Already Exists." });
         }
@@ -30,7 +31,6 @@ router.post(
         const academicYearId = +Date.now();
         req.body.academicYearId = academicYearId;
         const serviceResponse = await service.create(req.body);
-        console.log(serviceResponse);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
