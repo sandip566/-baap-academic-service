@@ -184,7 +184,13 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async getAllDataByGroupId(groupId, query, page, perPage, reverseOrder = true) {
+    async getAllDataByGroupId(
+        groupId,
+        query,
+        page,
+        perPage,
+        reverseOrder = true
+    ) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -232,59 +238,88 @@ class StudentsAdmmisionService extends BaseService {
             const skip = (page - 1) * perPage;
             const limit = perPage;
 
-            const services = await studentAdmissionModel.find(searchFilter).skip(skip).limit(limit);
+            const services = await studentAdmissionModel
+                .find(searchFilter)
+                .skip(skip)
+                .limit(limit);
 
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
-                    if (service.courseDetails && service.courseDetails.length > 0) {
-                        const courseDetailsWithAdditionalData = await Promise.all(service.courseDetails.map(async (courseDetail) => {
-                            let additionalData = {};
+                    if (
+                        service.courseDetails &&
+                        service.courseDetails.length > 0
+                    ) {
+                        const courseDetailsWithAdditionalData =
+                            await Promise.all(
+                                service.courseDetails.map(
+                                    async (courseDetail) => {
+                                        let additionalData = {};
 
-                            if (courseDetail?.course_id && courseDetail?.course_id !== "null") {
-                                console.log("ddddddddddddddddd", courseDetail?.course_id);
-                                const course_id = await courseModel.findOne({ courseId: courseDetail?.course_id, });
-                                console.log(course_id);
-                                additionalData.course_id = course_id;
-                            }
+                                        if (
+                                            courseDetail?.course_id &&
+                                            courseDetail?.course_id !== "null"
+                                        ) {
+                                            console.log(
+                                                "ddddddddddddddddd",
+                                                courseDetail?.course_id
+                                            );
+                                            const course_id =
+                                                await courseModel.findOne({
+                                                    courseId:
+                                                        courseDetail?.course_id,
+                                                });
+                                            console.log(course_id);
+                                            additionalData.course_id =
+                                                course_id;
+                                        }
 
-                            if (courseDetail?.class_id) {
-                                const classId = parseInt(courseDetail?.class_id);
-                                if (!isNaN(classId)) {
-                                    const class_id = await ClassModel.findOne({ classId: classId });
-                                    additionalData.class_id = class_id;
-                                } else {
-                                    console.error("courseDetail.class_id is not a valid number:", courseDetail?.class_id);
-                                }
-                            }
-                            if (courseDetail?.division_id) {
-                                const divisionId = parseInt(
-                                    courseDetail?.division_id
-                                );
-                                if (!isNaN(divisionId)) {
-                                    const division_id =
-                                        await DivisionModel.findOne(
-                                            {
-                                                divisionId:
-                                                    divisionId,
+                                        if (courseDetail?.class_id) {
+                                            const classId = parseInt(
+                                                courseDetail?.class_id
+                                            );
+                                            if (!isNaN(classId)) {
+                                                const class_id =
+                                                    await ClassModel.findOne({
+                                                        classId: classId,
+                                                    });
+                                                additionalData.class_id =
+                                                    class_id;
+                                            } else {
+                                                console.error(
+                                                    "courseDetail.class_id is not a valid number:",
+                                                    courseDetail?.class_id
+                                                );
                                             }
-                                        );
-                                    additionalData.division_id =
-                                        division_id;
-                                } else {
-                                    console.error(
-                                        "courseDetail.division_id is not a valid number:",
-                                        courseDetail?.division_id
-                                    );
-                                }
-                            }
+                                        }
+                                        if (courseDetail?.division_id) {
+                                            const divisionId = parseInt(
+                                                courseDetail?.division_id
+                                            );
+                                            if (!isNaN(divisionId)) {
+                                                const division_id =
+                                                    await DivisionModel.findOne(
+                                                        {
+                                                            divisionId:
+                                                                divisionId,
+                                                        }
+                                                    );
+                                                additionalData.division_id =
+                                                    division_id;
+                                            } else {
+                                                console.error(
+                                                    "courseDetail.division_id is not a valid number:",
+                                                    courseDetail?.division_id
+                                                );
+                                            }
+                                        }
 
-                            return {
-                                ...courseDetail,
-                                ...additionalData,
-                            };
-                        }
-                        )
-                        );
+                                        return {
+                                            ...courseDetail,
+                                            ...additionalData,
+                                        };
+                                    }
+                                )
+                            );
                         return {
                             ...service._doc,
                             courseDetails: courseDetailsWithAdditionalData,
@@ -300,7 +335,9 @@ class StudentsAdmmisionService extends BaseService {
                 return reverseOrder ? dateB - dateA : dateA - dateB;
             });
 
-            const totalItemsCount = await studentAdmissionModel.countDocuments(searchFilter);
+            const totalItemsCount = await studentAdmissionModel.countDocuments(
+                searchFilter
+            );
 
             const response = {
                 status: "Success",
@@ -554,8 +591,8 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                    data.empId === query.empId &&
-                    data.addmissionId == query.addmissionId,
+                        data.empId === query.empId &&
+                        data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -749,11 +786,11 @@ class StudentsAdmmisionService extends BaseService {
                     (installment) => installment.installmentNo === installmentId
                 )
             );
-           
+
             const allInstallmentsPaid = feesDetail.installment.every(
                 (installment) => installment.status === "paid"
             );
-           
+
             if (allInstallmentsPaid) {
                 await studentAdmissionModel.findOneAndUpdate(
                     { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
