@@ -735,7 +735,7 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-    async updateInstallmentAmount(installmentId, newAmount) {
+    async updateInstallmentAmount(installmentId, newAmount, newStatus) {
         try {
             const updateResult = await studentAdmissionModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
@@ -743,6 +743,8 @@ class StudentsAdmmisionService extends BaseService {
                     $set: {
                         "feesDetails.$[outer].installment.$[inner].amount":
                             newAmount,
+                        "feesDetails.$[outer].installment.$[inner].status":
+                            newStatus,
                     },
                 },
                 {
@@ -759,6 +761,27 @@ class StudentsAdmmisionService extends BaseService {
                 "Installment amount updated successfully:",
                 updateResult
             );
+            const feesDetail = updateResult.feesDetails.find((detail) =>
+                detail.installment.some(
+                    (installment) => installment.installmentNo === installmentId
+                )
+            );
+           
+            const allInstallmentsPaid = feesDetail.installment.every(
+                (installment) => installment.status === "paid"
+            );
+           
+            if (allInstallmentsPaid) {
+                await studentAdmissionModel.findOneAndUpdate(
+                    { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
+                    { $set: { "feesDetails.$.status": "paid" } }
+                );
+            } else {
+                await studentAdmissionModel.findOneAndUpdate(
+                    { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
+                    { $set: { "feesDetails.$.status": "pending" } }
+                );
+            }
         } catch (error) {
             console.error("Error updating installment amount:", error);
         }

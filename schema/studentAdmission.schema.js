@@ -50,6 +50,7 @@ const studentsAdmissionSchema = new mongoose.Schema(
         phone: {
             type: Number,
         },
+  
         admissionStatus:{
             type:String,
             required:false,

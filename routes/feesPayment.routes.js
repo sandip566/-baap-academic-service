@@ -219,7 +219,7 @@ console.log(totalPaidAmount , existingRecord.data.remainingAmount);
                                     installment.amount -= amountToDeduct;
                                     otherAmountRemaining -= amountToDeduct;
 
-                                    if (installment.amount === 0) {
+                                    if (installment.amount == 0) {
                                         installment.status = "paid";
                                         studentAdmissionServices.updateInstallmentAmount(
                                             installment.installmentNo,
@@ -247,7 +247,7 @@ console.log(totalPaidAmount , existingRecord.data.remainingAmount);
         } else {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
-console.log("mm",totalPaidAmount , req.body.courseFee);
+
             if (totalPaidAmount > req.body.courseFee) {
                 return res
                     .status(400)
