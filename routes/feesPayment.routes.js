@@ -45,8 +45,11 @@ router.post(
         if (existingRecord.data !== null) {
             const feesPaymentId = +Date.now();
             req.body.feesPaymentId = feesPaymentId;
-console.log(totalPaidAmount , existingRecord.data.remainingAmount);
-            if (totalPaidAmount > existingRecord.data.remainingAmount+tolerance) {
+            console.log(totalPaidAmount, existingRecord.data.remainingAmount);
+            if (
+                totalPaidAmount >
+                existingRecord.data.remainingAmount + tolerance
+            ) {
                 return res
                     .status(400)
                     .json({ error: "You have paid extra amount." });
@@ -484,7 +487,8 @@ router.get(
             search: req.query.search,
         };
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 100;
+        const limit = parseInt(req.query.limit) || 10;
+
         // const skip = (page - 1) * limit;
         // const skip=(page-1)*limit;
         const serviceResponse = await service.getFeesStatData(

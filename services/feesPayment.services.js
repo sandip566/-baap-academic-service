@@ -129,6 +129,7 @@ class feesPaymentService extends BaseService {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
+
                 const query = {
                     groupId: groupId,
                 };
@@ -141,12 +142,15 @@ class feesPaymentService extends BaseService {
                     admissionStatus: "Confirm",
                 });
 
-                let feesData = await this.model
-                    .find({ groupId: groupId, isShowInAccounting: true })
-                    .skip(skip)
-                    .limit(limit);
+                let feesData = await this.model.find({
+                    groupId: groupId,
+                    isShowInAccounting: true,
+                });
 
-                // console.log(criteria.currentDate, criteria.currentDate);
+                console.log(
+                    "criteria.currentDate, criteria.currentDate,feesData",
+                    feesData.length
+                );
                 const currentDateValue = criteria.currentDate
                     ? criteria.currentDate
                     : null;
@@ -684,13 +688,17 @@ class feesPaymentService extends BaseService {
                 totalCourseFee1 = finalServices.reduce((total, course) => {
                     return total + parseFloat(course.courseFees || 0);
                 }, 0);
-
+                const paginatedServices = finalServices.slice(
+                    skip,
+                    skip + limit
+                );
                 let response = {
                     coursePayments: formattedCoursePayments,
-                    servicesWithData: [finalServices],
+                    servicesWithData: [paginatedServices],
                     totalFees: totalCourseFee1 || 0,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
+
                     totalItemsCount: finalServices.length,
                 };
 
