@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/documentConfigration.services");
+const service = require("../services/documentConfiguration.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const documentConfigrationModel = require("../schema/documentConfigration.schema")
+const documentConfigrationModel = require("../schema/documentConfiguration.schema")
 const documntModel = require("../schema/document.schema")
 router.post(
     "/",

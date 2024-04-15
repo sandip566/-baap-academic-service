@@ -1,5 +1,5 @@
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
-const documentConfigrationModel = require("../schema/documentConfigration.schema");
+const documentConfigrationModel = require("../schema/documentConfiguration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const documntModel = require("../schema/document.schema")
 class documentConfigration extends BaseService {
