@@ -242,6 +242,19 @@ class StudentsAdmmisionService extends BaseService {
                 };
             }
 
+            if (query.CourseName) {
+                const courseIds = await courseModel.find({
+                    CourseName: { $regex: query.CourseName, $options: "i" },
+                }).select("courseId");
+                if (courseIds && courseIds.length > 0) {
+                    searchFilter["courseDetails.course_id"] = {
+                        $in: courseIds.map((course) => course.courseId),
+                    };
+                } else {
+                    return { message: "No data found with the courseName" };
+                }
+            }
+
             const skip = (page - 1) * perPage;
             const limit = perPage;
 
@@ -598,8 +611,8 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.addmissionId == query.addmissionId,
+                    data.empId === query.empId &&
+                    data.addmissionId == query.addmissionId,
                     true
                 );
             });
