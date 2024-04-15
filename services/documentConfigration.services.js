@@ -1,7 +1,7 @@
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const documentConfigrationModel = require("../schema/documentConfigration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-
+const documntModel = require("../schema/document.schema")
 class documentConfigration extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -14,7 +14,6 @@ class documentConfigration extends BaseService {
                 data,
                 { upsert: true, new: true }
             );
-
             return new ServiceResponse({
                 data: resp,
             });
@@ -122,5 +121,6 @@ class documentConfigration extends BaseService {
             return null;
         }
     }
+
 }
 module.exports = new documentConfigration(documentConfigrationModel, 'documentConfigration');

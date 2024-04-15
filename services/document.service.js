@@ -129,5 +129,6 @@ class DocumentService extends BaseService {
             return DocumentModel.findOne({ documentId: documentId });
         });
     }
+
 }
 module.exports = new DocumentService(DocumentModel, "document");
