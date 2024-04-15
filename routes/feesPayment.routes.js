@@ -221,8 +221,8 @@ router.post(
                                     );
                                     installment.amount -= amountToDeduct;
                                     otherAmountRemaining -= amountToDeduct;
-
-                                    if (installment.amount == 0) {
+                                  
+                                    if (installment.amount === 0) {
                                         installment.status = "paid";
                                         studentAdmissionServices.updateInstallmentAmount(
                                             installment.installmentNo,

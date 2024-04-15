@@ -795,7 +795,7 @@ class StudentsAdmmisionService extends BaseService {
             );
 
             const allInstallmentsPaid = feesDetail.installment.every(
-                (installment) => installment.status === "paid"
+                (installment) => installment.status == "paid"
             );
 
             if (allInstallmentsPaid) {

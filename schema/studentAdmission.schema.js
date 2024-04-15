@@ -55,6 +55,11 @@ const studentsAdmissionSchema = new mongoose.Schema(
             required: false,
             default: "Draft",
         },
+        status:{
+            type: String,
+            required: false,
+        }
+        
     },
     { strict: false, timestamps: true }
 );
