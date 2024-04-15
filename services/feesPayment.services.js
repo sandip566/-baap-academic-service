@@ -29,8 +29,8 @@ class feesPaymentService extends BaseService {
                     academicYear: academicYear,
                     isShowInAccounting: true,
                 })
-                .skip(skip)
-                .limit(limit)
+                // .skip(skip)
+                // .limit(limit)
                 .exec();
             //const count = await .countDocuments(data);
             const totalPaidAmount = data.reduce((total, item) => {
@@ -112,13 +112,13 @@ class feesPaymentService extends BaseService {
                 },
                 0
             );
-
+            const paginatedServices = finalServices.slice(skip, skip + limit);
             let response = {
                 totalPaidAmount: totalPaidAmountCount,
                 totalRemainingAmount: totalRemainingAmountCount,
                 // feesDefaulter: data,
                 //count:count,
-                servicesWithData: finalServices,
+                servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
             };
             return response;
@@ -140,7 +140,9 @@ class feesPaymentService extends BaseService {
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
                     admissionStatus: "Confirm",
-                });
+                })
+                    .skip(skip)
+                    .limit(limit);
 
                 let feesData = await this.model.find({
                     groupId: groupId,
