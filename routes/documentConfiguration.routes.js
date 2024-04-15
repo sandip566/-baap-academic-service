@@ -4,7 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/documentConfiguration.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const documentConfigrationModel = require("../schema/documentConfiguration.schema")
+const documentConfigurationModel = require("../schema/documentConfiguration.schema")
 const documntModel = require("../schema/document.schema")
 router.post(
     "/",
@@ -38,7 +38,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
 
-        const documentConfigurations = await documentConfigrationModel.find(searchFilter);
+        const documentConfigurations = await documentConfigurationModel.find(searchFilter);
 
         let filteredDocuments = documentConfigurations;
         let populatedDocuments = [];
@@ -98,7 +98,7 @@ router.delete("/groupId/:groupId/documntConfigurationId/:documntConfigurationId"
         const groupId = req.params.groupId
         const Data = await service.deletedocumntConfigurationId({ documntConfigurationId: documntConfigurationId, groupId: groupId });
         if (!Data) {
-            res.status(404).json({ error: 'documentConfigration data not found to delete' });
+            res.status(404).json({ error: 'documentConfiguration data not found to delete' });
         } else {
             res.status(201).json(Data);
         }
