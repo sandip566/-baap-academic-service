@@ -158,7 +158,7 @@ router.get(
         const groupId = req.params.groupId;
         const criteria = {
             feesTemplateId: req.query.feesTemplateId,
-            // pageNumber: parseInt(req.query.pageNumber) || 1,
+            pageNumber: parseInt(req.query.pageNumber) || 1,
         };
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
