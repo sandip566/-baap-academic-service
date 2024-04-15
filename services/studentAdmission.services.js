@@ -235,6 +235,13 @@ class StudentsAdmmisionService extends BaseService {
                 };
             }
 
+            if (query.admissionStatus) {
+                searchFilter.admissionStatus = {
+                    $regex: query.admissionStatus,
+                    $options: "i",
+                };
+            }
+
             const skip = (page - 1) * perPage;
             const limit = perPage;
 
