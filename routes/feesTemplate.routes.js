@@ -23,52 +23,7 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-// router.get(
-//     "/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo",
-//     async (req, res, next) => {
-//         if (ValidationHelper.requestValidationErrors(req, res)) {
-//             return;
-//         }
 
-//         const feesTemplateId = req.params.feesTemplateId;
-//         console.log(feesTemplateId);
-//         const installmentNo = parseInt(req.params.installmentNo);
-
-//         try {
-//             const installmentDetails = [];
-//             const serviceResponse = await service.getByfeesTemplateId(
-//                 feesTemplateId
-//             );
-// if(!serviceResponse){
-//     res.status(409).json({ error: 'Installment Not Allowed' });
-// }
-//             if (serviceResponse.data) {
-//                 const totalFees = serviceResponse.data.totalFees;
-//                 const installmentAmount = Math.round(totalFees / installmentNo);
-
-//                 for (let i = 1; i <= installmentNo; i++) {
-//                     installmentDetails.push({
-//                         installmentNo: i,
-//                         amount: installmentAmount,
-//                         totalInstallmentAmount: installmentAmount,
-//                     });
-//                 }
-//                 serviceResponse.data.installmentDetails = installmentDetails;
-//             }
-//             let response = {
-//                 status: "success",
-//                 data: installmentDetails,
-//             };
-//             requestResponsehelper.sendResponse(res, response);
-//         } catch (error) {
-//             console.error("Error occurred:", error);
-//             requestResponsehelper.sendResponse(res, {
-//                 status: "Failed",
-//                 message: "An error occurred while processing the request.",
-//             });
-//         }
-//     }
-// );
 router.get(
     "/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo",
     async (req, res, next) => {
