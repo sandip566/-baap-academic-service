@@ -11,10 +11,7 @@ class BookIssueLogService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.bookIssueLogId) query.phone = criteria.bookIssueLogId;
-        if (criteria.studentId) query.studentId = criteria.studentId;
-        if (criteria.returned)
-            query.returned = new RegExp(criteria.returned, "i");
+        
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -156,6 +153,48 @@ class BookIssueLogService extends BaseService {
             return response;
         } catch (error) {
             console.log(error);
+        }
+    }
+    async getStudentDetails(groupId,criteria) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+            console.log(searchFilter)
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { phoneNumber: numericSearch },
+                        { roleId: numericSearch },
+                        { userId: numericSearch },
+                        { addmissionId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { lastName: { $regex: criteria.search, $options: "i" } },
+                        { name: { $regex: criteria.search, $options: "i" } },
+                       // { name: { $regex: criteria.search, $options: "i" } },
+                    ];
+                }
+            }
+
+    
+            const students = await Student.find(searchFilter);
+    
+            if (!students || students.length === 0) {
+                return { error: "Student not found" };
+            }
+    
+
+            const student = await bookIssueLogModel.find({
+                addmissionId: { $in: students.map((book) => book.addmissionId) },
+                returned: false,
+            });
+            return { searchedStudents: students, issueLogs: student };
+        } catch (error) {
+            console.error("Error fetching student details:", error);
+            return { error: "Internal server error" };
         }
     }
 }
