@@ -1,7 +1,7 @@
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const documentConfigrationModel = require("../schema/documentConfiguration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const documntModel = require("../schema/document.schema")
+const documntModel = require("../schema/document.schema");
 class documentConfiguration extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -26,26 +26,29 @@ class documentConfiguration extends BaseService {
     }
     async deletedocumntConfigurationId(documentConfigrationId, groupId) {
         try {
-            return await documentConfigrationModel.deleteOne({ documentConfigrationId: documentConfigrationId, groupId: groupId });
+            return await documentConfigrationModel.deleteOne({
+                documentConfigrationId: documentConfigrationId,
+                groupId: groupId,
+            });
         } catch (error) {
             throw error;
         }
     }
     async updateById({ groupId, documentId, updateData }) {
         try {
-
             const updateResult1 = await documentConfigrationModel.updateMany(
                 { "documents.documentId": documentId },
                 {
                     $set: {
-                        "documents.$[elem].documentTitle": updateData.documentTitle,
+                        "documents.$[elem].documentTitle":
+                            updateData.documentTitle,
                         "documents.$[elem].expiryDate": updateData.expiryDate,
                         "documents.$[elem].formDate": updateData.formDate,
-                        "documents.$[elem].documentUrl": updateData.documentUrl
-                    }
+                        "documents.$[elem].documentUrl": updateData.documentUrl,
+                    },
                 },
                 {
-                    arrayFilters: [{ "elem.documentId": documentId }]
+                    arrayFilters: [{ "elem.documentId": documentId }],
                 }
             );
             return updateResult1;
@@ -54,13 +57,21 @@ class documentConfiguration extends BaseService {
         }
     }
 
-    async updateDocumntConfigrationByConfigrationId(documntConfigurationId, groupId, newData) {
+    async updateDocumntConfigrationByConfigrationId(
+        documntConfigurationId,
+        groupId,
+        newData
+    ) {
         try {
-            const updatedDocumntConfigration = await this.dbModel.findOneAndUpdate(
-                { documntConfigurationId: documntConfigurationId, groupId: groupId },
-                newData,
-                { new: true }
-            );
+            const updatedDocumntConfigration =
+                await this.dbModel.findOneAndUpdate(
+                    {
+                        documntConfigurationId: documntConfigurationId,
+                        groupId: groupId,
+                    },
+                    newData,
+                    { new: true }
+                );
             return updatedDocumntConfigration;
         } catch (error) {
             throw error;
@@ -69,13 +80,16 @@ class documentConfiguration extends BaseService {
 
     async deleteById({ groupId, documentId }) {
         try {
-            const documentConfiguration = await documentConfigrationModel.findOne({ groupId });
+            const documentConfiguration =
+                await documentConfigrationModel.findOne({ groupId });
 
             if (!documentConfiguration) {
                 return null;
             }
 
-            const documentIndex = documentConfiguration.documents.findIndex(doc => doc.documentId === parseInt(documentId));
+            const documentIndex = documentConfiguration.documents.findIndex(
+                (doc) => doc.documentId === parseInt(documentId)
+            );
 
             if (documentIndex === -1) {
                 return null;
@@ -95,7 +109,6 @@ class documentConfiguration extends BaseService {
         try {
             const searchFilter = {
                 groupId: groupId,
-
             };
 
             if (criteria.search) {
@@ -106,12 +119,10 @@ class documentConfiguration extends BaseService {
                         { userId: numericSearch },
                         { roleId: numericSearch },
                         { addmissionId: numericSearch },
-                        { empId: numericSearch }
+                        { empId: numericSearch },
                     ];
                 } else {
-                    searchFilter.$or = [
-
-                    ];
+                    searchFilter.$or = [];
                 }
             }
 
@@ -121,6 +132,8 @@ class documentConfiguration extends BaseService {
             return null;
         }
     }
-
 }
-module.exports = new documentConfiguration(documentConfigrationModel, 'documentConfiguration');
+module.exports = new documentConfiguration(
+    documentConfigrationModel,
+    "documentConfiguration"
+);
