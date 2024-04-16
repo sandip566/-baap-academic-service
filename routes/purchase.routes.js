@@ -110,7 +110,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             groupId,
             criteria,
             skip,
-            limit,
+            limit
         );
         const totalCount = await PurchaseModel.countDocuments(searchFilter);
         const purchase = await PurchaseModel.find(searchFilter)

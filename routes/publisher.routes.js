@@ -30,7 +30,6 @@ router.get("/all", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
@@ -40,7 +39,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             phoneNumber: req.query.phoneNumber,
             search: req.query.search,
             address: req.query.address,
-            website: req.query.website
+            website: req.query.website,
         };
 
         const page = parseInt(req.query.page) || 1;
@@ -51,10 +50,11 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             groupId,
             criteria,
             skip,
-            limit,
+            limit
         );
         const totalCount = await publisherModel.countDocuments(searchFilter);
-        const publisher = await publisherModel.find(searchFilter)
+        const publisher = await publisherModel
+            .find(searchFilter)
             .skip(skip)
             .limit(limit)
             .exec();
@@ -71,26 +71,29 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
-router.delete("/groupId/:groupId/publisherId/:publisherId", async (req, res) => {
-    try {
-        const publisherId = req.params.publisherId;
-        const groupId = req.params.groupId;
-        const publisherData = await service.deletePublisherById({
-            publisherId: publisherId,
-            groupId: groupId,
-        });
-        if (!publisherData) {
-            res.status(404).json({
-                error: "publisher data not found to delete",
+router.delete(
+    "/groupId/:groupId/publisherId/:publisherId",
+    async (req, res) => {
+        try {
+            const publisherId = req.params.publisherId;
+            const groupId = req.params.groupId;
+            const publisherData = await service.deletePublisherById({
+                publisherId: publisherId,
+                groupId: groupId,
             });
-        } else {
-            res.status(201).json(publisherData);
+            if (!publisherData) {
+                res.status(404).json({
+                    error: "publisher data not found to delete",
+                });
+            } else {
+                res.status(201).json(publisherData);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
         }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
     }
-});
+);
 router.put("/groupId/:groupId/publisherId/:publisherId", async (req, res) => {
     try {
         const publisherId = req.params.publisherId;
@@ -116,7 +119,6 @@ router.put("/groupId/:groupId/publisherId/:publisherId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 
 router.get("/totalPublisher", async (req, res) => {
     try {

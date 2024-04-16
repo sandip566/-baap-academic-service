@@ -8,7 +8,9 @@ class LatefeepaymentService extends BaseService {
 
     async getByDataId(lateFeePaymentId) {
         return this.execute(() => {
-            return LatefeepaymentModel.findOne({ lateFeePaymentId: lateFeePaymentId });
+            return LatefeepaymentModel.findOne({
+                lateFeePaymentId: lateFeePaymentId,
+            });
         });
     }
 
@@ -16,15 +18,22 @@ class LatefeepaymentService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.lateFeeAmount) query.lateFeeAmount = criteria.lateFeeAmount;
-        if (criteria.paymentStatus) query.paymentStatus = new RegExp(criteria.paymentStatus, "i");
-        if (criteria.lateFeePaymentId) query.lateFeePaymentId = criteria.lateFeePaymentId;
+        if (criteria.lateFeeAmount)
+            query.lateFeeAmount = criteria.lateFeeAmount;
+        if (criteria.paymentStatus)
+            query.paymentStatus = new RegExp(criteria.paymentStatus, "i");
+        if (criteria.lateFeePaymentId)
+            query.lateFeePaymentId = criteria.lateFeePaymentId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async updateDataById(lateFeePaymentId, groupId, newData) {
         try {
-            const updatedData = await LatefeepaymentModel.findOneAndUpdate({ lateFeePaymentId: lateFeePaymentId, groupId: groupId }, newData, { new: true });
+            const updatedData = await LatefeepaymentModel.findOneAndUpdate(
+                { lateFeePaymentId: lateFeePaymentId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatedData;
         } catch (error) {
             throw error;
@@ -33,11 +42,17 @@ class LatefeepaymentService extends BaseService {
 
     async deleteByDataId(lateFeePaymentId, groupId) {
         try {
-            const deleteData = await LatefeepaymentModel.deleteOne({ lateFeePaymentId: lateFeePaymentId, groupId: groupId });
+            const deleteData = await LatefeepaymentModel.deleteOne({
+                lateFeePaymentId: lateFeePaymentId,
+                groupId: groupId,
+            });
             return deleteData;
         } catch (error) {
             throw error;
         }
     }
 }
-module.exports = new LatefeepaymentService(LatefeepaymentModel, 'latefeepayment');
+module.exports = new LatefeepaymentService(
+    LatefeepaymentModel,
+    "latefeepayment"
+);

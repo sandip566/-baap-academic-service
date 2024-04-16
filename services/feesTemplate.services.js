@@ -32,7 +32,11 @@ class Service extends BaseService {
 
     async updatefeesTemplateById(feesTemplateId, groupId, newData) {
         try {
-            const updatefeesTemplate = await feesTemplateModel.findOneAndUpdate({ feesTemplateId: feesTemplateId, groupId: groupId }, newData, { new: true });
+            const updatefeesTemplate = await feesTemplateModel.findOneAndUpdate(
+                { feesTemplateId: feesTemplateId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatefeesTemplate;
         } catch (error) {
             throw error;
