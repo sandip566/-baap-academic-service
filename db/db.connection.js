@@ -2,9 +2,9 @@ const mongoose = require("mongoose")
 
 const mongodbUrl = process.env.connectionString;
 mongoose.set("strictQuery", false);
-mongoose.connect(mongodbUrl, { useNewUrlParser: true,dbName:"baap-acadamic-dev"})
+mongoose.connect(mongodbUrl, { useNewUrlParser: true},dbName="baap-academic-dev")
 	.then(() => {
-        console.log("Connected to the database");
+        console.log("Connected to the database",mongodbUrl);
 	})
 
 module.exports = mongoose;

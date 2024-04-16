@@ -195,11 +195,32 @@ class BookIssueLogService extends BaseService {
                 },
                 returned: false,
             });
-            return { searchedStudents: students, issueLogs: student };
+            return { data:"student",searchedStudents: students, issueLogs: student };
         } catch (error) {
             console.error("Error fetching student details:", error);
             return { error: "Internal server error" };
         }
     }
+
+    async  getUserIssuedBooks(userId) {
+        try {
+            const issuedBooks = await bookIssueLogModel.find({ userId: userId, returned: false });
+            const bookIds = issuedBooks.map(bookIssue => bookIssue.bookId)
+            const bookDetailsArray = await Promise.all(
+                bookIds.map(async (bookId) => {
+                    const bookDetails = await Book.findOne({ bookId: bookId });
+                    return bookDetails;
+                })
+            );
+            
+            const validBookDetailsArray = bookDetailsArray.filter(book => book !== null);
+            
+            return { userIssuedBooks: validBookDetailsArray }
+        } catch (error) {
+            console.error("Error retrieving user's issued books:", error);
+            return []; 
+        }
+    }
+    
 }
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");
