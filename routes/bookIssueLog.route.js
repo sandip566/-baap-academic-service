@@ -210,4 +210,13 @@ router.get("/book-issues/overdue", async (req, res) => {
     const bookIssues = await service.fetchBookIssuesWithOverdue();
     requestResponsehelper.sendResponse(res, bookIssues);
 });
+
+router.get("/student-details/:groupId", async (req, res) => {
+    const groupId = req.params.groupId;
+    const criteria = {
+        search: req.query.search,
+    };
+    const searchFilter = await service.getStudentDetails(groupId, criteria);
+    requestResponsehelper.sendResponse(res, searchFilter);
+});
 module.exports = router;

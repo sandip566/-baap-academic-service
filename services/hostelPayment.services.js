@@ -10,12 +10,13 @@ class hostelPaymnetService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10
-        if (criteria.hostelPaymnetId) query.hostelPaymnetId = criteria.hostelPaymnetId;
+        criteria.pageSize = 10;
+        if (criteria.hostelPaymnetId)
+            query.hostelPaymnetId = criteria.hostelPaymnetId;
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.memberId) query.memberId = criteria.memberId;
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
-        return this.preparePaginationAndReturnData(query, criteria)
+        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteHostelPaymnetById(hostelPaymnetId, groupId) {
@@ -28,11 +29,12 @@ class hostelPaymnetService extends BaseService {
 
     async updateHostelPaymnetById(hostelPaymnetId, groupId, newData) {
         try {
-            const updateHostelPaymnet = await hostelPaymnetModel.findOneAndUpdate(
-                { hostelPaymnetId: hostelPaymnetId, groupId: groupId },
-                newData,
-                { new: true }
-            );
+            const updateHostelPaymnet =
+                await hostelPaymnetModel.findOneAndUpdate(
+                    { hostelPaymnetId: hostelPaymnetId, groupId: groupId },
+                    newData,
+                    { new: true }
+                );
             return updateHostelPaymnet;
         } catch (error) {
             throw error;

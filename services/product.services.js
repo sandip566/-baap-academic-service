@@ -25,7 +25,11 @@ class Service extends BaseService {
 
     async updateProductById(productId, groupId, newData) {
         try {
-            const updateData = await productModel.findOneAndUpdate({ productId: productId, groupId: groupId }, newData, { new: true });
+            const updateData = await productModel.findOneAndUpdate(
+                { productId: productId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updateData;
         } catch (error) {
             throw error;
