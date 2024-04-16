@@ -21,7 +21,7 @@ router.post(
         //     (acc, item) => acc + item.quantity * item.unitPrice,
         //     0
         // );
-        const totalAmount=req.body.quantity*req.body.unitPrice;
+        const totalAmount = req.body.quantity * req.body.unitPrice;
         req.body.totalAmount = totalAmount;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
@@ -99,12 +99,11 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             vendorId: req.query.vendorId,
             purchaseId: req.query.purchaseId,
-            search:req.query.search,
-            orderStatus:req.query.orderStatus,
-            book:req.query.book,
-            unitPrice:req.query.unitPrice,
-            quantity:req.query.quantity
-          
+            search: req.query.search,
+            orderStatus: req.query.orderStatus,
+            book: req.query.book,
+            unitPrice: req.query.unitPrice,
+            quantity: req.query.quantity,
         };
 
         const page = parseInt(req.query.page) || 1;
@@ -115,7 +114,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             groupId,
             criteria,
             skip,
-            limit,
+            limit
         );
         const totalCount = await PurchaseModel.countDocuments(searchFilter);
         const purchase = await PurchaseModel.find(searchFilter)

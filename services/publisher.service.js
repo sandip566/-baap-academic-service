@@ -2,7 +2,6 @@ const { query } = require("express");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const publisherModel = require("../schema/publisher.schema");
 
-
 class publisherService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -18,8 +17,7 @@ class publisherService extends BaseService {
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
                         { publisherId: numericSearch },
-                       {phoneNumber:numericSearch}
-
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
@@ -28,30 +26,31 @@ class publisherService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-                        { address: { $regex: new RegExp(criteria.search, "i") } },
+                        {
+                            address: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
                         {
                             website: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
                         {
-                          
-                             email : { $regex:new RegExp(criteria.search, "i")}
-                        
-                    }
-
+                            email: { $regex: new RegExp(criteria.search, "i") },
+                        },
                     ];
                 }
             }
-          if(criteria.phoneNumber){
-           searchFilter.phoneNumber=criteria.phoneNumber
-          }
+            if (criteria.phoneNumber) {
+                searchFilter.phoneNumber = criteria.phoneNumber;
+            }
             if (criteria.publisherName) {
                 searchFilter.publisherName = {
                     $regex: new RegExp(criteria.publisherName, "i"),
                 };
             }
-            
+
             return { searchFilter };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);

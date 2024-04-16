@@ -533,7 +533,7 @@ router.get(
             empId: req.query.empId,
             userId: req.query.userId,
             installmentId: req.query.installmentId,
-            search: req.query.search
+            search: req.query.search,
         };
         const serviceResponse = await service.getAllFeesPaymentByGroupId(
             groupId,

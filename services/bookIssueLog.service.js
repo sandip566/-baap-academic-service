@@ -11,7 +11,7 @@ class BookIssueLogService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        
+
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -155,12 +155,12 @@ class BookIssueLogService extends BaseService {
             console.log(error);
         }
     }
-    async getStudentDetails(groupId,criteria) {
+    async getStudentDetails(groupId, criteria) {
         try {
             const searchFilter = {
                 groupId: groupId,
             };
-            console.log(searchFilter)
+            console.log(searchFilter);
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
@@ -172,23 +172,27 @@ class BookIssueLogService extends BaseService {
                     ];
                 } else {
                     searchFilter.$or = [
-                        { lastName: { $regex: criteria.search, $options: "i" } },
+                        {
+                            lastName: {
+                                $regex: criteria.search,
+                                $options: "i",
+                            },
+                        },
                         { name: { $regex: criteria.search, $options: "i" } },
-                       // { name: { $regex: criteria.search, $options: "i" } },
                     ];
                 }
             }
 
-    
             const students = await Student.find(searchFilter);
-    
+
             if (!students || students.length === 0) {
                 return { error: "Student not found" };
             }
-    
 
             const student = await bookIssueLogModel.find({
-                addmissionId: { $in: students.map((book) => book.addmissionId) },
+                addmissionId: {
+                    $in: students.map((book) => book.addmissionId),
+                },
                 returned: false,
             });
             return { searchedStudents: students, issueLogs: student };

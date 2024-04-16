@@ -12,7 +12,8 @@ class Service extends BaseService {
             groupId: groupId,
         };
         criteria.pageSize = 10;
-        if (criteria.feesTemplateId) query.feesTemplateId = criteria.feesTemplateId;
+        if (criteria.feesTemplateId)
+            query.feesTemplateId = criteria.feesTemplateId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
     async getByfeesTemplateId(feesTemplateId) {
@@ -22,9 +23,12 @@ class Service extends BaseService {
         });
     }
 
-    async deletefeesTemplateById( groupId,feesTemplateId) {
+    async deletefeesTemplateById(groupId, feesTemplateId) {
         try {
-            return await feesTemplateModel.deleteOne({groupId:groupId,feesTemplateId:feesTemplateId});
+            return await feesTemplateModel.deleteOne({
+                groupId: groupId,
+                feesTemplateId: feesTemplateId,
+            });
         } catch (error) {
             throw error;
         }
@@ -32,7 +36,11 @@ class Service extends BaseService {
 
     async updatefeesTemplateById(feesTemplateId, groupId, newData) {
         try {
-            const updatefeesTemplate = await feesTemplateModel.findOneAndUpdate({ feesTemplateId: feesTemplateId, groupId: groupId }, newData, { new: true });
+            const updatefeesTemplate = await feesTemplateModel.findOneAndUpdate(
+                { feesTemplateId: feesTemplateId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatefeesTemplate;
         } catch (error) {
             throw error;

@@ -8,7 +8,11 @@ class TransactionService extends BaseService {
 
     async updateTransactionById(transactionId, groupId, newData) {
         try {
-            const updatedData = await TransactionModel.findOneAndUpdate({ transactionId: transactionId, groupId: groupId }, newData, { new: true });
+            const updatedData = await TransactionModel.findOneAndUpdate(
+                { transactionId: transactionId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatedData;
         } catch (error) {
             throw error;
@@ -28,8 +32,9 @@ class TransactionService extends BaseService {
             groupId: groupId,
         };
         if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.transactionId) query.transactionId = criteria.transactionId;
+        if (criteria.transactionId)
+            query.transactionId = criteria.transactionId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }
-module.exports = new TransactionService(TransactionModel, 'transactions');
+module.exports = new TransactionService(TransactionModel, "transactions");

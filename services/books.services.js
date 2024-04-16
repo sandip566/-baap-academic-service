@@ -113,7 +113,9 @@ class BooksService extends BaseService {
 
     async getDepartmentMap(groupId) {
         try {
-            const departments = await departmentModel.find({groupId:groupId});
+            const departments = await departmentModel.find({
+                groupId: groupId,
+            });
             const departmentMap = {};
             departments.forEach((department) => {
                 if (department.departmentName) {

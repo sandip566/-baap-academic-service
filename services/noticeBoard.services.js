@@ -10,9 +10,10 @@ class noticeBoardService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.noticeBoardId) query.noticeBoardId = criteria.noticeBoardId;
+        if (criteria.noticeBoardId)
+            query.noticeBoardId = criteria.noticeBoardId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
-        return this.preparePaginationAndReturnData(query, criteria)
+        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteNoticeBoardByNo(noticeBoardId, groupId) {

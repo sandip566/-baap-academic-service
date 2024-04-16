@@ -172,7 +172,9 @@ class feesInstallmentService extends BaseService {
 
     async getStudentById(addmissionId) {
         try {
-            const student = await studentAdmissionModel.findOne({ addmissionId: addmissionId });
+            const student = await studentAdmissionModel.findOne({
+                addmissionId: addmissionId,
+            });
             return student;
         } catch (error) {
             throw error;

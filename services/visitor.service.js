@@ -11,13 +11,17 @@ class VisitorService extends BaseService {
             groupId: groupId,
         };
         if (criteria.visitorId) query.visitorId = criteria.visitorId;
-        if (criteria.visitorName) query.visitorName = new RegExp(criteria.visitorName, "i");
+        if (criteria.visitorName)
+            query.visitorName = new RegExp(criteria.visitorName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteVisitor(vendorId, groupId) {
         try {
-            return await this.dbModel.deleteOne({ visitorId: visitorId, groupId: groupId });
+            return await this.dbModel.deleteOne({
+                visitorId: visitorId,
+                groupId: groupId,
+            });
         } catch (error) {
             throw error;
         }
@@ -54,11 +58,15 @@ class VisitorService extends BaseService {
 
     async updateVisitorById(visitorId, groupId, newData) {
         try {
-            const updateVisitorData = await VisitorModel.findOneAndUpdate({ visitorId: visitorId, groupId: groupId }, newData, { new: true });
+            const updateVisitorData = await VisitorModel.findOneAndUpdate(
+                { visitorId: visitorId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updateVisitorData;
         } catch (error) {
             throw error;
         }
     }
 }
-module.exports = new VisitorService(VisitorModel, 'visitor');
+module.exports = new VisitorService(VisitorModel, "visitor");

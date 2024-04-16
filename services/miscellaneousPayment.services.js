@@ -10,33 +10,49 @@ class miscellaneousPaymentService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10
-        if (criteria.miscellaneousPaymentId) query.miscellaneousPaymentId = criteria.miscellaneousPaymentId;
+        criteria.pageSize = 10;
+        if (criteria.miscellaneousPaymentId)
+            query.miscellaneousPaymentId = criteria.miscellaneousPaymentId;
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.empId) query.empId = criteria.empId;
-        if (criteria.installmentId) query.installmentId = criteria.installmentId;
-        return this.preparePaginationAndReturnData(query, criteria)
+        if (criteria.installmentId)
+            query.installmentId = criteria.installmentId;
+        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteMiscellaneousPaymentById(miscellaneousPaymentId, groupId) {
         try {
-            return await miscellaneousPaymentModel.deleteOne(miscellaneousPaymentId, groupId);
+            return await miscellaneousPaymentModel.deleteOne(
+                miscellaneousPaymentId,
+                groupId
+            );
         } catch (error) {
             throw error;
         }
     }
 
-    async updateMiscellaneousPaymentById(miscellaneousPaymentId, groupId, newData) {
+    async updateMiscellaneousPaymentById(
+        miscellaneousPaymentId,
+        groupId,
+        newData
+    ) {
         try {
-            const updateMiscellaneousPaymentFee = await miscellaneousPaymentModel.findOneAndUpdate(
-                { miscellaneousPaymentId: miscellaneousPaymentId, groupId: groupId },
-                newData,
-                { new: true }
-            );
+            const updateMiscellaneousPaymentFee =
+                await miscellaneousPaymentModel.findOneAndUpdate(
+                    {
+                        miscellaneousPaymentId: miscellaneousPaymentId,
+                        groupId: groupId,
+                    },
+                    newData,
+                    { new: true }
+                );
             return updateMiscellaneousPaymentFee;
         } catch (error) {
             throw error;
         }
     }
 }
-module.exports = new miscellaneousPaymentService(miscellaneousPaymentModel, "miscellaneousPayment");
+module.exports = new miscellaneousPaymentService(
+    miscellaneousPaymentModel,
+    "miscellaneousPayment"
+);
