@@ -267,7 +267,8 @@ router.get(
                 lastName: req.query.lastName,
                 admissionStatus: req.query.admissionStatus,
                 search: req.query.search,
-                CourseName: req.query.CourseName
+                CourseName: req.query.CourseName,
+                className: req.query.className
             };
 
             const serviceResponse = await service.getAllDataByGroupId(
