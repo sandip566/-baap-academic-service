@@ -221,7 +221,7 @@ router.post(
                                     );
                                     installment.amount -= amountToDeduct;
                                     otherAmountRemaining -= amountToDeduct;
-                                  
+
                                     if (installment.amount === 0) {
                                         installment.status = "paid";
                                         studentAdmissionServices.updateInstallmentAmount(
@@ -469,7 +469,7 @@ router.get(
 );
 router.get(
     "/getFeesStatData/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -488,20 +488,42 @@ router.get(
         };
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-
-        // const skip = (page - 1) * limit;
-        // const skip=(page-1)*limit;
         const serviceResponse = await service.getFeesStatData(
             groupId,
             criteria,
-            // skip,
             page,
             limit
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+router.get(
+    "/getFeesTotalCount/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            currentDate: req.query.currentDate,
+            academicYear: req.query.academicYear,
+            startDate: req.query.startDate,
+            endDate: req.query.endDate,
+            location: req.query.location,
+            course: req.query.course,
+            class: req.query.class,
+            department: req.query.department,
+            feesTemplateId: req.query.feesTemplateId,
+            division: req.query.division,
+            month: req.query.month,
+            search: req.query.search,
+        };
 
+        const serviceResponse = await service.getFeesTotalCount(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
