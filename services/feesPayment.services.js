@@ -21,8 +21,7 @@ class feesPaymentService extends BaseService {
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
             })
-                .skip(skip)
-                .limit(limit);
+                
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
