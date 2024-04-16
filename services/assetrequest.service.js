@@ -56,18 +56,12 @@ class AssetRequestService extends BaseService {
         });
     }
 
-    async getByRequestId(requestId) {
-        return this.execute(() => {
-            return AssetRequestModel.findOne({ requestId: requestId });
-        });
-    }
-
     async updateRequest(requestId, data) {
         try {
             const updateRequest = await AssetRequestModel.findOneAndUpdate(
                 { requestId: requestId },
                 data,
-                { upsert: true, new: true }
+                { new: true, upsert: true }
             );
             return new ServiceResponse({
                 data: updateRequest,

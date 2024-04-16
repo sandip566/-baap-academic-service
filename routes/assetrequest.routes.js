@@ -33,21 +33,8 @@ router.post(
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
       } else if (req.body.requestId) {
-        const existingRequest = await service.getByRequestId(req.body.requestId);
-        if (existingRequest) {
-          const updatedData = {
-            ...existingRequest.toObject(),
-            ...req.body,
-            type: existingRequest.type,
-          };
-          const serviceResponse = await service.updateRequest(
-            req.body.requestId,
-            updatedData
-          );
-          requestResponsehelper.sendResponse(res, serviceResponse);
-        } else {
-          res.status(404).json({ error: "Request not found" });
-        }
+        const serviceResponse = await service.updateRequest(req.body.requestId, req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
       } else {
         res.status(400).json({ error: "Invalid request" });
       }
