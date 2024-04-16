@@ -83,6 +83,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         title: req.query.title,
         description: req.query.description,
         category: req.query.category,
+        userId: req.query.userId,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -138,4 +139,5 @@ router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 module.exports = router;

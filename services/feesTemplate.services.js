@@ -11,13 +11,12 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10;
-        if (criteria.feesTemplateId)
-            query.feesTemplateId = criteria.feesTemplateId;
+        criteria.pageSize = 5;
+        if (criteria.feesTemplateId) query.feesTemplateId = criteria.feesTemplateId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
     async getByfeesTemplateId(feesTemplateId) {
-        const result = await this.model.findOne({ feesTemplateId });
+        const result = await this.model.findOne({ feesTemplateId});
         return new ServiceResponse({
             data: result,
         });
@@ -25,10 +24,7 @@ class Service extends BaseService {
 
     async deletefeesTemplateById(groupId, feesTemplateId) {
         try {
-            return await feesTemplateModel.deleteOne({
-                groupId: groupId,
-                feesTemplateId: feesTemplateId,
-            });
+            return await feesTemplateModel.deleteOne({ groupId: groupId, feesTemplateId: feesTemplateId });
         } catch (error) {
             throw error;
         }

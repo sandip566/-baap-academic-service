@@ -170,9 +170,10 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getStudentById(addmissionId) {
+    async getStudentById(groupId,addmissionId) {
         try {
-            const student = await studentAdmissionModel.findOne({
+            const student = await feesInstallmentModel.findOne({
+                groupId:groupId,
                 addmissionId: addmissionId,
             });
             return student;
@@ -354,13 +355,18 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getTotalStudentsForClass(classId, feesTemplateId, groupId) {
+    async getTotalStudentsForClass(
+        classId,
+        feesTemplateId,
+        groupId,
+        academicYear
+    ) {
         try {
             const totalStudents = await studentAdmissionModel.countDocuments({
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
-                status: "Confirm",
+                admissionStatus:"Confirm",
             });
             return totalStudents;
         } catch (error) {
@@ -421,8 +427,12 @@ class feesInstallmentService extends BaseService {
                         totalInstallmentAmount: {
                             $sum: {
                                 $subtract: [
-                                    "$feesDetails.installment.totalInstallmentAmount",
-                                    "$feesDetails.installment.amount",
+                                    {
+                                        $toInt: "$feesDetails.installment.totalInstallmentAmount",
+                                    },
+                                    {
+                                        $toInt: "$feesDetails.installment.amount",
+                                    },
                                 ],
                             },
                         },

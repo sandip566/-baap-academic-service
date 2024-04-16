@@ -7,6 +7,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
+const StudentAdmissionModel = require("../schema/studentAdmission.schema");
 
 router.post(
     "/",
@@ -22,6 +23,7 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 router.get(
     "/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo",
     async (req, res, next) => {
@@ -30,32 +32,40 @@ router.get(
         }
 
         const feesTemplateId = req.params.feesTemplateId;
-        console.log(feesTemplateId);
         const installmentNo = parseInt(req.params.installmentNo);
 
         try {
-            const installmentDetails = [];
             const serviceResponse = await service.getByfeesTemplateId(
                 feesTemplateId
             );
-
-            if (serviceResponse.data) {
-                const totalFees = serviceResponse.data.totalFees;
-                const installmentAmount = Math.round(totalFees / installmentNo);
-
-                for (let i = 1; i <= installmentNo; i++) {
-                    installmentDetails.push({
-                        installmentNo: i,
-                        amount: installmentAmount,
-                        totalInstallmentAmount: installmentAmount,
-                    });
-                }
-                serviceResponse.data.installmentDetails = installmentDetails;
+            if (!serviceResponse || !serviceResponse.data) {
+                return res.status(404).json({ error: "Data not found" });
             }
-            let response = {
+
+            const isInstallmentAllowed =
+                serviceResponse.data.isInstallmentAllowed;
+
+            const maxInstallmentNo = isInstallmentAllowed ? installmentNo : 1;
+
+            const totalFees = serviceResponse.data.totalFees;
+            const installmentAmount = Math.round(totalFees / maxInstallmentNo);
+
+            const installmentDetails = [];
+            for (let i = 1; i <= maxInstallmentNo; i++) {
+                installmentDetails.push({
+                    installmentNo: i,
+                    amount: installmentAmount,
+                    totalInstallmentAmount: installmentAmount,
+                });
+            }
+
+            serviceResponse.data.installmentDetails = installmentDetails;
+
+            const response = {
                 status: "success",
                 data: installmentDetails,
             };
+
             requestResponsehelper.sendResponse(res, response);
         } catch (error) {
             console.error("Error occurred:", error);
@@ -136,23 +146,31 @@ router.delete(
         try {
             const groupId = req.params.groupId;
             const feesTemplateId = req.params.feesTemplateId;
-            const feesInstallment = await FeesInstallmentModel.find({
+            const feesInstallment = await StudentAdmissionModel.find({
                 groupId: groupId,
             });
+            console.log(feesInstallment[0].feesDetails);
 
             let findId = false;
             for (const data of feesInstallment) {
-                for (const data1 of data.feesDetails) {
-                    if (data1.feesTemplateId == feesTemplateId) {
-                        findId = true;
-                        break;
+                console.log(data);
+                // Check if feesDetails exists and is iterable
+                if (
+                    data.feesDetails &&
+                    typeof data.feesDetails[Symbol.iterator] === "function"
+                ) {
+                    for (const data1 of data.feesDetails) {
+                        if (data1.feesTemplateId == feesTemplateId) {
+                            findId = true;
+                            break;
+                        }
                     }
                 }
             }
 
             if (findId) {
                 console.log("Fees Template is assigned to Fees Details");
-                res.send("Fees Template is assigned to Fees Details");
+                res.status(409).send({ error: "Fees Template is assigned" });
             } else {
                 const data = await service.deletefeesTemplateById(
                     groupId,

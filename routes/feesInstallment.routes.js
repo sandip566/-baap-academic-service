@@ -10,6 +10,7 @@ const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const mongoURI = "mongodb://127.0.0.1:27017/baap-acadamic-dev";
 const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const { Aggregate, match, project, sum } = require("mongoose").Aggregate;
+const feesPaymentModel = require("../services/feesPayment.services")
 let totalAmount = 0;
 let collectedAmount = 0;
 
@@ -149,72 +150,54 @@ router.put(
         }
     }
 );
-
-router.get("/installments/:addmissionId", async (req, res) => {
+router.get("/installments/groupId/:groupId/addmission/:addmissionId", async (req, res) => {
     try {
+        const groupId = req.params.groupId;
         const addmissionId = req.params.addmissionId;
 
-        const student = await service.getStudentById(addmissionId);
+        const student = await service.getStudentById(groupId,addmissionId);
         if (!student) {
             return res.status(404).json({ error: "Student not found" });
         }
 
         const installments = await service.getInstallmentsByStudentId(
+            groupId,
             addmissionId
         );
+        
+        let paidAmt = await feesPaymentModel.getPaidAmount(groupId,addmissionId);
+        let totalAmount = 0;
+        let totalPaidAmount = 0;
 
-        let totalFee = 0;
-        let remeningAmount = 0;
-        let totalPaid = 0;
-        installments.forEach((installment) => {
-            installment.feesDetails.forEach((feesDetail) => {
-                feesDetail.installment.forEach((installmentItem) => {
-                    totalFee += installmentItem.amount;
-                    if (installmentItem.status === "pending") {
-                        remeningAmount += installmentItem.amount;
-                    } else if (installmentItem.status === "paid") {
-                        totalPaid += parseInt(installmentItem.amount);
-                    }
-                });
+        if (paidAmt && paidAmt.length > 0) {
+            paidAmt.forEach(item => {
+                totalAmount = parseInt(item.courseFee);
+                totalPaidAmount += parseInt(item.paidAmount);
             });
-        });
-        const populatedFeesTemplet = await Promise.all(
-            installments.map(async (feesInstallment) => {
-                const feesTemplet = await FeesTemplateModel.findOne({
-                    feesTemplateId: feesInstallment.feesTemplateId,
-                });
-                return { ...feesInstallment._doc, feesTemplet };
-            })
-        );
-
-        const populatedFeesTempletObject = populatedFeesTemplet.reduce(
-            (acc, curr) => {
-                acc[curr._id] = curr;
-                return acc;
-            },
-            {}
-        );
+        }
+let remainingAmount=0
+         remainingAmount = totalAmount - totalPaidAmount;
 
         const response = {
-            totalFee: totalFee,
-            totalPaid: totalPaid,
-            remeningAmount: remeningAmount,
+            paidAmount: paidAmt,
+            totalAmount: totalAmount,
+            PaidAmount: totalPaidAmount,
+            remainingAmount: remainingAmount
         };
+
         res.json({
             status: "Success",
             data: {
                 addmissionId: addmissionId,
                 student: student,
-                feesTemplet: populatedFeesTempletObject,
-                amountDetails: response,
-            },
-        });
+                amountDetails: response
+            }
+        })
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 router.get("/get-total-amount", async (req, res) => {
     try {
         const client = new MongoClient(mongoURI);
@@ -398,6 +381,7 @@ router.get("/get-classes-fees", async (req, res) => {
 
         res.json(response);
     } catch (error) {
+        console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

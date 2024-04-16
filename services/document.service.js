@@ -40,11 +40,18 @@ class DocumentService extends BaseService {
             groupId: groupId,
         };
         if (criteria.roleId) query.roleId = criteria.roleId;
+        if (criteria.userId) query.userId = criteria.userId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
         if (criteria.description)
             query.description = new RegExp(criteria.description, "i");
-        if (criteria.category)
-            query.category = new RegExp(criteria.category, "i");
+        if (criteria.userId && criteria.category) {
+            query.userId = criteria.userId;
+            query.category = criteria.category;
+        } else {
+            if (criteria.userId) query.userId = criteria.userId;
+            if (criteria.category) query.category = criteria.category;
+        }
+        return this.preparePaginationAndReturnData(query, criteria);
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -122,5 +129,6 @@ class DocumentService extends BaseService {
             return DocumentModel.findOne({ documentId: documentId });
         });
     }
+
 }
 module.exports = new DocumentService(DocumentModel, "document");

@@ -12,7 +12,10 @@ const DocumentSchema = new mongoose.Schema(
         memberId: {
             type: Number,
         },
-        rollId: {
+        userId: {
+            type: Number
+        },
+        roleId: {
             type: Number,
         },
         title: {

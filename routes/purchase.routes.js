@@ -16,11 +16,6 @@ router.post(
         }
         const purchaseId = +Date.now();
         req.body.purchaseId = purchaseId;
-        // const items = req.body.items;
-        // const totalAmount = items.reduce(
-        //     (acc, item) => acc + item.quantity * item.unitPrice,
-        //     0
-        // );
         const totalAmount = req.body.quantity * req.body.unitPrice;
         req.body.totalAmount = totalAmount;
         const serviceResponse = await service.create(req.body);
@@ -103,7 +98,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             orderStatus: req.query.orderStatus,
             book: req.query.book,
             unitPrice: req.query.unitPrice,
-            quantity: req.query.quantity,
+            quantity: req.query.quantity
+
         };
 
         const page = parseInt(req.query.page) || 1;

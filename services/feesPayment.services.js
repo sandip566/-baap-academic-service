@@ -19,6 +19,7 @@ class feesPaymentService extends BaseService {
             let studentRecordCount = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
+                admissionStatus: "Confirm",
             });
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
@@ -28,8 +29,8 @@ class feesPaymentService extends BaseService {
                     academicYear: academicYear,
                     isShowInAccounting: true,
                 })
-                .skip(skip)
-                .limit(limit)
+                // .skip(skip)
+                // .limit(limit)
                 .exec();
             //const count = await .countDocuments(data);
             const totalPaidAmount = data.reduce((total, item) => {
@@ -111,13 +112,13 @@ class feesPaymentService extends BaseService {
                 },
                 0
             );
-
+            const paginatedServices = finalServices.slice(skip, skip + limit);
             let response = {
                 totalPaidAmount: totalPaidAmountCount,
                 totalRemainingAmount: totalRemainingAmountCount,
                 // feesDefaulter: data,
                 //count:count,
-                servicesWithData: finalServices,
+                servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
             };
             return response;
@@ -128,6 +129,7 @@ class feesPaymentService extends BaseService {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
+
                 const query = {
                     groupId: groupId,
                 };
@@ -137,15 +139,20 @@ class feesPaymentService extends BaseService {
                 let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
-                    status: "Confirm",
-                });
-
-                let feesData = await this.model
-                    .find({ groupId: groupId, isShowInAccounting: true })
+                    admissionStatus: "Confirm",
+                })
                     .skip(skip)
                     .limit(limit);
 
-                // console.log(criteria.currentDate, criteria.currentDate);
+                let feesData = await this.model.find({
+                    groupId: groupId,
+                    isShowInAccounting: true,
+                });
+
+                console.log(
+                    "criteria.currentDate, criteria.currentDate,feesData",
+                    feesData.length
+                );
                 const currentDateValue = criteria.currentDate
                     ? criteria.currentDate
                     : null;
@@ -683,13 +690,17 @@ class feesPaymentService extends BaseService {
                 totalCourseFee1 = finalServices.reduce((total, course) => {
                     return total + parseFloat(course.courseFees || 0);
                 }, 0);
-
+                const paginatedServices = finalServices.slice(
+                    skip,
+                    skip + limit
+                );
                 let response = {
                     coursePayments: formattedCoursePayments,
-                    servicesWithData: [finalServices],
+                    servicesWithData: [paginatedServices],
                     totalFees: totalCourseFee1 || 0,
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
+
                     totalItemsCount: finalServices.length,
                 };
 
@@ -919,6 +930,19 @@ class feesPaymentService extends BaseService {
                 error
             );
             throw error;
+        }
+    }
+
+    async getPaidAmount(groupId, addmissionId) {
+        try {
+            const paidamount = await feesPaymentModel.find({
+                groupId: groupId,
+                addmissionId: addmissionId,
+                isShowInAccounting: true,
+            });
+            return paidamount;
+        } catch (err) {
+            throw err;
         }
     }
 }

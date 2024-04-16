@@ -6,6 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { default: mongoose } = require("mongoose");
 const feesInstallmentServices = require("../services/feesInstallment.services");
+const documentConfigurationService = require("../services/documentConfiguration.services");
 const TokenService = require("../services/token.services");
 const multer = require("multer");
 const upload = multer();
@@ -50,117 +51,138 @@ router.get("/all", async (req, res) => {
     }
 });
 
-router.post(
-    "/data/save",
+router.post("/data/save", async (req, res, next) => {
+    try {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
 
-    async (req, res, next) => {
-        try {
-            if (ValidationHelper.requestValidationErrors(req, res)) {
-                return;
-            }
+        if (req.body.addmissionId) {
+            const existingDocument = await service.getByAddmissionIdData(
+                req.body.addmissionId
+            );
 
-            if (req.body.addmissionId) {
-                const existingDocument = await service.getByAddmissionIdData(
-                    req.body.addmissionId
-                );
-
-                if (existingDocument) {
-                    req.body.documents = req.body.documents
-                        ? req.body.documents.map((documentData) => {
-                              const documentId =
-                                  +Date.now() +
-                                  Math.floor(Math.random() * 1000);
-                              return {
-                                  _id: new mongoose.Types.ObjectId(),
-                                  documentId: documentId,
-                                  documents: documentData,
-                              };
-                          })
-                        : existingDocument.data?.documents || [];
-
-                    if (req.body.feesDetails) {
-                        const installmentId = +Date.now();
-                        req.body.installmentId = installmentId;
-
-                        const updatedFeesDetails = req.body.feesDetails.map(
-                            (feesDetail) => {
-                                const installNo =
-                                    +Date.now() +
-                                    Math.floor(Math.random() * 1000) +
-                                    1;
-
-                                const updatedInstallments =
-                                    feesDetail.installment.map(
-                                        (installment) => {
-                                            const uniqueInstallNo =
-                                                +Date.now() +
-                                                Math.floor(
-                                                    Math.random() * 1000
-                                                ) +
-                                                1;
-                                            return {
-                                                ...installment,
-                                                installmentNo: uniqueInstallNo,
-                                                status: "pending",
-                                            };
-                                        }
-                                    );
-
-                                return {
-                                    ...feesDetail,
-                                    feesDetailsId: installNo,
-                                    installment: updatedInstallments,
-                                };
-                            }
-                        );
-
-                        req.body.feesDetails = updatedFeesDetails;
-
-                        const feesinstallmentResponse =
-                            await feesInstallmentServices.updateUser(
-                                req.body.addmissionId,
-                                req.body.groupId,
-                                req.body
-                            );
-
-                        console.log(feesinstallmentResponse);
-                    }
-
-                    const serviceResponse = await service.updateUser(
-                        req.body.addmissionId,
-                        req.body
+            if (existingDocument) {
+                if (req.body.documents) {
+                    req.body.documents = req.body.documents.map(
+                        (documentData) => {
+                            const documentId =
+                                Date.now() + Math.floor(Math.random() * 1000);
+                            return {
+                                documentTitle: documentData.documentTitle || "",
+                                expiryDate: documentData.expiryDate || "",
+                                formDate: documentData.formDate || "",
+                                documentUrl: documentData.documentUrl || "",
+                                documentId: documentId,
+                            };
+                        }
                     );
 
-                    requestResponsehelper.sendResponse(res, serviceResponse);
-                } else {
-                    const serviceResponse = await service.create(req.body);
+                    const documentData =
+                        await documentConfigurationService.updateUser(
+                            req.body.addmissionId,
+                            req.body.groupId,
+                            req.body
+                        );
+                }
 
-                    if (req.body.feesDetails) {
-                        const installmentId = +Date.now();
-                        req.body.installmentId = installmentId;
+                if (req.body.feesDetails) {
+                    const installmentId = +Date.now();
+                    req.body.installmentId = installmentId;
 
-                        const feesinstallment =
-                            await feesInstallmentServices.create(req.body);
+                    const updatedFeesDetails = req.body.feesDetails.map(
+                        (feesDetail) => {
+                            const installNo =
+                                +Date.now() +
+                                Math.floor(Math.random() * 1000) +
+                                1;
 
-                        const updatedInstallments = req.body.feesDetails.map(
-                            (detail, index) => ({
-                                ...detail,
-                                installNo: index + 1,
-                            })
+                            const updatedInstallments =
+                                feesDetail.installment.map((installment) => {
+                                    const uniqueInstallNo =
+                                        +Date.now() +
+                                        Math.floor(Math.random() * 1000) +
+                                        1;
+                                    return {
+                                        ...installment,
+                                        installmentNo: uniqueInstallNo,
+                                        status: "pending",
+                                    };
+                                });
+
+                            return {
+                                ...feesDetail,
+                                feesDetailsId: installNo,
+                                installment: updatedInstallments,
+                            };
+                        }
+                    );
+
+                    req.body.feesDetails = updatedFeesDetails;
+
+                    const feesinstallmentResponse =
+                        await feesInstallmentServices.updateUser(
+                            req.body.addmissionId,
+                            req.body.groupId,
+                            req.body
                         );
 
-                        req.body.feesDetails = updatedInstallments;
-                    }
-
-                    requestResponsehelper.sendResponse(res, serviceResponse);
+                    console.log(feesinstallmentResponse);
                 }
+
+                const serviceResponse = await service.updateUser(
+                    req.body.addmissionId,
+                    req.body
+                );
+
+                requestResponsehelper.sendResponse(res, serviceResponse);
+            } else {
+                const serviceResponse = await service.create(req.body);
+
+                if (req.body.documents) {
+                    req.body.documents = req.body.documents.map(
+                        (documentData) => {
+                            const documentId =
+                                Date.now() + Math.floor(Math.random() * 1000);
+                            return {
+                                documentTitle: documentData.documentTitle || "",
+                                expiryDate: documentData.expiryDate || "",
+                                formDate: documentData.formDate || "",
+                                documentUrl: documentData.documentUrl || "",
+                                documentId: documentId,
+                            };
+                        }
+                    );
+
+                    // Save documents using documentConfigurationService
+                    await documentConfigurationService.create(req.body);
+                }
+
+                if (req.body.feesDetails) {
+                    const installmentId = +Date.now();
+                    req.body.installmentId = installmentId;
+
+                    const feesinstallment =
+                        await feesInstallmentServices.create(req.body);
+
+                    const updatedInstallments = req.body.feesDetails.map(
+                        (detail, index) => ({
+                            ...detail,
+                            installNo: index + 1,
+                        })
+                    );
+
+                    req.body.feesDetails = updatedInstallments;
+                }
+
+                requestResponsehelper.sendResponse(res, serviceResponse);
             }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal server error" });
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal server error" });
     }
-);
+});
 
 router.delete(
     "/installmentDetails/addmissionId/:addmissionId/installmentId/:installmentId",
@@ -235,18 +257,24 @@ router.get(
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
+            const page = parseInt(req.query.page) || 1;
+            const perPage = parseInt(req.query.limit);
             const criteria = {
                 // phoneNumber: req.query.phoneNumber,
                 academicYear: req.query.academicYear,
                 firstName: req.query.firstName,
                 phoneNumber: req.query.phoneNumber,
                 lastName: req.query.lastName,
+                admissionStatus: req.query.admissionStatus,
                 search: req.query.search,
+                CourseName: req.query.CourseName
             };
 
             const serviceResponse = await service.getAllDataByGroupId(
                 groupId,
-                criteria
+                criteria,
+                page,
+                perPage
             );
 
             requestResponsehelper.sendResponse(res, serviceResponse);

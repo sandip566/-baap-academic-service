@@ -184,7 +184,13 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async getAllDataByGroupId(groupId, query, reverseOrder = true) {
+    async getAllDataByGroupId(
+        groupId,
+        query,
+        page,
+        perPage,
+        reverseOrder = true
+    ) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -197,6 +203,7 @@ class StudentsAdmmisionService extends BaseService {
                         { firstName: { $regex: query.search, $options: "i" } },
                         { lastName: { $regex: query.search, $options: "i" } },
                         { phoneNumber: numericSearch },
+                        { addmissionId: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
@@ -227,7 +234,35 @@ class StudentsAdmmisionService extends BaseService {
                     $options: "i",
                 };
             }
-            const services = await studentAdmissionModel.find(searchFilter);
+
+            if (query.admissionStatus) {
+                searchFilter.admissionStatus = {
+                    $regex: query.admissionStatus,
+                    $options: "i",
+                };
+            }
+
+            if (query.CourseName) {
+                const courseIds = await courseModel.find({
+                    CourseName: { $regex: query.CourseName, $options: "i" },
+                }).select("courseId");
+                if (courseIds && courseIds.length > 0) {
+                    searchFilter["courseDetails.course_id"] = {
+                        $in: courseIds.map((course) => course.courseId),
+                    };
+                } else {
+                    return { message: "No data found with the courseName" };
+                }
+            }
+
+            const skip = (page - 1) * perPage;
+            const limit = perPage;
+
+            const services = await studentAdmissionModel
+                .find(searchFilter)
+                .skip(skip)
+                .limit(limit);
+
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
                     if (
@@ -245,7 +280,7 @@ class StudentsAdmmisionService extends BaseService {
                                             courseDetail?.course_id !== "null"
                                         ) {
                                             console.log(
-                                                "ddddddddddddddddd",
+                                                " courseDetail?.course_id",
                                                 courseDetail?.course_id
                                             );
                                             const course_id =
@@ -257,6 +292,7 @@ class StudentsAdmmisionService extends BaseService {
                                             additionalData.course_id =
                                                 course_id;
                                         }
+
                                         if (courseDetail?.class_id) {
                                             const classId = parseInt(
                                                 courseDetail?.class_id
@@ -312,17 +348,22 @@ class StudentsAdmmisionService extends BaseService {
                     return service;
                 })
             );
+
             servicesWithData.sort((a, b) => {
                 const dateA = new Date(a.createdAt);
                 const dateB = new Date(b.createdAt);
                 return reverseOrder ? dateB - dateA : dateA - dateB;
             });
 
+            const totalItemsCount = await studentAdmissionModel.countDocuments(
+                searchFilter
+            );
+
             const response = {
                 status: "Success",
                 data: {
                     items: servicesWithData,
-                    totalItemsCount: services.length,
+                    totalItemsCount: totalItemsCount,
                 },
             };
             return response;
@@ -468,6 +509,17 @@ class StudentsAdmmisionService extends BaseService {
                             service.feesDetails.map(async (feesDetail) => {
                                 let feesAdditionalData = {};
 
+                                let totalPendingInstallmentAmount = 0;
+
+                                for (const installment of feesDetail.installment) {
+                                    if (installment.status == "pending") {
+                                        const amount = parseFloat(
+                                            installment.amount
+                                        );
+                                        totalPendingInstallmentAmount += amount;
+                                    }
+                                }
+
                                 if (feesDetail.feesTemplateId) {
                                     const feesTemplateId =
                                         await feesTemplateModel.findOne({
@@ -478,7 +530,12 @@ class StudentsAdmmisionService extends BaseService {
                                         feesTemplateId;
                                 }
 
-                                return { ...feesDetail, ...feesAdditionalData };
+                                return {
+                                    ...feesDetail,
+                                    ...feesAdditionalData,
+                                    totalPendingInstallmentAmount:
+                                        totalPendingInstallmentAmount,
+                                };
                             })
                         );
 
@@ -554,8 +611,8 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.addmissionId == query.addmissionId,
+                    data.empId === query.empId &&
+                    data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -595,6 +652,7 @@ class StudentsAdmmisionService extends BaseService {
             let admissionData = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
+                admissionStatus: "Confirm",
             });
             let coursePayments = {};
             let courseID;
@@ -717,7 +775,7 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-    async updateInstallmentAmount(installmentId, newAmount) {
+    async updateInstallmentAmount(installmentId, newAmount, newStatus) {
         try {
             const updateResult = await studentAdmissionModel.findOneAndUpdate(
                 { "feesDetails.installment.installmentNo": installmentId },
@@ -725,6 +783,8 @@ class StudentsAdmmisionService extends BaseService {
                     $set: {
                         "feesDetails.$[outer].installment.$[inner].amount":
                             newAmount,
+                        "feesDetails.$[outer].installment.$[inner].status":
+                            newStatus,
                     },
                 },
                 {
@@ -741,6 +801,27 @@ class StudentsAdmmisionService extends BaseService {
                 "Installment amount updated successfully:",
                 updateResult
             );
+            const feesDetail = updateResult.feesDetails.find((detail) =>
+                detail.installment.some(
+                    (installment) => installment.installmentNo === installmentId
+                )
+            );
+
+            const allInstallmentsPaid = feesDetail.installment.every(
+                (installment) => installment.status == "paid"
+            );
+
+            if (allInstallmentsPaid) {
+                await studentAdmissionModel.findOneAndUpdate(
+                    { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
+                    { $set: { "feesDetails.$.status": "paid" } }
+                );
+            } else {
+                await studentAdmissionModel.findOneAndUpdate(
+                    { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
+                    { $set: { "feesDetails.$.status": "pending" } }
+                );
+            }
         } catch (error) {
             console.error("Error updating installment amount:", error);
         }
@@ -750,7 +831,7 @@ class StudentsAdmmisionService extends BaseService {
         try {
             let results = [];
 
-            for (let i = 0; i < dataRows.length; i++) {
+            for (let i = 0; i < dataRows?.length; i++) {
                 const data = dataRows[i];
                 const CourseName = data.courseName;
                 const className = data.class;
@@ -801,9 +882,9 @@ class StudentsAdmmisionService extends BaseService {
                         $or: [{ phoneNumber: phoneNumber }, { phone: phone }],
                     });
 
-                if (existingPhoneNumberRecord) {
-                    throw new Error("Phone number already exists");
-                }
+                // if (existingPhoneNumberRecord) {
+                //     throw new Error("Phone number already exists");
+                // }
 
                 const studentAdmissionId =
                     Date.now() + Math.floor(Math.random() * 1000000);
