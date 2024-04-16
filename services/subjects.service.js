@@ -9,19 +9,26 @@ class SubjectService extends BaseService {
 
     async updateSubjectById(subjectId, groupId, newData) {
         try {
-            const updatedData = await SubjectModel.findOneAndUpdate({ subjectId: subjectId, groupId: groupId }, newData, { new: true });
+            const updatedData = await SubjectModel.findOneAndUpdate(
+                { subjectId: subjectId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updatedData;
         } catch (error) {
             throw error;
         }
     }
 
-    async getBySubjectIdAndGroupId(groupId, name,classId) {
-
-        const result = await this.model.findOne({ groupId: groupId, name: name ,classId:classId});
+    async getBySubjectIdAndGroupId(groupId, name, classId) {
+        const result = await this.model.findOne({
+            groupId: groupId,
+            name: name,
+            classId: classId,
+        });
         return new ServiceResponse({
-            data: result
-        })
+            data: result,
+        });
     }
 
     async deleteBySubjectId(subjectId, groupId) {
@@ -36,7 +43,8 @@ class SubjectService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.subjectName) query.subjectName = new RegExp(criteria.subjectName, "i");
+        if (criteria.subjectName)
+            query.subjectName = new RegExp(criteria.subjectName, "i");
         if (criteria.subjectId) query.subjectId = criteria.subjectId;
         if (criteria.courseId) query.courseId = criteria.courseId;
         if (criteria.semesterId) query.semesterId = criteria.semesterId;
@@ -46,4 +54,4 @@ class SubjectService extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 }
-module.exports = new SubjectService(SubjectModel, 'subject');
+module.exports = new SubjectService(SubjectModel, "subject");

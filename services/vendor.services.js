@@ -12,7 +12,8 @@ class Service extends BaseService {
         };
         criteria.pageSize = 10;
         if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.vendorName) query.vendorName = new RegExp(criteria.vendorName, "i");
+        if (criteria.vendorName)
+            query.vendorName = new RegExp(criteria.vendorName, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -26,7 +27,11 @@ class Service extends BaseService {
 
     async updateVendorById(vendorId, groupId, newData) {
         try {
-            const updateVendorData = await vendorModel.findOneAndUpdate({ vendorId: vendorId, groupId: groupId }, newData, { new: true });
+            const updateVendorData = await vendorModel.findOneAndUpdate(
+                { vendorId: vendorId, groupId: groupId },
+                newData,
+                { new: true }
+            );
             return updateVendorData;
         } catch (error) {
             throw error;
