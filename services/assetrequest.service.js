@@ -1,5 +1,6 @@
 const AssetRequestModel = require("../schema/assetrequest.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class AssetRequestService extends BaseService {
     constructor(dbModel, entityName) {
@@ -14,6 +15,8 @@ class AssetRequestService extends BaseService {
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
         if (criteria.type) query.type = new RegExp(criteria.type, "i");
         if (criteria.category) query.category = new RegExp(criteria.category, "i");
+        if (criteria.empId) query.empId = criteria.empId;
+        if (criteria.userId) query.userId = criteria.userId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -52,6 +55,29 @@ class AssetRequestService extends BaseService {
             });
         });
     }
-}
 
+    async getByRequestId(requestId) {
+        return this.execute(() => {
+            return AssetRequestModel.findOne({ requestId: requestId });
+        });
+    }
+
+    async updateRequest(requestId, data) {
+        try {
+            const updateRequest = await AssetRequestModel.findOneAndUpdate(
+                { requestId: requestId },
+                data,
+                { upsert: true, new: true }
+            );
+            return new ServiceResponse({
+                data: updateRequest,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
+}
 module.exports = new AssetRequestService(AssetRequestModel, 'assetrequest');
