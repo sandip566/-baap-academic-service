@@ -19,6 +19,32 @@ router.post(
   }
 );
 
+router.post(
+  "/data/save",
+  checkSchema(require("../dto/assetrequest.dto")),
+  async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+      return;
+    }
+    try {
+      if (req.body.type === "new") {
+        const requestId = +Date.now();
+        req.body.requestId = requestId;
+        const serviceResponse = await service.create(req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+      } else if (req.body.requestId) {
+        const serviceResponse = await service.updateRequest(req.body.requestId, req.body);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+      } else {
+        res.status(400).json({ error: "Invalid request" });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
 router.delete("/:id", async (req, res) => {
   const serviceResponse = await service.deleteById(req.params.id);
   requestResponsehelper.sendResponse(res, serviceResponse);
@@ -46,6 +72,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     type: req.query.type,
     status: req.query.status,
     category: req.query.category,
+    empId: req.query.empId,
+    userId: req.query.userId,
     pageNumber: parseInt(req.query.pageNumber) || 1,
     pageSize: parseInt(req.query.pageSize) || 10,
   };

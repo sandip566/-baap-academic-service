@@ -58,6 +58,10 @@ const studentsAdmissionSchema = new mongoose.Schema(
         status:{
             type: String,
             required: false,
+        },
+        dateOfBirth:{
+            type: String,
+            required: false, 
         }
         
     },

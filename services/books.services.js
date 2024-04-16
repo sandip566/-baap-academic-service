@@ -287,7 +287,7 @@ class BooksService extends BaseService {
                 issueDate: issue.issueDate,
             }));
 
-            return { populatedBooks: populatedBooks, issueLogs: data };
+            return { data:"books",populatedBooks: populatedBooks, issueLogs: data };
         } catch (error) {
             console.error("Error fetching book details:", error);
             return { error: "Internal server error" };

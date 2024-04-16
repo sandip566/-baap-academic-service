@@ -195,7 +195,7 @@ class BookIssueLogService extends BaseService {
                 },
                 returned: false,
             });
-            return { searchedStudents: students, issueLogs: student };
+            return { data:"student",searchedStudents: students, issueLogs: student };
         } catch (error) {
             console.error("Error fetching student details:", error);
             return { error: "Internal server error" };

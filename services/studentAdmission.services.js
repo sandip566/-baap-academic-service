@@ -255,6 +255,19 @@ class StudentsAdmmisionService extends BaseService {
                 }
             }
 
+            if (query.className) {
+                const classIds = await ClassModel.find({
+                    name: { $regex: query.className, $options: "i" },
+                }).select("classId");
+                if (classIds && classIds.length > 0) {
+                    searchFilter["courseDetails.class_id"] = {
+                        $in: classIds.map((cls) => cls.classId),
+                    };
+                } else {
+                    return { message: "No data found with the class name" };
+                }
+            }
+
             const skip = (page - 1) * perPage;
             const limit = perPage;
 

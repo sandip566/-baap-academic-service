@@ -20,7 +20,8 @@ class feesPaymentService extends BaseService {
                 groupId: groupId,
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
-            });
+            })
+                
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
@@ -139,6 +140,7 @@ class feesPaymentService extends BaseService {
                 let courseFee;
                 let admissionData = await StudentsAdmissionModel.find({
                     groupId: groupId,
+                    academicYear: criteria.academicYear,
                     admissionStatus: "Confirm",
                 })
                     .skip(skip)
@@ -146,6 +148,7 @@ class feesPaymentService extends BaseService {
 
                 let feesData = await this.model.find({
                     groupId: groupId,
+                    academicYear: criteria.academicYear,
                     isShowInAccounting: true,
                 });
 
@@ -210,7 +213,7 @@ class feesPaymentService extends BaseService {
                         (data) => data.location == query.location
                     );
                 }
-                // console.log("ssssssssssssssssssss", admissionData);
+
                 if (criteria.department) {
                     query.department = criteria.department;
                     admissionData = admissionData.filter((data) => {
@@ -478,7 +481,7 @@ class feesPaymentService extends BaseService {
                         ) {
                             const matchingAdmission = admissionData.find(
                                 (admission) =>
-                                    admission.addmissionId ===
+                                    admission.addmissionId ==
                                         service.addmissionId &&
                                     service.isShowInAccounting
                             );
@@ -626,7 +629,6 @@ class feesPaymentService extends BaseService {
                                             installments: installmentLengths[0],
                                             groupId: service.groupId,
                                         };
-                                        // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",a);
                                     });
 
                                 return updatedInstallmentRecords;
@@ -701,7 +703,7 @@ class feesPaymentService extends BaseService {
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
 
-                    totalItemsCount: finalServices.length,
+                    totalItemsCount: admissionData.length,
                 };
 
                 return response;

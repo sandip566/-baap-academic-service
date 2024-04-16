@@ -10,9 +10,17 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        empId: {
+            type: Number,
+            required: false
+        },
+        userId: {
+            type: Number,
+            required: false
+        },
         name: {
             type: String,
-            required: true,
+            required: false,
         },
         category: {
             type: String,
