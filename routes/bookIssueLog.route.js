@@ -219,4 +219,9 @@ router.get("/student-details/:groupId", async (req, res) => {
     const searchFilter = await service.getStudentDetails(groupId, criteria);
     requestResponsehelper.sendResponse(res, searchFilter);
 });
+router.get("/getBooksdetails/:userId", async (req, res) => {
+    const userId=parseInt(req.params.userId)
+    const response = await service.getUserIssuedBooks(userId);
+    requestResponsehelper.sendResponse(res, response);
+});
 module.exports = router;
