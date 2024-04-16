@@ -6,6 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const documentConfigurationModel = require("../schema/documentConfiguration.schema")
 const documntModel = require("../schema/document.schema")
+
 router.post(
     "/",
     checkSchema(require("../dto/documentConfiguration.dto")),

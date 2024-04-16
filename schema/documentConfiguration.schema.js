@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const documentConfigrationModel = new mongoose.Schema(
+const documentConfigurationModel = new mongoose.Schema(
     {
         groupId: {
             type: Number,
@@ -32,8 +32,8 @@ const documentConfigrationModel = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
-const documentConfigrationSchema = mongoose.model(
-    "documentConfigration",
-    documentConfigrationModel
+const documentConfigurationSchema = mongoose.model(
+    "documentConfiguration",
+    documentConfigurationModel
 );
-module.exports = documentConfigrationSchema;
+module.exports = documentConfigurationSchema;
