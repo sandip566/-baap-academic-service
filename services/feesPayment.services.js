@@ -701,7 +701,7 @@ class feesPaymentService extends BaseService {
                     totalPaidFees: totalPaidAmount,
                     totalPendingFees: totalRemainingAmount,
 
-                    totalItemsCount: finalServices.length,
+                    totalItemsCount: admissionData.length,
                 };
 
                 return response;
