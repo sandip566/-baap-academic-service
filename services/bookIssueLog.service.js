@@ -45,7 +45,7 @@ class BookIssueLogService extends BaseService {
                 addmissionId: addmissionId,
                 returned: false,
             });
-            return !existingReservation;
+            return existingReservation;
         } catch (error) {
             console.error(error);
             throw error;
