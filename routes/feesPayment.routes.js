@@ -462,10 +462,7 @@ router.get(
             req.query.academicYear,
             skip,
             limit,
-            page,
-            req.query.name,
-            req.query.phoneNumber,
-            req.query.className
+            page
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     }

@@ -14,18 +14,14 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId, academicYear, skip, limit, name, phoneNumber, cls) {
+    async getRecoveryData(groupId, academicYear, skip, limit) {
         return this.execute(async () => {
             let studentRecordCount = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
             });
-            let query = {
-                groupId: groupId,
-                academicYear: academicYear,
-                isShowInAccounting: true,
-            };
+
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
@@ -51,21 +47,6 @@ class feesPaymentService extends BaseService {
                 }
                 return total;
             }, 0);
-
-            if (name) {
-                query["addmissionId.name"] = { $regex: new RegExp(name, "i") };
-            }
-            if (phoneNumber) {
-                query["addmissionId.phoneNumber"] = phoneNumber;
-            }
-            if (cls) {
-                const classData = await ClassModel.findOne({ name: cls });
-                if (classData) {
-                    query["addmissionId.courseDetails.class_id"] = classData.classId;
-                } else {
-                    return { message: "No data found with the className" };
-                }
-            }
 
             console.log("Total Paid Amount:", totalPaidAmount);
 
