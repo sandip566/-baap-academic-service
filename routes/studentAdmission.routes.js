@@ -286,6 +286,35 @@ router.get(
     }
 );
 
+router.get(
+    "/all/confirmAdmission/:groupId",
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const page = parseInt(req.query.page) || 1;
+            const perPage = parseInt(req.query.limit);
+            const criteria = {
+                firstName: req.query.firstName,
+                phoneNumber: req.query.phoneNumber,
+                lastName: req.query.lastName,
+                className: req.query.className
+            };
+            const serviceResponse = await service.getAllByGroupId(
+                groupId,
+                criteria,
+                page,
+                perPage
+            );
+
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+
+
 router.get("/all/getfeesPayment/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
