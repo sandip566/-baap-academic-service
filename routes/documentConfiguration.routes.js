@@ -206,4 +206,69 @@ router.put("/groupId/:groupId/documentId/:documentId", async (req, res) => {
         return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/documnetCnfig/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const userId = req.params.userId
+        const criteria = {
+
+        };
+        const { searchFilter } = await service.getDocumentConfigrationData(
+            groupId,
+            userId,
+            criteria
+        );
+
+        const documentConfigrations = await documentConfigurationModel.find(searchFilter);
+        const populatedItems = await Promise.all(
+            documentConfigrations.map(async (fact) => {
+                const documnets = await documntModel.find({ userId: fact.userId });
+                return { ...fact._doc, documnets };
+            })
+        );
+
+        const filteredDocuments = populatedItems.filter(doc => doc !== null);
+        const count = await documentConfigurationModel.countDocuments(searchFilter);
+
+        res.json({
+            data: {
+                item: filteredDocuments,
+                totalCount: count,
+            }
+        });
+
+    } catch (err) {
+        throw err;
+    }
+});
+
+
+router.get("/allGetByRoleId/groupId/:groupId/roleId/:roleId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            search: req.query.search,
+            roleId: req.query.roleId,
+        };
+        const { searchFilter } = await service.getByRoleId(
+            groupId,
+            criteria
+        );
+        const documentConfigrations = await documntModel.find(searchFilter);
+        const count = await documentConfigurationModel.countDocuments(searchFilter);
+        res.json({
+            data: {
+                item: documentConfigrations,
+                totalCount: count,
+            }
+        });
+
+    } catch (err) {
+        throw err;
+    }
+});
+
+
+
 module.exports = router;
