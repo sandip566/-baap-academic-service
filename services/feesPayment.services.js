@@ -14,18 +14,14 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId, academicYear, skip, limit, name, phoneNumber, cls) {
+    async getRecoveryData(groupId, academicYear, skip, limit) {
         return this.execute(async () => {
             let studentRecordCount = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
             });
-            let query = {
-                groupId: groupId,
-                academicYear: academicYear,
-                isShowInAccounting: true,
-            };
+
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
@@ -51,21 +47,6 @@ class feesPaymentService extends BaseService {
                 }
                 return total;
             }, 0);
-
-            if (name) {
-                query["addmissionId.name"] = { $regex: new RegExp(name, "i") };
-            }
-            if (phoneNumber) {
-                query["addmissionId.phoneNumber"] = phoneNumber;
-            }
-            if (cls) {
-                const classData = await ClassModel.findOne({ name: cls });
-                if (classData) {
-                    query["addmissionId.courseDetails.class_id"] = classData.classId;
-                } else {
-                    return { message: "No data found with the className" };
-                }
-            }
 
             console.log("Total Paid Amount:", totalPaidAmount);
 
@@ -108,7 +89,7 @@ class feesPaymentService extends BaseService {
             const lastServices = {};
 
             servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId && service.remainingAmount !== "0") {
+                if (service.addmissionId && service.addmissionId.addmissionId) {
                     const addmissionId = service.addmissionId.addmissionId;
                     const paidAmount = parseFloat(service.paidAmount) || 0;
 
@@ -141,6 +122,7 @@ class feesPaymentService extends BaseService {
                 //count:count,
                 servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
+                StudentRecordsCount:finalServices.length
             };
             return response;
         });
@@ -150,7 +132,6 @@ class feesPaymentService extends BaseService {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
-
                 const query = {
                     groupId: groupId,
                 };
@@ -165,7 +146,11 @@ class feesPaymentService extends BaseService {
                 })
                     .skip(skip)
                     .limit(limit);
-
+                    let paginationAdmissionData = await StudentsAdmissionModel.find({
+                        groupId: groupId,
+                        academicYear: criteria.academicYear,
+                        admissionStatus: "Confirm",
+                    })
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
@@ -584,9 +569,9 @@ class feesPaymentService extends BaseService {
                     skip + limit
                 );
                 let response = {
-                    servicesWithData: [paginatedServices],
+                    servicesWithData: [finalServices],
                     totalFees: totalCourseFee1 || 0,
-                    totalItemsCount: admissionData.length,
+                    totalItemsCount: paginationAdmissionData.length,
                 };
 
                 return response;
@@ -1170,5 +1155,19 @@ class feesPaymentService extends BaseService {
             throw err;
         }
     }
+
+    async getPaymentDetails(groupId, userId) {
+        try {
+            const paidamount = await feesPaymentModel.find({
+                groupId: groupId,
+                userId: userId,
+                isShowInAccounting: true,
+            });
+            return paidamount;
+        } catch (err) {
+            throw err;
+        }
+    }
+
 }
 module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");

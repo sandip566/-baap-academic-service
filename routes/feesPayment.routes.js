@@ -11,7 +11,7 @@ const studentAdmissionServices = require("../services/studentAdmission.services"
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const TokenService = require("../services/token.services");
-
+const feesPaymnetModel = require("../services/feesPayment.services")
 router.post(
     "/",
     checkSchema(require("../dto/feesPayment.dto")),
@@ -97,7 +97,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -174,7 +174,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -294,7 +294,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -371,7 +371,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -462,10 +462,7 @@ router.get(
             req.query.academicYear,
             skip,
             limit,
-            page,
-            req.query.name,
-            req.query.phoneNumber,
-            req.query.className
+            page
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -502,7 +499,7 @@ router.get(
 );
 router.get(
     "/getFeesTotalCount/:groupId",
-    TokenService.checkPermission(["EFCL1"]),
+    // TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -714,6 +711,43 @@ router.get("/studentClearansDetails/:groupId", async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal server error" });
+    }
+});
+
+router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const userId = req.params.userId;
+        let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, userId);
+        let totalAmount = 0;
+        let totalPaidAmount = 0;
+
+        if (paidAmt && paidAmt.length > 0) {
+            paidAmt.forEach(item => {
+                totalAmount = parseInt(item.courseFee);
+                totalPaidAmount += parseInt(item.paidAmount);
+            });
+        }
+        let remainingAmount = 0
+        remainingAmount = totalAmount - totalPaidAmount;
+
+        const response = {
+            paidAmount: paidAmt,
+            totalAmount: totalAmount,
+            PaidAmount: totalPaidAmount,
+            remainingAmount: remainingAmount
+        };
+
+        res.json({
+            status: "Success",
+            data: {
+                userId: userId,
+                amountDetails: response
+            }
+        })
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
