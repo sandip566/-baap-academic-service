@@ -132,6 +132,57 @@ class documentConfiguration extends BaseService {
             return null;
         }
     }
+
+    async getDocumentConfigrationData(groupId, userId, criteria) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+                userId: userId
+            };
+            if (criteria.userId) {
+                const numericUserId = parseInt(criteria.userId);
+                if (!isNaN(numericUserId)) {
+                    searchFilter.userId = numericUserId;
+                }
+            }
+            return { searchFilter };
+        } catch (error) {
+            throw (error);
+        }
+    }
+
+
+
+    async getByRoleId(groupId, criteria) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { roleId: numericSearch }
+                    ];
+                } else {
+                    searchFilter.$or = [
+
+                    ];
+                }
+            }
+            if (criteria.roleId) {
+                const numericRoleId = parseInt(criteria.roleId);
+                if (!isNaN(numericRoleId)) {
+                    searchFilter.roleId = numericRoleId;
+                }
+            }
+
+            return { searchFilter };
+        } catch (error) {
+            throw (error);
+        }
+    }
+
 }
 module.exports = new documentConfiguration(
     documentConfigrationModel,

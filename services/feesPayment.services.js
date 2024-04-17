@@ -1155,5 +1155,19 @@ class feesPaymentService extends BaseService {
             throw err;
         }
     }
+
+    async getPaymentDetails(groupId, userId) {
+        try {
+            const paidamount = await feesPaymentModel.find({
+                groupId: groupId,
+                userId: userId,
+                isShowInAccounting: true,
+            });
+            return paidamount;
+        } catch (err) {
+            throw err;
+        }
+    }
+
 }
 module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");
