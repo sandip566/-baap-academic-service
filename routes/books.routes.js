@@ -117,7 +117,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 return { ...book._doc, shelf, department, publisher };
             })
         );
-        const count = await service.getBooksCount(req.body.groupId);
+        const count = await service.getBooksCount(groupId);
         res.json({
             status: "Success",
             data: {
