@@ -114,6 +114,7 @@ router.get(
         const criteria = {
             feesTemplateId: req.query.feesTemplateId,
             pageNumber: parseInt(req.query.pageNumber) || 1,
+            pageSize: parseInt(req.query.pageSize) || 10
         };
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,

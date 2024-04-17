@@ -89,7 +89,7 @@ class feesPaymentService extends BaseService {
             const lastServices = {};
 
             servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId && service.remainingAmount !== "0") {
+                if (service.addmissionId && service.addmissionId.addmissionId) {
                     const addmissionId = service.addmissionId.addmissionId;
                     const paidAmount = parseFloat(service.paidAmount) || 0;
 
@@ -122,6 +122,7 @@ class feesPaymentService extends BaseService {
                 //count:count,
                 servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
+                StudentRecordsCount:finalServices.length
             };
             return response;
         });
@@ -131,7 +132,6 @@ class feesPaymentService extends BaseService {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
-
                 const query = {
                     groupId: groupId,
                 };
@@ -146,7 +146,11 @@ class feesPaymentService extends BaseService {
                 })
                     .skip(skip)
                     .limit(limit);
-
+                    let paginationAdmissionData = await StudentsAdmissionModel.find({
+                        groupId: groupId,
+                        academicYear: criteria.academicYear,
+                        admissionStatus: "Confirm",
+                    })
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
@@ -565,9 +569,9 @@ class feesPaymentService extends BaseService {
                     skip + limit
                 );
                 let response = {
-                    servicesWithData: [paginatedServices],
+                    servicesWithData: [finalServices],
                     totalFees: totalCourseFee1 || 0,
-                    totalItemsCount: admissionData.length,
+                    totalItemsCount: paginationAdmissionData.length,
                 };
 
                 return response;
@@ -1151,5 +1155,19 @@ class feesPaymentService extends BaseService {
             throw err;
         }
     }
+
+    async getPaymentDetails(groupId, userId) {
+        try {
+            const paidamount = await feesPaymentModel.find({
+                groupId: groupId,
+                userId: userId,
+                isShowInAccounting: true,
+            });
+            return paidamount;
+        } catch (err) {
+            throw err;
+        }
+    }
+
 }
 module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");

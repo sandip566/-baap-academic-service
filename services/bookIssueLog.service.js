@@ -80,31 +80,36 @@ class BookIssueLogService extends BaseService {
                 addmissionId: { $in: studentIds },
             });
             const books = await Book.find({ bookId: { $in: bookIds } });
+            await Promise.all(bookIssues.map(async (bookIssue) => {
+                const dueDate = new Date(bookIssue.dueDate);
+                const diffTime = currDate - dueDate;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays > 0) {
+                    await bookIssueLogModel.updateOne(
+                        { _id: bookIssue._id },
+                        { $set: { isOverdue: true } }
+                    );
+                }
+            }));
+
             const bookIssuesWithOverdue = bookIssues
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     return diffDays > 0;
                 })
                 .map((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     const student = students.find(
                         (student) =>
                             student.addmissionId === bookIssue.addmissionId
                     );
                     const book = books.find(
                         (book) => book.bookId === bookIssue.bookId
-                    );
-                    bookIssueLogModel.updateMany(
-                        { _id: bookIssue._id },
-                        { $set: { isFine: true } }
                     );
                     let bookIssueDate = bookIssue.issueDate;
                     var response = {
