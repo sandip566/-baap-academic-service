@@ -14,14 +14,18 @@ class feesPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getRecoveryData(groupId, academicYear, skip, limit) {
+    async getRecoveryData(groupId, academicYear, skip, limit, name, phoneNumber, cls) {
         return this.execute(async () => {
             let studentRecordCount = await StudentsAdmissionModel.find({
                 groupId: groupId,
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
             });
-
+            let query = {
+                groupId: groupId,
+                academicYear: academicYear,
+                isShowInAccounting: true,
+            };
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
@@ -48,6 +52,21 @@ class feesPaymentService extends BaseService {
                 return total;
             }, 0);
 
+            if (name) {
+                query["addmissionId.name"] = { $regex: new RegExp(name, "i") };
+            }
+            if (phoneNumber) {
+                query["addmissionId.phoneNumber"] = phoneNumber;
+            }
+            if (cls) {
+                const classData = await ClassModel.findOne({ name: cls });
+                if (classData) {
+                    query["addmissionId.courseDetails.class_id"] = classData.classId;
+                } else {
+                    return { message: "No data found with the className" };
+                }
+            }
+
             console.log("Total Paid Amount:", totalPaidAmount);
 
             const servicesWithData = await Promise.all(
@@ -60,7 +79,7 @@ class feesPaymentService extends BaseService {
                             await StudentsAdmissionModel.findOne({
                                 groupId: groupId,
                                 addmissionId: service.addmissionId,
-                                
+
                             });
                         feesAdditionalData.addmissionId = feesTemplateId;
                         console.log(feesTemplateId);
@@ -89,7 +108,7 @@ class feesPaymentService extends BaseService {
             const lastServices = {};
 
             servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId&&service.remainingAmount!=="0") {
+                if (service.addmissionId && service.addmissionId.addmissionId && service.remainingAmount !== "0") {
                     const addmissionId = service.addmissionId.addmissionId;
                     const paidAmount = parseFloat(service.paidAmount) || 0;
 
@@ -226,7 +245,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -241,7 +260,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -259,7 +278,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -279,7 +298,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -298,7 +317,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -350,7 +369,7 @@ class feesPaymentService extends BaseService {
                             const matchingAdmission = admissionData.find(
                                 (admission) =>
                                     admission.addmissionId ==
-                                        service.addmissionId &&
+                                    service.addmissionId &&
                                     service.isShowInAccounting
                             );
 
@@ -458,9 +477,9 @@ class feesPaymentService extends BaseService {
 
                                                     if (
                                                         item.status ==
-                                                            "pending" &&
+                                                        "pending" &&
                                                         formattedDate <
-                                                            criteria.currentDate
+                                                        criteria.currentDate
                                                     ) {
                                                         isDue = true;
                                                         return;
@@ -675,7 +694,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -690,7 +709,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -708,7 +727,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -728,7 +747,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -747,7 +766,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -800,15 +819,15 @@ class feesPaymentService extends BaseService {
                                         (total, paymentArray, currentIndex) => {
                                             const lastIndex =
                                                 currentIndex ===
-                                                paymentsForCourse.length - 1
+                                                    paymentsForCourse.length - 1
                                                     ? paymentArray
                                                     : null;
 
                                             const remainingAmount = lastIndex
                                                 ? parseFloat(
-                                                      lastIndex.remainingAmount ||
-                                                          0
-                                                  )
+                                                    lastIndex.remainingAmount ||
+                                                    0
+                                                )
                                                 : 0;
 
                                             return total + remainingAmount;
@@ -866,9 +885,9 @@ class feesPaymentService extends BaseService {
 
                         console.log(
                             "Total fee for course '" +
-                                courseName +
-                                "': " +
-                                totalFee
+                            courseName +
+                            "': " +
+                            totalFee
                         );
 
                         return {
@@ -877,7 +896,7 @@ class feesPaymentService extends BaseService {
                             courseFee: totalFee,
                             TotalCourseFee:
                                 coursePayments[courseName].courseFee *
-                                    coursePayments[courseName].noOfStudents ||
+                                coursePayments[courseName].noOfStudents ||
                                 0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
