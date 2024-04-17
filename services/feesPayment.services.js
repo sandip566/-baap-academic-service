@@ -131,7 +131,6 @@ class feesPaymentService extends BaseService {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
-
                 const query = {
                     groupId: groupId,
                 };
@@ -146,7 +145,11 @@ class feesPaymentService extends BaseService {
                 })
                     .skip(skip)
                     .limit(limit);
-
+                    let paginationAdmissionData = await StudentsAdmissionModel.find({
+                        groupId: groupId,
+                        academicYear: criteria.academicYear,
+                        admissionStatus: "Confirm",
+                    })
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
@@ -567,7 +570,7 @@ class feesPaymentService extends BaseService {
                 let response = {
                     servicesWithData: [paginatedServices],
                     totalFees: totalCourseFee1 || 0,
-                    totalItemsCount: admissionData.length,
+                    totalItemsCount: paginationAdmissionData.length,
                 };
 
                 return response;
