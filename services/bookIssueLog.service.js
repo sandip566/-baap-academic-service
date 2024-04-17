@@ -66,9 +66,9 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async fetchBookIssuesWithOverdue(groupId, currentDate) {
+    async fetchBookIssuesWithOverdue(groupId) {
         try {
-            const currDate = new Date(currentDate)
+            const currDate = new Date();
             const bookIssues = await bookIssueLogModel.find({
                 groupId: groupId,
                 returned: false
