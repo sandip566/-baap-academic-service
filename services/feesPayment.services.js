@@ -89,7 +89,7 @@ class feesPaymentService extends BaseService {
             const lastServices = {};
 
             servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId && service.remainingAmount !== "0") {
+                if (service.addmissionId && service.addmissionId.addmissionId) {
                     const addmissionId = service.addmissionId.addmissionId;
                     const paidAmount = parseFloat(service.paidAmount) || 0;
 
@@ -122,6 +122,7 @@ class feesPaymentService extends BaseService {
                 //count:count,
                 servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
+                StudentRecordsCount:finalServices.length
             };
             return response;
         });
@@ -568,7 +569,7 @@ class feesPaymentService extends BaseService {
                     skip + limit
                 );
                 let response = {
-                    servicesWithData: [paginatedServices],
+                    servicesWithData: [finalServices],
                     totalFees: totalCourseFee1 || 0,
                     totalItemsCount: paginationAdmissionData.length,
                 };
