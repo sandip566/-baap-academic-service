@@ -1,7 +1,8 @@
 const bookIssueLogModel = require("../schema/bookIssueLog.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const Book = require("../schema/books.schema.js");
-const Student = require("../schema/studentAdmission.schema.js");
+const studentAdmissionModel = require("../schema/studentAdmission.schema.js");
+const { addListener } = require("../schema/publisher.schema.js");
 class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -36,11 +37,12 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async isBookAvailableForIssuing(addmissionId) {
+    async checkOverdueStatus(addmissionId) {
         try {
             const existingReservation = await Book.findOne({
                 addmissionId: addmissionId,
                 returned: false,
+                isOverdue: true
             });
             return existingReservation;
         } catch (error) {
@@ -49,26 +51,39 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async fetchBookIssuesWithOverdue() {
+    async checkIssuedCount(groupId, addmissionId) {
         try {
-            const currentDate = new Date();
+            const count = await bookIssueLogModel.countDocuments({ groupId: groupId, addmissionId: addmissionId, returned: false })
+            console.log(count + "count")
+            if (count >= 3) {
+                return false;
+            }
+            else {
+                return true;
+            }
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async fetchBookIssuesWithOverdue(groupId, currentDate) {
+        try {
+            const currDate = new Date(currentDate)
             const bookIssues = await bookIssueLogModel.find({
-                returned: false,
+                groupId: groupId,
+                returned: false
             });
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
             const bookIds = bookIssues.map((issue) => issue.bookId);
-
-            // Fetch student and book details
-            const students = await Student.find({
+            const students = await studentAdmissionModel.find({
                 addmissionId: { $in: studentIds },
             });
             const books = await Book.find({ bookId: { $in: bookIds } });
-
             const bookIssuesWithOverdue = bookIssues
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
-                    const diffTime = currentDate - dueDate;
+                    const diffTime = currDate - dueDate;
                     const diffDays = Math.ceil(
                         diffTime / (1000 * 60 * 60 * 24)
                     );
@@ -76,12 +91,10 @@ class BookIssueLogService extends BaseService {
                 })
                 .map((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
-                    const diffTime = currentDate - dueDate;
+                    const diffTime = currDate - dueDate;
                     const diffDays = Math.ceil(
                         diffTime / (1000 * 60 * 60 * 24)
                     );
-
-                    // Find corresponding student and book
                     const student = students.find(
                         (student) =>
                             student.addmissionId === bookIssue.addmissionId
@@ -183,7 +196,7 @@ class BookIssueLogService extends BaseService {
                 }
             }
 
-            const students = await Student.find(searchFilter);
+            const students = await studentAdmissionModel.find(searchFilter);
 
             if (!students || students.length === 0) {
                 return { error: "Student not found" };
@@ -195,16 +208,17 @@ class BookIssueLogService extends BaseService {
                 },
                 returned: false,
             });
-            return { data:"student",searchedStudents: students, issueLogs: student };
+            return { data: "student", searchedStudents: students, issueLogs: student };
         } catch (error) {
             console.error("Error fetching student details:", error);
             return { error: "Internal server error" };
         }
     }
 
-    async  getUserIssuedBooks(userId) {
+    async getUserIssuedBooks(userId) {
         try {
             const issuedBooks = await bookIssueLogModel.find({ userId: userId, returned: false });
+            console.log(issuedBooks)
             const bookIds = issuedBooks.map(bookIssue => bookIssue.bookId)
             const bookDetailsArray = await Promise.all(
                 bookIds.map(async (bookId) => {
@@ -212,15 +226,15 @@ class BookIssueLogService extends BaseService {
                     return bookDetails;
                 })
             );
-            
+
             const validBookDetailsArray = bookDetailsArray.filter(book => book !== null);
-            
+
             return { userIssuedBooks: validBookDetailsArray }
         } catch (error) {
             console.error("Error retrieving user's issued books:", error);
-            return []; 
+            return [];
         }
     }
-    
+
 }
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");
