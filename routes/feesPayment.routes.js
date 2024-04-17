@@ -11,7 +11,7 @@ const studentAdmissionServices = require("../services/studentAdmission.services"
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const TokenService = require("../services/token.services");
-const feesPaymnetModel = require("../services/feesPayment.services")
+const feesPaymnetModel = require("../services/feesPayment.services");
 router.post(
     "/",
     checkSchema(require("../dto/feesPayment.dto")),
@@ -97,7 +97,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -174,7 +174,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -294,7 +294,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -371,7 +371,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -449,7 +449,27 @@ router.post(
 
 router.get(
     "/getRecoveryData/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const skip = (page - 1) * limit;
+        const serviceResponse = await service.getRecoveryData(
+            req.params.groupId,
+            req.query.academicYear,
+            skip,
+            limit,
+            page
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
+router.get(
+    "/getRecoveryCount/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -457,7 +477,7 @@ router.get(
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const skip = (page - 1) * limit;
-        const serviceResponse = await service.getRecoveryData(
+        const serviceResponse = await service.getRecoveryCount(
             req.params.groupId,
             req.query.academicYear,
             skip,
@@ -723,28 +743,28 @@ router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
         let totalPaidAmount = 0;
 
         if (paidAmt && paidAmt.length > 0) {
-            paidAmt.forEach(item => {
+            paidAmt.forEach((item) => {
                 totalAmount = parseInt(item.courseFee);
                 totalPaidAmount += parseInt(item.paidAmount);
             });
         }
-        let remainingAmount = 0
+        let remainingAmount = 0;
         remainingAmount = totalAmount - totalPaidAmount;
 
         const response = {
             paidAmount: paidAmt,
             totalAmount: totalAmount,
             PaidAmount: totalPaidAmount,
-            remainingAmount: remainingAmount
+            remainingAmount: remainingAmount,
         };
 
         res.json({
             status: "Success",
             data: {
                 userId: userId,
-                amountDetails: response
-            }
-        })
+                amountDetails: response,
+            },
+        });
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
