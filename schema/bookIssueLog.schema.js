@@ -39,6 +39,13 @@ const bookIssueLogSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        userId: {
+            type: Number
+        },
+        isOverdue: {
+            type: Boolean,
+            default: false
+        }
     },
     { strict: false, timestamps: true }
 );
