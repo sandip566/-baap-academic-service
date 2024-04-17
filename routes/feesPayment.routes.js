@@ -449,13 +449,13 @@ router.post(
 
 router.get(
     "/getRecoveryData/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 5;
         const skip = (page - 1) * limit;
         const serviceResponse = await service.getRecoveryData(
             req.params.groupId,
@@ -467,7 +467,26 @@ router.get(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
+router.get(
+    "/getRecoveryCount/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const skip = (page - 1) * limit;
+        const serviceResponse = await service.getRecoveryCount(
+            req.params.groupId,
+            req.query.academicYear,
+            skip,
+            limit,
+            page
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.get(
     "/getFeesStatData/:groupId",
     TokenService.checkPermission(["EFCL1"]),

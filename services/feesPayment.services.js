@@ -131,7 +131,114 @@ class feesPaymentService extends BaseService {
             return response;
         });
     }
+    async getRecoveryCount(groupId, academicYear, skip, limit) {
+        return this.execute(async () => {
+            let studentRecordCount = await StudentsAdmissionModel.find({
+                groupId: groupId,
+                academicYear: academicYear,
+                admissionStatus: "Confirm",
+            });
 
+            let totalPaidAmountCount = 0;
+            let totalRemainingAmountCount = 0;
+            let data = await this.model
+                .find({
+                    groupId: groupId,
+                    academicYear: academicYear,
+                    isShowInAccounting: true,
+                })
+                // .skip(skip)
+                // .limit(limit)
+                .exec();
+            //const count = await .countDocuments(data);
+            const totalPaidAmount = data.reduce((total, item) => {
+                if (item.paidAmount) {
+                    total += parseFloat(item.paidAmount);
+                }
+                return total;
+            }, 0);
+
+            const totalRemainingAmount = data.reduce((total, item) => {
+                if (item.remainingAmount) {
+                    total += parseFloat(item.remainingAmount);
+                }
+                return total;
+            }, 0);
+
+            console.log("Total Paid Amount:", totalPaidAmount);
+
+            const servicesWithData = await Promise.all(
+                data.map(async (service) => {
+                    let additionalData = {};
+                    let feesAdditionalData = {};
+
+                    if (service.addmissionId) {
+                        const feesTemplateId =
+                            await StudentsAdmissionModel.findOne({
+                                groupId: groupId,
+                                addmissionId: service.addmissionId,
+                            });
+                        feesAdditionalData.addmissionId = feesTemplateId;
+                        console.log(feesTemplateId);
+                    }
+
+                    additionalData.addmissionId = feesAdditionalData;
+                    return { ...service._doc, ...additionalData.addmissionId };
+                })
+            );
+
+            const groupedServices = {};
+
+            servicesWithData.forEach((service) => {
+                const addmissionId = service?.addmissionId?.addmissionId;
+                const paidAmount = parseFloat(service.paidAmount) || 0;
+
+                groupedServices[addmissionId] = {
+                    ...service,
+                    paidAmount: paidAmount,
+                };
+            });
+
+            const lastServices = {};
+
+            servicesWithData.forEach((service) => {
+                if (service.addmissionId && service.addmissionId.addmissionId) {
+                    const addmissionId = service.addmissionId.addmissionId;
+                    const paidAmount = parseFloat(service.paidAmount) || 0;
+
+                    lastServices[addmissionId] = {
+                        ...service,
+                        paidAmount:
+                            (lastServices[addmissionId]?.paidAmount || 0) +
+                            paidAmount,
+                    };
+                }
+            });
+
+            const finalServices = Object.values(lastServices);
+            totalPaidAmountCount = finalServices.reduce((total, course) => {
+                return total + parseFloat(course.paidAmount || 0);
+            }, 0);
+
+            totalRemainingAmountCount = finalServices.reduce(
+                (total, course) => {
+                    return total + parseFloat(course.remainingAmount || 0);
+                },
+                0
+            );
+            const filteredServices = finalServices.filter((service) => {
+                const remainingAmount = parseFloat(service.remainingAmount);
+                return remainingAmount !== 0;
+            });
+
+            let response = {
+                totalPaidAmount: totalPaidAmountCount,
+                totalRemainingAmount: totalRemainingAmountCount,
+                StudentRecords: studentRecordCount.length,
+            };
+            return response;
+        });
+    }
     async getFeesStatData(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
