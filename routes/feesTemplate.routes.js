@@ -23,16 +23,14 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
 router.get(
     "/getByFeesTemplateId/:feesTemplateId/installmentNo/:installmentNo",
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-
         const feesTemplateId = req.params.feesTemplateId;
-        const installmentNo = parseInt(req.params.installmentNo);
+        const installmentNo = parseInt(req.params.installmentNo, 10);
 
         try {
             const serviceResponse = await service.getByfeesTemplateId(
@@ -42,16 +40,26 @@ router.get(
                 return res.status(404).json({ error: "Data not found" });
             }
 
-            const isInstallmentAllowed =
-                serviceResponse.data.isInstallmentAllowed;
+            const { data } = serviceResponse;
+            const { totalFees, isInstallmentAllowed } = data;
 
             const maxInstallmentNo = isInstallmentAllowed ? installmentNo : 1;
 
-            const totalFees = serviceResponse.data.totalFees;
-            const installmentAmount = Math.round(totalFees / maxInstallmentNo);
+            const baseInstallmentAmount = Math.floor(
+                totalFees / maxInstallmentNo
+            );
+
+            const totalBaseAmount = baseInstallmentAmount * maxInstallmentNo;
+            const remainingAmount = totalFees - totalBaseAmount;
 
             const installmentDetails = [];
             for (let i = 1; i <= maxInstallmentNo; i++) {
+                let installmentAmount = baseInstallmentAmount;
+
+                if (i === maxInstallmentNo) {
+                    installmentAmount += remainingAmount;
+                }
+
                 installmentDetails.push({
                     installmentNo: i,
                     amount: installmentAmount,
@@ -59,7 +67,7 @@ router.get(
                 });
             }
 
-            serviceResponse.data.installmentDetails = installmentDetails;
+            data.installmentDetails = installmentDetails;
 
             const response = {
                 status: "success",
@@ -114,7 +122,7 @@ router.get(
         const criteria = {
             feesTemplateId: req.query.feesTemplateId,
             pageNumber: parseInt(req.query.pageNumber) || 1,
-            pageSize: parseInt(req.query.pageSize) || 10
+            pageSize: parseInt(req.query.pageSize) || 10,
         };
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
