@@ -60,7 +60,6 @@ class feesPaymentService extends BaseService {
                             await StudentsAdmissionModel.findOne({
                                 groupId: groupId,
                                 addmissionId: service.addmissionId,
-
                             });
                         feesAdditionalData.addmissionId = feesTemplateId;
                         console.log(feesTemplateId);
@@ -71,29 +70,25 @@ class feesPaymentService extends BaseService {
                 })
             );
 
-            // Grouping services based on addmissionId and keeping only the last occurrence
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
-                // Store the service data for each addmissionId
                 groupedServices[addmissionId] = {
                     ...service,
                     paidAmount: paidAmount,
                 };
             });
 
-            // Filter only the last occurrence of each addmissionId
             const lastServices = {};
 
             servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId && service.remainingAmount !== "0") {
+                if (service.addmissionId && service.addmissionId.addmissionId) {
                     const addmissionId = service.addmissionId.addmissionId;
                     const paidAmount = parseFloat(service.paidAmount) || 0;
 
-                    // Update or initialize the entry for the current addmissionId with the latest service data
                     lastServices[addmissionId] = {
                         ...service,
                         paidAmount:
@@ -114,7 +109,16 @@ class feesPaymentService extends BaseService {
                 },
                 0
             );
-            const paginatedServices = finalServices.slice(skip, skip + limit);
+            const filteredServices = finalServices.filter((service) => {
+                const remainingAmount = parseFloat(service.remainingAmount);
+                return remainingAmount !== 0;
+            });
+
+            const paginatedServices = filteredServices.slice(
+                skip,
+                skip + limit
+            );
+
             let response = {
                 totalPaidAmount: totalPaidAmountCount,
                 totalRemainingAmount: totalRemainingAmountCount,
@@ -122,16 +126,123 @@ class feesPaymentService extends BaseService {
                 //count:count,
                 servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
+                StudentRecordsCount: filteredServices.length,
             };
             return response;
         });
     }
+    async getRecoveryCount(groupId, academicYear, skip, limit) {
+        return this.execute(async () => {
+            let studentRecordCount = await StudentsAdmissionModel.find({
+                groupId: groupId,
+                academicYear: academicYear,
+                admissionStatus: "Confirm",
+            });
 
+            let totalPaidAmountCount = 0;
+            let totalRemainingAmountCount = 0;
+            let data = await this.model
+                .find({
+                    groupId: groupId,
+                    academicYear: academicYear,
+                    isShowInAccounting: true,
+                })
+                // .skip(skip)
+                // .limit(limit)
+                .exec();
+            //const count = await .countDocuments(data);
+            const totalPaidAmount = data.reduce((total, item) => {
+                if (item.paidAmount) {
+                    total += parseFloat(item.paidAmount);
+                }
+                return total;
+            }, 0);
+
+            const totalRemainingAmount = data.reduce((total, item) => {
+                if (item.remainingAmount) {
+                    total += parseFloat(item.remainingAmount);
+                }
+                return total;
+            }, 0);
+
+            console.log("Total Paid Amount:", totalPaidAmount);
+
+            const servicesWithData = await Promise.all(
+                data.map(async (service) => {
+                    let additionalData = {};
+                    let feesAdditionalData = {};
+
+                    if (service.addmissionId) {
+                        const feesTemplateId =
+                            await StudentsAdmissionModel.findOne({
+                                groupId: groupId,
+                                addmissionId: service.addmissionId,
+                            });
+                        feesAdditionalData.addmissionId = feesTemplateId;
+                        console.log(feesTemplateId);
+                    }
+
+                    additionalData.addmissionId = feesAdditionalData;
+                    return { ...service._doc, ...additionalData.addmissionId };
+                })
+            );
+
+            const groupedServices = {};
+
+            servicesWithData.forEach((service) => {
+                const addmissionId = service?.addmissionId?.addmissionId;
+                const paidAmount = parseFloat(service.paidAmount) || 0;
+
+                groupedServices[addmissionId] = {
+                    ...service,
+                    paidAmount: paidAmount,
+                };
+            });
+
+            const lastServices = {};
+
+            servicesWithData.forEach((service) => {
+                if (service.addmissionId && service.addmissionId.addmissionId) {
+                    const addmissionId = service.addmissionId.addmissionId;
+                    const paidAmount = parseFloat(service.paidAmount) || 0;
+
+                    lastServices[addmissionId] = {
+                        ...service,
+                        paidAmount:
+                            (lastServices[addmissionId]?.paidAmount || 0) +
+                            paidAmount,
+                    };
+                }
+            });
+
+            const finalServices = Object.values(lastServices);
+            totalPaidAmountCount = finalServices.reduce((total, course) => {
+                return total + parseFloat(course.paidAmount || 0);
+            }, 0);
+
+            totalRemainingAmountCount = finalServices.reduce(
+                (total, course) => {
+                    return total + parseFloat(course.remainingAmount || 0);
+                },
+                0
+            );
+            const filteredServices = finalServices.filter((service) => {
+                const remainingAmount = parseFloat(service.remainingAmount);
+                return remainingAmount !== 0;
+            });
+
+            let response = {
+                totalPaidAmount: totalPaidAmountCount,
+                totalRemainingAmount: totalRemainingAmountCount,
+                StudentRecords: studentRecordCount.length,
+            };
+            return response;
+        });
+    }
     async getFeesStatData(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
-
                 const query = {
                     groupId: groupId,
                 };
@@ -146,7 +257,13 @@ class feesPaymentService extends BaseService {
                 })
                     .skip(skip)
                     .limit(limit);
-
+                let paginationAdmissionData = await StudentsAdmissionModel.find(
+                    {
+                        groupId: groupId,
+                        academicYear: criteria.academicYear,
+                        admissionStatus: "Confirm",
+                    }
+                );
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
@@ -226,7 +343,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                    query.department.toString()
+                                        query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -241,7 +358,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                    query.feesTemplateId.toString()
+                                        query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -259,7 +376,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                    query.course.toString()
+                                        query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -279,7 +396,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                    query.class.toString()
+                                        query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -298,7 +415,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                    query.division.toString()
+                                        query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -350,7 +467,7 @@ class feesPaymentService extends BaseService {
                             const matchingAdmission = admissionData.find(
                                 (admission) =>
                                     admission.addmissionId ==
-                                    service.addmissionId &&
+                                        service.addmissionId &&
                                     service.isShowInAccounting
                             );
 
@@ -458,9 +575,9 @@ class feesPaymentService extends BaseService {
 
                                                     if (
                                                         item.status ==
-                                                        "pending" &&
+                                                            "pending" &&
                                                         formattedDate <
-                                                        criteria.currentDate
+                                                            criteria.currentDate
                                                     ) {
                                                         isDue = true;
                                                         return;
@@ -565,9 +682,9 @@ class feesPaymentService extends BaseService {
                     skip + limit
                 );
                 let response = {
-                    servicesWithData: [paginatedServices],
+                    servicesWithData: [finalServices],
                     totalFees: totalCourseFee1 || 0,
-                    totalItemsCount: admissionData.length,
+                    totalItemsCount: paginationAdmissionData.length,
                 };
 
                 return response;
@@ -675,7 +792,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                    query.department.toString()
+                                        query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -690,7 +807,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                    query.feesTemplateId.toString()
+                                        query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -708,7 +825,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                    query.course.toString()
+                                        query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -728,7 +845,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                    query.class.toString()
+                                        query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -747,7 +864,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                    query.division.toString()
+                                        query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -800,15 +917,15 @@ class feesPaymentService extends BaseService {
                                         (total, paymentArray, currentIndex) => {
                                             const lastIndex =
                                                 currentIndex ===
-                                                    paymentsForCourse.length - 1
+                                                paymentsForCourse.length - 1
                                                     ? paymentArray
                                                     : null;
 
                                             const remainingAmount = lastIndex
                                                 ? parseFloat(
-                                                    lastIndex.remainingAmount ||
-                                                    0
-                                                )
+                                                      lastIndex.remainingAmount ||
+                                                          0
+                                                  )
                                                 : 0;
 
                                             return total + remainingAmount;
@@ -866,9 +983,9 @@ class feesPaymentService extends BaseService {
 
                         console.log(
                             "Total fee for course '" +
-                            courseName +
-                            "': " +
-                            totalFee
+                                courseName +
+                                "': " +
+                                totalFee
                         );
 
                         return {
@@ -877,7 +994,7 @@ class feesPaymentService extends BaseService {
                             courseFee: totalFee,
                             TotalCourseFee:
                                 coursePayments[courseName].courseFee *
-                                coursePayments[courseName].noOfStudents ||
+                                    coursePayments[courseName].noOfStudents ||
                                 0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
@@ -1164,6 +1281,5 @@ class feesPaymentService extends BaseService {
             throw err;
         }
     }
-
 }
 module.exports = new feesPaymentService(feesPaymentModel, "FeesPayment");
