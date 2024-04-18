@@ -14,7 +14,6 @@ class Service extends BaseService {
         if (criteria.productId) query.productId = criteria.productId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-
     async deleteProductById(productId, groupId) {
         try {
             return await productModel.deleteOne(productId, groupId);

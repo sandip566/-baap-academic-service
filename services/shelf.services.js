@@ -14,10 +14,8 @@ class ShelfService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    // Numeric search
                     searchFilter.$or = [{ capacity: numericSearch }];
                 } else {
-                    // Non-numeric search
                     searchFilter.$or = [
                         {
                             location: {

@@ -11,7 +11,6 @@ class ReminderService extends BaseService {
             return ReminderModel.findOne({ reminderId: reminderId });
         });
     }
-
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,

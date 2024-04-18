@@ -26,7 +26,6 @@ class hostelPaymnetService extends BaseService {
             throw error;
         }
     }
-
     async updateHostelPaymnetById(hostelPaymnetId, groupId, newData) {
         try {
             const updateHostelPaymnet =

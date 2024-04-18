@@ -11,7 +11,8 @@ class Service extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.feesTemplateId) query.feesTemplateId = criteria.feesTemplateId;
+        if (criteria.feesTemplateId)
+            query.feesTemplateId = criteria.feesTemplateId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
     async getByfeesTemplateId(feesTemplateId) {
@@ -23,7 +24,10 @@ class Service extends BaseService {
 
     async deletefeesTemplateById(groupId, feesTemplateId) {
         try {
-            return await feesTemplateModel.deleteOne({ groupId: groupId, feesTemplateId: feesTemplateId });
+            return await feesTemplateModel.deleteOne({
+                groupId: groupId,
+                feesTemplateId: feesTemplateId,
+            });
         } catch (error) {
             throw error;
         }
