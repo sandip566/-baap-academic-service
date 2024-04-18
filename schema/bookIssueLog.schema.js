@@ -13,20 +13,11 @@ const bookIssueLogSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        issueDate: {
-            type: Date,
-            default: Date.now(),
-            require: true,
-        },
         dueDate: {
             type: Date,
         },
         returnDate: {
             type: Date,
-        },
-        returned: {
-            type: Boolean,
-            default: false,
         },
         bookIssueLogId: {
             type: Number,
@@ -35,16 +26,12 @@ const bookIssueLogSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        isFine: {
-            type: Boolean,
-            default: false,
-        },
         userId: {
             type: Number
         },
-        isOverdue: {
-            type: Boolean,
-            default: false
+        status:{
+            type:String,
+            enum:["Reserved","Returned","Issued","Overdue"]
         }
     },
     { strict: false, timestamps: true }
