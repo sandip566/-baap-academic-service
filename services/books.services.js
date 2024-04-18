@@ -188,7 +188,7 @@ class BooksService extends BaseService {
             for (const book of books) {
                 totalCount += book.totalCopies || 0;
             }
-            const count = await bookIssueLogService.getCount();
+            const count = await bookIssueLogService.getCount(groupId);
             const response = {
                 totalCount: totalCount,
                 totalAvailableCount: totalAvailableCount,
@@ -277,7 +277,11 @@ class BooksService extends BaseService {
                 issueDate: issue.issueDate,
             }));
 
-            return { data: "books", populatedBooks: populatedBooks, issueLogs: data };
+            return {
+                data: "books",
+                populatedBooks: populatedBooks,
+                issueLogs: data,
+            };
         } catch (error) {
             console.error("Error fetching book details:", error);
             return { error: "Internal server error" };
@@ -288,7 +292,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) { }
+        } catch (error) {}
     }
 }
 module.exports = new BooksService(booksModel, "books");

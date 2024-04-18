@@ -20,225 +20,186 @@ class feesPaymentService extends BaseService {
                 groupId: groupId,
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
-            });
+            })
+                .skip(skip)
+                .limit(limit);
 
-            let totalPaidAmountCount = 0;
-            let totalRemainingAmountCount = 0;
-            let data = await this.model
-                .find({
-                    groupId: groupId,
-                    academicYear: academicYear,
-                    isShowInAccounting: true,
-                })
-                // .skip(skip)
-                // .limit(limit)
-                .exec();
-            //const count = await .countDocuments(data);
-            const totalPaidAmount = data.reduce((total, item) => {
-                if (item.paidAmount) {
-                    total += parseFloat(item.paidAmount);
-                }
-                return total;
-            }, 0);
-
-            const totalRemainingAmount = data.reduce((total, item) => {
-                if (item.remainingAmount) {
-                    total += parseFloat(item.remainingAmount);
-                }
-                return total;
-            }, 0);
-
-            console.log("Total Paid Amount:", totalPaidAmount);
-
-            const servicesWithData = await Promise.all(
-                data.map(async (service) => {
-                    let additionalData = {};
-                    let feesAdditionalData = {};
-
-                    if (service.addmissionId) {
-                        const feesTemplateId =
-                            await StudentsAdmissionModel.findOne({
-                                groupId: groupId,
-                                addmissionId: service.addmissionId,
-                            });
-                        feesAdditionalData.addmissionId = feesTemplateId;
-                        console.log(feesTemplateId);
-                    }
-
-                    additionalData.addmissionId = feesAdditionalData;
-                    return { ...service._doc, ...additionalData.addmissionId };
-                })
-            );
-
-            const groupedServices = {};
-
-            servicesWithData.forEach((service) => {
-                const addmissionId = service?.addmissionId?.addmissionId;
-                const paidAmount = parseFloat(service.paidAmount) || 0;
-
-                groupedServices[addmissionId] = {
-                    ...service,
-                    paidAmount: paidAmount,
-                };
-            });
-
-            const lastServices = {};
-
-            servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId) {
-                    const addmissionId = service.addmissionId.addmissionId;
-                    const paidAmount = parseFloat(service.paidAmount) || 0;
-
-                    lastServices[addmissionId] = {
-                        ...service,
-                        paidAmount:
-                            (lastServices[addmissionId]?.paidAmount || 0) +
-                            paidAmount,
-                    };
-                }
-            });
-
-            const finalServices = Object.values(lastServices);
-            totalPaidAmountCount = finalServices.reduce((total, course) => {
-                return total + parseFloat(course.paidAmount || 0);
-            }, 0);
-
-            totalRemainingAmountCount = finalServices.reduce(
-                (total, course) => {
-                    return total + parseFloat(course.remainingAmount || 0);
+            const aggregationResult = await this.model.aggregate([
+                {
+                    $match: {
+                        groupId: Number(groupId),
+                        academicYear: academicYear,
+                        isShowInAccounting: true,
+                    },
                 },
-                0
-            );
-            const filteredServices = finalServices.filter((service) => {
-                const remainingAmount = parseFloat(service.remainingAmount);
-                return remainingAmount !== 0;
-            });
+                {
+                    $sort: {
+                        addmissionId: 1,
+                        currentDate: -1,
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$addmissionId",
+                        totalPaidAmount: {
+                            $sum: {
+                                $toDouble: "$paidAmount",
+                            },
+                        },
+                        lastRemainingAmount: {
+                            $first: {
+                                $toDouble: "$remainingAmount",
+                            },
+                        },
+                    },
+                },
+                {
+                    $match: {
+                        lastRemainingAmount: { $ne: 0 },
+                    },
+                },
+                {
+                    $project: {
+                        admissionId: "$_id",
+                        totalPaidAmount: 1,
+                        lastRemainingAmount: 1,
+                    },
+                },
+               
+                // {
+                //     $skip: skip,
+                // },
+                // {
+                //     $limit: limit,
+                // },
+            ]);
+// console.log(aggregationResult);
+            const combinedDataArray = [];
 
-            const paginatedServices = filteredServices.slice(
-                skip,
-                skip + limit
-            );
+            for (const result of aggregationResult) {
+                const { admissionId, totalPaidAmount, lastRemainingAmount } =
+                    result;
 
-            let response = {
-                totalPaidAmount: totalPaidAmountCount,
-                totalRemainingAmount: totalRemainingAmountCount,
-                // feesDefaulter: data,
-                //count:count,
-                servicesWithData: paginatedServices,
-                StudentRecords: studentRecordCount.length,
-                StudentRecordsCount: filteredServices.length,
+                const admissionData = await StudentsAdmissionModel.findOne({
+                    groupId: groupId,
+                    addmissionId: admissionId,
+                });
+
+                if (admissionData) {
+                    const admissionDetails = {
+                        name: admissionData.name,
+                        phoneNumber: admissionData.phoneNumber,
+                        familyDetails: [
+                            {
+                                father_phone_number:
+                                    admissionData.familyDetails[0]
+                                        ?.father_phone_number,
+                            },
+                        ],
+                    };
+
+                    const combinedData = {
+                        paidAmount: totalPaidAmount,
+                        remainingAmount: lastRemainingAmount,
+                        admissionId: admissionId,
+                        addmissionId: admissionDetails,
+                    };
+
+                    combinedDataArray.push(combinedData);
+                    
+                }
+              
+            }
+
+
+// Apply the skip and limit to the combinedDataArray to get paginated results
+const paginatedCombinedDataArray = combinedDataArray.slice(skip, skip + limit);
+            const response = {
+                servicesWithData: paginatedCombinedDataArray,
+                totalStudentsRecords: combinedDataArray.length,
             };
+
             return response;
         });
     }
-    async getRecoveryCount(groupId, academicYear, skip, limit) {
+
+    async getRecoveryCount(groupId, academicYear) {
         return this.execute(async () => {
-            let studentRecordCount = await StudentsAdmissionModel.find({
-                groupId: groupId,
-                academicYear: academicYear,
-                admissionStatus: "Confirm",
-            });
-
-            let totalPaidAmountCount = 0;
-            let totalRemainingAmountCount = 0;
-            let data = await this.model
-                .find({
+            const studentRecordCount =
+                await StudentsAdmissionModel.countDocuments({
                     groupId: groupId,
                     academicYear: academicYear,
-                    isShowInAccounting: true,
-                })
-                // .skip(skip)
-                // .limit(limit)
-                .exec();
-            //const count = await .countDocuments(data);
-            const totalPaidAmount = data.reduce((total, item) => {
-                if (item.paidAmount) {
-                    total += parseFloat(item.paidAmount);
-                }
-                return total;
-            }, 0);
+                    admissionStatus: "Confirm",
+                });
 
-            const totalRemainingAmount = data.reduce((total, item) => {
-                if (item.remainingAmount) {
-                    total += parseFloat(item.remainingAmount);
-                }
-                return total;
-            }, 0);
+            const aggregationResult = await this.model.aggregate([
+                {
+                    $match: {
+                        groupId: Number(groupId),
+                        academicYear: academicYear,
+                        isShowInAccounting: true,
+                    },
+                },
 
-            console.log("Total Paid Amount:", totalPaidAmount);
+                {
+                    $sort: {
+                        addmissionId: 1,
+                        currentDate: -1,
+                    },
+                },
 
-            const servicesWithData = await Promise.all(
-                data.map(async (service) => {
-                    let additionalData = {};
-                    let feesAdditionalData = {};
+                {
+                    $group: {
+                        _id: "$addmissionId", 
+                        totalPaidAmount: {
+                            $sum: {
+                                $toDouble: "$paidAmount", 
+                            },
+                        },
+                        lastRemainingAmount: {
+                            $first: "$remainingAmount", 
+                        },
+                    },
+                },
 
-                    if (service.addmissionId) {
-                        const feesTemplateId =
-                            await StudentsAdmissionModel.findOne({
-                                groupId: groupId,
-                                addmissionId: service.addmissionId,
-                            });
-                        feesAdditionalData.addmissionId = feesTemplateId;
-                        console.log(feesTemplateId);
-                    }
+                {
+                    $project: {
+                        _id: 0,
+                        admissionId: "$_id",
+                        totalPaidAmount: 1,
+                        lastRemainingAmount: 1,
+                    },
+                },
+            ]);
 
-                    additionalData.addmissionId = feesAdditionalData;
-                    return { ...service._doc, ...additionalData.addmissionId };
-                })
-            );
-
-            const groupedServices = {};
-
-            servicesWithData.forEach((service) => {
-                const addmissionId = service?.addmissionId?.addmissionId;
-                const paidAmount = parseFloat(service.paidAmount) || 0;
-
-                groupedServices[addmissionId] = {
-                    ...service,
-                    paidAmount: paidAmount,
-                };
-            });
-
-            const lastServices = {};
-
-            servicesWithData.forEach((service) => {
-                if (service.addmissionId && service.addmissionId.addmissionId) {
-                    const addmissionId = service.addmissionId.addmissionId;
-                    const paidAmount = parseFloat(service.paidAmount) || 0;
-
-                    lastServices[addmissionId] = {
-                        ...service,
-                        paidAmount:
-                            (lastServices[addmissionId]?.paidAmount || 0) +
-                            paidAmount,
-                    };
-                }
-            });
-
-            const finalServices = Object.values(lastServices);
-            totalPaidAmountCount = finalServices.reduce((total, course) => {
-                return total + parseFloat(course.paidAmount || 0);
-            }, 0);
-
-            totalRemainingAmountCount = finalServices.reduce(
-                (total, course) => {
-                    return total + parseFloat(course.remainingAmount || 0);
+            console.log(aggregationResult);
+            const totalPaidAmount = aggregationResult.reduce(
+                (total, record) => {
+                    return total + record.totalPaidAmount;
                 },
                 0
             );
-            const filteredServices = finalServices.filter((service) => {
-                const remainingAmount = parseFloat(service.remainingAmount);
-                return remainingAmount !== 0;
-            });
-
-            let response = {
-                totalPaidAmount: totalPaidAmountCount,
-                totalRemainingAmount: totalRemainingAmountCount,
-                StudentRecords: studentRecordCount.length,
+            const totalRemainingAmount = aggregationResult.reduce(
+                (total, record) => {
+                    const remainingAmount = parseFloat(
+                        record.lastRemainingAmount
+                    );
+                    return (
+                        total + (isNaN(remainingAmount) ? 0 : remainingAmount)
+                    );
+                },
+                0
+            );
+            const response = {
+                totalRemainingAmount: totalRemainingAmount,
+                totalPaidAmount: totalPaidAmount,
+                StudentRecords: studentRecordCount,
             };
+
             return response;
         });
     }
+
     async getFeesStatData(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
@@ -264,12 +225,20 @@ class feesPaymentService extends BaseService {
                         admissionStatus: "Confirm",
                     }
                 );
-                let feesData = await this.model.find({
-                    groupId: groupId,
-                    academicYear: criteria.academicYear,
-                    isShowInAccounting: true,
-                });
-
+                // let feesData = await this.model.find({
+                //     groupId: groupId,
+                //     academicYear: criteria.academicYear,
+                //     isShowInAccounting: true,
+                // });
+                let feesData = await this.model.aggregate([
+                    {
+                        $match: {
+                            groupId: Number(groupId),
+                            academicYear: criteria.academicYear,
+                            isShowInAccounting: true,
+                        },
+                    },
+                ])
                 console.log(
                     "criteria.currentDate, criteria.currentDate,feesData",
                     feesData.length
