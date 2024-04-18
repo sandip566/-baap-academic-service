@@ -65,7 +65,7 @@ class feesPaymentService extends BaseService {
                         lastRemainingAmount: 1,
                     },
                 },
-                // Apply skip and limit for pagination
+               
                 {
                     $skip: skip,
                 },

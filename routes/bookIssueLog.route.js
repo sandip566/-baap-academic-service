@@ -30,7 +30,8 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, dueDate, issuedDate, userId } = req.body;
+        const { groupId, bookId, addmissionId, dueDate, issuedDate, userId } =
+            req.body;
         const existingReservation = await bookIssueLogModel.findOne({
             addmissionId: addmissionId,
             bookId: bookId,
@@ -42,7 +43,10 @@ router.post("/issue-book", async (req, res) => {
                 error: "There is already an unreturned reservation for this book and admission ID.",
             });
         }
-        const checkIssuedCount = await service.checkIssuedCount(groupId, addmissionId)
+        const checkIssuedCount = await service.checkIssuedCount(
+            groupId,
+            addmissionId
+        );
         if (checkIssuedCount == false) {
             return res.status(400).json({
                 success: false,
@@ -50,7 +54,7 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const isOverdue = await service.checkOverdueStatus(addmissionId);
-        console.log(isOverdue)
+        console.log(isOverdue);
         if (isOverdue) {
             return res.status(400).json({
                 success: false,
@@ -83,7 +87,7 @@ router.post("/issue-book", async (req, res) => {
             dueDate: dueDate,
             issuedDate: issuedDate,
             shelfId: shelfId,
-            userId: userId
+            userId: userId,
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -215,21 +219,28 @@ router.put(
 );
 
 router.get("/book-issues/overdue/:groupId", async (req, res) => {
-    const groupId = req.params.groupId
+    const groupId = req.params.groupId;
     const bookIssues = await service.fetchBookIssuesWithOverdue(groupId);
     requestResponsehelper.sendResponse(res, bookIssues);
 });
 
 router.get("/student-details/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
+    const page = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.limit);
     const criteria = {
         search: req.query.search,
     };
-    const searchFilter = await service.getStudentDetails(groupId, criteria);
+    const searchFilter = await service.getStudentDetails(
+        groupId,
+        criteria,
+        page,
+        perPage
+    );
     requestResponsehelper.sendResponse(res, searchFilter);
 });
 router.get("/getBooksdetails/:userId", async (req, res) => {
-    const userId = parseInt(req.params.userId)
+    const userId = parseInt(req.params.userId);
     const response = await service.getUserIssuedBooks(userId);
     requestResponsehelper.sendResponse(res, response);
 });
