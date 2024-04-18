@@ -6,7 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const documentConfigurationModel = require("../schema/documentConfiguration.schema");
 const documntModel = require("../schema/document.schema");
-
+const documentModel = require("../services/documentConfiguration.services")
 router.post(
     "/",
     checkSchema(require("../dto/documentConfiguration.dto")),
@@ -243,32 +243,18 @@ router.get("/documnetCnfig/groupId/:groupId/userId/:userId", async (req, res) =>
     }
 });
 
-
 router.get("/allGetByRoleId/groupId/:groupId/roleId/:roleId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const criteria = {
-            search: req.query.search,
-            roleId: req.query.roleId,
-        };
-        const { searchFilter } = await service.getByRoleId(
-            groupId,
-            criteria
-        );
-        const documentConfigrations = await documntModel.find(searchFilter);
-        const count = await documentConfigurationModel.countDocuments(searchFilter);
-        res.json({
-            data: {
-                item: documentConfigrations,
-                totalCount: count,
-            }
-        });
-
+        const roleId = req.params.roleId;
+        const data = await service.getByRoleId(groupId, roleId);
+        if (!data) {
+            return res.status(404).json({ error: "No documents found for the given group ID and role ID" });
+        }
+        res.status(200).json(data);
     } catch (err) {
-        throw err;
+        console.error(err);
+        res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-
-
 module.exports = router;

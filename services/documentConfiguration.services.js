@@ -151,35 +151,13 @@ class documentConfiguration extends BaseService {
         }
     }
 
-
-
-    async getByRoleId(groupId, criteria) {
+    async getByRoleId(groupId, roleId) {
         try {
-            const searchFilter = {
-                groupId: groupId,
-            };
-            if (criteria.search) {
-                const numericSearch = parseInt(criteria.search);
-                if (!isNaN(numericSearch)) {
-                    searchFilter.$or = [
-                        { roleId: numericSearch }
-                    ];
-                } else {
-                    searchFilter.$or = [
-
-                    ];
-                }
-            }
-            if (criteria.roleId) {
-                const numericRoleId = parseInt(criteria.roleId);
-                if (!isNaN(numericRoleId)) {
-                    searchFilter.roleId = numericRoleId;
-                }
-            }
-
-            return { searchFilter };
-        } catch (error) {
-            throw (error);
+            const documents = await documntModel.find({ groupId: groupId, roleId: roleId });
+            return documents;
+        } catch (err) {
+            console.error("Error fetching documents:", err);
+            throw err;
         }
     }
 
