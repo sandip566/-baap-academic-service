@@ -66,14 +66,14 @@ class feesPaymentService extends BaseService {
                     },
                 },
                
-                {
-                    $skip: skip,
-                },
-                {
-                    $limit: limit,
-                },
+                // {
+                //     $skip: skip,
+                // },
+                // {
+                //     $limit: limit,
+                // },
             ]);
-
+// console.log(aggregationResult);
             const combinedDataArray = [];
 
             for (const result of aggregationResult) {
@@ -106,11 +106,17 @@ class feesPaymentService extends BaseService {
                     };
 
                     combinedDataArray.push(combinedData);
+                    
                 }
+              
             }
+
+
+// Apply the skip and limit to the combinedDataArray to get paginated results
+const paginatedCombinedDataArray = combinedDataArray.slice(skip, skip + limit);
             const response = {
-                servicesWithData: combinedDataArray,
-                StudentRecordsCount: aggregationResult.length,
+                servicesWithData: paginatedCombinedDataArray,
+                totalStudentsRecords: combinedDataArray.length,
             };
 
             return response;
@@ -144,14 +150,14 @@ class feesPaymentService extends BaseService {
 
                 {
                     $group: {
-                        _id: "$addmissionId", // Group by admission ID
+                        _id: "$addmissionId", 
                         totalPaidAmount: {
                             $sum: {
-                                $toDouble: "$paidAmount", // Convert paidAmount to double and sum it up
+                                $toDouble: "$paidAmount", 
                             },
                         },
                         lastRemainingAmount: {
-                            $first: "$remainingAmount", // Get remainingAmount from the most recent record
+                            $first: "$remainingAmount", 
                         },
                     },
                 },
@@ -219,12 +225,20 @@ class feesPaymentService extends BaseService {
                         admissionStatus: "Confirm",
                     }
                 );
-                let feesData = await this.model.find({
-                    groupId: groupId,
-                    academicYear: criteria.academicYear,
-                    isShowInAccounting: true,
-                });
-
+                // let feesData = await this.model.find({
+                //     groupId: groupId,
+                //     academicYear: criteria.academicYear,
+                //     isShowInAccounting: true,
+                // });
+                let feesData = await this.model.aggregate([
+                    {
+                        $match: {
+                            groupId: Number(groupId),
+                            academicYear: criteria.academicYear,
+                            isShowInAccounting: true,
+                        },
+                    },
+                ])
                 console.log(
                     "criteria.currentDate, criteria.currentDate,feesData",
                     feesData.length
