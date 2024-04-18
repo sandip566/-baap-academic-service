@@ -32,34 +32,18 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    // const departmentId =
-                    //     departmentMap[criteria.search.trim().toLowerCase()];
+
                     const shelfId =
                         shelfMap[criteria.search.trim().toLowerCase()];
-                    // const publisherId =
-                    //     publisherMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
 
-                        // { publisherId: publisherId },
-                        // {
-                        //     publisherName: {
-                        //         $regex: new RegExp(criteria.search, "i"),
-                        //     },
-                        // },
-                        // { departmentId: departmentId },
-                        // {
-                        //     departmentName: {
-                        //         $regex: new RegExp(criteria.search, "i"),
-                        //     },
-                        // },
-                        
                         { shelfId: shelfId },
                         {
                             shelfName: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-                        
+
                         {
                             status: {
                                 $regex: new RegExp(criteria.search, "i"),
@@ -71,7 +55,7 @@ class BooksService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-                      
+
                     ];
                 }
             }
@@ -169,9 +153,9 @@ class BooksService extends BaseService {
         throw new Error("An error occurred while fetching publisher map.");
     }
 
-    async deleteBookById(groupId,bookId) {
+    async deleteBookById(groupId, bookId) {
         try {
-            return await booksModel.deleteOne({groupId:groupId,bookId:bookId});
+            return await booksModel.deleteOne({ groupId: groupId, bookId: bookId });
         } catch (error) {
             throw error;
         }
