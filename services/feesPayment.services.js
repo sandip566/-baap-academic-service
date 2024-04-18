@@ -21,7 +21,6 @@ class feesPaymentService extends BaseService {
                 academicYear: academicYear,
                 admissionStatus: "Confirm",
             });
-
             let totalPaidAmountCount = 0;
             let totalRemainingAmountCount = 0;
             let data = await this.model
@@ -70,18 +69,21 @@ class feesPaymentService extends BaseService {
                 })
             );
 
+            // Grouping services based on addmissionId and keeping only the last occurrence
             const groupedServices = {};
 
             servicesWithData.forEach((service) => {
                 const addmissionId = service?.addmissionId?.addmissionId;
                 const paidAmount = parseFloat(service.paidAmount) || 0;
 
+                // Store the service data for each addmissionId
                 groupedServices[addmissionId] = {
                     ...service,
                     paidAmount: paidAmount,
                 };
             });
 
+            // Filter only the last occurrence of each addmissionId
             const lastServices = {};
 
             servicesWithData.forEach((service) => {
@@ -89,6 +91,7 @@ class feesPaymentService extends BaseService {
                     const addmissionId = service.addmissionId.addmissionId;
                     const paidAmount = parseFloat(service.paidAmount) || 0;
 
+                    // Update or initialize the entry for the current addmissionId with the latest service data
                     lastServices[addmissionId] = {
                         ...service,
                         paidAmount:
@@ -109,16 +112,7 @@ class feesPaymentService extends BaseService {
                 },
                 0
             );
-            const filteredServices = finalServices.filter((service) => {
-                const remainingAmount = parseFloat(service.remainingAmount);
-                return remainingAmount !== 0;
-            });
-
-            const paginatedServices = filteredServices.slice(
-                skip,
-                skip + limit
-            );
-
+            const paginatedServices = finalServices.slice(skip, skip + limit);
             let response = {
                 totalPaidAmount: totalPaidAmountCount,
                 totalRemainingAmount: totalRemainingAmountCount,
@@ -126,7 +120,6 @@ class feesPaymentService extends BaseService {
                 //count:count,
                 servicesWithData: paginatedServices,
                 StudentRecords: studentRecordCount.length,
-                StudentRecordsCount: filteredServices.length,
             };
             return response;
         });
