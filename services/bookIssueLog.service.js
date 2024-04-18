@@ -127,8 +127,9 @@ class BookIssueLogService extends BaseService {
                     var response = {
                         bookIssueDate,
                         studentName: student
-                            ? student.firstName
+                            ? student.name
                             : "Unknown Student",
+                        image:student?student.profile_img:"image is not provided",
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
@@ -197,14 +198,30 @@ class BookIssueLogService extends BaseService {
             console.log(students);
             const student = await bookIssueLogModel.find({
                 addmissionId: {
-                    $in: students.map((book) => book.addmissionId),
+                    $in: students.map((book) => book.addmissionId),  
                 },
                 returned: false,
+            });
+            const bookIds = student.map(student => student.bookId);
+             const booksObject = await Book.find({ bookId: { $in: bookIds } });
+      
+             const issuedBooks = student.map((item) => {
+                const correspondingBook = booksObject.find(book => book.bookId === item.bookId);
+            
+                return {
+                    bookIssueDate: item.issueDate,
+                    dueDate: item.dueDate,
+                    bookName: correspondingBook ? correspondingBook.name : null,
+                    availableCount: correspondingBook ? correspondingBook.availableCount : null,
+                    totalCopies:correspondingBook ? correspondingBook.totalCopies:null,
+                    book_img:correspondingBook ? correspondingBook.book_img:null,
+                    overdue: item.isOverdue
+                };
             });
             return {
                 data: "student",
                 searchedStudents: students,
-                issueLogs: student,
+                issueLogs: issuedBooks
             };
         } catch (error) {
             console.error("Error fetching student details:", error);

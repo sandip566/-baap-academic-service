@@ -30,8 +30,11 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, dueDate, issuedDate, userId } =
-            req.body;
+        const { groupId, bookId, addmissionId, issuedDate,dueDate, userId } = req.body;
+        // const currentDate = new Date();
+        // const dueDate = new Date(currentDate);
+        // dueDate.setDate(dueDate.getDate() + 5);
+
         const existingReservation = await bookIssueLogModel.findOne({
             addmissionId: addmissionId,
             bookId: bookId,
