@@ -32,13 +32,18 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-                    const departmentId =
-                        departmentMap[criteria.search.trim().toLowerCase()];
+
                     const shelfId =
                         shelfMap[criteria.search.trim().toLowerCase()];
-                    const publisherId =
-                        publisherMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
+
+                        { shelfId: shelfId },
+                        {
+                            shelfName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+
                         {
                             status: {
                                 $regex: new RegExp(criteria.search, "i"),
@@ -50,24 +55,7 @@ class BooksService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-                        { publisherId: publisherId },
-                        {
-                            publisherName: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                        { departmentId: departmentId },
-                        {
-                            departmentName: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                        { shelfId: shelfId },
-                        {
-                            shelfName: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
+
                     ];
                 }
             }
@@ -83,6 +71,7 @@ class BooksService extends BaseService {
                 }
             }
 
+
             if (criteria.shelfName) {
                 const shelfnameLowercase = criteria.shelfName.toLowerCase();
                 const shelfId = shelfMap[shelfnameLowercase];
@@ -92,6 +81,7 @@ class BooksService extends BaseService {
                     return { searchFilter: {}, shelfMap: {} };
                 }
             }
+
             if (criteria.publisherName) {
                 const publishernameLowercase =
                     criteria.publisherName.toLowerCase();
@@ -111,11 +101,9 @@ class BooksService extends BaseService {
         }
     }
 
-    async getDepartmentMap(groupId) {
+    async getDepartmentMap() {
         try {
-            const departments = await departmentModel.find({
-                groupId: groupId,
-            });
+            const departments = await departmentModel.find();
             const departmentMap = {};
             departments.forEach((department) => {
                 if (department.departmentName) {
@@ -165,9 +153,9 @@ class BooksService extends BaseService {
         throw new Error("An error occurred while fetching publisher map.");
     }
 
-    async deleteBookById(bookId, groupId) {
+    async deleteBookById(groupId, bookId) {
         try {
-            return await booksModel.deleteOne(bookId, groupId);
+            return await booksModel.deleteOne({ groupId: groupId, bookId: bookId });
         } catch (error) {
             throw error;
         }
