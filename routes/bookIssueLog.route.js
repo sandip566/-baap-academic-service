@@ -160,9 +160,11 @@ router.put("/:id", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        bookIssueLogId: req.params.bookIssueLogId,
-        studentId: req.params.studentId,
-        status: req.params.status,
+        bookIssueLogId: req.query.bookIssueLogId,
+        status: req.params.query,
+        pageNumber : req.query.pageNumber||1,
+        pageSize :req.query.pageSize||10,
+        search:req.query.search
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
