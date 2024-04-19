@@ -91,7 +91,7 @@ router.post("/issue-book", async (req, res) => {
             issuedDate:new Date(),
             shelfId: shelfId,
             userId: userId,
-            status:"Issued"
+            
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -118,7 +118,7 @@ router.post("/return-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             addmissionId: addmissionId,
-            status: "Issued",
+            isReturn:false
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -128,7 +128,7 @@ router.post("/return-book", async (req, res) => {
         }
         const updatedReservation = await service.updateBookIssueLogById(
             existingReservation.bookIssueLogId,
-            { status:"Returned", returnDate: new Date() }
+            { isReturn:true, returnDate: new Date() }
         );
         await Book.findOneAndUpdate(
             { bookId: bookId, availableCount: { $gt: 0 } },
@@ -160,9 +160,11 @@ router.put("/:id", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        bookIssueLogId: req.params.bookIssueLogId,
-        studentId: req.params.studentId,
-        status: req.params.status,
+        bookIssueLogId: req.query.bookIssueLogId,
+        status: req.params.query,
+        pageNumber : req.query.pageNumber||1,
+        pageSize :req.query.pageSize||10,
+        search:req.query.search
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -256,6 +258,17 @@ router.post("/reserve-book", async (req, res) => {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for reserving",
+            });
+        }
+        const existingReservation = await bookIssueLogModel.findOne({
+            bookId: bookId,
+            addmissionId: addmissionId,
+            status: "Reserved",
+        });
+        if (!existingReservation) {
+            return res.status(400).json({
+                success: false,
+                error: "You have already reserved this book",
             });
         }
         const bookIssueLogId = +Date.now();
