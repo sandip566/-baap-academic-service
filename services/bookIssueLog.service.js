@@ -42,7 +42,7 @@ class BookIssueLogService extends BaseService {
         try {
             const existingReservation = await Book.findOne({
                 addmissionId: addmissionId,
-                isOverdue:true,
+                isOverdue: true,
             });
             return existingReservation;
         } catch (error) {
@@ -56,7 +56,7 @@ class BookIssueLogService extends BaseService {
             const count = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
                 addmissionId: addmissionId,
-                isReturn:false
+                isReturn: false
             });
             console.log(count + "count");
             if (count >= 3) {
@@ -72,9 +72,10 @@ class BookIssueLogService extends BaseService {
     async fetchBookIssuesWithOverdue(groupId) {
         try {
             const currDate = new Date();
+            const finePerDay = 5;
             const bookIssues = await bookIssueLogModel.find({
                 groupId: groupId,
-                isReturn:false,
+                isReturn: false,
             });
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
@@ -94,7 +95,7 @@ class BookIssueLogService extends BaseService {
                     if (diffDays > 0) {
                         await bookIssueLogModel.updateOne(
                             { _id: bookIssue._id },
-                            { $set: { isOverdue:true } }
+                            { $set: { isOverdue: true } }
                         );
                     }
                 })
@@ -123,15 +124,18 @@ class BookIssueLogService extends BaseService {
                         (book) => book.bookId === bookIssue.bookId
                     );
                     let bookIssueDate = bookIssue.issueDate;
+                    const totalFine = diffDays * finePerDay;
                     var response = {
                         bookIssueDate,
+                        addmissionId: student.addmissionId,
                         studentName: student
                             ? student.name
                             : "Unknown Student",
-                        image:student?student.profile_img:"image is not provided",
+                        image: student ? student.profile_img : "image is not provided",
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
+                        totalFine: totalFine
                     };
                     return response;
                 });
@@ -170,7 +174,7 @@ class BookIssueLogService extends BaseService {
         try {
             const bookIssues = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
-                isReturn:false,
+                isReturn: false,
             });
             const returnedBooks = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
@@ -197,23 +201,23 @@ class BookIssueLogService extends BaseService {
             console.log(students);
             const student = await bookIssueLogModel.find({
                 addmissionId: {
-                    $in: students.map((book) => book.addmissionId),  
+                    $in: students.map((book) => book.addmissionId),
                 },
-                isReturn:false,
+                isReturn: false,
             });
             const bookIds = student.map(student => student.bookId);
-             const booksObject = await Book.find({ bookId: { $in: bookIds } });
-      
-             const issuedBooks = student.map((item) => {
+            const booksObject = await Book.find({ bookId: { $in: bookIds } });
+
+            const issuedBooks = student.map((item) => {
                 const correspondingBook = booksObject.find(book => book.bookId === item.bookId);
-            
+
                 return {
                     bookIssueDate: item.issueDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,
                     availableCount: correspondingBook ? correspondingBook.availableCount : null,
-                    totalCopies:correspondingBook ? correspondingBook.totalCopies:null,
-                    book_img:correspondingBook ? correspondingBook.book_img:null,
+                    totalCopies: correspondingBook ? correspondingBook.totalCopies : null,
+                    book_img: correspondingBook ? correspondingBook.book_img : null,
                     overdue: item.isOverdue
                 };
             });
@@ -232,7 +236,7 @@ class BookIssueLogService extends BaseService {
         try {
             const issuedBooks = await bookIssueLogModel.find({
                 userId: userId,
-                isReturn:false,
+                isReturn: false,
             });
             console.log(issuedBooks);
             const bookIds = issuedBooks.map((bookIssue) => bookIssue.bookId);
@@ -253,20 +257,20 @@ class BookIssueLogService extends BaseService {
             return [];
         }
     }
-    async reserveBook(groupId,bookId){
+    async reserveBook(groupId, bookId) {
         try {
-           const book=await Book.find({groupId:groupId,bookId:groupId});
-        //    if(!book){
-        //     return "Book is not available in the library"
-        //    }
-           return book;
+            const book = await Book.find({ groupId: groupId, bookId: groupId });
+            //    if(!book){
+            //     return "Book is not available in the library"
+            //    }
+            return book;
         } catch (error) {
             throw error;
         }
-    
+
     }
 
-    
+
 }
 
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");
