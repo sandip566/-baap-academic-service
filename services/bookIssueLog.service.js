@@ -42,7 +42,7 @@ class BookIssueLogService extends BaseService {
         try {
             const existingReservation = await Book.findOne({
                 addmissionId: addmissionId,
-                status:"Overdue",
+                isOverdue:true,
             });
             return existingReservation;
         } catch (error) {
@@ -56,7 +56,7 @@ class BookIssueLogService extends BaseService {
             const count = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
                 addmissionId: addmissionId,
-                status:"Issued",
+                isReturn:false
             });
             console.log(count + "count");
             if (count >= 3) {
@@ -74,7 +74,7 @@ class BookIssueLogService extends BaseService {
             const currDate = new Date();
             const bookIssues = await bookIssueLogModel.find({
                 groupId: groupId,
-                status:"Issued",
+                isReturn:false,
             });
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
@@ -94,7 +94,7 @@ class BookIssueLogService extends BaseService {
                     if (diffDays > 0) {
                         await bookIssueLogModel.updateOne(
                             { _id: bookIssue._id },
-                            { $set: { status:"Overdue" } }
+                            { $set: { isOverdue:true } }
                         );
                     }
                 })
@@ -147,11 +147,11 @@ class BookIssueLogService extends BaseService {
         try {
             console.log(addmissionId);
             const bookIssues = await bookIssueLogModel.countDocuments({
-                status: "Issued",
+                isReturn: false,
                 addmissionId: addmissionId,
             });
             const returnedBooks = await bookIssueLogModel.countDocuments({
-                status: "Returned",
+                isReturn: true,
                 addmissionId: addmissionId,
             });
             const totalBooksIssued = await bookIssueLogModel.countDocuments({
@@ -170,11 +170,11 @@ class BookIssueLogService extends BaseService {
         try {
             const bookIssues = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
-                status: "Issued",
+                isReturn:false,
             });
             const returnedBooks = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
-                status: "Returned",
+                isReturn: true,
             });
             const response = {
                 bookIssues: bookIssues,
@@ -199,7 +199,7 @@ class BookIssueLogService extends BaseService {
                 addmissionId: {
                     $in: students.map((book) => book.addmissionId),  
                 },
-                status: "Issued",
+                isReturn:false,
             });
             const bookIds = student.map(student => student.bookId);
              const booksObject = await Book.find({ bookId: { $in: bookIds } });
@@ -232,7 +232,7 @@ class BookIssueLogService extends BaseService {
         try {
             const issuedBooks = await bookIssueLogModel.find({
                 userId: userId,
-                status: "Issued",
+                isReturn:false,
             });
             console.log(issuedBooks);
             const bookIds = issuedBooks.map((bookIssue) => bookIssue.bookId);
@@ -265,6 +265,8 @@ class BookIssueLogService extends BaseService {
         }
     
     }
+
+    
 }
 
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");

@@ -32,6 +32,14 @@ const bookIssueLogSchema = new mongoose.Schema(
         status:{
             type:String,
             enum:["Reserved","Returned","Issued","Overdue"]
+        },
+        isReturn:{
+            type:Boolean,
+            default:false
+        },
+        isOverdue:{
+            type:Boolean,
+            default:false
         }
     },
     { strict: false, timestamps: true }

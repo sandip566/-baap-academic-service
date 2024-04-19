@@ -65,7 +65,7 @@ class feesPaymentService extends BaseService {
                         lastRemainingAmount: 1,
                     },
                 },
-               
+
                 // {
                 //     $skip: skip,
                 // },
@@ -73,7 +73,7 @@ class feesPaymentService extends BaseService {
                 //     $limit: limit,
                 // },
             ]);
-// console.log(aggregationResult);
+            // console.log(aggregationResult);
             const combinedDataArray = [];
 
             for (const result of aggregationResult) {
@@ -92,7 +92,7 @@ class feesPaymentService extends BaseService {
                         familyDetails: [
                             {
                                 father_phone_number:
-                                    admissionData.familyDetails[0]
+                                    admissionData?.familyDetails[0]
                                         ?.father_phone_number,
                             },
                         ],
@@ -106,14 +106,14 @@ class feesPaymentService extends BaseService {
                     };
 
                     combinedDataArray.push(combinedData);
-                    
                 }
-              
             }
 
-
-// Apply the skip and limit to the combinedDataArray to get paginated results
-const paginatedCombinedDataArray = combinedDataArray.slice(skip, skip + limit);
+            // Apply the skip and limit to the combinedDataArray to get paginated results
+            const paginatedCombinedDataArray = combinedDataArray.slice(
+                skip,
+                skip + limit
+            );
             const response = {
                 servicesWithData: paginatedCombinedDataArray,
                 totalStudentsRecords: combinedDataArray.length,
@@ -150,14 +150,14 @@ const paginatedCombinedDataArray = combinedDataArray.slice(skip, skip + limit);
 
                 {
                     $group: {
-                        _id: "$addmissionId", 
+                        _id: "$addmissionId",
                         totalPaidAmount: {
                             $sum: {
-                                $toDouble: "$paidAmount", 
+                                $toDouble: "$paidAmount",
                             },
                         },
                         lastRemainingAmount: {
-                            $first: "$remainingAmount", 
+                            $first: "$remainingAmount",
                         },
                     },
                 },
@@ -238,7 +238,7 @@ const paginatedCombinedDataArray = combinedDataArray.slice(skip, skip + limit);
                             isShowInAccounting: true,
                         },
                     },
-                ])
+                ]);
                 console.log(
                     "criteria.currentDate, criteria.currentDate,feesData",
                     feesData.length

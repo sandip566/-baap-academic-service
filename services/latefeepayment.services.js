@@ -13,7 +13,6 @@ class LatefeepaymentService extends BaseService {
             });
         });
     }
-
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,

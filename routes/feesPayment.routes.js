@@ -507,7 +507,7 @@ router.get(
             search: req.query.search,
         };
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 500;
         const serviceResponse = await service.getFeesStatData(
             groupId,
             criteria,

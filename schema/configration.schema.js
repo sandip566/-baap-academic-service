@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const ConfigrationSchema = new mongoose.Schema(
+const configurationSchema = new mongoose.Schema(
     {
         groupId:{
             type:Number,
@@ -13,5 +13,5 @@ const ConfigrationSchema = new mongoose.Schema(
     { timestamps: true ,strict:false}
 );
 
-const ConfigrationModel = mongoose.model("configration", ConfigrationSchema);
+const ConfigrationModel = mongoose.model("configration", configurationSchema);
 module.exports = ConfigrationModel;
