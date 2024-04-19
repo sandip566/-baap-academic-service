@@ -30,7 +30,8 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, issuedDate,dueDate, userId } = req.body;
+        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
+            req.body;
         // const currentDate = new Date();
         // const dueDate = new Date(currentDate);
         // dueDate.setDate(dueDate.getDate() + 5);
@@ -38,7 +39,7 @@ router.post("/issue-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             addmissionId: addmissionId,
             bookId: bookId,
-            status:"Issued",
+            status: "Issued",
         });
         if (existingReservation) {
             return res.status(400).json({
@@ -88,10 +89,9 @@ router.post("/issue-book", async (req, res) => {
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
             dueDate: dueDate,
-            issuedDate:new Date(),
+            issuedDate: new Date(),
             shelfId: shelfId,
             userId: userId,
-            
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -118,7 +118,7 @@ router.post("/return-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             addmissionId: addmissionId,
-            isReturn:false
+            isReturn: false,
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -128,7 +128,7 @@ router.post("/return-book", async (req, res) => {
         }
         const updatedReservation = await service.updateBookIssueLogById(
             existingReservation.bookIssueLogId,
-            { isReturn:true, returnDate: new Date() }
+            { isReturn: true, returnDate: new Date() }
         );
         await Book.findOneAndUpdate(
             { bookId: bookId, availableCount: { $gt: 0 } },
@@ -162,9 +162,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.params.query,
-        pageNumber : req.query.pageNumber||1,
-        pageSize :req.query.pageSize||10,
-        search:req.query.search
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: req.query.pageSize || 10,
+        search: req.query.search,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -252,8 +252,8 @@ router.get("/getBooksdetails/:userId", async (req, res) => {
 });
 router.post("/reserve-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId,reserveDate,userId } = req.body;
-        const serviceResponse=service.reserveBook(groupId,bookId)
+        const { groupId, bookId, addmissionId, reserveDate, userId } = req.body;
+        const serviceResponse = service.reserveBook(groupId, bookId);
         if (!serviceResponse) {
             return res.status(400).json({
                 success: false,
@@ -265,7 +265,7 @@ router.post("/reserve-book", async (req, res) => {
             addmissionId: addmissionId,
             status: "Reserved",
         });
-        if (!existingReservation) {
+        if (existingReservation) {
             return res.status(400).json({
                 success: false,
                 error: "You have already reserved this book",
@@ -277,21 +277,20 @@ router.post("/reserve-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
-            reserveDate:new Date(),
-            isReserve:true,
+            reserveDate: new Date(),
+            isReserve: true,
             userId: userId,
-            status:"Reserved"
+            status: "Reserved",
         };
         const createdReservation = await service.create(newReservation);
         res.status(201).json({
             success: true,
             reservation: createdReservation,
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
 
 module.exports = router;

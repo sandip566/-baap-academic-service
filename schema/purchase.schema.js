@@ -9,7 +9,7 @@ const PurchaseSchema = new mongoose.Schema(
         purchaseId: {
             type: Number,
         },
-        vendorId: {
+        publisherId: {
             type: Number,
             required: false,
         },
@@ -28,20 +28,7 @@ const PurchaseSchema = new mongoose.Schema(
             type: String,
             enum: ["Upi", "Cash", "Cheque"],
         },
-        // items: [{
-        //     book: {
-        //         type: String
-        //     },
-        //     quantity: {
-        //         type: Number,
-        //         required: false
-        //     },
-        //     unitPrice: {
-        //         type: Number,
-        //         required: false
-        //     }
-        // }],
-        book: {
+        bookName: {
             type: String,
         },
         quantity: {
