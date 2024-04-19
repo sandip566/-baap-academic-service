@@ -115,14 +115,19 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async fetchBookIssuesWithOverdue(groupId) {
+    async fetchBookIssuesWithOverdue(groupId, addmissionId) {
         try {
             const currDate = new Date();
             const finePerDay = 5;
-            const bookIssues = await bookIssueLogModel.find({
+            let query = {
                 groupId: groupId,
                 isReturn: false,
-            });
+            }
+
+            if (addmissionId) {
+                query.addmissionId = addmissionId
+            }
+            const bookIssues = await bookIssueLogModel.find(query);
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
             const bookIds = bookIssues.map((issue) => issue.bookId);
@@ -305,11 +310,11 @@ class BookIssueLogService extends BaseService {
     }
     async reserveBook(groupId, bookId) {
         try {
-           const book=await Book.find({groupId:groupId,bookId:groupId});
-        //    if(!book){
-        //     return "Book is not available in the library"
-        //    }
-           return book;
+            const book = await Book.find({ groupId: groupId, bookId: groupId });
+            //    if(!book){
+            //     return "Book is not available in the library"
+            //    }
+            return book;
         } catch (error) {
             throw error;
         }
