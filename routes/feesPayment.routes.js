@@ -97,7 +97,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -174,7 +174,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -294,7 +294,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -371,7 +371,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -734,34 +734,60 @@ router.get("/studentClearansDetails/:groupId", async (req, res) => {
     }
 });
 
-router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
+router.get("/feesDetails/groupId/:groupId/empId/:empId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const userId = req.params.userId;
-        let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, userId);
-        let totalAmount = 0;
-        let totalPaidAmount = 0;
+        const empId = req.params.empId;
 
-        if (paidAmt && paidAmt.length > 0) {
-            paidAmt.forEach((item) => {
-                totalAmount = parseInt(item.courseFee);
-                totalPaidAmount += parseInt(item.paidAmount);
-            });
+        // Array to store payment details for each class
+        let classPaymentDetails = [];
+
+        // Array to store total amounts for all classes
+        let totalAmountAllClasses = 0;
+        let totalPaidAmountAllClasses = 0;
+
+        // Loop through each class
+        const classNames = ["BCA 1st year", "BCA 2nd year"]; // Add more class names if needed
+        for (const className of classNames) {
+            let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, empId, className);
+
+            let totalAmount = 0;
+            let totalPaidAmount = 0;
+
+            if (paidAmt && paidAmt.length > 0) {
+                paidAmt.forEach((item) => {
+                    totalAmount += parseInt(item.courseFee);
+                    totalPaidAmount += parseInt(item.paidAmount);
+                });
+            }
+
+            totalAmountAllClasses += totalAmount;
+            totalPaidAmountAllClasses += totalPaidAmount;
+
+            let remainingAmount = totalAmount - totalPaidAmount;
+
+            const classDetails = {
+                paidAmount: paidAmt,
+                className: className,
+                totalAmount: totalAmount,
+                PaidAmount: totalPaidAmount,
+                remainingAmount: remainingAmount,
+            };
+
+            classPaymentDetails.push(classDetails);
         }
-        let remainingAmount = 0;
-        remainingAmount = totalAmount - totalPaidAmount;
 
         const response = {
-            paidAmount: paidAmt,
-            totalAmount: totalAmount,
-            PaidAmount: totalPaidAmount,
-            remainingAmount: remainingAmount,
+            classPaymentDetails: classPaymentDetails,
+            totalAmountAllClasses: totalAmountAllClasses,
+            totalPaidAmountAllClasses: totalPaidAmountAllClasses,
+            remainingAmountAllClasses: totalAmountAllClasses - totalPaidAmountAllClasses,
         };
 
         res.json({
             status: "Success",
             data: {
-                userId: userId,
+                empId: empId,
                 amountDetails: response,
             },
         });
