@@ -91,7 +91,6 @@ router.post("/issue-book", async (req, res) => {
             issuedDate: new Date(),
             shelfId: shelfId,
             userId: userId,
-
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -266,7 +265,7 @@ router.post("/reserve-book", async (req, res) => {
             addmissionId: addmissionId,
             status: "Reserved",
         });
-        if (!existingReservation) {
+        if (existingReservation) {
             return res.status(400).json({
                 success: false,
                 error: "You have already reserved this book",
@@ -288,11 +287,10 @@ router.post("/reserve-book", async (req, res) => {
             success: true,
             reservation: createdReservation,
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
 
 module.exports = router;
