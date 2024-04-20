@@ -1,6 +1,6 @@
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const ShelfModel = require("../schema/shelf.schema");
-
+const bookModel=require("../schema/books.schema")
 class ShelfService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -65,11 +65,22 @@ class ShelfService extends BaseService {
 
     async deleteShelfById(shelfId, groupId) {
         try {
-            return await ShelfModel.deleteOne(shelfId, groupId);
+            const isShelfAssigned = await bookModel.exists({ shelfId: shelfId, groupId: groupId });
+            if (isShelfAssigned) {
+                return false;
+            } else {
+                const result = await ShelfModel.deleteOne({ shelfId: shelfId, groupId: groupId });
+                console.log(result)
+                return result;
+
+            }
         } catch (error) {
             throw error;
         }
     }
+    
+
+
 
     async updateShelfById(shelfId, groupId, newData) {
         try {
