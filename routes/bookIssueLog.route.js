@@ -30,8 +30,7 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
-            req.body;
+        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } = req.body;
         // const currentDate = new Date();
         // const dueDate = new Date(currentDate);
         // dueDate.setDate(dueDate.getDate() + 5);
@@ -118,7 +117,7 @@ router.post("/return-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             addmissionId: addmissionId,
-            isReturn: false,
+            isReturn: false
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -164,7 +163,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         status: req.params.query,
         pageNumber: req.query.pageNumber || 1,
         pageSize: req.query.pageSize || 10,
-        search: req.query.search,
+        search: req.query.search
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -226,7 +225,8 @@ router.put(
 
 router.get("/book-issues/overdue/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const bookIssues = await service.fetchBookIssuesWithOverdue(groupId);
+    const addmissionId = req.query.addmissionId
+    const bookIssues = await service.fetchBookIssuesWithOverdue(groupId, addmissionId);
     requestResponsehelper.sendResponse(res, bookIssues);
 });
 
@@ -253,7 +253,7 @@ router.get("/getBooksdetails/:userId", async (req, res) => {
 router.post("/reserve-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, reserveDate, userId } = req.body;
-        const serviceResponse = service.reserveBook(groupId, bookId);
+        const serviceResponse = service.reserveBook(groupId, bookId)
         if (!serviceResponse) {
             return res.status(400).json({
                 success: false,
@@ -280,7 +280,7 @@ router.post("/reserve-book", async (req, res) => {
             reserveDate: new Date(),
             isReserve: true,
             userId: userId,
-            status: "Reserved",
+            status: "Reserved"
         };
         const createdReservation = await service.create(newReservation);
         res.status(201).json({
