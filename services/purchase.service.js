@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const PurchaseModel = require("../schema/purchase.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
@@ -76,6 +77,18 @@ class PurchaseService extends BaseService {
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw new Error("An error occurred while processing the request.");
+        }
+    }
+
+    async bulkUpload(purchaseData) {
+        try {
+            const result = await PurchaseModel.insertMany(purchaseData);
+            return new ServiceResponse({
+                data: result,
+            });
+        } catch (error) {
+            console.error("Error occurred during bulk upload:", error);
+            throw error;
         }
     }
 }
