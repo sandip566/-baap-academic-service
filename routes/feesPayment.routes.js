@@ -739,15 +739,17 @@ router.get("/feesDetails/groupId/:groupId/empId/:empId", async (req, res) => {
         const groupId = req.params.groupId;
         const empId = req.params.empId;
 
+        // Fetch distinct class names associated with the employee ID
+        const classNames = await feesPaymnetModel.getClassNames(groupId, empId);
+
         // Array to store payment details for each class
         let classPaymentDetails = [];
 
-        // Array to store total amounts for all classes
+        // Total amounts for all classes
         let totalAmountAllClasses = 0;
         let totalPaidAmountAllClasses = 0;
 
-        // Loop through each class
-        const classNames = ["BCA 1st year", "BCA 2nd year"]; // Add more class names if needed
+        // Loop through each class name
         for (const className of classNames) {
             let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, empId, className);
 
@@ -760,14 +762,14 @@ router.get("/feesDetails/groupId/:groupId/empId/:empId", async (req, res) => {
                     totalPaidAmount += parseInt(item.paidAmount);
                 });
             }
-
+            
             totalAmountAllClasses += totalAmount;
             totalPaidAmountAllClasses += totalPaidAmount;
 
             let remainingAmount = totalAmount - totalPaidAmount;
 
             const classDetails = {
-                paidAmount: paidAmt,
+                paidAmount:paidAmt,
                 className: className,
                 totalAmount: totalAmount,
                 PaidAmount: totalPaidAmount,
