@@ -130,4 +130,29 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
+
+router.post("/bulkUpload", async (req, res, next) => {
+    try {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+
+        const purchaseData = req.body.map((data) => {
+            return {
+                ...data,
+                purchaseId: +Date.now() ,
+                totalAmount:data.quantity *data.unitPrice
+        
+            };
+        });
+
+        const serviceResponse = await service.bulkUpload(purchaseData);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        // Handle errors
+        console.error("Error occurred during bulk upload:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
 module.exports = router;
