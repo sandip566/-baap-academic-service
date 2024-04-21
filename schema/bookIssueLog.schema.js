@@ -34,8 +34,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             enum:["Reserved","Returned","Issued","Overdue"]
         },
         isReturn:{
-            type:Boolean,
-            default:false
+            type:Boolean
         },
         isOverdue:{
             type:Boolean,
