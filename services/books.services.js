@@ -7,6 +7,7 @@ const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
 const publisherModel = require("../schema/publisher.schema");
 const bookIssueLogService = require("../services/bookIssueLog.service");
+const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -107,9 +108,7 @@ class BooksService extends BaseService {
             const departmentMap = {};
             departments.forEach((department) => {
                 if (department.departmentName) {
-                    const departmentName = department.departmentName
-                        .trim()
-                        .toLowerCase();
+                    const departmentName = department.departmentName.trim().toLowerCase();
                     departmentMap[departmentName] = department.departmentId;
                 }
             });
@@ -140,9 +139,7 @@ class BooksService extends BaseService {
         const publisherMap = {};
         publishers.forEach((publisher) => {
             if (publisher.publisherName) {
-                const publisherName = publisher.publisherName
-                    .trim()
-                    .toLowerCase();
+                const publisherName = publisher.publisherName.trim().toLowerCase();
                 publisherMap[publisherName] = publisher.publisherId;
             }
         });
@@ -153,9 +150,15 @@ class BooksService extends BaseService {
         throw new Error("An error occurred while fetching publisher map.");
     }
 
-    async deleteBookById(groupId, bookId) {
+    async deleteBookById(bookId, groupId) {
         try {
-            return await booksModel.deleteOne({ groupId: groupId, bookId: bookId });
+            const isIssuedBook = await bookIssueLogModel.exists({ bookId: bookId, groupId: groupId });
+            if (isIssuedBook) {
+                return false;
+            } else {
+                const result = await booksModel.deleteOne({ bookId: bookId, groupId: groupId });
+                return result;
+            }
         } catch (error) {
             throw error;
         }
@@ -292,7 +295,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) {}
+        } catch (error) { }
     }
 }
 module.exports = new BooksService(booksModel, "books");

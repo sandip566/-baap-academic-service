@@ -8,7 +8,7 @@ const booksModel = require("../schema/books.schema");
 const shelfModel = require("../schema/shelf.schema");
 const deparmentModel = require("../schema/department.schema");
 const publisherModel = require("../schema/publisher.schema");
-const bookIssueLogService = require("../services/bookIssueLog.service");
+const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 router.post(
     "/",
     checkSchema(require("../dto/books.dto")),
@@ -131,26 +131,25 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
+
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;
         const groupId = req.params.groupId;
-        const bookData = await service.deleteBookById({
-            bookId: bookId,
-            groupId: groupId,
-        });
-        if (!bookData) {
-            res.status(404).json({
-                error: "book data not found to delete",
-            });
+        const data = await service.deleteBookById(bookId, groupId);
+        if (data === false) {
+            res.status(400).json({ error: "book is issued it cannot be deleted." });
+        } else if (!data) {
+            res.status(404).json({ error: "Book not found." });
         } else {
-            res.status(201).json(bookData);
+            res.status(200).json(data);
         }
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 router.put("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const bookId = req.params.bookId;

@@ -65,11 +65,13 @@ router.delete("/groupId/:groupId/shelfId/:shelfId", async (req, res) => {
     try {
         const shelfId = req.params.shelfId;
         const groupId = req.params.groupId;
-        const data = await service.deleteShelfById({ shelfId, groupId });
-        if (!data) {
-            res.status(404).json({ error: "Data not found to delete" });
+        const data = await service.deleteShelfById(shelfId, groupId);
+        if (data === false) {
+            res.status(400).json({ error: "Shelf is assigned to a book and cannot be deleted." });
+        } else if (!data) {
+            res.status(404).json({ error: "Shelf not found." });
         } else {
-            res.status(201).json(data);
+            res.status(200).json(data);
         }
     } catch (error) {
         console.error(error);
