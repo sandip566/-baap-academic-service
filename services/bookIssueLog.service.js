@@ -9,58 +9,111 @@ class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
     async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-            status: "Reserved",
-        };
-        const result = await this.preparePaginationAndReturnData(
-            query,
-            criteria
-        );
-        const items = result.data.items;
-        const count = result.data.totalItemsCount;
-        const bookIds = items.map((bookIssue) => bookIssue.bookId);
-        const studentIds = items.map((student) => student.addmissionId);
-        const studentObject = await StudentsAdmissionModel.find({
-            addmissionId: { $in: studentIds },
-        });
-        const booksObject = await Book.find({ bookId: { $in: bookIds } });
-        const reservedBooks = items.map((item) => {
-            const correspondingBook = booksObject.find(
-                (book) => book.bookId === item.bookId
-            );
-            const correspondingStudent = studentObject.find(
-                (student) => student.addmissionId === item.addmissionId
-            );
-
-            return {
-                reserveDate: item.reserveDate,
-                status: item.status,
-                userId: item.userId,
-                bookIssueLogId: item.bookIssueLogId,
-                addmissionId: item.addmissionId,
-                groupId: item.groupId,
-                bookName: correspondingBook ? correspondingBook.name : null,
-                availableCount: correspondingBook
-                    ? correspondingBook.availableCount
-                    : null,
-                totalCopies: correspondingBook
-                    ? correspondingBook.totalCopies
-                    : null,
-                book_img: correspondingBook ? correspondingBook.book_img : null,
-                isbn: correspondingBook ? correspondingBook.ISBN : null,
-                studentName: correspondingStudent
-                    ? correspondingStudent.name
-                    : null,
+        try { 
+            const searchFilter = {
+                groupId
             };
-        });
+            const bookMap = await this.getBookMap();
+            const studentMap = await this.getStudentMap();
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { userId: numericSearch },
+                        { bookIssueLogId: numericSearch },
+                    ];
+                } else {
+                    const bookId =
+                        bookMap[criteria.search.trim().toLowerCase()];
+                    const addmissionId =
+                        studentMap[criteria.search.trim().toLowerCase()];
+                    searchFilter.$or = [
+                        { bookId: bookId },
+                        {
+                            name: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
 
-        return {
-            data: reservedBooks,
-            totalItemsCount: count,
-        };
+                        // {
+                        //     ISBN: {
+                        //         searchFilter.search = criteria.search
+                        //     },
+                        // },
+
+                        { addmissionId: addmissionId },
+                        {
+                            firstName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                    ];
+                }
+                
+            }
+            if (criteria.isReturn) {
+                searchFilter.isReturn = criteria.isReturn;
+            }
+            if (criteria.status) {
+                searchFilter.status = criteria.status;
+            }
+            if (criteria.isOverdue) {
+                searchFilter.isOverdue = criteria.isOverdue;
+            }
+
+            const bookIssueLog = await bookIssueLogModel.find(searchFilter);
+            const populatedBooks = await Promise.all(
+                bookIssueLog.map(async (book) => {
+                    const books = await Book.findOne({
+                        bookId: book.bookId,
+                    });
+                    const student = await studentAdmissionModel.findOne({
+                        addmissionId: book.addmissionId,
+                    });
+                    return { ...book._doc, books, student };
+                })
+            );
+            const count= await this.getCount(groupId)
+            const totalCount = await bookIssueLogModel.countDocuments(populatedBooks);
+            return { populatedBookIssueLog: populatedBooks,count:count,totalCount:totalCount };
+        } catch (error) {
+            console.error("Error in getAllDataByGroupId:", error);
+            throw new Error("An error occurred while processing the request.");
+        }
+    }
+
+    async getBookMap() {
+        try {
+            const books = await Book.find();
+            const bookMap = {};
+            books.forEach((book) => {
+                if (book.name) {
+                    const name = book.name.trim().toLowerCase();
+                    bookMap[name] = book.bookId;
+                }
+            });
+            return bookMap;
+        } catch (error) {
+            console.error("Error fetching book map:", error);
+            throw new Error("An error occurred while fetching book map.");
+        }
+    }
+    async getStudentMap() {
+        try {
+            const students = await studentAdmissionModel.find();
+            const studentMap = {};
+            students.forEach((student) => {
+                if (student.firstName) {
+                    const firstName = student.firstName.trim().toLowerCase();
+                    studentMap[firstName] = student.addmissionId;
+                }
+            });
+            return studentMap;
+        } catch (error) {
+            console.error("Error fetching student map:", error);
+            throw new Error("An error occurred while fetching student map.");
+        }
     }
 
     async deleteBookIssueLogById(bookIssueLogId, groupId) {
@@ -86,7 +139,7 @@ class BookIssueLogService extends BaseService {
 
     async checkOverdueStatus(addmissionId) {
         try {
-            const existingReservation = await Book.findOne({
+            const existingReservation = await bookIssueLogModel.findOne({
                 addmissionId: addmissionId,
                 isOverdue: true,
             });
@@ -231,9 +284,14 @@ class BookIssueLogService extends BaseService {
                 groupId: groupId,
                 isReturn: true,
             });
+            const reserveBooks=await bookIssueLogModel.countDocuments({
+                groupId:groupId,
+                status:"Reserved"
+            })
             const response = {
                 bookIssues: bookIssues,
                 returnedBooks: returnedBooks,
+                reserveBooks:reserveBooks
             };
             return response;
         } catch (error) {
@@ -310,13 +368,20 @@ class BookIssueLogService extends BaseService {
     }
     async reserveBook(groupId, bookId) {
         try {
-            const book = await Book.find({ groupId: groupId, bookId: groupId });
-            //    if(!book){
-            //     return "Book is not available in the library"
-            //    }
+            const book = await Book.find({ groupId: groupId, bookId: bookId });
             return book;
         } catch (error) {
             throw error;
+        }
+    }
+
+    async checkBookAvailability(groupId,bookId){
+        try {
+            const book = await Book.find({ groupId: groupId, bookId: bookId });
+            console.log(book)
+            return book
+        } catch (error) {
+           throw error; 
         }
     }
 }
