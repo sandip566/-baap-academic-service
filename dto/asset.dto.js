@@ -1,5 +1,2 @@
-module.exports = {
-    name: {
-        notEmpty: true,
-    }
-}
+module.exports = {};
+  
