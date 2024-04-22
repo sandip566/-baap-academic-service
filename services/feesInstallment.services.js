@@ -365,7 +365,15 @@ class feesInstallmentService extends BaseService {
             const totalStudents = await studentAdmissionModel.countDocuments({
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
+                groupId:Number(groupId),
+                academicYear:academicYear,
+                admissionStatus:"Confirm",
+            });
+            console.log(totalStudents,{
+                "courseDetails.class_id": classId,
+                "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
+                academicYear:academicYear,
                 admissionStatus:"Confirm",
             });
             return totalStudents;

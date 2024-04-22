@@ -231,11 +231,6 @@ class feesPaymentService extends BaseService {
                         admissionStatus: "Confirm",
                     }
                 );
-                // let feesData = await this.model.find({
-                //     groupId: groupId,
-                //     academicYear: criteria.academicYear,
-                //     isShowInAccounting: true,
-                // });
                 let feesData = await this.model.aggregate([
                     {
                         $match: {
@@ -640,7 +635,7 @@ class feesPaymentService extends BaseService {
                     }
                 }
 
-                const finalServices = Object.values(groupedServices);
+                const finalServices = Object.values(groupedServices)
                 for (const service of finalServices) {
                     const installmentStatus =
                         await feesInstallmentServices.getByInstallmentStatus(
