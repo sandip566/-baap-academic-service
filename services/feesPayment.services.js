@@ -1239,14 +1239,29 @@ class feesPaymentService extends BaseService {
         }
     }
 
-    async getPaymentDetails(groupId, userId) {
+    async getClassNames(groupId, userId) {
         try {
-            const paidamount = await feesPaymentModel.find({
+            const classNames = await feesPaymentModel.distinct("className", {
                 groupId: groupId,
                 userId: userId,
                 isShowInAccounting: true,
             });
-            return paidamount;
+            return classNames;
+        } catch (err) {
+            throw err;
+        }
+    }
+
+
+    async getPaymentDetails(groupId, userId, className) {
+        try {
+            const paidAmount = await feesPaymentModel.find({
+                groupId: groupId,
+                userId: userId,
+                className: className,
+                isShowInAccounting: true,
+            });
+            return paidAmount;
         } catch (err) {
             throw err;
         }
