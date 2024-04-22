@@ -51,6 +51,8 @@ class feesPaymentService extends BaseService {
                                 $toDouble: "$remainingAmount",
                             },
                         },
+                        className: { $first: "$className" },
+                        courseName: { $first: "$courseName" },
                     },
                 },
                 {
@@ -63,6 +65,8 @@ class feesPaymentService extends BaseService {
                         admissionId: "$_id",
                         totalPaidAmount: 1,
                         lastRemainingAmount: 1,
+                        className: 1,
+                        courseName: 1,
                     },
                 },
 
@@ -97,9 +101,11 @@ class feesPaymentService extends BaseService {
                             },
                         ],
                     };
-
+                    console.log(result);
                     const combinedData = {
                         paidAmount: totalPaidAmount,
+                        className: result?.className,
+                        courseName: result?.courseName,
                         remainingAmount: lastRemainingAmount,
                         admissionId: admissionId,
                         addmissionId: admissionDetails,
