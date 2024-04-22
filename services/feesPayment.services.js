@@ -1238,11 +1238,11 @@ class feesPaymentService extends BaseService {
         }
     }
 
-    async getClassNames(groupId, empId) {
+    async getClassNames(groupId, userId) {
         try {
             const classNames = await feesPaymentModel.distinct("className", {
                 groupId: groupId,
-                empId: empId,
+                userId: userId,
                 isShowInAccounting: true,
             });
             return classNames;
@@ -1252,11 +1252,11 @@ class feesPaymentService extends BaseService {
     }
 
 
-    async getPaymentDetails(groupId, empId, className) {
+    async getPaymentDetails(groupId, userId, className) {
         try {
             const paidAmount = await feesPaymentModel.find({
                 groupId: groupId,
-                empId: empId,
+                userId: userId,
                 className: className,
                 isShowInAccounting: true,
             });

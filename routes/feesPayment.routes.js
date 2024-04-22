@@ -734,25 +734,16 @@ router.get("/studentClearansDetails/:groupId", async (req, res) => {
     }
 });
 
-router.get("/feesDetails/groupId/:groupId/empId/:empId", async (req, res) => {
+router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const empId = req.params.empId;
-
-        // Fetch distinct class names associated with the employee ID
-        const classNames = await feesPaymnetModel.getClassNames(groupId, empId);
-
-        // Array to store payment details for each class
+        const userId = req.params.userId;
+        const classNames = await feesPaymnetModel.getClassNames(groupId, userId);
         let classPaymentDetails = [];
-
-        // Total amounts for all classes
         let totalAmountAllClasses = 0;
         let totalPaidAmountAllClasses = 0;
-
-        // Loop through each class name
         for (const className of classNames) {
-            let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, empId, className);
-
+            let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, userId, className);
             let totalAmount = 0;
             let totalPaidAmount = 0;
 
@@ -762,14 +753,11 @@ router.get("/feesDetails/groupId/:groupId/empId/:empId", async (req, res) => {
                     totalPaidAmount += parseInt(item.paidAmount);
                 });
             }
-            
             totalAmountAllClasses += totalAmount;
             totalPaidAmountAllClasses += totalPaidAmount;
-
             let remainingAmount = totalAmount - totalPaidAmount;
-
             const classDetails = {
-                paidAmount:paidAmt,
+                paidAmount: paidAmt,
                 className: className,
                 totalAmount: totalAmount,
                 PaidAmount: totalPaidAmount,
@@ -778,18 +766,16 @@ router.get("/feesDetails/groupId/:groupId/empId/:empId", async (req, res) => {
 
             classPaymentDetails.push(classDetails);
         }
-
         const response = {
             classPaymentDetails: classPaymentDetails,
             totalAmountAllClasses: totalAmountAllClasses,
             totalPaidAmountAllClasses: totalPaidAmountAllClasses,
             remainingAmountAllClasses: totalAmountAllClasses - totalPaidAmountAllClasses,
         };
-
         res.json({
             status: "Success",
             data: {
-                empId: empId,
+                userId: userId,
                 amountDetails: response,
             },
         });
