@@ -16,123 +16,80 @@ class feesPaymentService extends BaseService {
     }
     async getRecoveryData(groupId, academicYear, skip, limit) {
         return this.execute(async () => {
-            let studentRecordCount = await StudentsAdmissionModel.find({
-                groupId: groupId,
+    
+            const queryResult = await this.model.find({
+                groupId: Number(groupId),
                 academicYear: academicYear,
-                admissionStatus: "Confirm",
-            })
-                .skip(skip)
-                .limit(limit);
-
-            const aggregationResult = await this.model.aggregate([
-                {
-                    $match: {
-                        groupId: Number(groupId),
-                        academicYear: academicYear,
-                        isShowInAccounting: true,
-                    },
-                },
-                {
-                    $sort: {
-                        addmissionId: 1,
-                        currentDate: -1,
-                    },
-                },
-                {
-                    $group: {
-                        _id: "$addmissionId",
-                        totalPaidAmount: {
-                            $sum: {
-                                $toDouble: "$paidAmount",
-                            },
-                        },
-                        lastRemainingAmount: {
-                            $first: {
-                                $toDouble: "$remainingAmount",
-                            },
-                        },
-                        className: { $first: "$className" },
-                        courseName: { $first: "$courseName" },
-                    },
-                },
-                {
-                    $match: {
-                        lastRemainingAmount: { $ne: 0 },
-                    },
-                },
-                {
-                    $project: {
-                        admissionId: "$_id",
-                        totalPaidAmount: 1,
-                        lastRemainingAmount: 1,
-                        className: 1,
-                        courseName: 1,
-                    },
-                },
-
-                // {
-                //     $skip: skip,
-                // },
-                // {
-                //     $limit: limit,
-                // },
-            ]);
-            // console.log(aggregationResult);
+                isShowInAccounting: true,
+            }).sort({ addmissionId: 1, currentDate: -1 });
+    
+            const groupedData = {};
+    
+            for (const record of queryResult) {
+                const admissionId = record.addmissionId;
+    
+                if (!groupedData[admissionId]) {
+                    groupedData[admissionId] = {
+                        totalPaidAmount: 0,
+                        lastRemainingAmount: 0,
+                        className: record.className,
+                        courseName: record.courseName,
+                        admissionDetails: {},
+                    };
+                }
+    
+                groupedData[admissionId].totalPaidAmount += parseFloat(record.paidAmount);
+                groupedData[admissionId].lastRemainingAmount = parseFloat(record.remainingAmount);
+            }
+    
             const combinedDataArray = [];
-
-            for (const result of aggregationResult) {
-                const { admissionId, totalPaidAmount, lastRemainingAmount } =
-                    result;
-
+    
+            for (const admissionId in groupedData) {
                 const admissionData = await StudentsAdmissionModel.findOne({
                     groupId: groupId,
                     addmissionId: admissionId,
                 });
-
+    
                 if (admissionData) {
                     const admissionDetails = {
                         name: admissionData.name,
                         phoneNumber: admissionData.phoneNumber,
                         familyDetails: [
                             {
-                                father_phone_number:
-                                    admissionData?.familyDetails[0]
-                                        ?.father_phone_number,
+                                father_phone_number: admissionData?.familyDetails[0]?.father_phone_number,
                             },
                         ],
                     };
-                    console.log(result);
+    
                     const combinedData = {
-                        paidAmount: totalPaidAmount,
-                        className: result?.className,
-                        courseName: result?.courseName,
-                        remainingAmount: lastRemainingAmount,
+                        paidAmount: groupedData[admissionId].totalPaidAmount,
+                        className: groupedData[admissionId].className,
+                        courseName: groupedData[admissionId].courseName,
+                        remainingAmount: groupedData[admissionId].lastRemainingAmount,
                         admissionId: admissionId,
-                        addmissionId: admissionDetails,
+                        admissionDetails: admissionDetails,
                     };
-
+    
                     combinedDataArray.push(combinedData);
                 }
             }
-
-            // Apply the skip and limit to the combinedDataArray to get paginated results
-            const paginatedCombinedDataArray = combinedDataArray.slice(
-                skip,
-                skip + limit
-            );
+    
+            const paginatedCombinedDataArray = combinedDataArray.slice(skip, skip + limit);
+    
             const response = {
                 servicesWithData: paginatedCombinedDataArray,
                 totalStudentsRecords: combinedDataArray.length,
             };
-
+    
             return response;
         });
     }
+    
 
     async getRecoveryCount(groupId, academicYear) {
         return this.execute(async () => {
             const studentRecordCount =
-                await StudentsAdmissionModel.countDocuments({
+                await StudentsAdmissionModel.countDocuments({   
                     groupId: groupId,
                     academicYear: academicYear,
                     admissionStatus: "Confirm",
