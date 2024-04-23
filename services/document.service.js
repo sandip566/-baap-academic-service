@@ -52,7 +52,7 @@ class DocumentService extends BaseService {
             if (criteria.category) query.category = criteria.category;
         }
         return this.preparePaginationAndReturnData(query, criteria);
-        return this.preparePaginationAndReturnData(query, criteria);
+        
     }
 
     async updateDataById(documentId, groupId, newData) {
