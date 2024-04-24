@@ -8,6 +8,7 @@ const PurchaseSchema = new mongoose.Schema(
         },
         purchaseId: {
             type: Number,
+            required: false,
         },
         publisherId: {
             type: Number,
@@ -21,11 +22,13 @@ const PurchaseSchema = new mongoose.Schema(
             type: Date,
             default: Date.now(),
         },
-        publisherId:{
-         type:Number
+        publisherId: {
+            type: Number,
+            required: false,
         },
         totalAmount: {
             type: Number,
+            required: false,
         },
         paymentMethod: {
             type: String,
@@ -33,12 +36,15 @@ const PurchaseSchema = new mongoose.Schema(
         },
         bookName: {
             type: String,
+            required: false,
         },
         quantity: {
             type: Number,
+            required: false,
         },
         unitPrice: {
             type: Number,
+            required: false,
         },
         orderStatus: {
             type: String,

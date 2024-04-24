@@ -265,11 +265,12 @@ router.get("/get-collected-amount", async (req, res) => {
 });
 router.get("/get-update", async (req, res) => {
     try {
+        let groupId = req.query.groupId;
+        let academicYear = req.query.academicYear;
         const students = await StudentsAdmissionModel.find({
-            groupId: 1709987550657,
-            academicYear: "1710409442534",
+            groupId: Number(groupId),
+            academicYear: academicYear,
         });
-        console.log(students);
 
         for (const student of students) {
             const feeInstallment = await FeesInstallmentModel.findOne({
@@ -359,52 +360,6 @@ router.get("/get-fees-summary", async (req, res) => {
     }
 });
 
-// router.get("/get-classes-fees", async (req, res) => {
-//     try {
-//         const { groupId, feesTemplateId, academicYear, courseId } = req.query;
-
-//         const classes = await service.getAllDataByCourseId(groupId, courseId);
-// console.log(classes,);
-//         const response = {
-//             groupId,
-//             academicYear,
-//             courseId,
-//             classes: [],
-//         };
-//         let totalFeesObjData;
-//         for (const classObj of classes) {
-//             const totalFeesObj =
-//                 await service.getTotalFeesAndPendingFeesForClass(
-//                     classObj.classId,
-//                     groupId,
-//                     academicYear
-//                 );
-// console.log(classObj.classId,
-//     groupId,
-//     academicYear);
-//             totalFeesObj.forEach((item) => {
-//                 totalFeesObjData = item;
-//             });
-//             let classData = {
-//                 name: classObj.name,
-//                 classId: classObj.classId,
-//                 paidFees: totalFeesObjData?.totalPaidAmount || 0,
-//                 pendingFees: totalFeesObjData?.totalRemainingAmount || 0,
-//                 totalFees:
-//                     totalFeesObjData?.totalPaidAmount +
-//                         totalFeesObjData?.totalRemainingAmount || 0,
-//                 totalStudents: totalFeesObjData?.totalCount,
-//             };
-
-//             response.classes.push(classData);
-//         }
-
-//         res.json(response);
-//     } catch (error) {
-//         console.log(error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
 router.get("/get-classes-fees", async (req, res) => {
     try {
         const { groupId, feesTemplateId, academicYear, courseId } = req.query;

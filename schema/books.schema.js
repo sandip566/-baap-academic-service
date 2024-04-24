@@ -10,8 +10,8 @@ const booksSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        bookIssueLogId:{
-            type:Number
+        bookIssueLogId: {
+            type: Number,
         },
         author: {
             type: String,

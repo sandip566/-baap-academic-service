@@ -11,60 +11,54 @@ const HostelSchema = new mongoose.Schema(
         },
         hostelName: {
             type: String,
-            required: true
-
+            required: true,
         },
 
         nameOfHead: {
             type: String,
-            require: true
+            required: true,
         },
         numberOfFloors: {
             type: Number,
-            required: true
+            required: true,
         },
         numberOfBeds: {
             type: Number,
-            require: true
+            required: true,
         },
         totalAccupiedBed: {
             type: Number,
-            require: true
+            required: true,
         },
         totalVacantBed: {
             type: Number,
-            require: true
+            required: true,
         },
         hostelAddress: [
             {
                 address1: {
                     type: String,
-                    required: true
-
+                    required: true,
                 },
                 pincode: {
-                    type: Number
-
+                    type: Number,
+                    required: false,
                 },
                 District: {
                     type: String,
-                    require: true
+                    require: true,
                 },
                 state: {
                     type: String,
-                    required: true
+                    required: true,
                 },
 
                 country: {
                     type: String,
-                    required: true
-                }
-
-
+                    required: true,
+                },
             },
-
         ],
-
 
         hosteladmissionDate: {
             type: Date,
