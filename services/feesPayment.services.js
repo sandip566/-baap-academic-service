@@ -700,6 +700,23 @@ class feesPaymentService extends BaseService {
                     feesMatchStage["feesPaymentData.currentDate"] =
                         criteria.currentDate;
                 }
+                // if (criteria.month) {
+                //     console.log("sssssssssssssssssss",criteria.month);
+                //     let currentDate = feesMatchStage["feesPaymentData.currentDate"];
+                //     console.log(currentDate);
+                //     let dateComponents = currentDate?.split('/');
+                //     let year = dateComponents[0];
+                //     let month = dateComponents[1];
+                //     let day = dateComponents[2];
+                    
+                //     // Now you can use year, month, and day as needed
+                //     feesMatchStage["feesPaymentData.currentDate"] = {
+                //         year: year,
+                //         month: month,
+                //         day: day
+                //     };
+                // }
+                
                 if (criteria.startDate && criteria.endDate) {
                     feesMatchStage["feesPaymentData.currentDate"] = {
                         $gte: criteria.startDate,
