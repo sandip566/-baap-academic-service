@@ -835,8 +835,10 @@ class feesPaymentService extends BaseService {
                         __seed: seed + index,
                     }))
                     .sort((a, b) => {
-                        if (a.status === "overdue" && b.status !== "overdue") return -1;
-                        if (a.status === "pending" && b.status !== "pending") return 1;
+                        if (a.status === "overdue" && b.status !== "overdue")
+                            return -1;
+                        if (a.status === "pending" && b.status !== "pending")
+                            return 1;
                         return a.__seed - b.__seed;
                     })
                     // .sort((a, b) => a.__seed - b.__seed)
