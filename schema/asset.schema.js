@@ -24,11 +24,11 @@ const AssetSchema = new mongoose.Schema(
     },
     purchaseCost: {
       type: Number,
-      required: true
+      required: false
     },
     depreciationMethod: {
       type: String,
-      required: true
+      required: false
     },
     depreciationStartDate: {
       type: Date,
@@ -36,15 +36,15 @@ const AssetSchema = new mongoose.Schema(
     },
     location: {
       type: String,
-      required: true
+      required: false
     },
     currentValue: {
       type: Number,
-      required: true
+      required: false
     },
     status: {
       type: String,
-      required: true
+      required: false
     },
     available: {
       type: Number,
@@ -52,7 +52,7 @@ const AssetSchema = new mongoose.Schema(
     }
 
   },
-  { timestamps: true }
+  {strict:false, timestamps: true }
 );
 
 const AssetModel = mongoose.model("asset", AssetSchema);
