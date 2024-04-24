@@ -16,18 +16,21 @@ class HostelService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.admissionDate)
-            query.admissionDate = criteria.admissionDate;
-        if (criteria.admissionStatus)
-            query.admissionStatus = new RegExp(criteria.admissionStatus, "i");
-        if (criteria.bedNumber) query.bedNumber = criteria.bedNumber;
+        if (criteria.hosteladmissionDate)
+            query.hosteladmissionDate = criteria.hosteladmissionDate;
+        if (criteria.hosteladmissionStatus)
+            query.hosteladmissionStatus = new RegExp(criteria.hosteladmissionStatus, "i");
+        if (criteria.numberOfBeds) query.numberOfBeds = criteria.numberOfBeds;
+        if (criteria.hostelId) query.hostelId = criteria.hostelId;
+        
+
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async updateDataById(hostelerId, groupId, newData) {
+    async updateDataById(hostelId, groupId, newData) {
         try {
             const updatedData = await HostelModel.findOneAndUpdate(
-                { hostelerId: hostelerId, groupId: groupId },
+                { hostelId: hostelId, groupId: groupId },
                 newData,
                 { new: true }
             );
@@ -37,10 +40,10 @@ class HostelService extends BaseService {
         }
     }
 
-    async deleteByDataId(hostelerId, groupId) {
+    async deleteByDataId(hostelId, groupId) {
         try {
             const deleteData = await HostelModel.deleteOne({
-                hostelerId: hostelerId,
+                hostelId: hostelId, 
                 groupId: groupId,
             });
             return deleteData;
@@ -48,5 +51,6 @@ class HostelService extends BaseService {
             throw error;
         }
     }
+    
 }
 module.exports = new HostelService(HostelModel, "hostel");
