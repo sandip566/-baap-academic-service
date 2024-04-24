@@ -52,7 +52,7 @@ const AssetSchema = new mongoose.Schema(
     }
 
   },
-  { timestamps: true }
+  {strict:false, timestamps: true }
 );
 
 const AssetModel = mongoose.model("asset", AssetSchema);
