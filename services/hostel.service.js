@@ -22,7 +22,7 @@ class HostelService extends BaseService {
             query.hosteladmissionStatus = new RegExp(criteria.hosteladmissionStatus, "i");
         if (criteria.numberOfBeds) query.numberOfBeds = criteria.numberOfBeds;
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
-        
+
 
         return this.preparePaginationAndReturnData(query, criteria);
     }
@@ -43,7 +43,7 @@ class HostelService extends BaseService {
     async deleteByDataId(hostelId, groupId) {
         try {
             const deleteData = await HostelModel.deleteOne({
-                hostelId: hostelId, 
+                hostelId: hostelId,
                 groupId: groupId,
             });
             return deleteData;
@@ -51,6 +51,6 @@ class HostelService extends BaseService {
             throw error;
         }
     }
-    
+
 }
 module.exports = new HostelService(HostelModel, "hostel");

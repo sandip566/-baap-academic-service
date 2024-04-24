@@ -50,7 +50,7 @@ router.put("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
         if (!Data) {
             res.status(404).json({ error: "Data not found to update" });
         } else {
-            res.status(201).json({Data, message:"deta update successfully"});
+            res.status(201).json({ Data, message: "deta update successfully" });
         }
     } catch (error) {
         console.error(error);
@@ -64,10 +64,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         hosteladmissionDate: req.query.hosteladmissionDate,
         hosteladmissionStatus: req.query.hosteladmissionStatus,
         numberOfBeds: req.query.numberOfBeds,
-        hostelId:req.query.hostelId,
+        hostelId: req.query.hostelId,
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
-    
+
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
