@@ -64,7 +64,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         hosteladmissionDate: req.query.hosteladmissionDate,
         hosteladmissionStatus: req.query.hosteladmissionStatus,
         numberOfBeds: req.query.numberOfBeds,
-        hostelId:req.query.hostelId
+        hostelId:req.query.hostelId,
+        pageNumber: parseInt(req.query.pageNumber) || 1,
+        pageSize: parseInt(req.query.pageSize) || 10,
+    
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
