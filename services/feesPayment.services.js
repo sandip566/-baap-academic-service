@@ -16,26 +16,12 @@ class feesPaymentService extends BaseService {
     }
     async getRecoveryData(groupId, academicYear, skip, limit) {
         return this.execute(async () => {
-            let studentRecordCount = await StudentsAdmissionModel.find({
-                groupId: groupId,
-                academicYear: academicYear,
-                admissionStatus: "Confirm",
-            })
-                .skip(skip)
-                .limit(limit);
-
             const aggregationResult = await this.model.aggregate([
                 {
                     $match: {
                         groupId: Number(groupId),
                         academicYear: academicYear,
                         isShowInAccounting: true,
-                    },
-                },
-                {
-                    $sort: {
-                        addmissionId: 1,
-                        currentDate: -1,
                     },
                 },
                 {
@@ -69,26 +55,19 @@ class feesPaymentService extends BaseService {
                         courseName: 1,
                     },
                 },
-
-                // {
-                //     $skip: skip,
-                // },
-                // {
-                //     $limit: limit,
-                // },
             ]);
-            // console.log(aggregationResult);
+    
             const combinedDataArray = [];
-
+    
             for (const result of aggregationResult) {
                 const { admissionId, totalPaidAmount, lastRemainingAmount } =
                     result;
-
+    
                 const admissionData = await StudentsAdmissionModel.findOne({
                     groupId: groupId,
                     addmissionId: admissionId,
                 });
-
+    
                 if (admissionData) {
                     const admissionDetails = {
                         name: admissionData.name,
@@ -101,7 +80,6 @@ class feesPaymentService extends BaseService {
                             },
                         ],
                     };
-                    console.log(result);
                     const combinedData = {
                         paidAmount: totalPaidAmount,
                         className: result?.className,
@@ -110,12 +88,11 @@ class feesPaymentService extends BaseService {
                         admissionId: admissionId,
                         addmissionId: admissionDetails,
                     };
-
+    
                     combinedDataArray.push(combinedData);
                 }
             }
-
-            // Apply the skip and limit to the combinedDataArray to get paginated results
+    
             const paginatedCombinedDataArray = combinedDataArray.slice(
                 skip,
                 skip + limit
@@ -124,17 +101,18 @@ class feesPaymentService extends BaseService {
                 servicesWithData: paginatedCombinedDataArray,
                 totalStudentsRecords: combinedDataArray.length,
             };
-
+    
             return response;
         });
     }
-
     
+
+
 
     async getRecoveryCount(groupId, academicYear) {
         return this.execute(async () => {
             const studentRecordCount =
-                await StudentsAdmissionModel.countDocuments({   
+                await StudentsAdmissionModel.countDocuments({
                     groupId: groupId,
                     academicYear: academicYear,
                     admissionStatus: "Confirm",
@@ -770,11 +748,11 @@ class feesPaymentService extends BaseService {
                                                                         $lt: [
                                                                             {
                                                                                 $dateFromString:
-                                                                                    {
-                                                                                        dateString:
-                                                                                            "$$inst.date",
-                                                                                        format: "%Y-%m-%d",
-                                                                                    },
+                                                                                {
+                                                                                    dateString:
+                                                                                        "$$inst.date",
+                                                                                    format: "%Y-%m-%d",
+                                                                                },
                                                                             },
                                                                             {
                                                                                 $toDate:
@@ -891,11 +869,11 @@ class feesPaymentService extends BaseService {
                                                                     $lt: [
                                                                         {
                                                                             $dateFromString:
-                                                                                {
-                                                                                    dateString:
-                                                                                        "$$item.date",
-                                                                                    format: "%Y-%m-%d",
-                                                                                },
+                                                                            {
+                                                                                dateString:
+                                                                                    "$$item.date",
+                                                                                format: "%Y-%m-%d",
+                                                                            },
                                                                         },
                                                                         currentDate,
                                                                     ],
@@ -1070,11 +1048,11 @@ class feesPaymentService extends BaseService {
                                                                         $lt: [
                                                                             {
                                                                                 $dateFromString:
-                                                                                    {
-                                                                                        dateString:
-                                                                                            "$$inst.date",
-                                                                                        format: "%Y-%m-%d",
-                                                                                    },
+                                                                                {
+                                                                                    dateString:
+                                                                                        "$$inst.date",
+                                                                                    format: "%Y-%m-%d",
+                                                                                },
                                                                             },
                                                                             {
                                                                                 $toDate:
@@ -1191,11 +1169,11 @@ class feesPaymentService extends BaseService {
                                                                     $lt: [
                                                                         {
                                                                             $dateFromString:
-                                                                                {
-                                                                                    dateString:
-                                                                                        "$$item.date",
-                                                                                    format: "%Y-%m-%d",
-                                                                                },
+                                                                            {
+                                                                                dateString:
+                                                                                    "$$item.date",
+                                                                                format: "%Y-%m-%d",
+                                                                            },
                                                                         },
                                                                         currentDate,
                                                                     ],
@@ -1845,7 +1823,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -1860,7 +1838,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -1878,7 +1856,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                        query.course.toString()
+                                    query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -1898,7 +1876,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                        query.class.toString()
+                                    query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -1917,7 +1895,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                        query.division.toString()
+                                    query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -1970,15 +1948,15 @@ class feesPaymentService extends BaseService {
                                         (total, paymentArray, currentIndex) => {
                                             const lastIndex =
                                                 currentIndex ===
-                                                paymentsForCourse.length - 1
+                                                    paymentsForCourse.length - 1
                                                     ? paymentArray
                                                     : null;
 
                                             const remainingAmount = lastIndex
                                                 ? parseFloat(
-                                                      lastIndex.remainingAmount ||
-                                                          0
-                                                  )
+                                                    lastIndex.remainingAmount ||
+                                                    0
+                                                )
                                                 : 0;
 
                                             return total + remainingAmount;
@@ -2036,9 +2014,9 @@ class feesPaymentService extends BaseService {
 
                         console.log(
                             "Total fee for course '" +
-                                courseName +
-                                "': " +
-                                totalFee
+                            courseName +
+                            "': " +
+                            totalFee
                         );
 
                         return {
@@ -2047,7 +2025,7 @@ class feesPaymentService extends BaseService {
                             courseFee: totalFee,
                             TotalCourseFee:
                                 coursePayments[courseName].courseFee *
-                                    coursePayments[courseName].noOfStudents ||
+                                coursePayments[courseName].noOfStudents ||
                                 0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,
