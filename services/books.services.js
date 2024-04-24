@@ -150,13 +150,15 @@ class BooksService extends BaseService {
         throw new Error("An error occurred while fetching publisher map.");
     }
 
-    async deleteBookById(bookId, groupId) {
+    async deleteBookById(groupId,bookId) {
         try {
-            const isIssuedBook = await bookIssueLogModel.exists({ bookId: bookId, groupId: groupId });
+            console.log(bookId)
+            const isIssuedBook = await bookIssueLogModel.findOne({ bookId: bookId });
+            console.log(isIssuedBook);
             if (isIssuedBook) {
                 return false;
             } else {
-                const result = await booksModel.deleteOne({ bookId: bookId, groupId: groupId });
+                const result = await booksModel.deleteOne({groupId: groupId,bookId: bookId });
                 return result;
             }
         } catch (error) {
@@ -214,24 +216,10 @@ class BooksService extends BaseService {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { ISBN: numericSearch },
-                        { shelfId: numericSearch },
-                        { price: numericSearch },
-                        { departmentId: numericSearch },
-                        { totalCount: numericSearch },
-                        { availableCount: numericSearch },
-                    ];
+                        { ISBN: numericSearch }
+                     ];
                 } else {
                     searchFilter.$or = [
-                        { status: { $regex: criteria.search, $options: "i" } },
-                        { name: { $regex: criteria.search, $options: "i" } },
-                        { author: { $regex: criteria.search, $options: "i" } },
-                        {
-                            publisher: {
-                                $regex: criteria.search,
-                                $options: "i",
-                            },
-                        },
                         { RFID: criteria.search },
                     ];
                 }
@@ -279,7 +267,7 @@ class BooksService extends BaseService {
                     studentMap[issue.addmissionId] || "Unknown Student",
                 issueDate: issue.issueDate,
             }));
-
+            console.log(data)
             return {
                 data: "books",
                 populatedBooks: populatedBooks,

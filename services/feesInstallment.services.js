@@ -513,6 +513,7 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
 }
 module.exports = new feesInstallmentService(
     feesInstallmentModel,

@@ -11,6 +11,7 @@ const mongoURI = "mongodb://127.0.0.1:27017/baap-acadamic-dev";
 const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const { Aggregate, match, project, sum } = require("mongoose").Aggregate;
 const feesPaymentModel = require("../services/feesPayment.services");
+const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 let totalAmount = 0;
 let collectedAmount = 0;
 
@@ -262,6 +263,40 @@ router.get("/get-collected-amount", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
+router.get('/get-update', async (req, res) => {
+    try {
+        // Find the relevant documents from StudentsAdmissionModel
+        const students = await StudentsAdmissionModel.find({
+            "groupId": 1709987550657,
+            "academicYear": "1710409489619"
+        });
+console.log(students);
+        // Iterate over each student
+        for (const student of students) {
+            // Find the corresponding feesinstallments record
+            const feeInstallment = await FeesInstallmentModel.findOne({ "addmissionId": student.addmissionId });
+
+            // If a corresponding feesinstallments record is found, update the status
+            if (feeInstallment) {
+                // Update the status field in the student document
+                student.status = feeInstallment.status;
+                
+                // Save the updated student document
+                await student.save();
+            }
+        }
+
+        // Return the updated documents
+        res.json(students);
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+});
+
+
+
+
 
 router.get("/get-remainingFees", async (req, res) => {
     const remainingFees = totalAmount - collectedAmount;
