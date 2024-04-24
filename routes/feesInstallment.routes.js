@@ -268,7 +268,7 @@ router.get("/get-update", async (req, res) => {
         let groupId = req.query.groupId;
         let academicYear = req.query.academicYear;
         const students = await StudentsAdmissionModel.find({
-            groupId: Number(groupId),
+            groupId: groupId,
             academicYear: academicYear,
         });
 
