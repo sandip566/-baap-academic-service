@@ -25,6 +25,31 @@ class feesPaymentService extends BaseService {
                     },
                 },
                 {
+                    $lookup: {
+                        from: "studentsadmissions",
+                        localField: "addmissionId",
+                        foreignField: "addmissionId",
+                        as: "studentsadmissions",
+                    },
+                },
+
+                {
+                    $unwind: "$studentsadmissions",
+                },
+                {
+                    $match: {
+                        "studentsadmissions.admissionStatus": "Confirm",
+                    },
+                },
+                {
+                    $match: {
+                        studentsadmissions: { $ne: [] },
+                    },
+                },
+                {
+                    $sort: { updatedAt: -1 },
+                },
+                {
                     $group: {
                         _id: "$addmissionId",
                         totalPaidAmount: {
@@ -32,11 +57,13 @@ class feesPaymentService extends BaseService {
                                 $toDouble: "$paidAmount",
                             },
                         },
+
                         lastRemainingAmount: {
                             $first: {
                                 $toDouble: "$remainingAmount",
                             },
                         },
+
                         className: { $first: "$className" },
                         courseName: { $first: "$courseName" },
                     },
@@ -56,18 +83,18 @@ class feesPaymentService extends BaseService {
                     },
                 },
             ]);
-    
+            console.log(aggregationResult);
             const combinedDataArray = [];
-    
+
             for (const result of aggregationResult) {
                 const { admissionId, totalPaidAmount, lastRemainingAmount } =
                     result;
-    
+
                 const admissionData = await StudentsAdmissionModel.findOne({
                     groupId: groupId,
                     addmissionId: admissionId,
                 });
-    
+
                 if (admissionData) {
                     const admissionDetails = {
                         name: admissionData.name,
@@ -88,11 +115,11 @@ class feesPaymentService extends BaseService {
                         admissionId: admissionId,
                         addmissionId: admissionDetails,
                     };
-    
+
                     combinedDataArray.push(combinedData);
                 }
             }
-    
+
             const paginatedCombinedDataArray = combinedDataArray.slice(
                 skip,
                 skip + limit
@@ -101,13 +128,10 @@ class feesPaymentService extends BaseService {
                 servicesWithData: paginatedCombinedDataArray,
                 totalStudentsRecords: combinedDataArray.length,
             };
-    
+
             return response;
         });
     }
-    
-
-
 
     async getRecoveryCount(groupId, academicYear) {
         return this.execute(async () => {
@@ -126,14 +150,37 @@ class feesPaymentService extends BaseService {
                         isShowInAccounting: true,
                     },
                 },
+                {
+                    $lookup: {
+                        from: "studentsadmissions",
+                        localField: "addmissionId",
+                        foreignField: "addmissionId",
+                        as: "studentsadmissions",
+                    },
+                },
 
+                {
+                    $unwind: "$studentsadmissions",
+                },
+                {
+                    $match: {
+                        "studentsadmissions.admissionStatus": "Confirm",
+                    },
+                },
+                {
+                    $match: {
+                        studentsadmissions: { $ne: [] },
+                    },
+                },
                 {
                     $sort: {
                         addmissionId: 1,
                         currentDate: -1,
                     },
                 },
-
+                {
+                    $sort: { updatedAt: -1 },
+                },
                 {
                     $group: {
                         _id: "$addmissionId",
@@ -185,466 +232,6 @@ class feesPaymentService extends BaseService {
             return response;
         });
     }
-
-    // async getFeesStatData(groupId, criteria, page, limit) {
-    //     return this.execute(async () => {
-    //         try {
-    //             const skip = (page - 1) * limit;
-    //             const query = {
-    //                 groupId: groupId,
-    //             };
-
-    //             let courseData = await courseModel.find({ groupId: groupId });
-    //             let courseID;
-    //             let courseFee;
-    //             let admissionData = await StudentsAdmissionModel.find({
-    //                 groupId: groupId,
-    //                 academicYear: criteria.academicYear,
-    //                 admissionStatus: "Confirm",
-    //             })
-    //                 .skip(skip)
-    //                 .limit(limit);
-    //             let paginationAdmissionData = await StudentsAdmissionModel.find(
-    //                 {
-    //                     groupId: groupId,
-    //                     academicYear: criteria.academicYear,
-    //                     admissionStatus: "Confirm",
-    //                 }
-    //             );
-    //             let feesData = await this.model.aggregate([
-    //                 {
-    //                     $match: {
-    //                         groupId: Number(groupId),
-    //                         academicYear: criteria.academicYear,
-    //                         isShowInAccounting: true,
-    //                     },
-    //                 },
-    //             ]);
-    //             console.log(
-    //                 "criteria.currentDate, criteria.currentDate,feesData",
-    //                 feesData.length
-    //             );
-    //             const currentDateValue = criteria.currentDate
-    //                 ? criteria.currentDate
-    //                 : null;
-    //             // console.log(currentDateValue);
-    //             const currentDateObj = currentDateValue
-    //                 ? new Date(currentDateValue)
-    //                 : null;
-
-    //             if (currentDateObj) {
-    //                 const year = currentDateObj.getFullYear();
-    //                 const month = String(
-    //                     currentDateObj.getMonth() + 1
-    //                 ).padStart(2, "0");
-    //                 const day = String(currentDateObj.getDate()).padStart(
-    //                     2,
-    //                     "0"
-    //                 );
-    //                 const formattedDate = `${year}/${month}/${day}`;
-
-    //                 feesData = feesData.filter(
-    //                     (fee) => fee.currentDate === formattedDate
-    //                 );
-    //             }
-    //             if (criteria.startDate && criteria.endDate) {
-    //                 feesData = feesData.filter((fee) => {
-    //                     return (
-    //                         fee.currentDate >= criteria.startDate &&
-    //                         fee.currentDate <= criteria.endDate
-    //                     );
-    //                 });
-    //             }
-
-    //             if (criteria.month) {
-    //                 query.month = criteria.month;
-    //                 const month = query.month.padStart(2, "0");
-    //                 feesData = feesData.filter((data) => {
-    //                     const currentDate = new Date(data.currentDate);
-    //                     const dataMonth = String(
-    //                         currentDate.getMonth() + 1
-    //                     ).padStart(2, "0");
-    //                     return dataMonth === month;
-    //                 });
-    //             }
-
-    //             if (criteria.academicYear) {
-    //                 query.academicYear = criteria.academicYear;
-    //                 feesData = feesData.filter(
-    //                     (data) => data.academicYear === query.academicYear
-    //                 );
-    //             }
-
-    //             if (criteria.location) {
-    //                 query.location = criteria.location;
-    //                 admissionData = admissionData.filter(
-    //                     (data) => data.location == query.location
-    //                 );
-    //             }
-
-    //             if (criteria.department) {
-    //                 query.department = criteria.department;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         let matchingdepartment = data.courseDetails.some(
-    //                             (departments) =>
-    //                                 departments.department_id &&
-    //                                 departments.department_id.toString() ===
-    //                                     query.department.toString()
-    //                         );
-    //                         return matchingdepartment;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-    //             if (criteria.feesTemplateId) {
-    //                 query.feesTemplateId = criteria.feesTemplateId;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (data.feesDetails && data.feesDetails.length > 0) {
-    //                         let matchingfeesTemplateId = data.feesDetails.some(
-    //                             (feesTemplate) =>
-    //                                 feesTemplate.feesTemplateId &&
-    //                                 feesTemplate.feesTemplateId.toString() ===
-    //                                     query.feesTemplateId.toString()
-    //                         );
-    //                         return matchingfeesTemplateId;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-    //             if (criteria.course) {
-    //                 query.course = criteria.course;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         const matchingCourses = data.courseDetails.some(
-    //                             (course) =>
-    //                                 course.course_id &&
-    //                                 course.course_id.toString() ===
-    //                                     query.course.toString()
-    //                         );
-    //                         // console.log("matchingCourses", matchingCourses);
-    //                         return matchingCourses;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-
-    //             if (criteria.class) {
-    //                 query.class = criteria.class;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         let matchingclasses = data.courseDetails.some(
-    //                             (classes) =>
-    //                                 classes.class_id &&
-    //                                 classes.class_id.toString() ===
-    //                                     query.class.toString()
-    //                         );
-    //                         return matchingclasses;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-
-    //             if (criteria.division) {
-    //                 query.division = criteria.division;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         let matchingdivision = data.courseDetails.some(
-    //                             (divisions) =>
-    //                                 divisions.division_id &&
-    //                                 divisions.division_id.toString() ===
-    //                                     query.division.toString()
-    //                         );
-    //                         return matchingdivision;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-
-    //             let coursePayments = {};
-    //             courseData.forEach((course) => {
-    //                 courseID = course.courseId;
-    //                 courseFee = course.Fees;
-    //                 coursePayments[course.CourseName] = {
-    //                     totalPaidAmount: 0,
-    //                     totalRemainingAmount: 0,
-    //                     courseId: courseID,
-    //                     courseFee: courseFee,
-    //                 };
-    //             });
-
-    //             let totalPaidAmount = 0;
-    //             let totalRemainingAmount = 0;
-    //             let totalCourseFee = 0;
-    //             let totalCourseFee1 = 0;
-
-    //             let totalFeesData =
-    //                 await feesInstallmentServices.getTotalFeesAndPendingFees(
-    //                     groupId,
-    //                     criteria.feesTemplateId,
-    //                     criteria.academicYear
-    //                 );
-    //             // console.log(totalFeesData);
-    //             let course_id;
-    //             let class_id;
-    //             let division_id;
-    //             let divisionDoc;
-    //             let classDoc;
-    //             let a;
-    //             let addmissionId;
-
-    //             const servicesWithData = await Promise.all(
-    //                 feesData?.map(async (service) => {
-    //                     let additionalData = {};
-    //                     let feesAdditionalData = {};
-
-    //                     if (
-    //                         service.addmissionId &&
-    //                         service.isShowInAccounting
-    //                     ) {
-    //                         const matchingAdmission = admissionData.find(
-    //                             (admission) =>
-    //                                 admission.addmissionId ==
-    //                                     service.addmissionId &&
-    //                                 service.isShowInAccounting
-    //                         );
-
-    //                         if (matchingAdmission) {
-    //                             await Promise.all(
-    //                                 matchingAdmission.courseDetails.map(
-    //                                     async (admission) => {
-    //                                         if (admission?.course_id) {
-    //                                             course_id =
-    //                                                 await courseModel.findOne({
-    //                                                     courseId:
-    //                                                         admission.course_id,
-    //                                                 });
-    //                                             admission.course_id = course_id;
-    //                                         }
-
-    //                                         if (admission?.class_id) {
-    //                                             classDoc =
-    //                                                 await ClassModel.findOne({
-    //                                                     classId:
-    //                                                         admission.class_id,
-    //                                                 });
-    //                                             if (classDoc) {
-    //                                                 class_id = classDoc.classId;
-    //                                                 // console.log(class_id);
-    //                                             } else {
-    //                                                 console.error(
-    //                                                     "Division document not found for division_id:",
-    //                                                     admission.class_id
-    //                                                 );
-    //                                             }
-    //                                             admission.class_id = class_id;
-    //                                         }
-    //                                         if (admission?.division_id) {
-    //                                             divisionDoc =
-    //                                                 await DivisionModel.findOne(
-    //                                                     {
-    //                                                         divisionId:
-    //                                                             admission.division_id,
-    //                                                     }
-    //                                                 );
-
-    //                                             if (divisionDoc) {
-    //                                                 division_id =
-    //                                                     divisionDoc.divisionId;
-    //                                                 // console.log(division_id);
-    //                                             } else {
-    //                                                 console.error(
-    //                                                     "Division document not found for division_id:",
-    //                                                     admission.division_id
-    //                                                 );
-    //                                             }
-    //                                             admission.division_id =
-    //                                                 division_id;
-    //                                         }
-    //                                     }
-    //                                 )
-    //                             );
-    //                             const installmentLengths =
-    //                                 matchingAdmission.feesDetails.map((item) =>
-    //                                     item.installment
-    //                                         ? item.installment.length
-    //                                         : 0
-    //                                 );
-    //                             const installments =
-    //                                 installmentLengths.length > 0
-    //                                     ? installmentLengths[0]
-    //                                     : 0;
-
-    //                             const installmentIds = feesData.map(
-    //                                 (service) => service.installmentId
-    //                             );
-
-    //                             const installmentRecords =
-    //                                 await FeesInstallmentModel.find({
-    //                                     installmentId: { $in: installmentIds },
-    //                                 });
-
-    //                             const updatedInstallmentRecords =
-    //                                 installmentRecords.map((record) => {
-    //                                     let isDue = false;
-
-    //                                     record.feesDetails.forEach((detail) => {
-    //                                         detail.installment.forEach(
-    //                                             (item) => {
-    //                                                 const dateString =
-    //                                                     item.date;
-
-    //                                                 const date = new Date(
-    //                                                     dateString
-    //                                                 );
-
-    //                                                 const year =
-    //                                                     date.getFullYear();
-    //                                                 const month = (
-    //                                                     "0" +
-    //                                                     (date.getMonth() + 1)
-    //                                                 ).slice(-2);
-    //                                                 const day = (
-    //                                                     "0" +
-    //                                                     (date.getDate() - 1)
-    //                                                 ).slice(-2);
-
-    //                                                 const formattedDate = `${year}/${month}/${day}`;
-
-    //                                                 if (
-    //                                                     item.status ==
-    //                                                         "pending" &&
-    //                                                     formattedDate <
-    //                                                         criteria.currentDate
-    //                                                 ) {
-    //                                                     isDue = true;
-    //                                                     return;
-    //                                                 }
-    //                                             }
-    //                                         );
-
-    //                                         if (isDue) return;
-    //                                     });
-
-    //                                     return {
-    //                                         candidateName:
-    //                                             matchingAdmission.name,
-    //                                         className: classDoc?.name,
-    //                                         phoneNumber:
-    //                                             matchingAdmission.phoneNumber,
-    //                                         divisionName: divisionDoc?.Name,
-    //                                         courseName: course_id?.CourseName,
-    //                                         courseFees: service?.courseFee,
-    //                                         // dueStatus: isDue,
-    //                                         // status: record.status,
-    //                                         status: isDue
-    //                                             ? "overdue"
-    //                                             : (record.status = "pending"),
-    //                                         paidAmount: service.paidAmount,
-    //                                         remainingAmount:
-    //                                             service.remainingAmount,
-    //                                         feesPaymentId:
-    //                                             service.feesPaymentId,
-    //                                         installmentId:
-    //                                             service.installmentId,
-    //                                         addmissionId: service.addmissionId,
-    //                                         empId: service.empId,
-    //                                         installments: installmentLengths[0],
-    //                                         groupId: service.groupId,
-    //                                     };
-    //                                 });
-
-    //                             return updatedInstallmentRecords;
-    //                         }
-
-    //                         feesAdditionalData.addmissionId =
-    //                             matchingAdmission || {};
-    //                     }
-
-    //                     additionalData.addmissionId = feesAdditionalData;
-
-    //                     if (
-    //                         Object.keys(feesAdditionalData.addmissionId)
-    //                             .length === 0
-    //                     )
-    //                         return {
-    //                             // ...service._doc,
-    //                             ...additionalData.addmissionId.addmissionId,
-    //                         };
-    //                 })
-    //             );
-
-    //             const groupedServices = {};
-    //             const visitedAddmissionIds = new Set();
-
-    //             const fetchPaidAmount = async (addmissionId) => {
-    //                 if (!visitedAddmissionIds.has(addmissionId)) {
-    //                     visitedAddmissionIds.add(addmissionId);
-    //                     a = await this.getPaymentData(groupId, addmissionId);
-    //                 }
-    //                 return a;
-    //             };
-
-    //             for (const serviceArray of servicesWithData) {
-    //                 if (serviceArray.length > 0) {
-    //                     const addmissionId = serviceArray[0].addmissionId;
-    //                     const paidAmount = await fetchPaidAmount(addmissionId);
-
-    //                     if (serviceArray.length == 1) {
-    //                         const service = serviceArray[0];
-    //                         service.paidAmount = parseFloat(service.paidAmount);
-    //                         groupedServices[addmissionId] = service;
-    //                     } else {
-    //                         const lastService =
-    //                             serviceArray[serviceArray.length - 1];
-    //                         lastService.paidAmount = paidAmount;
-    //                         groupedServices[addmissionId] = lastService;
-    //                     }
-    //                 }
-    //             }
-
-    //             const finalServices = Object.values(groupedServices)
-    //             for (const service of finalServices) {
-    //                 const installmentStatus =
-    //                     await feesInstallmentServices.getByInstallmentStatus(
-    //                         service.installmentId
-    //                     );
-    //                 service.status = installmentStatus.status.isDue;
-    //             }
-
-    //             totalCourseFee1 = finalServices.reduce((total, course) => {
-    //                 return total + parseFloat(course.courseFees || 0);
-    //             }, 0);
-    //             const paginatedServices = finalServices.slice(
-    //                 skip,
-    //                 skip + limit
-    //             );
-    //             let response = {
-    //                 servicesWithData: [finalServices],
-    //                 totalFees: totalCourseFee1 || 0,
-    //                 totalItemsCount: paginationAdmissionData.length,
-    //             };
-
-    //             return response;
-    //         } catch (error) {
-    //             console.error("Error occurred:", error);
-    //             throw error;
-    //         }
-    //     });
-    // }
-
     async getFeesStatData(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
@@ -678,23 +265,20 @@ class feesPaymentService extends BaseService {
                     feesMatchStage["feesPaymentData.currentDate"] =
                         criteria.currentDate;
                 }
-                // if (criteria.month) {
-                //     console.log("sssssssssssssssssss",criteria.month);
-                //     let currentDate = feesMatchStage["feesPaymentData.currentDate"];
-                //     console.log(currentDate);
-                //     let dateComponents = currentDate?.split('/');
-                //     let year = dateComponents[0];
-                //     let month = dateComponents[1];
-                //     let day = dateComponents[2];
-                    
-                //     // Now you can use year, month, and day as needed
-                //     feesMatchStage["feesPaymentData.currentDate"] = {
-                //         year: year,
-                //         month: month,
-                //         day: day
-                //     };
-                // }
-                
+
+                let date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+                const day = String(date.getDate()).padStart(2, "0");
+                let currentDate = `${year}/${month}/${day}`;
+
+                if (criteria.month) {
+                    feesMatchStage["feesPaymentData.currentDate"] = {
+                        $regex: `/${criteria.month}/`,
+                        $options: "i",
+                    };
+                }
+
                 if (criteria.startDate && criteria.endDate) {
                     feesMatchStage["feesPaymentData.currentDate"] = {
                         $gte: criteria.startDate,
@@ -730,12 +314,6 @@ class feesPaymentService extends BaseService {
                         criteria.division
                     );
                 }
-                let date = new Date();
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-                const day = String(date.getDate()).padStart(2, "0");
-                let currentDate = `${year}/${month}/${day}`;
-                console.log(currentDate);
 
                 let admissionData = await StudentsAdmissionModel.aggregate([
                     { $match: matchStage },
@@ -765,11 +343,11 @@ class feesPaymentService extends BaseService {
                                                                         $lt: [
                                                                             {
                                                                                 $dateFromString:
-                                                                                {
-                                                                                    dateString:
-                                                                                        "$$inst.date",
-                                                                                    format: "%Y-%m-%d",
-                                                                                },
+                                                                                    {
+                                                                                        dateString:
+                                                                                            "$$inst.date",
+                                                                                        format: "%Y-%m-%d",
+                                                                                    },
                                                                             },
                                                                             {
                                                                                 $toDate:
@@ -886,11 +464,11 @@ class feesPaymentService extends BaseService {
                                                                     $lt: [
                                                                         {
                                                                             $dateFromString:
-                                                                            {
-                                                                                dateString:
-                                                                                    "$$item.date",
-                                                                                format: "%Y-%m-%d",
-                                                                            },
+                                                                                {
+                                                                                    dateString:
+                                                                                        "$$item.date",
+                                                                                    format: "%Y-%m-%d",
+                                                                                },
                                                                         },
                                                                         currentDate,
                                                                     ],
@@ -916,9 +494,11 @@ class feesPaymentService extends BaseService {
                             },
                         },
                     },
+
                     // { $skip: skip },
                     // { $limit: limit },
                 ]);
+
                 const seed = (page - 1) * limit;
                 const servicesWithData = await admissionData
                     .map((data, index) => ({
@@ -938,7 +518,7 @@ class feesPaymentService extends BaseService {
                         status: data.overdue ? "overdue" : data.status,
                         __seed: seed + index,
                     }))
-                    .sort((a, b) => a.__seed - b.__seed) // Seed value ke hisab se sort karo
+                    .sort((a, b) => a.__seed - b.__seed)
                     .slice(skip, skip + limit);
 
                 const totalFees = servicesWithData.reduce(
@@ -953,7 +533,7 @@ class feesPaymentService extends BaseService {
                     totalFees: totalFees,
                     totalItemsCount: admissionData.length,
                 };
-                console.log(admissionData);
+                // console.log(admissionData);
                 return response;
             } catch (error) {
                 console.error("Error occurred:", error);
@@ -1002,6 +582,19 @@ class feesPaymentService extends BaseService {
                         $lte: criteria.endDate,
                     };
                 }
+                let date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+                const day = String(date.getDate()).padStart(2, "0");
+                let currentDate = `${year}/${month}/${day}`;
+
+                if (criteria.month) {
+                    feesMatchStage["feesPaymentData.currentDate"] = {
+                        $regex: `/${criteria.month}/`,
+                        $options: "i",
+                    };
+                }
+
                 if (criteria.feesTemplateId) {
                     matchStage["feesDetails.feesTemplateId"] = Number(
                         criteria.feesTemplateId
@@ -1031,11 +624,11 @@ class feesPaymentService extends BaseService {
                         criteria.division
                     );
                 }
-                let date = new Date();
-                const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
-                const day = String(date.getDate()).padStart(2, "0");
-                let currentDate = `${year}/${month}/${day}`;
+                // let date = new Date();
+                // const year = date.getFullYear();
+                // const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+                // const day = String(date.getDate()).padStart(2, "0");
+                // let currentDate = `${year}/${month}/${day}`;
                 console.log(currentDate);
                 let admissionData = await StudentsAdmissionModel.aggregate([
                     { $match: matchStage },
@@ -1065,11 +658,11 @@ class feesPaymentService extends BaseService {
                                                                         $lt: [
                                                                             {
                                                                                 $dateFromString:
-                                                                                {
-                                                                                    dateString:
-                                                                                        "$$inst.date",
-                                                                                    format: "%Y-%m-%d",
-                                                                                },
+                                                                                    {
+                                                                                        dateString:
+                                                                                            "$$inst.date",
+                                                                                        format: "%Y-%m-%d",
+                                                                                    },
                                                                             },
                                                                             {
                                                                                 $toDate:
@@ -1186,11 +779,11 @@ class feesPaymentService extends BaseService {
                                                                     $lt: [
                                                                         {
                                                                             $dateFromString:
-                                                                            {
-                                                                                dateString:
-                                                                                    "$$item.date",
-                                                                                format: "%Y-%m-%d",
-                                                                            },
+                                                                                {
+                                                                                    dateString:
+                                                                                        "$$item.date",
+                                                                                    format: "%Y-%m-%d",
+                                                                                },
                                                                         },
                                                                         currentDate,
                                                                     ],
@@ -1240,13 +833,11 @@ class feesPaymentService extends BaseService {
                         __seed: seed + index,
                     }))
                     .sort((a, b) => {
-                        if (a.status === "overdue" && b.status !== "pending")
-                            return -1;
-                        if (a.status === "pending" && b.status !== "overdue")
-                            return 1;
+                        if (a.status === "overdue" && b.status !== "overdue") return -1;
+                        if (a.status === "pending" && b.status !== "pending") return 1;
                         return a.__seed - b.__seed;
                     })
-                    .sort((a, b) => a.__seed - b.__seed)
+                    // .sort((a, b) => a.__seed - b.__seed)
                     .slice(skip, skip + limit);
 
                 const totalFees = servicesWithData.reduce(
@@ -1268,480 +859,6 @@ class feesPaymentService extends BaseService {
             }
         });
     }
-    // async getFeesDefaulter(groupId, criteria, page, limit) {
-    //     return this.execute(async () => {
-    //         try {
-    //             const skip = (page - 1) * limit;
-    //             const query = {
-    //                 groupId: groupId,
-    //             };
-
-    //             let courseData = await courseModel.find({ groupId: groupId });
-    //             let courseID;
-    //             let courseFee;
-    //             let admissionData = await StudentsAdmissionModel.find({
-    //                 groupId: groupId,
-    //                 academicYear: criteria.academicYear,
-    //                 admissionStatus: "Confirm",
-    //             })
-    //                 .skip(skip)
-    //                 .limit(limit);
-    //             let paginationAdmissionData = await StudentsAdmissionModel.find(
-    //                 {
-    //                     groupId: groupId,
-    //                     academicYear: criteria.academicYear,
-    //                     admissionStatus: "Confirm",
-    //                 }
-    //             );
-    //             let feesData = await this.model.aggregate([
-    //                 {
-    //                     $match: {
-    //                         groupId: Number(groupId),
-    //                         academicYear: criteria.academicYear,
-    //                         isShowInAccounting: true,
-    //                     },
-    //                 },
-    //             ]);
-    //             console.log(
-    //                 "criteria.currentDate, criteria.currentDate,feesData",
-    //                 feesData.length
-    //             );
-    //             const currentDateValue = criteria.currentDate
-    //                 ? criteria.currentDate
-    //                 : null;
-    //             // console.log(currentDateValue);
-    //             const currentDateObj = currentDateValue
-    //                 ? new Date(currentDateValue)
-    //                 : null;
-
-    //             if (currentDateObj) {
-    //                 const year = currentDateObj.getFullYear();
-    //                 const month = String(
-    //                     currentDateObj.getMonth() + 1
-    //                 ).padStart(2, "0");
-    //                 const day = String(currentDateObj.getDate()).padStart(
-    //                     2,
-    //                     "0"
-    //                 );
-    //                 const formattedDate = `${year}/${month}/${day}`;
-
-    //                 feesData = feesData.filter(
-    //                     (fee) => fee.currentDate === formattedDate
-    //                 );
-    //             }
-    //             if (criteria.startDate && criteria.endDate) {
-    //                 feesData = feesData.filter((fee) => {
-    //                     return (
-    //                         fee.currentDate >= criteria.startDate &&
-    //                         fee.currentDate <= criteria.endDate
-    //                     );
-    //                 });
-    //             }
-
-    //             if (criteria.month) {
-    //                 query.month = criteria.month;
-    //                 const month = query.month.padStart(2, "0");
-    //                 feesData = feesData.filter((data) => {
-    //                     const currentDate = new Date(data.currentDate);
-    //                     const dataMonth = String(
-    //                         currentDate.getMonth() + 1
-    //                     ).padStart(2, "0");
-    //                     return dataMonth === month;
-    //                 });
-    //             }
-
-    //             if (criteria.academicYear) {
-    //                 query.academicYear = criteria.academicYear;
-    //                 feesData = feesData.filter(
-    //                     (data) => data.academicYear === query.academicYear
-    //                 );
-    //             }
-
-    //             if (criteria.location) {
-    //                 query.location = criteria.location;
-    //                 admissionData = admissionData.filter(
-    //                     (data) => data.location == query.location
-    //                 );
-    //             }
-
-    //             if (criteria.department) {
-    //                 query.department = criteria.department;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         let matchingdepartment = data.courseDetails.some(
-    //                             (departments) =>
-    //                                 departments.department_id &&
-    //                                 departments.department_id.toString() ===
-    //                                     query.department.toString()
-    //                         );
-    //                         return matchingdepartment;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-    //             if (criteria.feesTemplateId) {
-    //                 query.feesTemplateId = criteria.feesTemplateId;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (data.feesDetails && data.feesDetails.length > 0) {
-    //                         let matchingfeesTemplateId = data.feesDetails.some(
-    //                             (feesTemplate) =>
-    //                                 feesTemplate.feesTemplateId &&
-    //                                 feesTemplate.feesTemplateId.toString() ===
-    //                                     query.feesTemplateId.toString()
-    //                         );
-    //                         return matchingfeesTemplateId;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-    //             if (criteria.course) {
-    //                 query.course = criteria.course;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         const matchingCourses = data.courseDetails.some(
-    //                             (course) =>
-    //                                 course.course_id &&
-    //                                 course.course_id.toString() ===
-    //                                     query.course.toString()
-    //                         );
-    //                         // console.log("matchingCourses", matchingCourses);
-    //                         return matchingCourses;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-
-    //             if (criteria.class) {
-    //                 query.class = criteria.class;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         let matchingclasses = data.courseDetails.some(
-    //                             (classes) =>
-    //                                 classes.class_id &&
-    //                                 classes.class_id.toString() ===
-    //                                     query.class.toString()
-    //                         );
-    //                         return matchingclasses;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-
-    //             if (criteria.division) {
-    //                 query.division = criteria.division;
-    //                 admissionData = admissionData.filter((data) => {
-    //                     if (
-    //                         data.courseDetails &&
-    //                         data.courseDetails.length > 0
-    //                     ) {
-    //                         let matchingdivision = data.courseDetails.some(
-    //                             (divisions) =>
-    //                                 divisions.division_id &&
-    //                                 divisions.division_id.toString() ===
-    //                                     query.division.toString()
-    //                         );
-    //                         return matchingdivision;
-    //                     }
-    //                     return false;
-    //                 });
-    //             }
-
-    //             let coursePayments = {};
-    //             courseData.forEach((course) => {
-    //                 courseID = course.courseId;
-    //                 courseFee = course.Fees;
-    //                 coursePayments[course.CourseName] = {
-    //                     totalPaidAmount: 0,
-    //                     totalRemainingAmount: 0,
-    //                     courseId: courseID,
-    //                     courseFee: courseFee,
-    //                 };
-    //             });
-
-    //             let totalPaidAmount = 0;
-    //             let totalRemainingAmount = 0;
-    //             let totalCourseFee = 0;
-    //             let totalCourseFee1 = 0;
-
-    //             let totalFeesData =
-    //                 await feesInstallmentServices.getTotalFeesAndPendingFees(
-    //                     groupId,
-    //                     criteria.feesTemplateId,
-    //                     criteria.academicYear
-    //                 );
-    //             // console.log(totalFeesData);
-    //             let course_id;
-    //             let class_id;
-    //             let division_id;
-    //             let divisionDoc;
-    //             let classDoc;
-    //             let a;
-    //             let addmissionId;
-
-    //             const servicesWithData = await Promise.all(
-    //                 feesData?.map(async (service) => {
-    //                     let additionalData = {};
-    //                     let feesAdditionalData = {};
-
-    //                     if (
-    //                         service.addmissionId &&
-    //                         service.isShowInAccounting
-    //                     ) {
-    //                         const matchingAdmission = admissionData.find(
-    //                             (admission) =>
-    //                                 admission.addmissionId ==
-    //                                     service.addmissionId &&
-    //                                 service.isShowInAccounting
-    //                         );
-
-    //                         if (matchingAdmission) {
-    //                             await Promise.all(
-    //                                 matchingAdmission.courseDetails.map(
-    //                                     async (admission) => {
-    //                                         if (admission?.course_id) {
-    //                                             course_id =
-    //                                                 await courseModel.findOne({
-    //                                                     courseId:
-    //                                                         admission.course_id,
-    //                                                 });
-    //                                             admission.course_id = course_id;
-    //                                         }
-
-    //                                         if (admission?.class_id) {
-    //                                             classDoc =
-    //                                                 await ClassModel.findOne({
-    //                                                     classId:
-    //                                                         admission.class_id,
-    //                                                 });
-    //                                             if (classDoc) {
-    //                                                 class_id = classDoc.classId;
-    //                                                 // console.log(class_id);
-    //                                             } else {
-    //                                                 console.error(
-    //                                                     "Division document not found for division_id:",
-    //                                                     admission.class_id
-    //                                                 );
-    //                                             }
-    //                                             admission.class_id = class_id;
-    //                                         }
-    //                                         if (admission?.division_id) {
-    //                                             divisionDoc =
-    //                                                 await DivisionModel.findOne(
-    //                                                     {
-    //                                                         divisionId:
-    //                                                             admission.division_id,
-    //                                                     }
-    //                                                 );
-
-    //                                             if (divisionDoc) {
-    //                                                 division_id =
-    //                                                     divisionDoc.divisionId;
-    //                                                 // console.log(division_id);
-    //                                             } else {
-    //                                                 console.error(
-    //                                                     "Division document not found for division_id:",
-    //                                                     admission.division_id
-    //                                                 );
-    //                                             }
-    //                                             admission.division_id =
-    //                                                 division_id;
-    //                                         }
-    //                                     }
-    //                                 )
-    //                             );
-    //                             const installmentLengths =
-    //                                 matchingAdmission.feesDetails.map((item) =>
-    //                                     item.installment
-    //                                         ? item.installment.length
-    //                                         : 0
-    //                                 );
-    //                             const installments =
-    //                                 installmentLengths.length > 0
-    //                                     ? installmentLengths[0]
-    //                                     : 0;
-
-    //                             const installmentIds = feesData.map(
-    //                                 (service) => service.installmentId
-    //                             );
-
-    //                             const installmentRecords =
-    //                                 await FeesInstallmentModel.find({
-    //                                     installmentId: { $in: installmentIds },
-    //                                 });
-
-    //                             const updatedInstallmentRecords =
-    //                                 installmentRecords.map((record) => {
-    //                                     let isDue = false;
-
-    //                                     record.feesDetails.forEach((detail) => {
-    //                                         detail.installment.forEach(
-    //                                             (item) => {
-    //                                                 const dateString =
-    //                                                     item.date;
-
-    //                                                 const date = new Date(
-    //                                                     dateString
-    //                                                 );
-
-    //                                                 const year =
-    //                                                     date.getFullYear();
-    //                                                 const month = (
-    //                                                     "0" +
-    //                                                     (date.getMonth() + 1)
-    //                                                 ).slice(-2);
-    //                                                 const day = (
-    //                                                     "0" +
-    //                                                     (date.getDate() - 1)
-    //                                                 ).slice(-2);
-
-    //                                                 const formattedDate = `${year}/${month}/${day}`;
-
-    //                                                 if (
-    //                                                     item.status ==
-    //                                                         "pending" &&
-    //                                                     formattedDate <
-    //                                                         criteria.currentDate
-    //                                                 ) {
-    //                                                     isDue = true;
-    //                                                     return;
-    //                                                 }
-    //                                             }
-    //                                         );
-
-    //                                         if (isDue) return;
-    //                                     });
-
-    //                                     return {
-    //                                         candidateName:
-    //                                             matchingAdmission.name,
-    //                                         className: classDoc?.name,
-    //                                         phoneNumber:
-    //                                             matchingAdmission.phoneNumber,
-    //                                         divisionName: divisionDoc?.Name,
-    //                                         courseName: course_id?.CourseName,
-    //                                         courseFees: service?.courseFee,
-    //                                         // dueStatus: isDue,
-    //                                         // status: record.status,
-    //                                         status: isDue
-    //                                             ? "overdue"
-    //                                             : (record.status = "pending"),
-    //                                         paidAmount: service.paidAmount,
-    //                                         remainingAmount:
-    //                                             service.remainingAmount,
-    //                                         feesPaymentId:
-    //                                             service.feesPaymentId,
-    //                                         installmentId:
-    //                                             service.installmentId,
-    //                                         addmissionId: service.addmissionId,
-    //                                         empId: service.empId,
-    //                                         installments: installmentLengths[0],
-    //                                         groupId: service.groupId,
-    //                                     };
-    //                                 });
-
-    //                             return updatedInstallmentRecords;
-    //                         }
-
-    //                         feesAdditionalData.addmissionId =
-    //                             matchingAdmission || {};
-    //                     }
-
-    //                     additionalData.addmissionId = feesAdditionalData;
-
-    //                     if (
-    //                         Object.keys(feesAdditionalData.addmissionId)
-    //                             .length === 0
-    //                     )
-    //                         return {
-    //                             // ...service._doc,
-    //                             ...additionalData.addmissionId.addmissionId,
-    //                         };
-    //                 })
-    //             );
-
-    //             const groupedServices = {};
-    //             const visitedAddmissionIds = new Set();
-
-    //             const fetchPaidAmount = async (addmissionId) => {
-    //                 if (!visitedAddmissionIds.has(addmissionId)) {
-    //                     visitedAddmissionIds.add(addmissionId);
-    //                     a = await this.getPaymentData(groupId, addmissionId);
-    //                 }
-    //                 return a;
-    //             };
-
-    //             for (const serviceArray of servicesWithData) {
-    //                 if (serviceArray.length > 0) {
-    //                     const addmissionId = serviceArray[0].addmissionId;
-    //                     const paidAmount = await fetchPaidAmount(addmissionId);
-
-    //                     if (serviceArray.length == 1) {
-    //                         const service = serviceArray[0];
-    //                         service.paidAmount = parseFloat(service.paidAmount);
-    //                         groupedServices[addmissionId] = service;
-    //                     } else {
-    //                         const lastService =
-    //                             serviceArray[serviceArray.length - 1];
-    //                         lastService.paidAmount = paidAmount;
-    //                         groupedServices[addmissionId] = lastService;
-    //                     }
-    //                 }
-    //             }
-
-    //             const finalServices = Object.values(groupedServices);
-    //             for (const service of finalServices) {
-    //                 const installmentStatus =
-    //                     await feesInstallmentServices.getByInstallmentStatus(
-    //                         service.installmentId
-    //                     );
-    //                 service.status = installmentStatus.status.isDue;
-    //             }
-    //             const overdueServices = finalServices.filter(
-    //                 (service) => service.status == "overdue"
-    //             );
-    //             console.log(overdueServices);
-    //             const pendingServices = finalServices.filter(
-    //                 (service) => service.status == "pending"
-    //             );
-    //             const paidServices = finalServices.filter(
-    //                 (service) => service.status == "paid"
-    //             );
-    //             const sortedFinalServices = [
-    //                 ...overdueServices,
-    //                 ...pendingServices,
-    //             ];
-    //             totalCourseFee1 = sortedFinalServices.reduce(
-    //                 (total, course) => {
-    //                     return total + parseFloat(course.courseFees || 0);
-    //                 },
-    //                 0
-    //             );
-    //             const paginatedServices = finalServices.slice(
-    //                 skip,
-    //                 skip + limit
-    //             );
-    //             let response = {
-    //                 servicesWithData: [sortedFinalServices],
-    //                 totalFees: totalCourseFee1 || 0,
-    //                 totalItemsCount: paginationAdmissionData.length,
-    //             };
-
-    //             return response;
-    //         } catch (error) {
-    //             console.error("Error occurred:", error);
-    //             throw error;
-    //         }
-    //     });
-    // }
 
     async getFeesTotalCount(groupId, criteria, page, limit) {
         return this.execute(async () => {
@@ -1840,7 +957,7 @@ class feesPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                    query.department.toString()
+                                        query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -1855,7 +972,7 @@ class feesPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                    query.feesTemplateId.toString()
+                                        query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -1873,7 +990,7 @@ class feesPaymentService extends BaseService {
                                 (course) =>
                                     course.course_id &&
                                     course.course_id.toString() ===
-                                    query.course.toString()
+                                        query.course.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -1893,7 +1010,7 @@ class feesPaymentService extends BaseService {
                                 (classes) =>
                                     classes.class_id &&
                                     classes.class_id.toString() ===
-                                    query.class.toString()
+                                        query.class.toString()
                             );
                             return matchingclasses;
                         }
@@ -1912,7 +1029,7 @@ class feesPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.division_id &&
                                     divisions.division_id.toString() ===
-                                    query.division.toString()
+                                        query.division.toString()
                             );
                             return matchingdivision;
                         }
@@ -1965,15 +1082,15 @@ class feesPaymentService extends BaseService {
                                         (total, paymentArray, currentIndex) => {
                                             const lastIndex =
                                                 currentIndex ===
-                                                    paymentsForCourse.length - 1
+                                                paymentsForCourse.length - 1
                                                     ? paymentArray
                                                     : null;
 
                                             const remainingAmount = lastIndex
                                                 ? parseFloat(
-                                                    lastIndex.remainingAmount ||
-                                                    0
-                                                )
+                                                      lastIndex.remainingAmount ||
+                                                          0
+                                                  )
                                                 : 0;
 
                                             return total + remainingAmount;
@@ -2031,9 +1148,9 @@ class feesPaymentService extends BaseService {
 
                         console.log(
                             "Total fee for course '" +
-                            courseName +
-                            "': " +
-                            totalFee
+                                courseName +
+                                "': " +
+                                totalFee
                         );
 
                         return {
@@ -2042,7 +1159,7 @@ class feesPaymentService extends BaseService {
                             courseFee: totalFee,
                             TotalCourseFee:
                                 coursePayments[courseName].courseFee *
-                                coursePayments[courseName].noOfStudents ||
+                                    coursePayments[courseName].noOfStudents ||
                                 0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,

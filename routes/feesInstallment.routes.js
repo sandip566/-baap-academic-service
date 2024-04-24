@@ -263,40 +263,32 @@ router.get("/get-collected-amount", async (req, res) => {
         res.status(500).send("Internal Server Error");
     }
 });
-router.get('/get-update', async (req, res) => {
+router.get("/get-update", async (req, res) => {
     try {
-        // Find the relevant documents from StudentsAdmissionModel
         const students = await StudentsAdmissionModel.find({
-            "groupId": 1709987550657,
-            "academicYear": "1710409489619"
+            groupId: 1709987550657,
+            academicYear: "1710409442534",
         });
-console.log(students);
-        // Iterate over each student
-        for (const student of students) {
-            // Find the corresponding feesinstallments record
-            const feeInstallment = await FeesInstallmentModel.findOne({ "addmissionId": student.addmissionId });
+        console.log(students);
 
-            // If a corresponding feesinstallments record is found, update the status
+        for (const student of students) {
+            const feeInstallment = await FeesInstallmentModel.findOne({
+                addmissionId: student.addmissionId,
+            });
+
             if (feeInstallment) {
-                // Update the status field in the student document
                 student.status = feeInstallment.status;
-                
-                // Save the updated student document
+
                 await student.save();
             }
         }
 
-        // Return the updated documents
         res.json(students);
     } catch (error) {
         console.error(error);
-        res.status(500).send('Internal Server Error');
+        res.status(500).send("Internal Server Error");
     }
 });
-
-
-
-
 
 router.get("/get-remainingFees", async (req, res) => {
     const remainingFees = totalAmount - collectedAmount;
@@ -370,7 +362,6 @@ router.get("/get-fees-summary", async (req, res) => {
 // router.get("/get-classes-fees", async (req, res) => {
 //     try {
 //         const { groupId, feesTemplateId, academicYear, courseId } = req.query;
-       
 
 //         const classes = await service.getAllDataByCourseId(groupId, courseId);
 // console.log(classes,);
@@ -419,7 +410,7 @@ router.get("/get-classes-fees", async (req, res) => {
         const { groupId, feesTemplateId, academicYear, courseId } = req.query;
 
         const classes = await service.getAllDataByCourseId(groupId, courseId);
-console.log(classes);
+        console.log(classes);
         const response = {
             groupId,
             academicYear,
@@ -435,10 +426,12 @@ console.log(classes);
                     academicYear,
                     feesTemplateId // Pass feesTemplateId
                 );
-console.log(classObj.classId,
-    groupId,
-    academicYear,
-    feesTemplateId );
+            console.log(
+                classObj.classId,
+                groupId,
+                academicYear,
+                feesTemplateId
+            );
             totalFeesObj.forEach((item) => {
                 totalFeesObjData = item;
             });
@@ -449,7 +442,7 @@ console.log(classObj.classId,
                 pendingFees: totalFeesObjData?.totalRemainingAmount || 0,
                 totalFees:
                     totalFeesObjData?.totalPaidAmount +
-                    totalFeesObjData?.totalRemainingAmount || 0,
+                        totalFeesObjData?.totalRemainingAmount || 0,
                 totalStudents: totalFeesObjData?.totalCount,
             };
 

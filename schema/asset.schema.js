@@ -32,7 +32,7 @@ const AssetSchema = new mongoose.Schema(
     },
     depreciationStartDate: {
       type: Date,
-      required: true
+      required: false
     },
     location: {
       type: String,

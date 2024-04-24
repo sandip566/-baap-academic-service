@@ -97,7 +97,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -174,7 +174,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -294,7 +294,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -371,7 +371,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                reqInstallment.installmentNo &&
+                                    reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -449,7 +449,7 @@ router.post(
 
 router.get(
     "/getRecoveryData/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -469,7 +469,7 @@ router.get(
 );
 router.get(
     "/getRecoveryCount/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -479,7 +479,7 @@ router.get(
         // const skip = (page - 1) * limit;
         const serviceResponse = await service.getRecoveryCount(
             req.params.groupId,
-            req.query.academicYear,
+            req.query.academicYear
             // skip,
             // limit,
             // page
@@ -489,7 +489,7 @@ router.get(
 );
 router.get(
     "/getFeesStatData/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -519,7 +519,7 @@ router.get(
 );
 router.get(
     "/getFeesDefaulter/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -549,7 +549,7 @@ router.get(
 );
 router.get(
     "/getFeesTotalCount/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -768,12 +768,19 @@ router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const userId = req.params.userId;
-        const classNames = await feesPaymnetModel.getClassNames(groupId, userId);
+        const classNames = await feesPaymnetModel.getClassNames(
+            groupId,
+            userId
+        );
         let classPaymentDetails = [];
         let totalAmountAllClasses = 0;
         let totalPaidAmountAllClasses = 0;
         for (const className of classNames) {
-            let paidAmt = await feesPaymnetModel.getPaymentDetails(groupId, userId, className);
+            let paidAmt = await feesPaymnetModel.getPaymentDetails(
+                groupId,
+                userId,
+                className
+            );
             let totalAmount = 0;
             let totalPaidAmount = 0;
 
@@ -800,7 +807,8 @@ router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
             classPaymentDetails: classPaymentDetails,
             totalAmountAllClasses: totalAmountAllClasses,
             totalPaidAmountAllClasses: totalPaidAmountAllClasses,
-            remainingAmountAllClasses: totalAmountAllClasses - totalPaidAmountAllClasses,
+            remainingAmountAllClasses:
+                totalAmountAllClasses - totalPaidAmountAllClasses,
         };
         res.json({
             status: "Success",
