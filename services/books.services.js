@@ -1,7 +1,7 @@
 const { query } = require("express");
 const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const bookIssueLog = require("../schema/bookIssueLog.schema");
+//const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
@@ -233,27 +233,25 @@ class BooksService extends BaseService {
             }
 
             const books = await booksModel.find(searchFilter);
-
+            if (!books || books.length === 0) {
+                return { error: "Books not found" };
+            }
             const populatedBooks = await Promise.all(
                 books.map(async (book) => {
                     const shelf = await shelfModel.findOne({
                         shelfId: book.shelfId,
                     });
-                    const department = await departmentModel.findOne({
-                        departmentId: book.departmentId,
-                    });
-                    return { ...book._doc, shelf, department };
+                    
+                    return { ...book._doc, shelf };
                 })
             );
-            if (!books) {
-                return { error: "Book not found" };
-            }
-            const issueLogs = await bookIssueLog.find({
+            
+            const issueLogs = await bookIssueLogModel.find({
                 bookId: { $in: books.map((book) => book.bookId) },
-                returned: false,
+                isReturn: false,
             });
-
             const studentIds = issueLogs.map((issue) => issue.addmissionId);
+            console.log(studentIds)
             const students = await Student.find({
                 addmissionId: { $in: studentIds },
             });
@@ -265,9 +263,8 @@ class BooksService extends BaseService {
             const data = issueLogs.map((issue) => ({
                 studentName:
                     studentMap[issue.addmissionId] || "Unknown Student",
-                issueDate: issue.issueDate,
+                issueDate: issue.issuedDate,
             }));
-            console.log(data)
             return {
                 data: "books",
                 populatedBooks: populatedBooks,
