@@ -45,6 +45,10 @@ const AssetSchema = new mongoose.Schema(
     status: {
       type: String,
       required: true
+    },
+    available: {
+      type: Number,
+      required: false
     }
 
   },
