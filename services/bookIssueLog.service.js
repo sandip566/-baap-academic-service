@@ -307,7 +307,6 @@ class BookIssueLogService extends BaseService {
                 perPage
             );
             const students = response.data.items;
-            console.log(students);
             const student = await bookIssueLogModel.find({
                 addmissionId: {
                     $in: students.map((book) => book.addmissionId),
@@ -316,12 +315,11 @@ class BookIssueLogService extends BaseService {
             });
             const bookIds = student.map(student => student.bookId);
             const booksObject = await Book.find({ bookId: { $in: bookIds } });
-
             const issuedBooks = student.map((item) => {
                 const correspondingBook = booksObject.find(book => book.bookId === item.bookId);
 
                 return {
-                    bookIssueDate: item.issueDate,
+                    bookIssueDate: item.issuedDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,
                     availableCount: correspondingBook ? correspondingBook.availableCount : null,
