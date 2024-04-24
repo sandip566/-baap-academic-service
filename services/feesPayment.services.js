@@ -66,6 +66,7 @@ class feesPaymentService extends BaseService {
 
                         className: { $first: "$className" },
                         courseName: { $first: "$courseName" },
+                        updatedAt: { $first: "$updatedAt" },
                     },
                 },
                 {
@@ -83,6 +84,7 @@ class feesPaymentService extends BaseService {
                     },
                 },
             ]);
+            aggregationResult.sort((a, b) => b.updatedAt - a.updatedAt);
             console.log(aggregationResult);
             const combinedDataArray = [];
 
