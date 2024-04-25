@@ -70,6 +70,14 @@ const HostelSchema = new mongoose.Schema(
             enum: ["Pending", "Approved", "Rejected"],
             default: "Pending",
         },
+        studentDetails: [
+            {
+                type:Number,
+                ref: "studentsAdmission",
+            },
+        ],
+
+       
     },
     { strict: false, timestamps: true }
 );
