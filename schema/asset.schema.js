@@ -50,15 +50,14 @@ const AssetSchema = new mongoose.Schema(
       type: Number,
       required: false
     },
-    SerialNo: {
+    serialNo: {
       type: Number,
-      required: false
+      required: true
     },
-    ModelName: {
+    modelName: {
       type: String,
       required: false
     }
-
   },
   { strict: false, timestamps: true }
 );

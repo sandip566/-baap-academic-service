@@ -27,8 +27,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     location: req.query.location,
     status: req.query.status,
     assetType: req.query.assetType,
-    SerialNo: req.query.SerialNo,
-    ModelName: req.query.ModelName,
+    serialNo: req.query.serialNo,
+    modelName: req.query.modelName,
     pageNumber: parseInt(req.query.pageNumber) || 1,
     pageSize: parseInt(req.query.pageSize) || 10,
 
