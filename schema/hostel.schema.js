@@ -72,12 +72,12 @@ const HostelSchema = new mongoose.Schema(
         },
         studentDetails: [
             {
-                type:Number,
+                type: Number,
                 ref: "studentsAdmission",
             },
         ],
 
-       
+
     },
     { strict: false, timestamps: true }
 );

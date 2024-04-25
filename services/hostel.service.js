@@ -1,13 +1,13 @@
 const HostelModel = require("../schema/hostel.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const studentAddmissionModel=require('../schema/studentAdmission.schema.js');
+const studentAddmissionModel = require('../schema/studentAdmission.schema.js');
 
 class HostelService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    async getByDataId(hostelId) {
+    async getDataById(hostelId) {
         return this.execute(() => {
             return HostelModel.findOne({ hostelId: hostelId });
         });
@@ -51,7 +51,7 @@ class HostelService extends BaseService {
         } catch (error) {
             throw error;
         }
-    }  
+    }
 
 }
 module.exports = new HostelService(HostelModel, "hostel");
