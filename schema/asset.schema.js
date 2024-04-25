@@ -49,10 +49,18 @@ const AssetSchema = new mongoose.Schema(
     available: {
       type: Number,
       required: false
+    },
+    SerialNo: {
+      type: Number,
+      required: false
+    },
+    ModelName: {
+      type: String,
+      required: false
     }
 
   },
-  {strict:false, timestamps: true }
+  { strict: false, timestamps: true }
 );
 
 const AssetModel = mongoose.model("asset", AssetSchema);

@@ -12,12 +12,14 @@ class AssetService extends BaseService {
         };
         if (criteria.assetId) query.assetId = criteria.assetId;
         if (criteria.assetName) query.assetName = new RegExp(criteria.assetName, "i");
+        if (criteria.ModelName) query.ModelName = new RegExp(criteria.ModelName, "i");
+        if (criteria.SerialNo) query.SerialNo = criteria.SerialNo;
         if (criteria.location) query.location = criteria.location;
         if (criteria.status) query.status = criteria.status;
         if (criteria.assetType) query.assetType = criteria.assetType;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    
+
     async updateByAssetId(assetId, groupId, newData) {
         try {
             const updatedData = await AssetModel.findOneAndUpdate({ assetId: assetId, groupId: groupId }, newData, { new: true });
