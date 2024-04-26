@@ -22,6 +22,7 @@ router.post(
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
+
 });
 
 router.delete("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
@@ -77,9 +78,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 });
 
 router.get("/hostelId/:id", async (req, res) => {
-    const serviceResponse = await service.getByDataId(req.params.id);
+    const serviceResponse = await service.getDataById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
