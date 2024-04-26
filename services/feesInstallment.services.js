@@ -175,6 +175,7 @@ class feesInstallmentService extends BaseService {
             const student = await feesInstallmentModel.findOne({
                 groupId: groupId,
                 addmissionId: addmissionId,
+                
             });
             return student;
         } catch (error) {
