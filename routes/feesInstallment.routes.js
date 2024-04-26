@@ -169,21 +169,21 @@ router.get(
                 addmissionId
             );
             let totalAmount = 0;
-                        let totalPaidAmount = 0;
-            
-                        if (paidAmt && paidAmt.length > 0) {
-                            paidAmt.forEach((item) => {
-                                totalAmount = parseInt(item.courseFee);
-                                totalPaidAmount += parseInt(item.paidAmount);
-                            });
-                        }
-                        let remainingAmount = 0;
-                        remainingAmount = totalAmount - totalPaidAmount;
-                        const amountDetails = {
-                                            totalAmount: totalAmount,
-                                            PaidAmount: totalPaidAmount,
-                                            remainingAmount: remainingAmount,
-                                        };
+            let totalPaidAmount = 0;
+
+            if (paidAmt && paidAmt.length > 0) {
+                paidAmt.forEach((item) => {
+                    totalAmount = parseInt(item.courseFee);
+                    totalPaidAmount += parseInt(item.paidAmount);
+                });
+            }
+            let remainingAmount = 0;
+            remainingAmount = totalAmount - totalPaidAmount;
+            const amountDetails = {
+                totalAmount: totalAmount,
+                PaidAmount: totalPaidAmount,
+                remainingAmount: remainingAmount,
+            };
             const installment = paidAmt.map(item => item.installment)
             const response = {
                 status: "Success",
@@ -191,9 +191,9 @@ router.get(
                     student: {
                         status: student.status
                     },
-                    installment: installment.flat(), 
+                    installment: installment.flat(),
                     amountDetails: amountDetails,
-                   
+
                 }
             };
 
@@ -397,7 +397,7 @@ router.get("/get-classes-fees", async (req, res) => {
                 pendingFees: totalFeesObjData?.totalRemainingAmount || 0,
                 totalFees:
                     totalFeesObjData?.totalPaidAmount +
-                        totalFeesObjData?.totalRemainingAmount || 0,
+                    totalFeesObjData?.totalRemainingAmount || 0,
                 totalStudents: totalFeesObjData?.totalCount,
             };
 
