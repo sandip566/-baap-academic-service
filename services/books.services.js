@@ -150,22 +150,22 @@ class BooksService extends BaseService {
         throw new Error("An error occurred while fetching publisher map.");
     }
 
-    async deleteBookById(groupId,bookId) {
+    async deleteBookById(groupId, bookId) {
         try {
-            console.log(bookId)
-            const isIssuedBook = await bookIssueLogModel.findOne({ bookId: bookId });
-            console.log(isIssuedBook);
-            if (isIssuedBook) {
-                return false;
-            } else {
-                const result = await booksModel.deleteOne({groupId: groupId,bookId: bookId });
+            const groupID=parseInt(groupId);
+            const bookID=parseInt(bookId);
+            const isIssuedBook = await bookIssueLogModel.find({ groupId: groupID, bookId: bookID });
+            if (isIssuedBook.length===0) {
+                const result = await booksModel.deleteOne({ groupId: groupID, bookId: bookID });
                 return result;
+            } else {
+                return false;
             }
         } catch (error) {
             throw error;
         }
     }
-
+    
     async updateBookById(bookId, groupId, newData) {
         try {
             const updateBook = await booksModel.findOneAndUpdate(
