@@ -10,9 +10,9 @@ class BookIssueLogService extends BaseService {
         super(dbModel, entityName);
     }
     async getAllDataByGroupId(groupId, criteria) {
-        try { 
+        try {
             const searchFilter = {
-                groupId
+                groupId,
             };
             const bookMap = await this.getBookMap();
             const studentMap = await this.getStudentMap();
@@ -50,7 +50,6 @@ class BookIssueLogService extends BaseService {
                         },
                     ];
                 }
-                
             }
             if (criteria.isReturn) {
                 searchFilter.isReturn = criteria.isReturn;
@@ -74,9 +73,15 @@ class BookIssueLogService extends BaseService {
                     return { ...book._doc, books, student };
                 })
             );
-            const count= await this.getCount(groupId)
-            const totalCount = await bookIssueLogModel.countDocuments(populatedBooks);
-            return { populatedBookIssueLog: populatedBooks,count:count,totalCount:totalCount };
+            const count = await this.getCount(groupId);
+            const totalCount = await bookIssueLogModel.countDocuments(
+                populatedBooks
+            );
+            return {
+                populatedBookIssueLog: populatedBooks,
+                count: count,
+                totalCount: totalCount,
+            };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw new Error("An error occurred while processing the request.");
@@ -155,7 +160,7 @@ class BookIssueLogService extends BaseService {
             const count = await bookIssueLogModel.countDocuments({
                 groupId: groupId,
                 addmissionId: addmissionId,
-                isReturn: false
+                isReturn: false,
             });
             console.log(count + "count");
             if (count >= 3) {
@@ -175,10 +180,10 @@ class BookIssueLogService extends BaseService {
             let query = {
                 groupId: groupId,
                 isReturn: false,
-            }
+            };
 
             if (addmissionId) {
-                query.addmissionId = addmissionId
+                query.addmissionId = addmissionId;
             }
             const bookIssues = await bookIssueLogModel.find(query);
 
@@ -232,14 +237,14 @@ class BookIssueLogService extends BaseService {
                     var response = {
                         bookIssueDate,
                         addmissionId: student.addmissionId,
-                        studentName: student
-                            ? student.name
-                            : "Unknown Student",
-                        image: student ? student.profile_img : "image is not provided",
+                        studentName: student ? student.name : "Unknown Student",
+                        image: student
+                            ? student.profile_img
+                            : "image is not provided",
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
-                        totalFine: totalFine
+                        totalFine: totalFine,
                     };
                     return response;
                 });
@@ -284,14 +289,14 @@ class BookIssueLogService extends BaseService {
                 groupId: groupId,
                 isReturn: true,
             });
-            const reserveBooks=await bookIssueLogModel.countDocuments({
-                groupId:groupId,
-                status:"Reserved"
-            })
+            const reserveBooks = await bookIssueLogModel.countDocuments({
+                groupId: groupId,
+                status: "Reserved",
+            });
             const response = {
                 bookIssues: bookIssues,
                 returnedBooks: returnedBooks,
-                reserveBooks:reserveBooks
+                reserveBooks: reserveBooks,
             };
             return response;
         } catch (error) {
@@ -313,19 +318,27 @@ class BookIssueLogService extends BaseService {
                 },
                 isReturn: false,
             });
-            const bookIds = student.map(student => student.bookId);
+            const bookIds = student.map((student) => student.bookId);
             const booksObject = await Book.find({ bookId: { $in: bookIds } });
             const issuedBooks = student.map((item) => {
-                const correspondingBook = booksObject.find(book => book.bookId === item.bookId);
+                const correspondingBook = booksObject.find(
+                    (book) => book.bookId === item.bookId
+                );
 
                 return {
                     bookIssueDate: item.issuedDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,
-                    availableCount: correspondingBook ? correspondingBook.availableCount : null,
-                    totalCopies: correspondingBook ? correspondingBook.totalCopies : null,
-                    book_img: correspondingBook ? correspondingBook.book_img : null,
-                    overdue: item.isOverdue
+                    availableCount: correspondingBook
+                        ? correspondingBook.availableCount
+                        : null,
+                    totalCopies: correspondingBook
+                        ? correspondingBook.totalCopies
+                        : null,
+                    book_img: correspondingBook
+                        ? correspondingBook.book_img
+                        : null,
+                    overdue: item.isOverdue,
                 };
             });
             return {
@@ -373,13 +386,13 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async checkBookAvailability(groupId,bookId){
+    async checkBookAvailability(groupId, bookId) {
         try {
             const book = await Book.find({ groupId: groupId, bookId: bookId });
-            console.log(book)
-            return book
+            console.log(book);
+            return book;
         } catch (error) {
-           throw error; 
+            throw error;
         }
     }
 }
