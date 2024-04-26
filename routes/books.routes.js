@@ -134,9 +134,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
-        const bookId = req.params.bookId;
         const groupId = req.params.groupId;
-        const data = await service.deleteBookById(bookId, groupId);
+        const bookId = req.params.bookId;
+        const data = await service.deleteBookById (groupId,bookId);
         if (data === false) {
             res.status(400).json({ error: "book is issued it cannot be deleted." });
         } else if (!data) {

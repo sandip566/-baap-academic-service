@@ -52,6 +52,19 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+
+    async updateByUserId( groupId,userId, newData) {
+        try {
+            const updatedData = await studentAdmissionModel.findOneAndUpdate(
+                { groupId: groupId, userId: userId },
+                newData,
+                { new: true }
+            );
+            return updatedData;
+        } catch (error) {
+            throw error;
+        }
+    }
     async updateUser(addmissionId, data) {
         try {
             const resp = await studentAdmissionModel.findOneAndUpdate(
