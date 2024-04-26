@@ -518,6 +518,36 @@ router.get(
     }
 );
 router.get(
+    "/getDenationFeesList/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            currentDate: req.query.currentDate,
+            academicYear: req.query.academicYear,
+            startDate: req.query.startDate,
+            endDate: req.query.endDate,
+            location: req.query.location,
+            course: req.query.course,
+            class: req.query.class,
+            department: req.query.department,
+            feesTemplateId: req.query.feesTemplateId,
+            division: req.query.division,
+            month: req.query.month,
+            search: req.query.search,
+        };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 500;
+        const serviceResponse = await service.getFeesStatWithDonationData(
+            groupId,
+            criteria,
+            page,
+            limit
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
+router.get(
     "/getFeesDefaulter/:groupId",
     TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
@@ -568,6 +598,33 @@ router.get(
         };
 
         const serviceResponse = await service.getFeesTotalCount(
+            groupId,
+            criteria
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
+router.get(
+    "/getDonationFeesListCount/:groupId",
+    TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            currentDate: req.query.currentDate,
+            academicYear: req.query.academicYear,
+            startDate: req.query.startDate,
+            endDate: req.query.endDate,
+            location: req.query.location,
+            course: req.query.course,
+            class: req.query.class,
+            department: req.query.department,
+            feesTemplateId: req.query.feesTemplateId,
+            division: req.query.division,
+            month: req.query.month,
+            search: req.query.search,
+        };
+
+        const serviceResponse = await service.getDonationFeesListCount(
             groupId,
             criteria
         );
