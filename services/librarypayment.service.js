@@ -19,7 +19,7 @@ class LibraryPaymentService extends BaseService {
 
     async deleteLibraryPaymentById(libraryPaymentId, groupId) {
         try {
-            return await vendorModel.deleteOne(libraryPaymentId, groupId);
+            return await LibraryPaymentModel.deleteOne(libraryPaymentId, groupId);
         } catch (error) {
             throw error;
         }
@@ -27,7 +27,7 @@ class LibraryPaymentService extends BaseService {
 
     async updateLibraryPaymentById(libraryPaymentId, groupId, newData) {
         try {
-            const updateVendorData = await vendorModel.findOneAndUpdate(
+            const updateVendorData = await LibraryPaymentModel.findOneAndUpdate(
                 { libraryPaymentId: libraryPaymentId, groupId: groupId },
                 newData,
                 { new: true }
