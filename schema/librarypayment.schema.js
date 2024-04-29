@@ -24,7 +24,11 @@ const LibraryPaymentSchema = new mongoose.Schema(
             type: Number
         },
         description:{
-
+         type:String
+        },
+        currentDate:{
+            type:Date,
+            default:Date.now()
         }
     },
     { timestamps: true,statics:false }
