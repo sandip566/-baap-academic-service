@@ -151,6 +151,7 @@ router.put(
         }
     }
 );
+
 router.get(
     "/installments/groupId/:groupId/addmission/:addmissionId",
     async (req, res) => {
@@ -162,11 +163,6 @@ router.get(
             if (!student) {
                 return res.status(404).json({ error: "Student not found" });
             }
-
-            const installments = await service.getInstallmentsByStudentId(
-                groupId,
-                addmissionId
-            );
 
             let paidAmt = await feesPaymentModel.getPaidAmount(
                 groupId,
@@ -183,28 +179,32 @@ router.get(
             }
             let remainingAmount = 0;
             remainingAmount = totalAmount - totalPaidAmount;
-
-            const response = {
-                paidAmount: paidAmt,
+            const amountDetails = {
                 totalAmount: totalAmount,
                 PaidAmount: totalPaidAmount,
                 remainingAmount: remainingAmount,
             };
-
-            res.json({
+            const installment = paidAmt.map(item => item.installment)
+            const response = {
                 status: "Success",
                 data: {
-                    addmissionId: addmissionId,
-                    student: student,
-                    amountDetails: response,
-                },
-            });
+                    student: {
+                        status: student.status
+                    },
+                    installment: installment.flat(),
+                    amountDetails: amountDetails,
+
+                }
+            };
+
+            res.json(response);
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: "Internal Server Error" });
         }
     }
 );
+
 router.get("/get-total-amount", async (req, res) => {
     try {
         const client = new MongoClient(mongoURI);
@@ -397,7 +397,7 @@ router.get("/get-classes-fees", async (req, res) => {
                 pendingFees: totalFeesObjData?.totalRemainingAmount || 0,
                 totalFees:
                     totalFeesObjData?.totalPaidAmount +
-                        totalFeesObjData?.totalRemainingAmount || 0,
+                    totalFeesObjData?.totalRemainingAmount || 0,
                 totalStudents: totalFeesObjData?.totalCount,
             };
 

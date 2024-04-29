@@ -9,6 +9,7 @@ const feesInstallmentServices = require("../services/feesInstallment.services");
 const documentConfigurationService = require("../services/documentConfiguration.services");
 const TokenService = require("../services/token.services");
 const multer = require("multer");
+const DocumentConfiguration=require("../schema/documentConfiguration.schema")
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
@@ -62,30 +63,25 @@ router.post("/data/save", async (req, res, next) => {
                 req.body.addmissionId
             );
 
-            if (existingDocument) {
-                if (req.body.documents) {
-                    req.body.documents = req.body.documents.map(
-                        (documentData) => {
-                            const documentId =
-                                Date.now() + Math.floor(Math.random() * 1000);
-                            return {
-                                documentTitle: documentData.documentTitle || "",
-                                expiryDate: documentData.expiryDate || "",
-                                formDate: documentData.formDate || "",
-                                documentUrl: documentData.documentUrl || "",
-                                documentId: documentId,
-                            };
-                        }
-                    );
-                     
-                    const documentData =
-                        await documentConfigurationService.updateUser(
-                            req.body.addmissionId,
-                            req.body.groupId,
-                            req.body
-                        );
-                }
+            if (existingDocument.data !== null) {
+                if (req.body.documents && req.body.documents.length > 0) {
+                    for (const documentData of req.body.documents) {
+                        const updatedDocument = {
+                            documentTitle: documentData.documentTitle || "",
+                            expiryDate: documentData.expiryDate || "",
+                            formDate: documentData.formDate || "",
+                            documentUrl: documentData.documentUrl || "",
+                            groupId: req.body.groupId 
+                        };
 
+                        const documentUpdateResponse = await documentConfigurationService.updateUser(
+                            req.body.addmissionId,
+                            updatedDocument 
+                        );
+                        console.log(documentUpdateResponse);
+                    }
+                }
+        
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
@@ -138,28 +134,26 @@ router.post("/data/save", async (req, res, next) => {
                 requestResponsehelper.sendResponse(res, serviceResponse);
             } else {
                 const serviceResponse = await service.create(req.body);
-
-                if (req.body.documents) {
-                    req.body.documents = req.body.documents.map(
-                        (documentData) => {
-                            const documentId =
-                                Date.now() + Math.floor(Math.random() * 1000);
-                            return {
-                                category:documentData.category,
-                                userDocumentId:documentData.userDocumentId,
-                                documentTitle: documentData.documentTitle || "",
-                                expiryDate: documentData.expiryDate || "",
-                                formDate: documentData.formDate || "",
-                                documentUrl: documentData.documentUrl || "",
-                                documentId: documentId,
-                            };
-                        }
-                    );
-
-                    // Save documents using documentConfigurationService
-                    await documentConfigurationService.create(req.body);
+                if (req.body.documents && req.body.documents.length > 0) {
+                    for (const documentData of req.body.documents) {
+                        const documentId = Date.now() + Math.floor(Math.random() * 1000);
+                        const document = new DocumentConfiguration({
+                            documentTitle: documentData.documentTitle || "",
+                            expiryDate: documentData.expiryDate || "",
+                            formDate: documentData.formDate || "",
+                            documentUrl: documentData.documentUrl || "",
+                            documentId: documentId,
+                            groupId: req.body.groupId,
+                            userId:req.body.userId,
+                            addmissionId:req.body.addmissionId,
+                            empId:req.body.empId,
+                            roleId:req.body.roleId,
+                            
+                        });
+                        await document.save();
+                    }
                 }
-
+            
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
