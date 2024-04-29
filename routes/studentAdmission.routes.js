@@ -431,4 +431,28 @@ router.get("/all/getByGroupId/searching/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, result);
 });
+
+router.put(
+    "/groupId/:groupId/userId/:userId",
+    async (req, res) => {
+        try {
+            const groupId = parseInt(req.params.groupId);
+            const userId = parseInt(req.params.userId);
+            const newData = req.body;
+            const updatedData = await service.updateByUserId(
+                groupId,
+                userId,
+                newData
+            );
+            if (!updatedData) {
+                res.status(404).json({ error: " not found to update" });
+            } else {
+                res.status(201).json(updatedData);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
 module.exports = router;
