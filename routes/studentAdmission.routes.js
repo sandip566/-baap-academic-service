@@ -77,7 +77,7 @@ router.post("/data/save", async (req, res, next) => {
                             };
                         }
                     );
-
+                     
                     const documentData =
                         await documentConfigurationService.updateUser(
                             req.body.addmissionId,
@@ -145,6 +145,8 @@ router.post("/data/save", async (req, res, next) => {
                             const documentId =
                                 Date.now() + Math.floor(Math.random() * 1000);
                             return {
+                                category:documentData.category,
+                                userDocumentId:documentData.userDocumentId,
                                 documentTitle: documentData.documentTitle || "",
                                 expiryDate: documentData.expiryDate || "",
                                 formDate: documentData.formDate || "",
@@ -325,6 +327,7 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
             lastName: req.query.lastName,
             search: req.query.search,
             addmissionId: req.query.addmissionId,
+            academicYear: req.query.academicYear,
             empId: req.query.empId,
         };
 
