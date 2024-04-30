@@ -189,7 +189,7 @@ router.get(
                 status: "Success",
                 data: {
                     student: {
-                        status: student.status
+                        status: student
                     },
                     installment: installment.flat(),
                     amountDetails: amountDetails,
@@ -204,6 +204,7 @@ router.get(
         }
     }
 );
+
 
 router.get("/get-total-amount", async (req, res) => {
     try {
