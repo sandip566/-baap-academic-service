@@ -6,35 +6,38 @@ class triphistoryervice extends BaseService {
         super(dbModel, entityName);
     }
 
-    async updatetriphistoryById(triphistoryId, groupId, newData) {
-        try {
-            const updatedData = await triphistoryModel.findOneAndUpdate(
-                { triphistoryId: triphistoryId, groupId: groupId },
-                newData,
-                { new: true }
-            );
-            return updatedData;
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    async deleteBytriphistoryId(triphistoryId, groupId) {
-        try {
-            return await triphistoryModel.deleteOne(triphistoryId, groupId);
-        } catch (error) {
-            throw error;
-        }
-    }
-
-    getAllDataByGroupId(groupId, criteria) {
+ async   getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
-        if (criteria.vendorId) query.vendorId = criteria.vendorId;
-        if (criteria.triphistoryId)
-            query.triphistoryId = criteria.triphistoryId;
+        if (criteria.tripHistoryId) query.tripHistoryId = criteria.tripHistoryId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
+
+    async deleteTripHistroyById(tripHistoryId, groupId) {
+        try {
+            return await triphistoryModel.deleteOne(
+                tripHistoryId,
+                groupId
+            );
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateTripHistoryById(tripHistoryId, groupId, newData) {
+        try {
+            const updatedVisitor = await triphistoryModel.findOneAndUpdate(
+                { tripHistoryId: tripHistoryId, groupId: groupId },
+                newData,
+                { new: true }
+            );
+            return updatedVisitor;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+   
 }
 module.exports = new triphistoryervice(triphistoryModel, "triphistory");

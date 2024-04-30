@@ -1,43 +1,43 @@
 const busModel = require("../schema/bus.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class busService extends BaseService {
+class buservice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    getAllDataByGroupId(groupId, criteria) {
+ async   getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10;
-        if (criteria.routeName)
-            query.routeName = new RegExp(criteria.routeName, "i");
-        if (criteria.schedule)
-            query.schedule = new RegExp(criteria.schedule, "i");
-        if (criteria.routeId) query.routeId = criteria.routeId;
+        if (criteria.busId) query.busId = criteria.busId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteRoute(routeId, groupId) {
+    async deleteTripHistroyById(busId, groupId) {
         try {
-            return await busModel.deleteOne(routeId, groupId);
+            return await busModel.deleteOne(
+                busId,
+                groupId
+            );
         } catch (error) {
             throw error;
         }
     }
 
-    async updateRoute(routeId, groupId, newData) {
+    async updatebusById(busId, groupId, newData) {
         try {
-            const updateRoute = await busModel.findOneAndUpdate(
-                { routeId: routeId, groupId: groupId },
+            const updatedVisitor = await busModel.findOneAndUpdate(
+                { busId: busId, groupId: groupId },
                 newData,
                 { new: true }
             );
-            return updateRoute;
+            return updatedVisitor;
         } catch (error) {
             throw error;
         }
     }
+
+   
 }
-module.exports = new busService(busModel, "bus");
+module.exports = new buservice(busModel, "bus");

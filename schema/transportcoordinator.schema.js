@@ -11,6 +11,9 @@ const TransportCoordinatorSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
+        transportcoordinatorId:{
+            type:Number
+        },
         phone: {
             type: String,
             required: true,

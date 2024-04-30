@@ -2,13 +2,17 @@ const mongoose = require("mongoose");
 
 const BusSchema = new mongoose.Schema(
     {
-        Bus_Id: {
+        busId: {
             type: Number,
-            required: false,
+            
         },
         Licence_plate:{
             type:Number,
             required:false
+        },
+        groupId: {
+            type: Number,
+            required: false,
         },
         Capality:{
             type:String,

@@ -6,9 +6,9 @@ const DriverSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        driver_Id:{
+        driverId:{
             type:Number,
-            required:true
+            required:false
         },
         driver_No:{
             type:Number,
@@ -24,7 +24,11 @@ const DriverSchema = new mongoose.Schema(
         },
         bus_Id:{
             type:Number,
-            required:true
+            
+        },
+        groupId: {
+            type: Number,
+            required: false,
         },
         driver_Licence_No:{
             type:Number,

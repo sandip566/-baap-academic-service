@@ -16,6 +16,13 @@ const TripHistorySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
+        tripHistoryId:{
+            type:Number
+        },
+        groupId: {
+            type: Number,
+            required: false,
+        },
         destination: {
             type: String,
             required: true,

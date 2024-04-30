@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { checkSchema, query } = require("express-validator");
+const { checkSchema } = require("express-validator");
 const service = require("../services/vichels.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
@@ -12,44 +12,25 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const vichelsId = +Date.now();
-        req.body.vichelsId = vichelsId;
+        const vichelsId=+Date.now();
+        req.body.vichelsId=vichelsId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
-router.get("/all", async (req, res) => {
-    const pagination = {
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: 10,
-    };
-    const { pageNumber, pageSize, ...query } = req.query;
-    const serviceResponse = await service.getAllByCriteria(query, pagination);
+router.get("/all/vichels", async (req, res) => {
+    const serviceResponse = await service.getAllByCriteria({});
+
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/:id", async (req, res) => {
-    const serviceResponse = await service.deleteById(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
-
-router.put("/:id", async (req, res) => {
-    const serviceResponse = await service.updateById(req.params.id, req.body);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
-
-router.get("/:id", async (req, res) => {
-    const serviceResponse = await service.getById(req.params.id);
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         vichelsId: req.query.vichelsId,
-        vichelsName: req.query.vichelsName,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
+      
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -62,7 +43,7 @@ router.delete("/groupId/:groupId/vichelsId/:vichelsId", async (req, res) => {
     try {
         const vichelsId = req.params.vichelsId;
         const groupId = req.params.groupId;
-        const Data = await service.deletevichelsById({
+        const Data = await service.deleteTripHistroyById({
             vichelsId: vichelsId,
             groupId: groupId,
         });
@@ -97,4 +78,8 @@ router.put("/groupId/:groupId/vichelsId/:vichelsId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+
+
 module.exports = router;

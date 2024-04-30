@@ -1,35 +1,25 @@
-const BaseService = require("@baapcompany/core-api/services/base.service");
 const driverModel = require("../schema/driver.schema");
+const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class Service extends BaseService {
+class driverervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    async getAllDataByGroupId(groupId, criteria, sortOptions) {
-        try {
-            const query = {
-                groupId: groupId,
-            };
-    if (criteria && criteria.driverId) {
-                query.driverId = criteria.driverId;
-            }
-            const data = await driverModel
-                .find({ groupId: groupId })
-                .sort(sortOptions);
-
-            return data;
-        } catch (error) {
-            throw error;
-        }
+ async   getAllDataByGroupId(groupId, criteria) {
+        const query = {
+            groupId: groupId,
+        };
+        if (criteria.driverId) query.driverId = criteria.driverId;
+        return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deletedriverById(driverId, groupId) {
+    async deleteTripHistroyById(driverId, groupId) {
         try {
-            return await driverModel.deleteOne({
-                driverId: driverId,
-                groupId: groupId,
-            });
+            return await driverModel.deleteOne(
+                driverId,
+                groupId
+            );
         } catch (error) {
             throw error;
         }
@@ -37,15 +27,17 @@ class Service extends BaseService {
 
     async updatedriverById(driverId, groupId, newData) {
         try {
-            const updateData = await driverModel.findOneAndUpdate(
+            const updatedVisitor = await driverModel.findOneAndUpdate(
                 { driverId: driverId, groupId: groupId },
                 newData,
                 { new: true }
             );
-            return updateData;
+            return updatedVisitor;
         } catch (error) {
             throw error;
         }
     }
+
+   
 }
-module.exports = new Service(driverModel, "driver");
+module.exports = new driverervice(driverModel, "driver");

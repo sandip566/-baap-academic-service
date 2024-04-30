@@ -19,10 +19,18 @@ const VehiclePaymentHistorySchema = new mongoose.Schema(
             type: Date,
             required: true,
         },
+        vehiclepaymenthistoryId:{
+            type:Number
+        },
+        groupId: {
+            type: Number,
+            required: false,
+        },
         amount: {
             type: Number,
             required: true,
         },
+        
         // Other fields like payment method, invoice number, etc. can be added
     },
     { timestamps: true } // This will automatically add createdAt and updatedAt fields
