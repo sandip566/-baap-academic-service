@@ -164,6 +164,11 @@ router.get(
                 return res.status(404).json({ error: "Student not found" });
             }
 
+            const installments = await service.getInstallmentsByStudentId(
+                groupId,
+                addmissionId
+            );
+
             let paidAmt = await feesPaymentModel.getPaidAmount(
                 groupId,
                 addmissionId
@@ -179,25 +184,22 @@ router.get(
             }
             let remainingAmount = 0;
             remainingAmount = totalAmount - totalPaidAmount;
-            const amountDetails = {
+
+            const response = {
+                paidAmount: paidAmt,
                 totalAmount: totalAmount,
                 PaidAmount: totalPaidAmount,
                 remainingAmount: remainingAmount,
             };
-            const installment = paidAmt.map(item => item.installment)
-            const response = {
+
+            res.json({
                 status: "Success",
                 data: {
-                    student: {
-                        status: student
-                    },
-                    installment: installment.flat(),
-                    amountDetails: amountDetails,
-
-                }
-            };
-
-            res.json(response);
+                    addmissionId: addmissionId,
+                    student: student,
+                    amountDetails: response,
+                },
+            });
         } catch (error) {
             console.error(error);
             res.status(500).json({ error: "Internal Server Error" });

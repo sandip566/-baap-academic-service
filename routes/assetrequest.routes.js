@@ -4,7 +4,8 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/assetrequest.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const assetModel=require("../schema/asset.schema");
+const AssetRequestModel = require("../schema/assetrequest.schema");
 router.post(
   "/",
   checkSchema(require("../dto/assetrequest.dto")),
@@ -65,24 +66,69 @@ router.get("/all/assetRequest", async (req, res) => {
   requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+// router.get("/all/getByGroupId/:groupId", async (req, res) => {
+//   const groupId = req.params.groupId;
+//   const criteria = {
+//     name: req.query.name,
+//     type: req.query.type,
+//     status: req.query.status,
+//     category: req.query.category,
+//     empId: req.query.empId,
+//     userId: req.query.userId,
+//     pageNumber: parseInt(req.query.pageNumber) || 1,
+//     pageSize: parseInt(req.query.pageSize) || 10,
+//   };
+//   const serviceResponse = await service.getAllDataByGroupId(
+//     groupId,
+//     criteria
+//   );
+//   requestResponsehelper.sendResponse(res, serviceResponse);
+// });
+
+
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-  const groupId = req.params.groupId;
-  const criteria = {
-    name: req.query.name,
-    type: req.query.type,
-    status: req.query.status,
-    category: req.query.category,
-    empId: req.query.empId,
-    userId: req.query.userId,
-    pageNumber: parseInt(req.query.pageNumber) || 1,
-    pageSize: parseInt(req.query.pageSize) || 10,
-  };
-  const serviceResponse = await service.getAllDataByGroupId(
-    groupId,
-    criteria
-  );
-  requestResponsehelper.sendResponse(res, serviceResponse);
+  try {
+    const groupId = req.params.groupId;
+    const criteria = {
+  
+      name: req.query.name,
+      type: req.query.type,
+      status: req.query.status,
+      search: req.query.search,
+      category: req.query.category,
+      empId: req.query.empId,
+      userId: req.query.userId,
+    };
+    const { searchFilter } = await service.getAllDataByGroupId(
+      groupId,
+      criteria
+    );
+
+    const assetRequests = await AssetRequestModel.find(searchFilter);
+    const populatedItems = await Promise.all(
+      assetRequests.map(async (assetRequest) => {
+        const assets = await assetModel.find({ assetId: assetRequest.assetId });
+       
+        return { ...fact._doc,assets };
+      })
+    );
+
+    const filteredDocuments = populatedItems.filter((doc) => doc !== null);
+    const count = await AssetRequestModel.countDocuments(searchFilter);
+
+    res.json({
+      data: {
+        item: filteredDocuments,
+        totalCount: count,
+      },
+    });
+  } catch (err) {
+    throw err;
+  }
 });
+
+
 
 
 router.get("/getByRequestId/:id", async (req, res) => {

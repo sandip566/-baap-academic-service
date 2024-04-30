@@ -7,17 +7,67 @@ class AssetRequestService extends BaseService {
         super(dbModel, entityName);
     }
 
+    // async getAllDataByGroupId(groupId, criteria) {
+    //     const query = {
+    //         groupId: groupId,
+    //     };
+    //     if (criteria.name) query.name = new RegExp(criteria.name, "i");
+    //     if (criteria.status) query.status = new RegExp(criteria.status, "i");
+    //     if (criteria.type) query.type = new RegExp(criteria.type, "i");
+    //     if (criteria.category) query.category = new RegExp(criteria.category, "i");
+    //     if (criteria.empId) query.empId = criteria.empId;
+    //     if (criteria.userId) query.userId = criteria.userId;
+    //     return this.preparePaginationAndReturnData(query, criteria);
+    // }
+
+
+
     async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        if (criteria.status) query.status = new RegExp(criteria.status, "i");
-        if (criteria.type) query.type = new RegExp(criteria.type, "i");
-        if (criteria.category) query.category = new RegExp(criteria.category, "i");
-        if (criteria.empId) query.empId = criteria.empId;
-        if (criteria.userId) query.userId = criteria.userId;
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { empId: numericSearch },
+                        { userId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        {
+                            name: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                        {
+                            status: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                        {
+                            category: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+
+
+
+                    ];
+                }
+            }
+            // if (criteria.customerId) {
+            //     const numericCustomerId = parseInt(criteria.customerId);
+            //     if (!isNaN(numericCustomerId)) {
+            //         searchFilter.customerId = numericCustomerId;
+            //     }
+            // }
+
+            return { searchFilter };
+        } catch (error) {
+            throw error;
+        }
     }
 
     async deleteByDataId(requestId, groupId) {
