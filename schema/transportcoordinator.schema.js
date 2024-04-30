@@ -11,15 +11,15 @@ const TransportCoordinatorSchema = new mongoose.Schema(
             required: true,
             unique: true,
         },
-        transportcoordinatorId:{
-            type:Number
+        transportcoordinatorId: {
+            type: Number
         },
         phone: {
             type: String,
             required: true,
         },
     },
-    { timestamps: true }
+    { timestamps: true ,strict:false}
 );
 
 const TransportCoordinatorModel = mongoose.model("transportcoordinator", TransportCoordinatorSchema);

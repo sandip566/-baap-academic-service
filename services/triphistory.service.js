@@ -6,7 +6,7 @@ class triphistoryervice extends BaseService {
         super(dbModel, entityName);
     }
 
- async   getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
@@ -38,6 +38,6 @@ class triphistoryervice extends BaseService {
         }
     }
 
-   
+
 }
 module.exports = new triphistoryervice(triphistoryModel, "triphistory");

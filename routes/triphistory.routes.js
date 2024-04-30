@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const tripHistoryId=+Date.now();
-        req.body.tripHistoryId=tripHistoryId
+        const tripHistoryId = +Date.now();
+        req.body.tripHistoryId = tripHistoryId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -30,7 +30,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         tripHistoryId: req.query.tripHistoryId,
-      
+
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
