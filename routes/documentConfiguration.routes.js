@@ -14,12 +14,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const documntConfigurationId = Date.now();
-        req.body.documntConfigurationId = documntConfigurationId;
-        req.body.documents.forEach((doc, index) => {
-            const documentId = Date.now() + index;
-            doc.documentId = documentId;
-        });
+        const documentId = Date.now();
+        req.body.documentId = documentId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
