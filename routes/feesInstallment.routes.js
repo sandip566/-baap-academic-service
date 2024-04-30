@@ -206,64 +206,6 @@ router.get(
 );
 
 
-// router.get(
-//     "/installments/groupId/:groupId/addmission/:addmissionId",
-//     async (req, res) => {
-//         try {
-//             const groupId = req.params.groupId;
-//             const addmissionId = req.params.addmissionId;
-
-//             const student = await service.getStudentById(groupId, addmissionId);
-//             if (!student) {
-//                 return res.status(404).json({ error: "Student not found" });
-//             }
-
-//             const installments = await service.getInstallmentsByStudentId(
-//                 groupId,
-//                 addmissionId
-//             );
-
-//             let paidAmt = await feesPaymentModel.getPaidAmount(
-//                 groupId,
-//                 addmissionId
-//             );
-//             let totalAmount = 0;
-//             let totalPaidAmount = 0;
-
-//             if (paidAmt && paidAmt.length > 0) {
-//                 paidAmt.forEach((item) => {
-//                     totalAmount = parseInt(item.courseFee);
-//                     totalPaidAmount += parseInt(item.paidAmount);
-//                 });
-//             }
-//             let remainingAmount = 0;
-//             remainingAmount = totalAmount - totalPaidAmount;
-
-//             const response = {
-//                 paidAmount: paidAmt,
-//                 totalAmount: totalAmount,
-//                 PaidAmount: totalPaidAmount,
-//                 remainingAmount: remainingAmount,
-//             };
-
-//             res.json({
-//                 status: "Success",
-//                 data: {
-//                     addmissionId: addmissionId,
-//                     student: student,
-//                     amountDetails: response,
-//                 },
-//             });
-//         } catch (error) {
-//             console.error(error);
-//             res.status(500).json({ error: "Internal Server Error" });
-//         }
-//     }
-// );
-
-
-
-
 router.get("/get-total-amount", async (req, res) => {
     try {
         const client = new MongoClient(mongoURI);
