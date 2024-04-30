@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const vehiclepaymenthistoryId=+Date.now();
-        req.body.vehiclepaymenthistoryId=vehiclepaymenthistoryId
+        const vehiclepaymenthistoryId = +Date.now();
+        req.body.vehiclepaymenthistoryId = vehiclepaymenthistoryId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -30,7 +30,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         vehiclepaymenthistoryId: req.query.vehiclepaymenthistoryId,
-      
+
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,

@@ -6,8 +6,7 @@ const TripHistorySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        // You can add more fields here according to your requirements
-        // For example:
+
         date: {
             type: Date,
             required: true,
@@ -16,8 +15,8 @@ const TripHistorySchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        tripHistoryId:{
-            type:Number
+        tripHistoryId: {
+            type: Number
         },
         groupId: {
             type: Number,
@@ -28,7 +27,7 @@ const TripHistorySchema = new mongoose.Schema(
             required: true,
         },
     },
-    { timestamps: true }
+    { timestamps: true,strict:false }
 );
 
 const TripHistoryModel = mongoose.model("triphistory", TripHistorySchema);
