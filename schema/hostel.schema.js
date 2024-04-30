@@ -7,29 +7,77 @@ const HostelSchema = new mongoose.Schema(
         },
         hostelId: {
             type: Number,
-           required: false,
-        },
-        hostelerId: {
-            type: Number,
             required: false,
         },
-        empId: {
-            type: Number,
-            required: false,
+        hostelName: {
+            type: String,
+            required: true,
         },
-        admissionDate: {
+
+        nameOfHead: {
+            type: String,
+            required: true,
+        },
+        numberOfFloors: {
+            type: Number,
+            required: true,
+        },
+        numberOfBeds: {
+            type: Number,
+            required: true,
+        },
+        totalAccupiedBed: {
+            type: Number,
+            required: true,
+        },
+        totalVacantBed: {
+            type: Number,
+            required: true,
+        },
+        hostelAddress: [
+            {
+                address1: {
+                    type: String,
+                    required: true,
+                },
+                pincode: {
+                    type: Number,
+                    required: false,
+                },
+                District: {
+                    type: String,
+                    require: true,
+                },
+                state: {
+                    type: String,
+                    required: true,
+                },
+
+                country: {
+                    type: String,
+                    required: true,
+                },
+            },
+        ],
+
+        hosteladmissionDate: {
             type: Date,
             default: Date.now(),
         },
-        bedNumber: {
-            type: String,
-            required: false,
-        },
-        admissionStatus: {
+
+        hosteladmissionStatus: {
             type: String,
             enum: ["Pending", "Approved", "Rejected"],
             default: "Pending",
         },
+        studentDetails: [
+            {
+                type: Number,
+                ref: "studentsAdmission",
+            },
+        ],
+
+
     },
     { strict: false, timestamps: true }
 );

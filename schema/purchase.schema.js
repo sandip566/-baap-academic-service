@@ -8,8 +8,9 @@ const PurchaseSchema = new mongoose.Schema(
         },
         purchaseId: {
             type: Number,
+            required: false,
         },
-        vendorId: {
+        publisherId: {
             type: Number,
             required: false,
         },
@@ -21,34 +22,29 @@ const PurchaseSchema = new mongoose.Schema(
             type: Date,
             default: Date.now(),
         },
+        publisherId: {
+            type: Number,
+            required: false,
+        },
         totalAmount: {
             type: Number,
+            required: false,
         },
         paymentMethod: {
             type: String,
             enum: ["Upi", "Cash", "Cheque"],
         },
-        // items: [{
-        //     book: {
-        //         type: String
-        //     },
-        //     quantity: {
-        //         type: Number,
-        //         required: false
-        //     },
-        //     unitPrice: {
-        //         type: Number,
-        //         required: false
-        //     }
-        // }],
-        book: {
+        bookName: {
             type: String,
+            required: false,
         },
         quantity: {
             type: Number,
+            required: false,
         },
         unitPrice: {
             type: Number,
+            required: false,
         },
         orderStatus: {
             type: String,

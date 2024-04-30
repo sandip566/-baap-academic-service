@@ -30,7 +30,8 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, issuedDate,dueDate, userId } = req.body;
+        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
+            req.body;
         // const currentDate = new Date();
         // const dueDate = new Date(currentDate);
         // dueDate.setDate(dueDate.getDate() + 5);
@@ -38,7 +39,7 @@ router.post("/issue-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             addmissionId: addmissionId,
             bookId: bookId,
-            status:"Issued",
+            isReturn: false,
         });
         if (existingReservation) {
             return res.status(400).json({
@@ -57,30 +58,22 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const isOverdue = await service.checkOverdueStatus(addmissionId);
-        console.log(isOverdue);
         if (isOverdue) {
             return res.status(400).json({
                 success: false,
                 error: "Overdue book returned needed",
             });
         }
-        const book = await Book.find({ bookId: bookId });
-        if (!book || book.availableCount <= 0) {
+        const isAvailable = await service.checkBookAvailability(
+            groupId,
+            bookId
+        );
+        if (!isAvailable || isAvailable.availableCount <= 0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for issuing. Available count is zero.",
             });
         }
-        const shelfId = await booksServices.getShelfId(req.body.bookId);
-        const shelf = await shelfModel.find({ shelfId });
-        if (!shelf) {
-            return res.status(404).json({ error: "Shelf not found" });
-        }
-        await shelfModel.findOneAndUpdate(
-            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
-            { $inc: { availableCapacity: 1, currentInventory: -1 } },
-            { new: true }
-        );
         const bookIssueLogId = +Date.now();
         const newReservation = {
             groupId: groupId,
@@ -88,10 +81,9 @@ router.post("/issue-book", async (req, res) => {
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
             dueDate: dueDate,
-            issuedDate:new Date(),
-            shelfId: shelfId,
+            issuedDate: new Date(),
             userId: userId,
-            
+            isReturn: false,
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
@@ -118,7 +110,7 @@ router.post("/return-book", async (req, res) => {
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             addmissionId: addmissionId,
-            isReturn:false
+            isReturn: false,
         });
         if (!existingReservation) {
             return res.status(400).json({
@@ -128,7 +120,7 @@ router.post("/return-book", async (req, res) => {
         }
         const updatedReservation = await service.updateBookIssueLogById(
             existingReservation.bookIssueLogId,
-            { isReturn:true, returnDate: new Date() }
+            { isReturn: true, returnDate: new Date() }
         );
         await Book.findOneAndUpdate(
             { bookId: bookId, availableCount: { $gt: 0 } },
@@ -161,10 +153,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
-        status: req.params.query,
-        pageNumber : req.query.pageNumber||1,
-        pageSize :req.query.pageSize||10,
-        search:req.query.search
+        status: req.query.status,
+        pageNumber: req.query.pageNumber || 1,
+        pageSize: req.query.pageSize || 10,
+        search: req.query.search,
+        isOverdue: req.query.isOverdue,
+        isReturn: req.query.isReturn,
+        studentName: req.query.studentName,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -226,7 +221,11 @@ router.put(
 
 router.get("/book-issues/overdue/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const bookIssues = await service.fetchBookIssuesWithOverdue(groupId);
+    const addmissionId = req.query.addmissionId;
+    const bookIssues = await service.fetchBookIssuesWithOverdue(
+        groupId,
+        addmissionId
+    );
     requestResponsehelper.sendResponse(res, bookIssues);
 });
 
@@ -252,8 +251,8 @@ router.get("/getBooksdetails/:userId", async (req, res) => {
 });
 router.post("/reserve-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId,reserveDate,userId } = req.body;
-        const serviceResponse=service.reserveBook(groupId,bookId)
+        const { groupId, bookId, addmissionId, reserveDate, userId } = req.body;
+        const serviceResponse = service.reserveBook(groupId, bookId);
         if (!serviceResponse) {
             return res.status(400).json({
                 success: false,
@@ -265,7 +264,7 @@ router.post("/reserve-book", async (req, res) => {
             addmissionId: addmissionId,
             status: "Reserved",
         });
-        if (!existingReservation) {
+        if (existingReservation) {
             return res.status(400).json({
                 success: false,
                 error: "You have already reserved this book",
@@ -277,21 +276,20 @@ router.post("/reserve-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
-            reserveDate:new Date(),
-            isReserve:true,
+            reserveDate: new Date(),
+            isReserve: true,
             userId: userId,
-            status:"Reserved"
+            status: "Reserved",
         };
         const createdReservation = await service.create(newReservation);
         res.status(201).json({
             success: true,
             reservation: createdReservation,
         });
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
 
 module.exports = router;

@@ -170,11 +170,12 @@ class feesInstallmentService extends BaseService {
         }
     }
 
-    async getStudentById(groupId,addmissionId) {
+    async getStudentById(groupId, addmissionId) {
         try {
             const student = await feesInstallmentModel.findOne({
-                groupId:groupId,
+                groupId: groupId,
                 addmissionId: addmissionId,
+                
             });
             return student;
         } catch (error) {
@@ -366,7 +367,7 @@ class feesInstallmentService extends BaseService {
                 "courseDetails.class_id": classId,
                 "feesDetails.feesTemplateId": Number(feesTemplateId),
                 groupId: groupId,
-                admissionStatus:"Confirm",
+                admissionStatus: "Confirm",
             });
             return totalStudents;
         } catch (error) {
@@ -374,118 +375,89 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
-
     async getTotalFeesAndPendingFeesForClass(
         classId,
         groupId,
-        feesTemplateId,
-        academicYear
+        academicYear,
+        feesTemplateId
     ) {
+        console.log(classId, groupId, academicYear, feesTemplateId);
         try {
-            const feeTemplates = await FeesTemplateModel.find({
-                groupId: groupId,
-                feesTemplateId: feesTemplateId,
+            let matchStage = {
+                "courseDetails.class_id": classId,
+                groupId: Number(groupId),
                 academicYear: academicYear,
-            });
+                admissionStatus: "Confirm",
+            };
 
-            let totalAmountFromTemplate = 0;
+            if (feesTemplateId) {
+                matchStage["feesDetails.feesTemplateId"] =
+                    Number(feesTemplateId);
+            }
 
-            feeTemplates.forEach((template) => {
-                totalAmountFromTemplate += template.totalFees;
-            });
-
-            const fee = await feesInstallmentModel.aggregate([
+            let data = await studentAdmissionModel.aggregate([
+                { $match: matchStage },
                 {
-                    $match: {
-                        "courseDetails.class_id": Number(classId),
-                        groupId: Number(groupId),
-                        academicYear: Number(academicYear),
-                        "feesDetails.feesTemplateId": Number(feesTemplateId),
-                        admission: "Confirm",
-                    },
-                },
-                {
-                    $unwind: "$feesDetails",
-                },
-                {
-                    $match: {
-                        "feesDetails.feesTemplateId": Number(feesTemplateId),
-                    },
-                },
-                {
-                    $unwind: "$feesDetails.installment",
-                },
-                {
-                    $group: {
-                        _id: {
-                            documentId: "$_id",
-                            status: "$feesDetails.installment.status",
-                        },
-                        totalAmount: {
-                            $sum: "$feesDetails.installment.amount",
-                        },
-                        totalInstallmentAmount: {
-                            $sum: {
-                                $subtract: [
-                                    {
-                                        $toInt: "$feesDetails.installment.totalInstallmentAmount",
-                                    },
-                                    {
-                                        $toInt: "$feesDetails.installment.amount",
-                                    },
-                                ],
-                            },
-                        },
-                    },
-                },
-                {
-                    $group: {
-                        _id: "$_id.documentId",
-                        feesDetails: {
-                            $push: {
-                                status: "$_id.status",
-                                totalAmount: "$totalAmount",
-                                totalInstallmentAmount:
-                                    "$totalInstallmentAmount",
-                            },
-                        },
-                        totalAmountAllStatus: { $sum: "$totalAmount" },
-                        totalStudents: { $sum: 1 },
+                    $lookup: {
+                        from: "feespayments",
+                        localField: "addmissionId",
+                        foreignField: "addmissionId",
+                        as: "feesPaymentData",
                     },
                 },
                 {
                     $project: {
-                        _id: 1,
-                        feesDetails: 1,
-                        totalAmountAllStatus: 1,
+                        _id: 0,
+                        classId: 1,
+                        numberOfFeesPayments: { $size: "$feesPaymentData" },
+                        totalPaidAmount: {
+                            $sum: {
+                                $map: {
+                                    input: "$feesPaymentData",
+                                    as: "payment",
+                                    in: { $toInt: "$$payment.paidAmount" },
+                                },
+                            },
+                        },
+                        lastPayment: { $arrayElemAt: ["$feesPaymentData", -1] },
+                    },
+                },
+                {
+                    $project: {
+                        classId: 1,
+                        numberOfFeesPayments: 1,
+                        totalPaidAmount: 1,
+                        remainingAmount: {
+                            $ifNull: ["$lastPayment.remainingAmount", 0],
+                        },
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$classId",
+                        totalPaidAmount: { $sum: "$totalPaidAmount" },
+                        totalCount: { $sum: 1 },
+                        totalRemainingAmount: {
+                            $sum: { $toDouble: "$remainingAmount" },
+                        },
                     },
                 },
             ]);
 
-            const response = {
-                totalFees: totalAmountFromTemplate,
-                pendingFees: 0,
-                paidFees: 0,
-            };
-
-            if (fee.length > 0) {
-                fee.forEach((feeItem) => {
-                    feeItem.feesDetails.forEach((detail) => {
-                        console.log(detail);
-                        if (detail.status === "pending") {
-                            response.pendingFees += detail.totalAmount;
-                        } else if (detail.status === "paid") {
-                            response.paidFees += detail.totalAmount;
-                        }
-                        // Add pendingTotalInstallmentAmount to paidFees
-                        response.paidFees += detail.totalInstallmentAmount;
-                    });
+            // If no documents match the query, return a dummy document with counts as 0
+            if (data.length === 0) {
+                data.push({
+                    _id: classId,
+                    totalPaidAmount: 0,
+                    totalCount: 0,
+                    totalRemainingAmount: 0,
                 });
             }
 
-            return response;
+            console.log(data);
+            return data;
         } catch (error) {
-            console.log(" An error occured", error);
+            console.log("An error occurred", error);
             throw error;
         }
     }
@@ -542,6 +514,7 @@ class feesInstallmentService extends BaseService {
             throw error;
         }
     }
+
 }
 module.exports = new feesInstallmentService(
     feesInstallmentModel,

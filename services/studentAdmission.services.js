@@ -52,6 +52,19 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+
+    async updateByUserId( groupId,userId, newData) {
+        try {
+            const updatedData = await studentAdmissionModel.findOneAndUpdate(
+                { groupId: groupId, userId: userId },
+                newData,
+                { new: true }
+            );
+            return updatedData;
+        } catch (error) {
+            throw error;
+        }
+    }
     async updateUser(addmissionId, data) {
         try {
             const resp = await studentAdmissionModel.findOneAndUpdate(
@@ -590,10 +603,13 @@ class StudentsAdmmisionService extends BaseService {
             if (query.phoneNumber) {
                 searchFilter.phoneNumber = query.phoneNumber;
             }
+           
             if (query.addmissionId) {
                 searchFilter.addmissionId = query.addmissionId;
             }
-
+            // if (query.academicYear) {
+            //     searchFilter.academicYear = query.academicYear;
+            // }
             if (query.firstName) {
                 searchFilter.firstName = {
                     $regex: query.firstName,
@@ -743,6 +759,7 @@ class StudentsAdmmisionService extends BaseService {
                 groupId: groupId,
                 empId: query.empId,
                 addmissionId: query.addmissionId,
+                academicYear: query.academicYear,
             });
 
             // let response1;
@@ -753,6 +770,7 @@ class StudentsAdmmisionService extends BaseService {
                 try {
                     const addmissionData = await studentAdmissionModel.findOne({
                         addmissionId: feesPayment.addmissionId,
+                        // academicYear: feesPayment.academicYear
                     });
 
                     if (addmissionData) {
@@ -804,6 +822,7 @@ class StudentsAdmmisionService extends BaseService {
                 return (
                     data.groupId === parseInt(groupId) &&
                     data.empId === query.empId &&
+                    data.academicYear==query.academicYear&&
                     data.addmissionId == query.addmissionId,
                     true
                 );

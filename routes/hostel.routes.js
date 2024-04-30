@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const hostelerId = +Date.now();
-        req.body.hostelerId = hostelerId;
+        const hostelId = +Date.now();
+        req.body.hostelId = hostelId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -22,17 +22,18 @@ router.post(
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
+
 });
 
-router.delete("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
+router.delete("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
     try {
-        const hostelerId = req.params.hostelerId;
+        const hostelId = req.params.hostelId;
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(hostelerId, groupId);
-        if (!Data) {
+        const data = await service.deleteByDataId(hostelId, groupId);
+        if (data.deletedCount === 0) {
             res.status(404).json({ error: "Data not found to delete" });
         } else {
-            res.status(201).json(Data);
+            res.status(200).json({ message: "Data deleted successfully" });
         }
     } catch (error) {
         console.error(error);
@@ -40,16 +41,17 @@ router.delete("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
+
+router.put("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
     try {
-        const hostelerId = req.params.hostelerId;
+        const hostelId = req.params.hostelId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const Data = await service.updateDataById(hostelerId, groupId, newData);
+        const Data = await service.updateDataById(hostelId, groupId, newData);
         if (!Data) {
             res.status(404).json({ error: "Data not found to update" });
         } else {
-            res.status(201).json(Data);
+            res.status(201).json({ Data, message: "deta update successfully" });
         }
     } catch (error) {
         console.error(error);
@@ -60,9 +62,13 @@ router.put("/groupId/:groupId/hostelerId/:hostelerId", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        admissionDate: req.query.admissionDate,
-        admissionStatus: req.query.admissionStatus,
-        bedNumber: req.query.bedNumber,
+        hosteladmissionDate: req.query.hosteladmissionDate,
+        hosteladmissionStatus: req.query.hosteladmissionStatus,
+        numberOfBeds: req.query.numberOfBeds,
+        hostelId: req.query.hostelId,
+        pageNumber: parseInt(req.query.pageNumber) || 1,
+        pageSize: parseInt(req.query.pageSize) || 10,
+
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -71,10 +77,11 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/hostelerId/:id", async (req, res) => {
-    const serviceResponse = await service.getByDataId(req.params.id);
+router.get("/hostelId/:id", async (req, res) => {
+    const serviceResponse = await service.getDataById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);

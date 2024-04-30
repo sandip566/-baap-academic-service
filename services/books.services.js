@@ -1,12 +1,13 @@
 const { query } = require("express");
 const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const bookIssueLog = require("../schema/bookIssueLog.schema");
+//const bookIssueLog = require("../schema/bookIssueLog.schema");
 const Student = require("../schema/studentAdmission.schema");
 const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
 const publisherModel = require("../schema/publisher.schema");
 const bookIssueLogService = require("../services/bookIssueLog.service");
+const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -107,9 +108,7 @@ class BooksService extends BaseService {
             const departmentMap = {};
             departments.forEach((department) => {
                 if (department.departmentName) {
-                    const departmentName = department.departmentName
-                        .trim()
-                        .toLowerCase();
+                    const departmentName = department.departmentName.trim().toLowerCase();
                     departmentMap[departmentName] = department.departmentId;
                 }
             });
@@ -140,9 +139,7 @@ class BooksService extends BaseService {
         const publisherMap = {};
         publishers.forEach((publisher) => {
             if (publisher.publisherName) {
-                const publisherName = publisher.publisherName
-                    .trim()
-                    .toLowerCase();
+                const publisherName = publisher.publisherName.trim().toLowerCase();
                 publisherMap[publisherName] = publisher.publisherId;
             }
         });
@@ -155,12 +152,20 @@ class BooksService extends BaseService {
 
     async deleteBookById(groupId, bookId) {
         try {
-            return await booksModel.deleteOne({ groupId: groupId, bookId: bookId });
+            const groupID=parseInt(groupId);
+            const bookID=parseInt(bookId);
+            const isIssuedBook = await bookIssueLogModel.find({ groupId: groupID, bookId: bookID });
+            if (isIssuedBook.length===0) {
+                const result = await booksModel.deleteOne({ groupId: groupID, bookId: bookID });
+                return result;
+            } else {
+                return false;
+            }
         } catch (error) {
             throw error;
         }
     }
-
+    
     async updateBookById(bookId, groupId, newData) {
         try {
             const updateBook = await booksModel.findOneAndUpdate(
@@ -211,24 +216,10 @@ class BooksService extends BaseService {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { ISBN: numericSearch },
-                        { shelfId: numericSearch },
-                        { price: numericSearch },
-                        { departmentId: numericSearch },
-                        { totalCount: numericSearch },
-                        { availableCount: numericSearch },
-                    ];
+                        { ISBN: numericSearch }
+                     ];
                 } else {
                     searchFilter.$or = [
-                        { status: { $regex: criteria.search, $options: "i" } },
-                        { name: { $regex: criteria.search, $options: "i" } },
-                        { author: { $regex: criteria.search, $options: "i" } },
-                        {
-                            publisher: {
-                                $regex: criteria.search,
-                                $options: "i",
-                            },
-                        },
                         { RFID: criteria.search },
                     ];
                 }
@@ -242,27 +233,25 @@ class BooksService extends BaseService {
             }
 
             const books = await booksModel.find(searchFilter);
-
+            if (!books || books.length === 0) {
+                return { error: "Books not found" };
+            }
             const populatedBooks = await Promise.all(
                 books.map(async (book) => {
                     const shelf = await shelfModel.findOne({
                         shelfId: book.shelfId,
                     });
-                    const department = await departmentModel.findOne({
-                        departmentId: book.departmentId,
-                    });
-                    return { ...book._doc, shelf, department };
+                    
+                    return { ...book._doc, shelf };
                 })
             );
-            if (!books) {
-                return { error: "Book not found" };
-            }
-            const issueLogs = await bookIssueLog.find({
+            
+            const issueLogs = await bookIssueLogModel.find({
                 bookId: { $in: books.map((book) => book.bookId) },
-                returned: false,
+                isReturn: false,
             });
-
             const studentIds = issueLogs.map((issue) => issue.addmissionId);
+            console.log(studentIds)
             const students = await Student.find({
                 addmissionId: { $in: studentIds },
             });
@@ -274,9 +263,8 @@ class BooksService extends BaseService {
             const data = issueLogs.map((issue) => ({
                 studentName:
                     studentMap[issue.addmissionId] || "Unknown Student",
-                issueDate: issue.issueDate,
+                issueDate: issue.issuedDate,
             }));
-
             return {
                 data: "books",
                 populatedBooks: populatedBooks,
@@ -292,7 +280,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) {}
+        } catch (error) { }
     }
 }
 module.exports = new BooksService(booksModel, "books");
