@@ -8,8 +8,6 @@ class documentConfiguration extends BaseService {
     }
     async updateUser(groupId,addmissionId,data) {
         try {
-            console.log(data+"________)))")
-            console.log(groupId+"+++++++++++")
             const resp = await documentConfigrationModel.findOneAndUpdate(
                 { addmissionId: addmissionId, groupId: groupId },
 
