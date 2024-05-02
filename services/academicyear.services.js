@@ -22,8 +22,14 @@ class AcademicYearService extends BaseService {
 
     async updateDataById(academicYearId, groupId, newData) {
         try {
+            if (newData.currentYear === true) {
+                await AcademicYearModel.updateMany(
+                    { groupId: groupId, currentYear: true },
+                    { $set: { currentYear: false } }
+                );
+            }
             const updatedData = await AcademicYearModel.findOneAndUpdate(
-                { academicYearId: academicYearId, groupId: groupId },
+                { academicYearId: Number(academicYearId), groupId: Number(groupId) },
                 newData,
                 { new: true }
             );
@@ -32,6 +38,7 @@ class AcademicYearService extends BaseService {
             throw error;
         }
     }
+
 
     getAllDataByGroupId(groupId, criteria) {
         const query = {
