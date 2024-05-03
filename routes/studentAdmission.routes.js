@@ -62,19 +62,19 @@ router.post("/data/save", async (req, res, next) => {
             const existingDocument = await service.getByAddmissionIdData(
                 req.body.addmissionId
             );
-
             if (existingDocument.data !== null) {
                 if (req.body.documents && req.body.documents.length > 0) {
                     for (const documentData of req.body.documents) {
                         const updatedDocument = {
                             documentTitle: documentData.documentTitle || "",
                             expiryDate: documentData.expiryDate || "",
-                            formDate: documentData.formDate || "",
+                            formDate: documentData.formDate|| "",
                             documentUrl: documentData.documentUrl || "",
                             groupId: req.body.groupId 
                         };
 
                         const documentUpdateResponse = await documentConfigurationService.updateUser(
+                            req.body.groupId,
                             req.body.addmissionId,
                             updatedDocument 
                         );
