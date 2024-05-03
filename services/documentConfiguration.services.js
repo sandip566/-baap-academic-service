@@ -6,7 +6,7 @@ class documentConfiguration extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async updateUser(addmissionId, groupId, data) {
+    async updateUser(groupId,addmissionId,data) {
         try {
             const resp = await documentConfigrationModel.findOneAndUpdate(
                 { addmissionId: addmissionId, groupId: groupId },
