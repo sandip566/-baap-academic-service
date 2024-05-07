@@ -933,6 +933,79 @@ class StudentsAdmmisionService extends BaseService {
             throw new Error("Error getting admission listing");
         }
     }
+    async  getAdmissionListingForDonation(groupId, academicYear) {
+        try {
+            const pipeline =[
+                {
+                  $match: {
+                    groupId:Number(groupId)
+                  }
+                },
+                {
+                  $lookup: {
+                    from: "studentsadmissions",
+                    localField: "courseId",
+                    foreignField: "courseDetails.course_id",
+                    as: "students"
+                  }
+                },
+                {
+                  $match: {
+                    "students.academicYear": academicYear,
+                    "students.admissionStatus": "Confirm"
+                  }
+                },
+                {
+                  $unwind: "$students"
+                },
+                {
+                  $unwind: "$students.feesDetails"
+                },
+                {
+                  $lookup: {
+                    from: "feestemplates",
+                    localField: "students.feesDetails.feesTemplateId",
+                    foreignField: "feesTemplateId",
+                    as: "feeTemplateData"
+                  }
+                },
+                {
+                  $match: {
+                    "feeTemplateData.isShowInAccounting": false
+                  }
+                },
+                {
+                  $group: {
+                     _id: { courseId: "$courseId", courseName: "$CourseName" },
+                    studentCount: { $sum: 1 }
+                  }
+                },
+                {
+                  $project: {
+                    _id: 0,
+                    courseId: "$_id.courseId",
+                    courseName: "$_id.courseName",
+                    studentCount: 1
+                  }
+                }
+              ];
+    
+            const result = await courseModel.aggregate(pipeline);
+  
+            let formattedCoursePayments = result.map(course => ({
+                name: course.courseName,
+                id: course.courseId,
+                count: course.studentCount,
+                noOfStudents: course.studentCount || 0
+            }));
+    
+            return { data: formattedCoursePayments };
+        } catch (error) {
+            console.error(error);
+            throw new Error("Error getting admission listing");
+        }
+    }
+    
     async getPendingInstallmentByAdmissionId(addmissionId) {
         try {
             const pipeline = [

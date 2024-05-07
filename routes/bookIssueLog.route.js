@@ -251,7 +251,16 @@ router.get("/getBooksdetails/:userId", async (req, res) => {
 });
 router.post("/reserve-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, reserveDate, userId } = req.body;
+        const {
+            groupId,
+            bookId,
+            addmissionId,
+            reserveDate,
+            userId,
+            totalCopies,
+            ISBN,
+            bookName
+        } = req.body;
         const serviceResponse = service.reserveBook(groupId, bookId);
         if (!serviceResponse) {
             return res.status(400).json({
@@ -278,6 +287,9 @@ router.post("/reserve-book", async (req, res) => {
             addmissionId: addmissionId,
             reserveDate: new Date(),
             isReserve: true,
+            totalCopies: totalCopies,
+            ISBN: ISBN,
+            bookName: bookName,
             userId: userId,
             status: "Reserved",
         };

@@ -63,25 +63,45 @@ router.post("/data/save", async (req, res, next) => {
                 req.body.addmissionId
             );
             if (existingDocument.data !== null) {
-                if (req.body.documents && req.body.documents.length > 0) {
-                    for (const documentData of req.body.documents) {
-                        const updatedDocument = {
-                            documentTitle: documentData.documentTitle || "",
-                            expiryDate: documentData.expiryDate || "",
-                            formDate: documentData.formDate|| "",
-                            documentUrl: documentData.documentUrl || "",
-                            groupId: req.body.groupId 
-                        };
-
-                        const documentUpdateResponse = await documentConfigurationService.updateUser(
-                            req.body.groupId,
-                            req.body.addmissionId,
-                            updatedDocument 
-                        );
-                        console.log(documentUpdateResponse);
-                    }
-                }
-        
+//                 if (req.body.documents && req.body.documents.length > 0) {
+//                     for (const documentData of req.body.documents) {
+//                         const updatedDocument = {
+//                             documentTitle: documentData.documentTitle || "",
+//                             expiryDate: documentData.expiryDate || "",
+//                             formDate: documentData.formDate|| "",
+//                             documentUrl: documentData.documentUrl || "",
+//                             groupId: req.body.groupId ,
+//                             userId: req.body.userId
+//                         };
+// console.log(updatedDocument);
+//                         const documentUpdateResponse = await documentConfigurationService.updateUser(
+//                             req.body.groupId,
+//                             req.body.addmissionId,
+//                             updatedDocument 
+//                         );
+//                         console.log(documentUpdateResponse);
+//                     }
+//                 }
+if (req.body.documents && req.body.documents.length > 0) {
+    for (const documentData of req.body.documents) {
+        const documentId = Date.now() + Math.floor(Math.random() * 1000);
+        const document = new DocumentConfiguration({
+            documentTitle: documentData.documentTitle || "",
+            expiryDate: documentData.expiryDate || "",
+            formDate: documentData.formDate || "",
+            documentUrl: documentData.documentUrl || "",
+            documentId: documentId,
+            groupId: req.body.groupId,
+            userId:req.body.userId,
+            addmissionId:req.body.addmissionId,
+            empId:req.body.empId,
+            roleId:req.body.roleId,
+            
+        });
+        console.log(document);
+        await document.save();
+    }
+}
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
@@ -150,6 +170,7 @@ router.post("/data/save", async (req, res, next) => {
                             roleId:req.body.roleId,
                             
                         });
+                        console.log(document);
                         await document.save();
                     }
                 }
@@ -341,6 +362,24 @@ router.get(
             const academicYear = req.params.academicYear;
 
             const courseData = await service.getAdmissionListing(
+                groupId,
+                academicYear
+            );
+            res.json(courseData);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+router.get(
+    "/all/getDonationAdmissionListing/groupId/:groupId/academicYear/:academicYear",
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const academicYear = req.params.academicYear;
+
+            const courseData = await service.getAdmissionListingForDonation(
                 groupId,
                 academicYear
             );

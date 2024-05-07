@@ -720,6 +720,7 @@ class feesPaymentService extends BaseService {
                             as: "feesPaymentData",
                         },
                     },
+
                     { $match: feesMatchStage },
                     {
                         $addFields: {
@@ -727,9 +728,23 @@ class feesPaymentService extends BaseService {
                                 $sum: {
                                     $map: {
                                         input: "$feesPaymentData",
+
                                         as: "payment",
                                         in: {
-                                            $toDouble: "$$payment.paidAmount",
+                                            $cond: [
+                                                {
+                                                    $eq: [
+                                                        "$$payment.isShowInAccounting",
+                                                        false,
+                                                    ],
+                                                },
+                                                {
+                                                    $toDouble:
+                                                        "$$payment.paidAmount",
+                                                },
+                                                0,
+                                            ],
+                                            // $toDouble: "$$payment.paidAmount",
                                         },
                                     },
                                 },
@@ -1533,7 +1548,7 @@ class feesPaymentService extends BaseService {
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
-                    isShowInAccounting: true,
+                    isShowInAccounting: false,
                 });
 
                 console.log(

@@ -52,7 +52,7 @@ const AssetSchema = new mongoose.Schema(
     },
     serialNo: {
       type: Number,
-      required: true
+      required: false
     },
     modelName: {
       type: String,

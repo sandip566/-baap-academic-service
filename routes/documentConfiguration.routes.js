@@ -28,6 +28,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             documntConfigurationId: req.query.documntConfigurationId,
             userId: req.query.userId,
+            category:req.query.category,
             roleId: req.query.roleId,
             addmissionId: req.query.addmissionId,
             academicYear: req.query.academicYear,
@@ -84,6 +85,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 filteredDocuments = documentConfigurations.filter(
                     (documentConfiguration) => {
                         return documentConfiguration.userId == criteria.userId;
+                    }
+                );
+            }else if (criteria.category) {
+                filteredDocuments = documentConfigurations.filter(
+                    (documentConfiguration) => {
+                        return documentConfiguration.category == criteria.category;
                     }
                 );
             }
