@@ -433,6 +433,12 @@ class StudentsAdmmisionService extends BaseService {
                     $options: "i",
                 };
             }
+            if (query.status) {
+                searchFilter.status = {
+                    $regex: query.status,
+                    $options: "i",
+                };
+            }
 
             if (query.CourseName) {
                 const courseIds = await courseModel.find({

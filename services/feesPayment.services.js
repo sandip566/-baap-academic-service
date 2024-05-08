@@ -104,8 +104,8 @@ class feesPaymentService extends BaseService {
                         familyDetails: [
                             {
                                 father_phone_number:
-                                    admissionData?.familyDetails[0]
-                                        ?.father_phone_number,
+                                    admissionData?.familyDetails?.[0]
+                                        ?.father_phone_number ?? null,
                             },
                         ],
                     };

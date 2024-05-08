@@ -283,6 +283,7 @@ router.get(
                 phoneNumber: req.query.phoneNumber,
                 lastName: req.query.lastName,
                 admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
                 search: req.query.search,
                 CourseName: req.query.CourseName,
                 className: req.query.className

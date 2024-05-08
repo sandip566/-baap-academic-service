@@ -2,6 +2,7 @@ const AssetRequestModel = require("../schema/assetrequest.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
+const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 class AssetRequestService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -73,7 +74,27 @@ class AssetRequestService extends BaseService {
             });
         }
     }
-
+    async  getClearanceData(groupId, userId) {
+        try {
+            
+            let assetData = await AssetRequestModel.find({ groupId: groupId, userId: userId, status: "Issued" });
+            console.log(assetData);
+            
+            let bookData = await bookIssueLogModel.find({ groupId: groupId, userId: userId, isReturn: false });
+            console.log(bookData);
+    
+            let response = {
+                bookData: bookData,
+                assetData: assetData
+            };
+            
+            return response;
+        } catch (error) {
+            console.error(error);
+            throw error; 
+        }
+    }
+    
     async getAssetsDetailsById(userId) {
         return this.execute(() => {
             return AssetRequestModel.find({

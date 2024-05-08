@@ -6,6 +6,18 @@ const AdmissionCancelSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        addmissionId:{
+            type: Number,
+            required: true,
+        },
+        userId:{
+            type: Number,
+            required: true,  
+        },
+        admissionCancelId:{
+            type: Number,
+            required: false, 
+        },
         status:{
             type:String,
             required:false,
