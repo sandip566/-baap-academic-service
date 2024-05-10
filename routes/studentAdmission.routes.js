@@ -303,7 +303,41 @@ router.get(
         }
     }
 );
+router.get(
+    "/all/getDonationDataByGroupId/:groupId",
+    // TokenService.checkPermission(["EAC1"]),
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const page = parseInt(req.query.page) || 1;
+            const perPage = parseInt(req.query.limit);
+            const criteria = {
+                // phoneNumber: req.query.phoneNumber,
+                academicYear: req.query.academicYear,
+                firstName: req.query.firstName,
+                phoneNumber: req.query.phoneNumber,
+                lastName: req.query.lastName,
+                admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
+                search: req.query.search,
+                CourseName: req.query.CourseName,
+                className: req.query.className
+            };
 
+            const serviceResponse = await service.getDonationDataByGroupId(
+                groupId,
+                criteria,
+                page,
+                perPage
+            );
+
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
 router.get(
     "/all/confirmAdmission/:groupId",
     async (req, res) => {

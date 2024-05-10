@@ -6,12 +6,12 @@ const configurationSchema = new mongoose.Schema(
             type:Number,
             require:true
         },
-        configrationId:{
+        configurationId:{
             type:Number
         }
     },
     { timestamps: true ,strict:false}
 );
 
-const ConfigrationModel = mongoose.model("configration", configurationSchema);
-module.exports = ConfigrationModel;
+const ConfigurationModel = mongoose.model("configuration", configurationSchema);
+module.exports = ConfigurationModel;

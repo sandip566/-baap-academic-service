@@ -17,6 +17,7 @@ class AssetRequestService extends BaseService {
         if (criteria.type) query.type = new RegExp(criteria.type, "i");
         if (criteria.category) query.category = new RegExp(criteria.category, "i");
         if (criteria.empId) query.empId = criteria.empId;
+        if (criteria.managerUserId) query.managerUserId = criteria.managerUserId;
         if (criteria.userId) query.userId = criteria.userId;
         return this.preparePaginationAndReturnData(query, criteria);
     }

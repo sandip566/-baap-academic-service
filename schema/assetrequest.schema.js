@@ -18,6 +18,10 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        managerUserId:{
+            type: Number,
+            required: false
+        },
         name: {
             type: String,
             required: false,

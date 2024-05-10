@@ -897,6 +897,22 @@ class feesPaymentService extends BaseService {
                     "feesPaymentData.isShowInAccounting": true,
                 };
 
+                if (criteria.search) {
+                    const numericSearch = parseInt(criteria.search);
+                    if (!isNaN(numericSearch)) {
+                        matchStage.$or = [
+                            { firstName: { $regex: criteria.search, $options: "i" } },
+                            { lastName: { $regex: criteria.search, $options: "i" } },
+                            { phoneNumber: numericSearch },
+                            { addmissionId: numericSearch },
+                        ];
+                    } else {
+                        matchStage.$or = [
+                            { firstName: { $regex: criteria.search, $options: "i" } },
+                            { lastName: { $regex: criteria.search, $options: "i" } },
+                        ];
+                    }
+                }
                 if (criteria.currentDate) {
                     feesMatchStage["feesPaymentData.currentDate"] =
                         criteria.currentDate;

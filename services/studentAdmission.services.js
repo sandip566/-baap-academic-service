@@ -53,7 +53,7 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async updateByUserId( groupId,userId, newData) {
+    async updateByUserId(groupId, userId, newData) {
         try {
             const updatedData = await studentAdmissionModel.findOneAndUpdate(
                 { groupId: groupId, userId: userId },
@@ -197,13 +197,7 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async getAllByGroupId(
-        groupId,
-        query,
-        page,
-        perPage,
-        reverseOrder = true
-    ) {
+    async getAllByGroupId(groupId, query, page, perPage, reverseOrder = true) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -441,9 +435,11 @@ class StudentsAdmmisionService extends BaseService {
             }
 
             if (query.CourseName) {
-                const courseIds = await courseModel.find({
-                    CourseName: { $regex: query.CourseName, $options: "i" },
-                }).select("courseId");
+                const courseIds = await courseModel
+                    .find({
+                        CourseName: { $regex: query.CourseName, $options: "i" },
+                    })
+                    .select("courseId");
                 if (courseIds && courseIds.length > 0) {
                     searchFilter["courseDetails.course_id"] = {
                         $in: courseIds.map((course) => course.courseId),
@@ -583,7 +579,253 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+    async getDonationDataByGroupId(
+        groupId,
+        query,
+        page,
+        limit,
+        reverseOrder = true
+    ) {
+        try {
+            const searchFilter = {
+                groupId: Number(groupId),
+            };
 
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { firstName: { $regex: query.search, $options: "i" } },
+                        { lastName: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: numericSearch },
+                        { addmissionId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { firstName: { $regex: query.search, $options: "i" } },
+                        { lastName: { $regex: query.search, $options: "i" } },
+                    ];
+                }
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = query.phoneNumber;
+            }
+
+            if (query.academicYear) {
+                searchFilter.academicYear = query.academicYear;
+            }
+
+            if (query.firstName) {
+                searchFilter.firstName = {
+                    $regex: query.firstName,
+                    $options: "i",
+                };
+            }
+
+            if (query.lastName) {
+                searchFilter.lastName = {
+                    $regex: query.lastName,
+                    $options: "i",
+                };
+            }
+
+            if (query.admissionStatus) {
+                searchFilter.admissionStatus = {
+                    $regex: query.admissionStatus,
+                    $options: "i",
+                };
+            }
+            if (query.status) {
+                searchFilter.status = {
+                    $regex: query.status,
+                    $options: "i",
+                };
+            }
+
+            if (query.CourseName) {
+                const courseIds = await courseModel
+                    .find({
+                        CourseName: { $regex: query.CourseName, $options: "i" },
+                    })
+                    .select("courseId");
+                if (courseIds && courseIds.length > 0) {
+                    searchFilter["courseDetails.course_id"] = {
+                        $in: courseIds.map((course) => course.courseId),
+                    };
+                } else {
+                    return { message: "No data found with the courseName" };
+                }
+            }
+
+            if (query.className) {
+                const classIds = await ClassModel.find({
+                    name: { $regex: query.className, $options: "i" },
+                }).select("classId");
+                if (classIds && classIds.length > 0) {
+                    searchFilter["courseDetails.class_id"] = {
+                        $in: classIds.map((cls) => cls.classId),
+                    };
+                } else {
+                    return { message: "No data found with the class name" };
+                }
+            }
+
+            const currentPage = page;
+            const perPage = limit;
+            const skip = (currentPage - 1) * perPage;
+
+            const pipeline = [
+                { $match: searchFilter },
+                {
+                    $unwind: "$feesDetails",
+                },
+                {
+                    $lookup: {
+                        from: "feestemplates",
+                        localField: "feesDetails.feesTemplateId",
+                        foreignField: "feesTemplateId",
+                        as: "feeTemplateData",
+                    },
+                },
+                {
+                    $addFields: {
+                        "feesDetails.feesTemplateId": {
+                            $arrayElemAt: ["$feeTemplateData", 0],
+                        },
+                    },
+                },
+                {
+                    $match: {
+                        "feeTemplateData.isShowInAccounting": false,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "courses",
+                        localField: "courseDetails.course_id",
+                        foreignField: "courseId",
+                        as: "course_id",
+                    },
+                },
+                {
+                    $addFields: {
+                        "courseDetails.course_id": {
+                            $arrayElemAt: ["$course_id", 0],
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "classes",
+                        localField: "courseDetails.class_id",
+                        foreignField: "classId",
+                        as: "class_id",
+                    },
+                },
+                {
+                    $addFields: {
+                        "courseDetails.class_id": {
+                            $arrayElemAt: ["$class_id", 0],
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "divisions",
+                        localField: "courseDetails.division_id",
+                        foreignField: "divisionId",
+                        as: "division_id",
+                    },
+                },
+                {
+                    $addFields: {
+                        "courseDetails.division_id": {
+                            $arrayElemAt: ["$division_id", 0],
+                        },
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "departments",
+                        localField: "courseDetails.department_id",
+                        foreignField: "departmentId",
+                        as: "department_id",
+                    },
+                },
+                {
+                    $addFields: {
+                        "courseDetails.department_id": {
+                            $arrayElemAt: ["$department_id", 0],
+                        },
+                    },
+                },
+                {
+                    $unset: "course_id",
+                },
+                {
+                    $unset: "department_id",
+                },
+                {
+                    $unset: "division_id",
+                },
+                {
+                    $unset: "class_id",
+                },
+                {
+                    $unset: "feeTemplateData",
+                },
+
+                { $skip: skip },
+                { $limit: perPage },
+                { $sort: { _id: -1 } },
+            ];
+
+            const servicesWithData = await studentAdmissionModel.aggregate(
+                pipeline
+            );
+            servicesWithData.sort((a, b) => {
+                const dateA = new Date(a.createdAt);
+                const dateB = new Date(b.createdAt);
+                return reverseOrder ? dateB - dateA : dateA - dateB;
+            });
+
+            const totalItemsCount = await studentAdmissionModel.aggregate([
+                { $match: searchFilter },
+                {
+                    $unwind: "$feesDetails",
+                },
+                {
+                    $lookup: {
+                        from: "feestemplates",
+                        localField: "feesDetails.feesTemplateId",
+                        foreignField: "feesTemplateId",
+                        as: "feeTemplateData",
+                    },
+                },
+                {
+                    $match: {
+                        "feeTemplateData.isShowInAccounting": false,
+                    },
+                },
+                {
+                    $count: "totalItemsCount",
+                },
+            ]);
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: servicesWithData,
+                    totalItemsCount: totalItemsCount[0]?.totalItemsCount,
+                },
+            };
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
     async getfeesPayment(groupId, query) {
         try {
             const searchFilter = {
@@ -609,7 +851,7 @@ class StudentsAdmmisionService extends BaseService {
             if (query.phoneNumber) {
                 searchFilter.phoneNumber = query.phoneNumber;
             }
-           
+
             if (query.addmissionId) {
                 searchFilter.addmissionId = query.addmissionId;
             }
@@ -629,7 +871,6 @@ class StudentsAdmmisionService extends BaseService {
                     $options: "i",
                 };
             }
-
             const services = await studentAdmissionModel.find(searchFilter);
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
@@ -672,7 +913,7 @@ class StudentsAdmmisionService extends BaseService {
                                         let course_id;
                                         let class_id;
                                         let division_id;
-                                        if (courseDetail.course_id) {
+                                        if (courseDetail?.course_id) {
                                             course_id =
                                                 await courseModel.findOne({
                                                     courseId:
@@ -683,7 +924,7 @@ class StudentsAdmmisionService extends BaseService {
                                                 course_id;
                                         }
 
-                                        if (courseDetail.class_id) {
+                                        if (courseDetail?.class_id) {
                                             class_id = await ClassModel.findOne(
                                                 {
                                                     classId:
@@ -693,7 +934,7 @@ class StudentsAdmmisionService extends BaseService {
                                             courseAdditionalData.class_id =
                                                 class_id;
                                         }
-                                        if (courseDetail.division_id) {
+                                        if (courseDetail?.division_id) {
                                             division_id =
                                                 await DivisionModel.findOne({
                                                     divisionId:
@@ -827,9 +1068,9 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                    data.empId === query.empId &&
-                    data.academicYear==query.academicYear&&
-                    data.addmissionId == query.addmissionId,
+                        data.empId === query.empId &&
+                        data.academicYear == query.academicYear &&
+                        data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -891,7 +1132,7 @@ class StudentsAdmmisionService extends BaseService {
                     admission.courseDetails.length > 0
                 ) {
                     admission.courseDetails.forEach((courseDetail) => {
-                        const courseId = courseDetail.course_id;
+                        const courseId = courseDetail?.course_id;
 
                         const courseExists = courseData.find(
                             (course) => course.courseId === courseId
@@ -939,79 +1180,82 @@ class StudentsAdmmisionService extends BaseService {
             throw new Error("Error getting admission listing");
         }
     }
-    async  getAdmissionListingForDonation(groupId, academicYear) {
+    async getAdmissionListingForDonation(groupId, academicYear) {
         try {
-            const pipeline =[
+            const pipeline = [
                 {
-                  $match: {
-                    groupId:Number(groupId)
-                  }
+                    $match: {
+                        groupId: Number(groupId),
+                    },
                 },
                 {
-                  $lookup: {
-                    from: "studentsadmissions",
-                    localField: "courseId",
-                    foreignField: "courseDetails.course_id",
-                    as: "students"
-                  }
+                    $lookup: {
+                        from: "studentsadmissions",
+                        localField: "courseId",
+                        foreignField: "courseDetails.course_id",
+                        as: "students",
+                    },
                 },
                 {
-                  $match: {
-                    "students.academicYear": academicYear,
-                    "students.admissionStatus": "Confirm"
-                  }
+                    $match: {
+                        "students.academicYear": academicYear,
+                        "students.admissionStatus": "Confirm",
+                    },
                 },
                 {
-                  $unwind: "$students"
+                    $unwind: "$students",
                 },
                 {
-                  $unwind: "$students.feesDetails"
+                    $unwind: "$students.feesDetails",
                 },
                 {
-                  $lookup: {
-                    from: "feestemplates",
-                    localField: "students.feesDetails.feesTemplateId",
-                    foreignField: "feesTemplateId",
-                    as: "feeTemplateData"
-                  }
+                    $lookup: {
+                        from: "feestemplates",
+                        localField: "students.feesDetails.feesTemplateId",
+                        foreignField: "feesTemplateId",
+                        as: "feeTemplateData",
+                    },
                 },
                 {
-                  $match: {
-                    "feeTemplateData.isShowInAccounting": false
-                  }
+                    $match: {
+                        "feeTemplateData.isShowInAccounting": false,
+                    },
                 },
                 {
-                  $group: {
-                     _id: { courseId: "$courseId", courseName: "$CourseName" },
-                    studentCount: { $sum: 1 }
-                  }
+                    $group: {
+                        _id: {
+                            courseId: "$courseId",
+                            courseName: "$CourseName",
+                        },
+                        studentCount: { $sum: 1 },
+                    },
                 },
                 {
-                  $project: {
-                    _id: 0,
-                    courseId: "$_id.courseId",
-                    courseName: "$_id.courseName",
-                    studentCount: 1
-                  }
-                }
-              ];
-    
+                    $project: {
+                        _id: 0,
+                        courseId: "$_id.courseId",
+                        courseName: "$_id.courseName",
+                        studentCount: 1,
+                    },
+                },
+            ];
+
             const result = await courseModel.aggregate(pipeline);
-  
-            let formattedCoursePayments = result.map(course => ({
+
+            let formattedCoursePayments = result.map((course) => ({
                 name: course.courseName,
                 id: course.courseId,
                 count: course.studentCount,
-                noOfStudents: course.studentCount || 0
+                noOfStudents: course.studentCount || 0,
             }));
-    
+
             return { data: formattedCoursePayments };
         } catch (error) {
             console.error(error);
             throw new Error("Error getting admission listing");
         }
     }
-    
+
     async getPendingInstallmentByAdmissionId(addmissionId) {
         try {
             const pipeline = [

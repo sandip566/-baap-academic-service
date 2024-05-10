@@ -33,6 +33,17 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+router.get("/getLibraryPayment/groupId/:groupId/userId/:userId/bookIssueLogId/:bookIssueLogId", async (req, res) => {
+    const groupId = req.params.groupId
+  const userId=req.params.userId
+   const bookIssueLogId= req.params.bookIssueLogId 
+    const serviceResponse = await service.getPenalty(
+        groupId,
+        userId,
+        bookIssueLogId
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 
 router.delete("/groupId/:groupId/libraryPaymentId/:libraryPaymentId", async (req, res) => {
     try {

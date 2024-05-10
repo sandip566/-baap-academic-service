@@ -1,4 +1,4 @@
-const ConfigrationModel = require("../schema/configration.schema");
+const ConfigrationModel = require("../schema/configuration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
 class ConfigrationService extends BaseService {
@@ -6,13 +6,12 @@ class ConfigrationService extends BaseService {
         super(dbModel, entityName);
     }
 
-
-
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
-        if (criteria.configrationId) query.configrationId = criteria.configrationId;
+        if (criteria.configrationId)
+            query.configrationId = criteria.configrationId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -26,7 +25,12 @@ class ConfigrationService extends BaseService {
 
     async updateConfigrationById(configrationId, groupId, newData) {
         try {
-            const updateConfigrationData = await ConfigrationModel.findOneAndUpdate({ configrationId: configrationId, groupId: groupId }, newData, { new: true });
+            const updateConfigrationData =
+                await ConfigrationModel.findOneAndUpdate(
+                    { configrationId: configrationId, groupId: groupId },
+                    newData,
+                    { new: true }
+                );
             return updateConfigrationData;
         } catch (error) {
             throw error;
@@ -34,4 +38,4 @@ class ConfigrationService extends BaseService {
     }
 }
 
-module.exports = new ConfigrationService(ConfigrationModel, 'configration');
+module.exports = new ConfigrationService(ConfigrationModel, "configuration");
