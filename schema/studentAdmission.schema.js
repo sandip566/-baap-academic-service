@@ -5,6 +5,10 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        roleId: {
+            type: Number,
+            required: false,
+        },
         studentAdmissionId: {
             type: Number,
         },

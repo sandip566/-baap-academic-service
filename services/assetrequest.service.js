@@ -12,6 +12,22 @@ class AssetRequestService extends BaseService {
         const query = {
             groupId: groupId,
         };
+        if (criteria.search) {
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                query.$or = [
+                    { userName: { $regex: criteria.search, $options: "i" } },
+                    { status: { $regex: criteria.search, $options: "i" } },
+                    { empId: numericSearch },
+                    { userId: numericSearch },
+                ];
+            } else {
+                query.$or = [
+                    { userName: { $regex: criteria.search, $options: "i" } },
+                    { status: { $regex: criteria.search, $options: "i" } },
+                ];
+            }
+        }
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
         if (criteria.type) query.type = new RegExp(criteria.type, "i");

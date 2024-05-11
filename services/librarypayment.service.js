@@ -77,7 +77,6 @@ class LibraryPaymentService extends BaseService {
                 },
             ];
     
-            // Execute aggregation pipeline
             let response = await bookIssueLogModel.aggregate(pipeLine).exec();
             let data = {
                 data: response[0],

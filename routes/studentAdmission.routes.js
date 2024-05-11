@@ -270,7 +270,7 @@ router.post("/bulkupload", upload.single("excelFile"), async (req, res) => {
 
 router.get(
     "/all/getByGroupId/:groupId",
-    TokenService.checkPermission(["EAC1"]),
+    // TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
@@ -284,6 +284,7 @@ router.get(
                 lastName: req.query.lastName,
                 admissionStatus: req.query.admissionStatus,
                 status: req.query.status,
+                roleId:req.query.roleId,
                 search: req.query.search,
                 CourseName: req.query.CourseName,
                 className: req.query.className
@@ -305,7 +306,7 @@ router.get(
 );
 router.get(
     "/all/getDonationDataByGroupId/:groupId",
-    // TokenService.checkPermission(["EAC1"]),
+    TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;

@@ -75,6 +75,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         type: req.query.type,
         status: req.query.status,
         category: req.query.category,
+        search: req.query.search,
         managerUserId: req.query.managerUserId,
         empId: req.query.empId,
         userId: req.query.userId,

@@ -1220,11 +1220,11 @@ class feesPaymentService extends BaseService {
                     academicYear: criteria.academicYear,
                     admissionStatus: "Confirm",
                 });
-
+console.log(admissionData);
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
-                    isShowInAccounting: false,
+                    isShowInAccounting: true,
                 });
 
                 console.log(

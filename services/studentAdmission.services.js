@@ -406,6 +406,9 @@ class StudentsAdmmisionService extends BaseService {
             if (query.academicYear) {
                 searchFilter.academicYear = query.academicYear;
             }
+            if (query.roleId) {
+                searchFilter.roleId = query.roleId;
+            }
 
             if (query.firstName) {
                 searchFilter.firstName = {
@@ -539,7 +542,7 @@ class StudentsAdmmisionService extends BaseService {
                                                 );
                                             }
                                         }
-
+    
                                         return {
                                             ...courseDetail,
                                             ...additionalData,
