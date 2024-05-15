@@ -126,7 +126,13 @@ router.get(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
+router.get(
+    "/getAcademicYearId/:academicYearId",
+    async (req, res) => {
+        const serviceResponse = await service.getByacademicYearId(req.params.academicYearId);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.delete(
     "/:id",
     TokenService.checkPermission(["EMA4"]),

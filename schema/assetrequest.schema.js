@@ -26,6 +26,10 @@ const AssetRequestSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        userName:{
+            type: String,
+            required: false,
+        },
         category: {
             type: String,
             required: false
