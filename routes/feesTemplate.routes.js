@@ -121,6 +121,7 @@ router.get(
         const groupId = req.params.groupId;
         const criteria = {
             feesTemplateId: req.query.feesTemplateId,
+            isShowInAccounting:req.query.isShowInAccounting,
             pageNumber: parseInt(req.query.pageNumber) || 1,
             pageSize: parseInt(req.query.pageSize) || 100,
         };

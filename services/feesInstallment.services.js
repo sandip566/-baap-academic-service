@@ -405,6 +405,26 @@ class feesInstallmentService extends BaseService {
                         as: "feesPaymentData",
                     },
                 },
+                 {
+                $lookup: {
+                    from: "feespayments",
+                    let: { admissionId: "$addmissionId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$addmissionId", "$$admissionId"] },
+                                        { $eq: ["$academicYear", academicYear] },
+                                        { $eq: ["$isShowInAccounting", true] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: "feesPaymentData"
+                }
+            },
                 {
                     $project: {
                         _id: 0,
@@ -445,7 +465,7 @@ class feesInstallmentService extends BaseService {
             ]);
 
             // If no documents match the query, return a dummy document with counts as 0
-            if (data.length === 0) {
+            if (data.length == 0) {
                 data.push({
                     _id: classId,
                     totalPaidAmount: 0,

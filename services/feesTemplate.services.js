@@ -10,9 +10,12 @@ class Service extends BaseService {
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
+            
         };
         if (criteria.feesTemplateId)
             query.feesTemplateId = criteria.feesTemplateId;
+        if (criteria.isShowInAccounting)
+            query.isShowInAccounting = criteria.isShowInAccounting;
         return this.preparePaginationAndReturnData(query, criteria);
     }
     async getByfeesTemplateId(feesTemplateId) {
