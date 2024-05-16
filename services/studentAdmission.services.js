@@ -12,7 +12,7 @@ const SubjectModel = require("../schema/subjects.schema");
 const categoryModel = require("../schema/categories.schema");
 // const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
-const assetrequestModel=require("../schema/assetrequest.schema")
+const assetrequestModel = require("../schema/assetrequest.schema");
 const FeesPaymentModel = require("../schema/feesPayment.schema");
 const CategoriesModel = require("../schema/categories.schema");
 const AcademicYearModel = require("../schema/academicyear.schema");
@@ -97,8 +97,6 @@ class StudentsAdmmisionService extends BaseService {
                 addmissionId: addmissionId,
                 groupId: groupId,
             });
-            assetData=await assetrequestModel.get({userId:studentDeletionResult.data.userId})
-
             return {
                 studentDeletionResult: studentDeletionResult,
                 feesDeletionResult: feesDeletionResult,

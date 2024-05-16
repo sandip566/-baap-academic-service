@@ -266,7 +266,8 @@ console.log(issueLogs);
                 issueDate: issue.issuedDate,
                 bookIssueLogId:issue.bookIssueLogId,
                 userId: issue.userId,
-                addmissionId: issue.addmissionId
+                addmissionId: issue.addmissionId,
+                isOverdue: issue.isOverdue
 
             }));
             return {
