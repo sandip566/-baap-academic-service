@@ -1,25 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/vichels.services");
+const service = require("../services/vehicle.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
     "/",
-    checkSchema(require("../dto/vichels.dto")),
+    checkSchema(require("../dto/vehicle.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const vichelsId=+Date.now();
-        req.body.vichelsId=vichelsId
+        const vehicleId=+Date.now();
+        req.body.vehicleId=vehicleId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
-router.get("/all/vichels", async (req, res) => {
+router.get("/all/vehicle", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 
     requestResponsehelper.sendResponse(res, serviceResponse);
@@ -29,7 +29,7 @@ router.get("/all/vichels", async (req, res) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        vichelsId: req.query.vichelsId,
+        vehicleId: req.query.vehicleId,
       
     };
     const serviceResponse = await service.getAllDataByGroupId(
@@ -39,16 +39,16 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/vichelsId/:vichelsId", async (req, res) => {
+router.delete("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
     try {
-        const vichelsId = req.params.vichelsId;
+        const vehicleId = req.params.vehicleId;
         const groupId = req.params.groupId;
         const Data = await service.deleteTripHistroyById({
-            vichelsId: vichelsId,
+            vehicleId: vehicleId,
             groupId: groupId,
         });
         if (!Data) {
-            res.status(404).json({ error: "vichels data not found to delete" });
+            res.status(404).json({ error: "vehicle data not found to delete" });
         } else {
             res.status(201).json(Data);
         }
@@ -58,13 +58,13 @@ router.delete("/groupId/:groupId/vichelsId/:vichelsId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/vichelsId/:vichelsId", async (req, res) => {
+router.put("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
     try {
-        const vichelsId = req.params.vichelsId;
+        const vehicleId = req.params.vehicleId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updatevichelsById(
-            vichelsId,
+        const updateData = await service.updatevehicleById(
+            vehicleId,
             groupId,
             newData
         );
