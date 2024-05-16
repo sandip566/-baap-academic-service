@@ -24,5 +24,5 @@ const room = new mongoose.Schema(
   { strict: false, timestamps: true }
 );
 room.plugin(require("mongoose-autopopulate"));
-const roomModel = mongoose.model("room", room);
+const roomModel = mongoose.model("rooms", room);
 module.exports = roomModel;

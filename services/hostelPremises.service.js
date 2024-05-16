@@ -1,4 +1,4 @@
-const HostelModel = require("../schema/hostel.schema");
+const HostelModel = require("../schema/hostelPremises.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const studentAddmissionModel = require('../schema/studentAdmission.schema.js');
 

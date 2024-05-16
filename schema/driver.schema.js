@@ -35,7 +35,7 @@ const DriverSchema = new mongoose.Schema(
             required: true
         },
         driverJoingDate: {
-            type: Number,
+            type: String,
             required: true
         }
     },
