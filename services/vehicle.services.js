@@ -1,7 +1,7 @@
-const vichelsModel = require("../schema/vichels.schema");
+const vehicleModel = require("../schema/vehicle.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class vichelservice extends BaseService {
+class vehicleervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
@@ -10,14 +10,14 @@ class vichelservice extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.vichelsId) query.vichelsId = criteria.vichelsId;
+        if (criteria.vehicleId) query.vehicleId = criteria.vehicleId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteTripHistroyById(vichelsId, groupId) {
+    async deleteTripHistroyById(vehicleId, groupId) {
         try {
-            return await vichelsModel.deleteOne(
-                vichelsId,
+            return await vehicleModel.deleteOne(
+                vehicleId,
                 groupId
             );
         } catch (error) {
@@ -25,10 +25,10 @@ class vichelservice extends BaseService {
         }
     }
 
-    async updatevichelsById(vichelsId, groupId, newData) {
+    async updatevehicleById(vehicleId, groupId, newData) {
         try {
-            const updatedVisitor = await vichelsModel.findOneAndUpdate(
-                { vichelsId: vichelsId, groupId: groupId },
+            const updatedVisitor = await vehicleModel.findOneAndUpdate(
+                { vehicleId: vehicleId, groupId: groupId },
                 newData,
                 { new: true }
             );
@@ -40,4 +40,4 @@ class vichelservice extends BaseService {
 
    
 }
-module.exports = new vichelservice(vichelsModel, "vichels");
+module.exports = new vehicleervice(vehicleModel, "vehicle");

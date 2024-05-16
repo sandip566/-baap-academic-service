@@ -1,23 +1,23 @@
 const mongoose = require("mongoose");
-const vichels = new mongoose.Schema(
+const vehicle = new mongoose.Schema(
     {
         groupId: {
             type: Number,
             required: false
         },
-        vichelsId: {
+        vehicleId: {
             type: Number
         },
-        vichelsName: {
+        vehicleName: {
             type: String
         },
-        vichelsAddress: {
+        vehicleAddress: {
             type: String
         },
-        vichelsPhoneNo: {
+        vehiclePhoneNo: {
             type: Number
         },
-        vichelsEmail: {
+        vehicleEmail: {
             type: String
         },
         taxId: {
@@ -26,5 +26,5 @@ const vichels = new mongoose.Schema(
     },
     { strict: false, timestamps: true }
 );
-const vichelsModel = mongoose.model("vichels", vichels);
-module.exports = vichelsModel;
+const vehicleModel = mongoose.model("vehicle", vehicle);
+module.exports = vehicleModel;
