@@ -148,5 +148,12 @@ class AssetRequestService extends BaseService {
             });
         });
     }
+    async getAssetsDetailsByRequestId(requestId) {
+        return this.execute(() => {
+            return AssetRequestModel.find({
+                requestId: requestId,
+            });
+        });
+    }
 }
 module.exports = new AssetRequestService(AssetRequestModel, "assetrequest");

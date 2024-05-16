@@ -142,6 +142,12 @@ router.get("/get-assets-details-of-user/:userId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+router.get("/getDataByRequestId/:requestId", async (req, res) => {
+    const serviceResponse = await service.getAssetsDetailsByRequestId(
+        req.params.requestId
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/getClearanceData/groupId/:groupId/userId/:userId", async (req, res) => {
     const { groupId, userId } = req.params;
     try {
