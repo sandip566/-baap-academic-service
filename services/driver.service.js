@@ -5,12 +5,23 @@ class driverervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
- async   getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
         if (criteria.driverId) query.driverId = criteria.driverId;
+        if (criteria.phoneNumber) query.phoneNumber = criteria.phoneNumber;
+        if (criteria.driverName) query.driverName = new RegExp(criteria.driverName, "i");
+        if (criteria.search) {
+            const searchRegex = new RegExp(criteria.search, "i");
+            query.$or = [
+                { driverName: searchRegex },
+            ];
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                query.$or.push({ phoneNumber: numericSearch });
+            }
+        }
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -38,6 +49,6 @@ class driverervice extends BaseService {
         }
     }
 
-   
+
 }
 module.exports = new driverervice(driverModel, "driver");
