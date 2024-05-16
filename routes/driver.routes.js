@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const driverId=+Date.now();
-        req.body.driverId=driverId
+        const driverId = +Date.now();
+        req.body.driverId = driverId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -30,7 +30,11 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         driverId: req.query.driverId,
-      
+        driverName: req.query.driverName,
+        phoneNumber: req.query.phoneNumber,
+        search: req.query.search,
+        pageNumber: parseInt(req.query.pageNumber) || 1,
+        pageSize: parseInt(req.query.pageSize) || 10,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -38,6 +42,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 
 router.delete("/groupId/:groupId/driverId/:driverId", async (req, res) => {
     try {
