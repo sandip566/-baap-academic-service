@@ -49,13 +49,24 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         routeId: req.query.routeId,
         routeName: req.query.routeName,
-        schedule: req.query.schedule,
+        rootNumber: req.query.rootNumber,
+        busName: req.query.busName,
         pageNumber: parseInt(req.query.pageNumber) || 1,
+        pageSize: parseInt(req.query.pageSize) || 10,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
         criteria
     );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/getrouteId/:routeId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByrouteId(req.params.routeId);
+
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 

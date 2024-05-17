@@ -1,14 +1,14 @@
-const CareTakerModel = require("../schema/caretaker.schema");
+const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class CareTakerService extends BaseService {
+class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    
-    async getBycareTakerId(careTakerId) {
+
+    async getBytravellerId(travellerId) {
         return this.execute(() => {
-            return this.model.findOne({ careTakerId: careTakerId });
+            return this.model.findOne({ travellerId: travellerId });
         });
     }
 
@@ -16,13 +16,13 @@ class CareTakerService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.careTakerId) query.careTakerId = criteria.careTakerId;
+        if (criteria.travellerId) query.travellerId = criteria.travellerId;
         if (criteria.phoneNumber) query.phoneNumber = criteria.phoneNumber;
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
+        if (criteria.travellerName) query.travellerName = new RegExp(criteria.travellerName, "i");
         if (criteria.search) {
             const searchRegex = new RegExp(criteria.search, "i");
             query.$or = [
-                { driverName: searchRegex },
+                { travellerName: searchRegex },
             ];
             const numericSearch = parseInt(criteria.search);
             if (!isNaN(numericSearch)) {
@@ -32,10 +32,10 @@ class CareTakerService extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteTripHistroyById(careTakerId, groupId) {
+    async deleteTravellerId(travellerId, groupId) {
         try {
-            return await CareTakerModel.deleteOne(
-                careTakerId,
+            return await TravellerModel.deleteOne(
+                travellerId,
                 groupId
             );
         } catch (error) {
@@ -43,10 +43,10 @@ class CareTakerService extends BaseService {
         }
     }
 
-    async updatedriverById(careTakerId, groupId, newData) {
+    async updatetravellerById(travellerId, groupId, newData) {
         try {
-            const updatedVisitor = await CareTakerModel.findOneAndUpdate(
-                { careTakerId: careTakerId, groupId: groupId },
+            const updatedVisitor = await TravellerModel.findOneAndUpdate(
+                { travellerId: travellerId, groupId: groupId },
                 newData,
                 { new: true }
             );
@@ -55,7 +55,6 @@ class CareTakerService extends BaseService {
             throw error;
         }
     }
-
 }
 
-module.exports = new CareTakerService(CareTakerModel, 'caretaker');
+module.exports = new TravellerService(TravellerModel, 'traveller');

@@ -43,6 +43,15 @@ router.get("/all/careTaker", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getcareTakerId/:careTakerId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getBycareTakerId(req.params.careTakerId);
+
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {

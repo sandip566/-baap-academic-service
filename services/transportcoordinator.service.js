@@ -6,29 +6,35 @@ class transportcoordinatorervice extends BaseService {
         super(dbModel, entityName);
     }
 
- async   getAllDataByGroupId(groupId, criteria) {
+    async getBytransportCoordinatorId(transportCoordinatorId) {
+        return this.execute(() => {
+            return this.model.findOne({ transportCoordinatorId: transportCoordinatorId });
+        });
+    }
+
+    async   getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
-        if (criteria.transportcoordinatorId) query.transportcoordinatorId = criteria.transportcoordinatorId;
+        if (criteria.transportCoordinatorId) query.transportCoordinatorId = criteria.transportCoordinatorId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteTripHistroyById(transportcoordinatorId, groupId) {
+    async deletetransportcoordinatorById(transportCoordinatorId, groupId) {
         try {
-            return await transportcoordinatorModel.deleteOne({
-                transportcoordinatorId: transportcoordinatorId,
-                groupId: groupId,
-            });
+            return await transportcoordinatorModel.deleteOne(
+                transportCoordinatorId,
+                groupId
+            );
         } catch (error) {
             throw error;
         }
     }
 
-    async updatetransportcoordinatorById(transportcoordinatorId, groupId, newData) {
+    async updateTransportCoordinatorById(transportCoordinatorId, groupId, newData) {
         try {
             const updatedVisitor = await transportcoordinatorModel.findOneAndUpdate(
-                { transportcoordinatorId: transportcoordinatorId, groupId: groupId },
+                { transportCoordinatorId: transportCoordinatorId, groupId: groupId },
                 newData,
                 { new: true }
             );

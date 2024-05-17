@@ -3,26 +3,49 @@ const vehicle = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            required: false
+            required: true
         },
         vehicleId: {
-            type: Number
+            type: Number,
+            required: true
         },
         vehicleName: {
-            type: String
+            type: String,
+            required: true
         },
-        vehicleAddress: {
-            type: String
+        vehicleNumber: {
+            type: Number,
+            required: true
         },
-        vehiclePhoneNo: {
-            type: Number
+        vehicleType: {
+            type: String,
+            required: true
         },
-        vehicleEmail: {
-            type: String
+        vehicleModel:{
+            type: String,
+            required: false
         },
-        taxId: {
-            type: Number
-        }
+        vehicleCondition:{
+            type: String,
+            required: false
+        },
+        seatCapacity:{
+            type: Number,
+        },
+        vehicleAddress:[{
+            village:{
+                type: String, 
+            },
+            city:{
+                type: String, 
+            },
+            state:{
+                type: String, 
+            },
+            country:{
+                type: String,  
+            }
+        }]
     },
     { strict: false, timestamps: true }
 );

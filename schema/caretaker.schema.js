@@ -2,7 +2,11 @@ const mongoose = require("mongoose");
 
 const CareTakerSchema = new mongoose.Schema(
     {
-        name: {
+        groupId: {
+            type: Number,
+            required: true
+        },
+        careTakerName: {
             type: String,
             required: true,
         },
@@ -14,52 +18,61 @@ const CareTakerSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        age: {
+            type: Number,
+            required: true
+        },
         gender: {
             type: String,
             enum: ['Male', 'Female', 'Other'],
-            require: true
+            required: true,
         },
-        age: {
+        careTakerNumber: {
             type: Number,
-            require: true
+            required: true
         },
         experience: {
-            type: Number,
-            require: true
+            type: String,
+            required: true
         },
-        address: [{
-            addressLine: {
+        fromDate: {
+            type: String,
+            required: true
+        },
+        toDate: {
+            type: String,
+            required: true
+        },
+        careTakerAddress: [{
+            village: {
                 type: String,
-                required: false
+                required: true
             },
-            taluka: {
+            city: {
                 type: String,
-                required: false,
-            },
-            district: {
-                type: String,
-                required: false,
+                required: true
             },
             state: {
                 type: String,
-                required: false,
-            },
-            country: {
-                type: String,
-                required: false,
-            },
+                required: true
+            }
         }],
-        busId: {
-            type: Number,
-        },
-        groupId: {
-            type: Number,
-            required: false,
-        },
-        careTakerJoingDate: {
+        country: {
             type: String,
             required: true
-        }
+        },
+        KYC: [{
+            pancardNumber: {
+                type: Number
+            },
+            aadharNumber:{
+                type: Number
+            },
+            medicalCertificate: {
+                type: Boolean,
+                required: true
+            }
+        }]
     },
     { timestamps: true, strict: false }
 );

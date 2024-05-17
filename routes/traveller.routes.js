@@ -1,35 +1,53 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service = require("../services/vehicle.services");
+const service = require("../services/traveller.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
 router.post(
     "/",
-    checkSchema(require("../dto/vehicle.dto")),
+    checkSchema(require("../dto/traveller.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const vehicleId = +Date.now();
-        req.body.vehicleId = vehicleId
+        const travellerId = +Date.now();
+        req.body.travellerId = travellerId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
-router.get("/all/vehicle", async (req, res) => {
+router.delete("/:id", async (req, res) => {
+    const serviceResponse = await service.deleteById(req.params.id);
+
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.put("/:id", async (req, res) => {
+    const serviceResponse = await service.updateById(req.params.id, req.body);
+
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/:id", async (req, res) => {
+    const serviceResponse = await service.getById(req.params.id);
+
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/all/traveller", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getVehicleId/:vehicleId", async (req, res, next) => {
+router.get("/getTravellerId/:travellerId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getByvehicleId(req.params.vehicleId);
+    const serviceResponse = await service.getBytravellerId(req.params.travellerId);
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -37,12 +55,13 @@ router.get("/getVehicleId/:vehicleId", async (req, res, next) => {
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        vehicleId: req.query.vehicleId,
-        vehicleName: req.query.vehicleName,
-        vehicleNumber: req.query.vehicleNumber,
+        travellerId: req.query.travellerId,
+        travellerName: req.query.travellerName,
+        phoneNumber: req.query.phoneNumber,
         search: req.query.search,
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
+      
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -51,16 +70,16 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
+router.delete("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
-        const vehicleId = req.params.vehicleId;
+        const travellerId = req.params.travellerId;
         const groupId = req.params.groupId;
-        const Data = await service.deleteTripHistroyById({
-            vehicleId: vehicleId,
+        const Data = await service.deleteTravellerId({
+            travellerId: travellerId,
             groupId: groupId,
         });
         if (!Data) {
-            res.status(404).json({ error: "vehicle data not found to delete" });
+            res.status(404).json({ error: "traveller data not found to delete" });
         } else {
             res.status(201).json(Data);
         }
@@ -70,13 +89,13 @@ router.delete("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
     }
 });
 
-router.put("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
+router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
-        const vehicleId = req.params.vehicleId;
+        const travellerId = req.params.travellerId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updatevehicleById(
-            vehicleId,
+        const updateData = await service.updatetravellerById(
+            travellerId,
             groupId,
             newData
         );
@@ -90,8 +109,5 @@ router.put("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
-
-
 
 module.exports = router;
