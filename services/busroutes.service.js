@@ -10,13 +10,26 @@ class BusRoutesService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        criteria.pageSize = 10;
-        if (criteria.routeName)
-            query.routeName = new RegExp(criteria.routeName, "i");
-        if (criteria.schedule)
-            query.schedule = new RegExp(criteria.schedule, "i");
         if (criteria.routeId) query.routeId = criteria.routeId;
+        if (criteria.rootNumber) query.rootNumber = criteria.rootNumber;
+        if (criteria.routeName) query.routeName = new RegExp(criteria.routeName, "i");
+        if (criteria.search) {
+            const searchRegex = new RegExp(criteria.search, "i");
+            query.$or = [
+                { routeName: searchRegex },
+            ];
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                query.$or.push({ rootNumber: numericSearch });
+            }
+        }
         return this.preparePaginationAndReturnData(query, criteria);
+    }
+
+    async getByrouteId(routeId) {
+        return this.execute(() => {
+            return this.model.findOne({ routeId: routeId });
+        });
     }
 
     async deleteRoute(routeId, groupId) {

@@ -6,11 +6,29 @@ class vehicleervice extends BaseService {
         super(dbModel, entityName);
     }
 
- async   getAllDataByGroupId(groupId, criteria) {
+    async getByvehicleId(vehicleId) {
+        return this.execute(() => {
+            return this.model.findOne({ vehicleId: vehicleId });
+        });
+    }
+
+    async getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
         if (criteria.vehicleId) query.vehicleId = criteria.vehicleId;
+        if (criteria.vehicleNumber) query.vehicleNumber = criteria.vehicleNumber;
+        if (criteria.vehicleName) query.vehicleName = new RegExp(criteria.vehicleName, "i");
+        if (criteria.search) {
+            const searchRegex = new RegExp(criteria.search, "i");
+            query.$or = [
+                { vehicleName: searchRegex },
+            ];
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                query.$or.push({ vehicleNumber: numericSearch });
+            }
+        }
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
@@ -38,6 +56,6 @@ class vehicleervice extends BaseService {
         }
     }
 
-   
+
 }
 module.exports = new vehicleervice(vehicleModel, "vehicle");

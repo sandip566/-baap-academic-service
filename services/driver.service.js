@@ -25,6 +25,12 @@ class driverervice extends BaseService {
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
+    async getBydriverId(driverId) {
+        return this.execute(() => {
+            return this.model.findOne({ driverId: driverId });
+        });
+    }
+
     async deleteTripHistroyById(driverId, groupId) {
         try {
             return await driverModel.deleteOne(

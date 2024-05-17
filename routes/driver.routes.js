@@ -43,6 +43,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getdriverId/:driverId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getBydriverId(req.params.driverId);
+
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 
 router.delete("/groupId/:groupId/driverId/:driverId", async (req, res) => {
     try {
