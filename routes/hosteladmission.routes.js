@@ -5,6 +5,7 @@ const service = require("../services/hosteladmission.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const hostelfeesinstallmentService = require("../services/hostelfeesinstallment.service");
 
 router.post(
     "/",
@@ -65,7 +66,7 @@ router.post("/data/save", async (req, res, next) => {
                     req.body.feesDetails = updatedFeesDetails;
 
                     const feesinstallmentResponse =
-                        await hostelFeesInstallmentServices.updateUser(
+                        await hostelfeesinstallmentService.updateUser(
                             req.body.hostelAdmissionId,
                             req.body.groupId,
                             req.body
@@ -88,7 +89,7 @@ router.post("/data/save", async (req, res, next) => {
                     req.body.hostelInstallmentId = hostelInstallmentId;
 
                     const feesinstallment =
-                        await hostelFeesInstallmentServices.create(req.body);
+                        await hostelfeesinstallmentService.create(req.body);
 
                     const updatedInstallments = req.body.feesDetails.map(
                         (detail, index) => ({

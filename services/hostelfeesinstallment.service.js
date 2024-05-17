@@ -19,6 +19,25 @@ class HostelFeesInstallmentService extends BaseService {
             query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria);
     }
+    async updateUser(hostelAdmissionId, groupId, data) {
+        try {
+            const resp = await HostelFeesInstallmentModel.findOneAndUpdate(
+                { hostelAdmissionId: hostelAdmissionId, groupId: groupId },
+
+                data,
+                { upsert: true, new: true }
+            );
+
+            return new ServiceResponse({
+                data: resp,
+            });
+        } catch (error) {
+            return new ServiceResponse({
+                isError: true,
+                message: error.message,
+            });
+        }
+    }
 }
 
 module.exports = new HostelFeesInstallmentService(HostelFeesInstallmentModel, 'hostelfeesinstallment');
