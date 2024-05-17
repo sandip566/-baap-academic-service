@@ -2,6 +2,7 @@ const AdmissionCancelModel = require("../schema/admissioncancel.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const { default: mongoose } = require("mongoose");
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 
 class AdmissionCancelService extends BaseService {
     constructor(dbModel, entityName) {
@@ -63,6 +64,15 @@ class AdmissionCancelService extends BaseService {
             console.error("Error updating admission status:", error);
             throw error;
         }
+    }
+    async getByCourseIdAndGroupId(groupId, addmissionId) {
+        const result = await this.model.findOne({
+            groupId: groupId,
+            addmissionId: addmissionId,
+        });
+        return new ServiceResponse({
+            data: result,
+        });
     }
 }
 

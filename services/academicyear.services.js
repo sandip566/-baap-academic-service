@@ -14,6 +14,7 @@ class AcademicYearService extends BaseService {
             });
         });
     }
+   
     async getByacademicYearId(academicYearId) {
         return this.execute(() => {
             return AcademicYearModel.findOne({

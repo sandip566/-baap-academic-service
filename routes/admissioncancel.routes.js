@@ -12,6 +12,16 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const existingRecord = await service.getByCourseIdAndGroupId(
+            req.body.groupId,
+            req.body.addmissionId
+        );
+        console.log(existingRecord);
+        if (existingRecord.data) {
+            return res
+                .status(409)
+                .json({ error: "This Admission Is Already Canceled" });
+        }
         const admissionCancelId = +Date.now();
         req.body.admissionCancelId = admissionCancelId;
         const serviceResponse = await service.create(req.body);
@@ -46,8 +56,8 @@ router.get(
             name: req.query.name,
             status: req.query.status
         };
-        const page = parseInt(req.query.pageNumber) || 1;
-        const limit = parseInt(req.query.pageSize) || 10;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria,
