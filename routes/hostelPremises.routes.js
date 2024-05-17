@@ -58,13 +58,17 @@ router.put("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
+router.get(
+    "/getHostelId/:hostelId",
+    async (req, res) => {
+        const serviceResponse = await service.getByHostelId(req.params.hostelId);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        hosteladmissionDate: req.query.hosteladmissionDate,
-        hosteladmissionStatus: req.query.hosteladmissionStatus,
-        numberOfBeds: req.query.numberOfBeds,
+      
         hostelId: req.query.hostelId,
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,

@@ -9,10 +9,7 @@ const room = new mongoose.Schema(
     name: {
       type: String
     },
-    status: {
-      type: String,
-      enum: ["avilable", "notAvilable"]
-    },
+   
     capacity: {
       type: Number,
     },

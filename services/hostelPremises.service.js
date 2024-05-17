@@ -1,6 +1,6 @@
 const HostelModel = require("../schema/hostelPremises.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const studentAddmissionModel = require('../schema/studentAdmission.schema.js');
+const studentAddmissionModel = require("../schema/studentAdmission.schema.js");
 
 class HostelService extends BaseService {
     constructor(dbModel, entityName) {
@@ -17,15 +17,17 @@ class HostelService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.hosteladmissionDate)
-            query.hosteladmissionDate = criteria.hosteladmissionDate;
-        if (criteria.hosteladmissionStatus)
-            query.hosteladmissionStatus = new RegExp(criteria.hosteladmissionStatus, "i");
-        if (criteria.numberOfBeds) query.numberOfBeds = criteria.numberOfBeds;
+
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
 
-
         return this.preparePaginationAndReturnData(query, criteria);
+    }
+    async getByHostelId(hostelId) {
+        return this.execute(() => {
+            return HostelModel.findOne({
+                hostelId: hostelId,
+            });
+        });
     }
 
     async updateDataById(hostelId, groupId, newData) {
@@ -52,6 +54,5 @@ class HostelService extends BaseService {
             throw error;
         }
     }
-
 }
-module.exports = new HostelService(HostelModel, "hostel");
+module.exports = new HostelService(HostelModel, "hostelPremises");
