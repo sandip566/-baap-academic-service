@@ -9,9 +9,17 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
         groupId: {
             type: Number,
             required: true,
+        },
+        hostelInstallmentId:{
+            type: Number,
+            required: true,
+        },
+        hostelAdmissionId:{
+            type: Number,
+            required: false,
         }
     },
-    { timestamps: true }
+    {strict:false, timestamps: true }
 );
 
 const HostelFeesInstallmentModel = mongoose.model("hostelfeesinstallment", HostelFeesInstallmentSchema);

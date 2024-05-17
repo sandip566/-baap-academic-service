@@ -20,7 +20,7 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-router.post("/data/save", async (req, res, next) => {
+router.post("/hostelAdmission/save", async (req, res, next) => {
     try {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
@@ -30,6 +30,7 @@ router.post("/data/save", async (req, res, next) => {
             const existingDocument = await service.getByAddmissionIdData(
                 req.body.hostelAdmissionId
             );
+            console.log("existingDocument", existingDocument.data !== null);
             if (existingDocument.data !== null) {
                 if (req.body.feesDetails) {
                     const hostelInstallmentId = +Date.now();
@@ -57,7 +58,7 @@ router.post("/data/save", async (req, res, next) => {
 
                             return {
                                 ...feesDetail,
-                                feesDetailsId: installNo,
+                                hostelFeesDetailsId: installNo,
                                 installment: updatedInstallments,
                             };
                         }
@@ -74,9 +75,9 @@ router.post("/data/save", async (req, res, next) => {
 
                     console.log(feesinstallmentResponse);
                 }
-
                 const serviceResponse = await service.updateUser(
                     req.body.hostelAdmissionId,
+                    req.body.groupId,
                     req.body
                 );
 
@@ -100,12 +101,12 @@ router.post("/data/save", async (req, res, next) => {
 
                     req.body.feesDetails = updatedInstallments;
                 }
-
+                console.log(serviceResponse);
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
         }
     } catch (error) {
-        console.error(error);
+        console.log(error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -134,17 +135,35 @@ router.get("/all/hostelAdmission", async (req, res) => {
 });
 router.get(
     "/all/getByGroupId/:groupId",
-    TokenService.checkPermission(["EMA1"]),
+    TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
-        const groupId = req.params.groupId;
-        const criteria = {
-            name: req.query.name,
-        };
-        const serviceResponse = await service.getAllDataByGroupId(
-            groupId,
-            criteria
-        );
-        requestResponsehelper.sendResponse(res, serviceResponse);
+        try {
+            const groupId = req.params.groupId;
+            const page = parseInt(req.query.page) || 1;
+            const perPage = parseInt(req.query.limit)||10
+            const criteria = {
+                academicYear: req.query.academicYear,
+                firstName: req.query.firstName,
+                phoneNumber: req.query.phoneNumber,
+                lastName: req.query.lastName,
+                admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
+                roleId:req.query.roleId,
+                search: req.query.search
+            };
+
+            const serviceResponse = await service.getAllDataByGroupId(
+                groupId,
+                criteria,
+                page,
+                perPage
+            );
+
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
 );
 router.delete(

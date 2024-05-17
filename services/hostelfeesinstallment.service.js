@@ -1,3 +1,4 @@
+const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const HostelFeesInstallmentModel = require("../schema/hostelfeesinstallment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
