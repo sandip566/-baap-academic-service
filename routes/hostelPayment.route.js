@@ -7,13 +7,13 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 
 router.post(
     "/",
-    checkSchema(require("../dto/hostelPaymnet.dto")),
+    checkSchema(require("../dto/hostelPayment.dto")),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const hostelPaymnetId = Date.now();
-        req.body.hostelPaymnetId = hostelPaymnetId;
+        const hostelPaymentId = Date.now();
+        req.body.hostelPaymentId = hostelPaymentId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -48,16 +48,16 @@ router.get("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getAllupdateHostelPaymnet/groupId/:groupId", async (req, res) => {
+router.get("/getAllupdateHostelPayment/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        hostelPaymnetId: req.query.hostelPaymnetId,
+        hostelPaymentId: req.query.hostelPaymentId,
         studentId: req.query.studentId,
         mmemberId: req.query.memberId,
         hostelId: req.query.hostelId,
         pageNumber: parseInt(req.query.pageNumber) || 1,
     };
-    const serviceResponse = await service.getAllHostelPaymnetByGroupId(
+    const serviceResponse = await service.getAllHostelPaymentByGroupId(
         groupId,
         criteria
     );
@@ -65,13 +65,13 @@ router.get("/getAllupdateHostelPaymnet/groupId/:groupId", async (req, res) => {
 });
 
 router.delete(
-    "/groupId/:groupId/hostelPaymnetId/:hostelPaymnetId",
+    "/groupId/:groupId/hostelPaymentId/:hostelPaymentId",
     async (req, res) => {
         try {
-            const hostelPaymnetId = req.params.hostelPaymnetId;
+            const hostelPaymentId = req.params.hostelPaymentId;
             const groupId = req.params.groupId;
-            const deleteHostelPaymnet = await service.deleteHostelPaymnetById({
-                hostelPaymnetId: hostelPaymnetId,
+            const deleteHostelPaymnet = await service.deleteHostelPaymentId({
+                hostelPaymentId: hostelPaymentId,
                 groupId: groupId,
             });
             if (!deleteHostelPaymnet) {
@@ -89,14 +89,14 @@ router.delete(
 );
 
 router.put(
-    "/groupId/:groupId/hostelPaymnetId/:hostelPaymnetId",
+    "/groupId/:groupId/hostelPaymentId/:hostelPaymentId",
     async (req, res) => {
         try {
-            const hostelPaymnetId = req.params.hostelPaymnetId;
+            const hostelPaymentId = req.params.hostelPaymentId;
             const groupId = req.params.groupId;
             const newData = req.body;
-            const updateHostelPaymnet = await service.updateHostelPaymnetById(
-                hostelPaymnetId,
+            const updateHostelPaymnet = await service.updateHostelPaymentById(
+                hostelPaymentId,
                 groupId,
                 newData
             );

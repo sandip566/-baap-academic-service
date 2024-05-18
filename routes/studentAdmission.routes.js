@@ -9,7 +9,7 @@ const feesInstallmentServices = require("../services/feesInstallment.services");
 const documentConfigurationService = require("../services/documentConfiguration.services");
 const TokenService = require("../services/token.services");
 const multer = require("multer");
-const DocumentConfiguration=require("../schema/documentConfiguration.schema")
+const DocumentConfiguration = require("../schema/documentConfiguration.schema");
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
@@ -63,45 +63,45 @@ router.post("/data/save", async (req, res, next) => {
                 req.body.addmissionId
             );
             if (existingDocument.data !== null) {
-//                 if (req.body.documents && req.body.documents.length > 0) {
-//                     for (const documentData of req.body.documents) {
-//                         const updatedDocument = {
-//                             documentTitle: documentData.documentTitle || "",
-//                             expiryDate: documentData.expiryDate || "",
-//                             formDate: documentData.formDate|| "",
-//                             documentUrl: documentData.documentUrl || "",
-//                             groupId: req.body.groupId ,
-//                             userId: req.body.userId
-//                         };
-// console.log(updatedDocument);
-//                         const documentUpdateResponse = await documentConfigurationService.updateUser(
-//                             req.body.groupId,
-//                             req.body.addmissionId,
-//                             updatedDocument 
-//                         );
-//                         console.log(documentUpdateResponse);
-//                     }
-//                 }
-if (req.body.documents && req.body.documents.length > 0) {
-    for (const documentData of req.body.documents) {
-        const documentId = Date.now() + Math.floor(Math.random() * 1000);
-        const document = new DocumentConfiguration({
-            documentTitle: documentData.documentTitle || "",
-            expiryDate: documentData.expiryDate || "",
-            formDate: documentData.formDate || "",
-            documentUrl: documentData.documentUrl || "",
-            documentId: documentId,
-            groupId: req.body.groupId,
-            userId:req.body.userId,
-            addmissionId:req.body.addmissionId,
-            empId:req.body.empId,
-            roleId:req.body.roleId,
-            
-        });
-        console.log(document);
-        await document.save();
-    }
-}
+                //                 if (req.body.documents && req.body.documents.length > 0) {
+                //                     for (const documentData of req.body.documents) {
+                //                         const updatedDocument = {
+                //                             documentTitle: documentData.documentTitle || "",
+                //                             expiryDate: documentData.expiryDate || "",
+                //                             formDate: documentData.formDate|| "",
+                //                             documentUrl: documentData.documentUrl || "",
+                //                             groupId: req.body.groupId ,
+                //                             userId: req.body.userId
+                //                         };
+                // console.log(updatedDocument);
+                //                         const documentUpdateResponse = await documentConfigurationService.updateUser(
+                //                             req.body.groupId,
+                //                             req.body.addmissionId,
+                //                             updatedDocument
+                //                         );
+                //                         console.log(documentUpdateResponse);
+                //                     }
+                //                 }
+                if (req.body.documents && req.body.documents.length > 0) {
+                    for (const documentData of req.body.documents) {
+                        const documentId =
+                            Date.now() + Math.floor(Math.random() * 1000);
+                        const document = new DocumentConfiguration({
+                            documentTitle: documentData.documentTitle || "",
+                            expiryDate: documentData.expiryDate || "",
+                            formDate: documentData.formDate || "",
+                            documentUrl: documentData.documentUrl || "",
+                            documentId: documentId,
+                            groupId: req.body.groupId,
+                            userId: req.body.userId,
+                            addmissionId: req.body.addmissionId,
+                            empId: req.body.empId,
+                            roleId: req.body.roleId,
+                        });
+                        console.log(document);
+                        await document.save();
+                    }
+                }
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
@@ -156,7 +156,8 @@ if (req.body.documents && req.body.documents.length > 0) {
                 const serviceResponse = await service.create(req.body);
                 if (req.body.documents && req.body.documents.length > 0) {
                     for (const documentData of req.body.documents) {
-                        const documentId = Date.now() + Math.floor(Math.random() * 1000);
+                        const documentId =
+                            Date.now() + Math.floor(Math.random() * 1000);
                         const document = new DocumentConfiguration({
                             documentTitle: documentData.documentTitle || "",
                             expiryDate: documentData.expiryDate || "",
@@ -164,17 +165,16 @@ if (req.body.documents && req.body.documents.length > 0) {
                             documentUrl: documentData.documentUrl || "",
                             documentId: documentId,
                             groupId: req.body.groupId,
-                            userId:req.body.userId,
-                            addmissionId:req.body.addmissionId,
-                            empId:req.body.empId,
-                            roleId:req.body.roleId,
-                            
+                            userId: req.body.userId,
+                            addmissionId: req.body.addmissionId,
+                            empId: req.body.empId,
+                            roleId: req.body.roleId,
                         });
                         console.log(document);
                         await document.save();
                     }
                 }
-            
+
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
@@ -284,10 +284,10 @@ router.get(
                 lastName: req.query.lastName,
                 admissionStatus: req.query.admissionStatus,
                 status: req.query.status,
-                roleId:req.query.roleId,
+                roleId: req.query.roleId,
                 search: req.query.search,
                 CourseName: req.query.CourseName,
-                className: req.query.className
+                className: req.query.className,
             };
 
             const serviceResponse = await service.getAllDataByGroupId(
@@ -322,7 +322,7 @@ router.get(
                 status: req.query.status,
                 search: req.query.search,
                 CourseName: req.query.CourseName,
-                className: req.query.className
+                className: req.query.className,
             };
 
             const serviceResponse = await service.getDonationDataByGroupId(
@@ -339,34 +339,30 @@ router.get(
         }
     }
 );
-router.get(
-    "/all/confirmAdmission/:groupId",
-    async (req, res) => {
-        try {
-            const groupId = req.params.groupId;
-            const page = parseInt(req.query.page) || 1;
-            const perPage = parseInt(req.query.limit);
-            const criteria = {
-                firstName: req.query.firstName,
-                phoneNumber: req.query.phoneNumber,
-                lastName: req.query.lastName,
-                className: req.query.className
-            };
-            const serviceResponse = await service.getAllByGroupId(
-                groupId,
-                criteria,
-                page,
-                perPage
-            );
+router.get("/all/confirmAdmission/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.limit);
+        const criteria = {
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            className: req.query.className,
+        };
+        const serviceResponse = await service.getAllByGroupId(
+            groupId,
+            criteria,
+            page,
+            perPage
+        );
 
-            requestResponsehelper.sendResponse(res, serviceResponse);
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal Server Error" });
-        }
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-);
-
+});
 
 router.get("/all/getfeesPayment/:groupId", async (req, res) => {
     try {
@@ -504,27 +500,24 @@ router.get("/all/getByGroupId/searching/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, result);
 });
 
-router.put(
-    "/groupId/:groupId/userId/:userId",
-    async (req, res) => {
-        try {
-            const groupId = parseInt(req.params.groupId);
-            const userId = parseInt(req.params.userId);
-            const newData = req.body;
-            const updatedData = await service.updateByUserId(
-                groupId,
-                userId,
-                newData
-            );
-            if (!updatedData) {
-                res.status(404).json({ error: " not found to update" });
-            } else {
-                res.status(201).json(updatedData);
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal Server Error" });
+router.put("/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = parseInt(req.params.userId);
+        const newData = req.body;
+        const updatedData = await service.updateByUserId(
+            groupId,
+            userId,
+            newData
+        );
+        if (!updatedData) {
+            res.status(404).json({ error: " not found to update" });
+        } else {
+            res.status(201).json(updatedData);
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-);
+});
 module.exports = router;

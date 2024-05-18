@@ -140,7 +140,7 @@ router.get(
         try {
             const groupId = req.params.groupId;
             const page = parseInt(req.query.page) || 1;
-            const perPage = parseInt(req.query.limit)||10
+            const perPage = parseInt(req.query.limit) || 10;
             const criteria = {
                 academicYear: req.query.academicYear,
                 firstName: req.query.firstName,
@@ -148,8 +148,8 @@ router.get(
                 lastName: req.query.lastName,
                 admissionStatus: req.query.admissionStatus,
                 status: req.query.status,
-                roleId:req.query.roleId,
-                search: req.query.search
+                roleId: req.query.roleId,
+                search: req.query.search,
             };
 
             const serviceResponse = await service.getAllDataByGroupId(
@@ -157,6 +157,30 @@ router.get(
                 criteria,
                 page,
                 perPage
+            );
+
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+router.get(
+    "/getTotalHostelCount/:groupId",
+    TokenService.checkPermission(["EAC1"]),
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const criteria = {
+                academicYear: req.query.academicYear,
+                admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
+            };
+
+            const serviceResponse = await service.getTotalCount(
+                groupId,
+                criteria
             );
 
             requestResponsehelper.sendResponse(res, serviceResponse);
@@ -212,6 +236,27 @@ router.put(
         }
     }
 );
+router.get("/all/getfeesPayment/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            // phoneNumber: req.query.phoneNumber,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            search: req.query.search,
+            hostelAdmissionId: req.query.hostelAdmissionId,
+            academicYear: req.query.academicYear,
+            empId: req.query.empId,
+        };
+
+        const serviceResponse = await service.getfeesPayment(groupId, criteria);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 router.get("/gethostelAdmissionId/:hostelAdmissionId", async (req, res) => {
     const serviceResponse = await service.getByHostelId(
         req.params.hostelAdmissionId

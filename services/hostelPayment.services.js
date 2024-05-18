@@ -1,36 +1,36 @@
-const hostelPaymnetModel = require("../schema/hostelPaymnet.schema");
+const hostelPaymentModel = require("../schema/hostelPayment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class hostelPaymnetService extends BaseService {
+class hostelPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    getAllHostelPaymnetByGroupId(groupId, criteria) {
+    getAllHostelPaymentByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
         };
         criteria.pageSize = 10;
-        if (criteria.hostelPaymnetId)
-            query.hostelPaymnetId = criteria.hostelPaymnetId;
+        if (criteria.hostelPaymentId)
+            query.hostelPaymentId = criteria.hostelPaymentId;
         if (criteria.studentId) query.studentId = criteria.studentId;
         if (criteria.memberId) query.memberId = criteria.memberId;
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteHostelPaymnetById(hostelPaymnetId, groupId) {
+    async deleteHostelPaymentId(hostelPaymentId, groupId) {
         try {
-            return await hostelPaymnetModel.deleteOne(hostelPaymnetId, groupId);
+            return await hostelPaymentModel.deleteOne(hostelPaymentId, groupId);
         } catch (error) {
             throw error;
         }
     }
-    async updateHostelPaymnetById(hostelPaymnetId, groupId, newData) {
+    async updateHostelPaymentById(hostelPaymentId, groupId, newData) {
         try {
             const updateHostelPaymnet =
-                await hostelPaymnetModel.findOneAndUpdate(
-                    { hostelPaymnetId: hostelPaymnetId, groupId: groupId },
+                await hostelPaymentModel.findOneAndUpdate(
+                    { hostelPaymentId: hostelPaymentId, groupId: groupId },
                     newData,
                     { new: true }
                 );
@@ -40,4 +40,4 @@ class hostelPaymnetService extends BaseService {
         }
     }
 }
-module.exports = new hostelPaymnetService(hostelPaymnetModel, "hostelPaymnet");
+module.exports = new hostelPaymentService(hostelPaymentModel, "hostelPayment");
