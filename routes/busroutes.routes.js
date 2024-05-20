@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
 const service = require("../services/busroutes.service");
+const { default: mongoose } = require("mongoose");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
@@ -14,6 +15,19 @@ router.post(
         }
         const routeId = +Date.now();
         req.body.routeId = routeId;
+        if (!req.body.stopDetails || req.body.stopDetails.length === 0) {
+            req.body.stopDetails = [];
+        } else {
+            req.body.stopDetails = req.body.stopDetails.map((stopDetailsData) => {
+                const stopId = Date.now() + Math.floor(Math.random() * 10000);
+                return {
+                    _id: new mongoose.Types.ObjectId(),
+                    stopId: stopId,
+                    stopDetails: stopDetailsData,
+                };
+            });
+                
+        }
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }

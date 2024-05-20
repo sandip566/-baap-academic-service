@@ -11,38 +11,77 @@ const BusRoutesSchema = new mongoose.Schema(
         },
         routeName: {
             type: String,
-            required:true
+            required: true
         },
-        busName:{
-            type:String
+        start: {
+            type: String,
+            required: true
         },
-        shift:{
-            type:String,
-            enum:['Morning','Afternoon','Evening'],
-            required:true
+        end: {
+            type: String,
+            required: true
         },
-        routetNumber: {
-            type: Number,
+        shift: {
+            type: String,
+            enum: ['Morning', 'Afternoon', 'Evening'],
+            required: true
         },
         driverId: {
             type: Number,
-            required:true
+            required: true
         },
         caretakerId: {
             type: Number,
-            rrequired:true
+            rrequired: true
         },
-        transportCoordinatorId:{
+        vehicleId: {
+            type: String,
+            required: true
+        },
+        routetNumber: {
             type: Number,
-            rrequired:true
+            required: true
         },
-        location: {
-            type: {
-                type: String,
-                default: 'Point'
+        feesFreq: {
+            type: String,
+            enum:['Monthly','Yearly','Half Yearly','Quarterly'],
+            required: true
+        },
+        currentLocaction: {
+            lattitude: {
+                type: Number,
+                required: true
             },
-            coordinates: [Number]
+            longitude: {
+                type: Number,
+                required: true
+            },
+        },
+        stopDetails:{
+            type:Array,
+            required:true
         }
+        // stopDetails: [{
+        //     stopName: {
+        //         type: String,
+        //         required: true
+        //     },
+        //     fees: {
+        //         type: Number,
+        //         required: true
+        //     },
+        //     location: {
+        //         lattitude: {
+        //             type: Number,
+        //             required: true
+        //         },
+        //         longitude: {
+        //             type: Number,
+        //             required: true
+        //         }
+        //     }
+        // }]
+        
     },
     { strict: false, timestamps: true }
 );
