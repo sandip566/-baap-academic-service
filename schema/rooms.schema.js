@@ -2,6 +2,10 @@ const mongoose = require("mongoose");
 
 const room = new mongoose.Schema(
   {
+    groupId: {
+      type: Number,
+      require: false
+    },
     roomId: {
       type: Number,
       require: false

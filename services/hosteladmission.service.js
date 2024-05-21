@@ -89,7 +89,7 @@ class HostelAdmissionService extends BaseService {
 
             const data = await HostelAdmissionModel.aggregate([
                 { $match: searchFilter },
-                { $unwind: "$feesDetails" },
+                { $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true } },
                 {
                     $lookup: {
                         from: "feestemplates", // The name of the fees template collection
@@ -98,7 +98,7 @@ class HostelAdmissionService extends BaseService {
                         as: "feesTemplateDetails",
                     },
                 },
-                { $unwind: "$feesTemplateDetails" },
+                { $unwind: { path: "$feesTemplateDetails", preserveNullAndEmptyArrays: true } },
                 {
                     $group: {
                         _id: "$_id",
@@ -109,8 +109,7 @@ class HostelAdmissionService extends BaseService {
                                 installment: "$feesDetails.installment",
                                 feesDetailsId: "$feesDetails.feesDetailsId",
                                 status: "$feesDetails.status",
-                                hostelFeesDetailsId:
-                                    "$feesDetails.hostelFeesDetailsId",
+                                hostelFeesDetailsId: "$feesDetails.hostelFeesDetailsId",
                                 feesTemplateDetails: "$feesTemplateDetails",
                             },
                         },
@@ -130,6 +129,7 @@ class HostelAdmissionService extends BaseService {
                 { $skip: skip },
                 { $limit: perPage },
             ]).exec();
+            
 
             const totalItemsCount = await HostelAdmissionModel.countDocuments(
                 searchFilter
@@ -231,6 +231,75 @@ class HostelAdmissionService extends BaseService {
             console.error("Error:", error);
             throw error;
         }
+    }
+    async updateFeesInstallmentById(installmentId, newFeesDetails, newData) {
+        try {
+            const updateResult = await HostelAdmissionModel.findOneAndUpdate(
+                { installmentId: installmentId },
+                { feesDetails: newFeesDetails, ...newData },
+                { new: true }
+            );
+            return updateResult;
+        } catch (error) {
+            throw error;
+        }
+    }
+    async getPendingInstallmentByAdmissionId(hostelAdmissionId) {
+        try {
+            const pipeline = [
+                {
+                    $match: {
+                        hostelAdmissionId: hostelAdmissionId,
+                    },
+                },
+                {
+                    $project: {
+                        addmissionId: 1,
+                        groupId: 1,
+                        academicYear: 1,
+                        createdAt: 1,
+                        documents: 1,
+                        updatedAt: 1,
+                        feesDetails: {
+                            $filter: {
+                                input: "$feesDetails",
+                                as: "feesDetail",
+                                cond: {
+                                    $anyElementTrue: {
+                                        $map: {
+                                            input: "$$feesDetail.installment",
+                                            as: "installment",
+                                            in: {
+                                                $eq: [
+                                                    "$$installment.status",
+                                                    "pending",
+                                                ],
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            ];
+
+            console.log("Pipeline:", JSON.stringify(pipeline)); // Log the pipeline
+
+            const result = await HostelAdmissionModel.aggregate(pipeline);
+
+            console.log("Result:", result); // Log the result
+
+            return result;
+        } catch (error) {
+            console.error("Error retrieving pending installment:", error);
+            throw error;
+        }
+    }
+    async getByInstallmentId(installmentId) {
+        return this.execute(() => {
+            return this.model.findOne({ installmentId: installmentId });
+        });
     }
     async getfeesPayment(groupId, query) {
         try {
@@ -423,8 +492,9 @@ class HostelAdmissionService extends BaseService {
         });
     }
     async updateUser(hostelAdmissionId, groupId, data) {
+
         try {
-            const resp = await HostelFeesInstallmentModel.findOneAndUpdate(
+            const resp = await HostelAdmissionModel.findOneAndUpdate(
                 { hostelAdmissionId: hostelAdmissionId, groupId: groupId },
 
                 data,
@@ -450,6 +520,78 @@ class HostelAdmissionService extends BaseService {
                 { new: true }
             );
             return updatedData;
+        } catch (error) {
+            throw error;
+        }
+    }
+    async updateInstallmentAmount(installmentId, newAmount, newStatus) {
+        try {
+            const updateResult = await HostelAdmissionModel.findOneAndUpdate(
+                { "feesDetails.installment.installmentNo": installmentId },
+                {
+                    $set: {
+                        "feesDetails.$[outer].installment.$[inner].amount":
+                            newAmount,
+                        "feesDetails.$[outer].installment.$[inner].status":
+                            newStatus,
+                    },
+                },
+                {
+                    arrayFilters: [
+                        { "outer.installment.installmentNo": installmentId },
+                        { "inner.installmentNo": installmentId },
+                    ],
+                    multi: true,
+                    new: true,
+                }
+            );
+
+            console.log(
+                "Installment amount updated successfully:",
+                updateResult
+            );
+            const feesDetail = updateResult.feesDetails.find((detail) =>
+                detail.installment.some(
+                    (installment) => installment.installmentNo === installmentId
+                )
+            );
+
+            const allInstallmentsPaid = feesDetail.installment.every(
+                (installment) => installment.status == "paid"
+            );
+
+            if (allInstallmentsPaid) {
+                await HostelAdmissionModel.findOneAndUpdate(
+                    { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
+                    { $set: { "feesDetails.$.status": "paid" } }
+                );
+            } else {
+                await HostelAdmissionModel.findOneAndUpdate(
+                    { "feesDetails.feesDetailsId": feesDetail.feesDetailsId },
+                    { $set: { "feesDetails.$.status": "pending" } }
+                );
+            }
+        } catch (error) {
+            console.error("Error updating installment amount:", error);
+        }
+    }
+    async deleteByStudentsAddmisionId(hostelAdmissionId, groupId) {
+        try {
+            const studentDeletionResult = await HostelAdmissionModel.deleteOne(
+                {
+                    hostelAdmissionId: hostelAdmissionId,
+                    groupId: groupId,
+                }
+            );
+
+            const feesDeletionResult = await HostelFeesInstallmentModel.deleteMany({
+                hostelAdmissionId: hostelAdmissionId,
+                groupId: groupId,
+            });
+            return {
+                studentDeletionResult: studentDeletionResult,
+                feesDeletionResult: feesDeletionResult,
+            };
         } catch (error) {
             throw error;
         }

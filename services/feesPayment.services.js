@@ -1542,7 +1542,8 @@ console.log(admissionData);
                 throw error;
             }
         });
-    }
+    }  
+
     async getDonationFeesListCount(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {

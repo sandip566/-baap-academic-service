@@ -30,6 +30,7 @@ router.post("/hostelAdmission/save", async (req, res, next) => {
             const existingDocument = await service.getByAddmissionIdData(
                 req.body.hostelAdmissionId
             );
+            console.log(existingDocument);
             console.log("existingDocument", existingDocument.data !== null);
             if (existingDocument.data !== null) {
                 if (req.body.feesDetails) {
@@ -115,6 +116,28 @@ router.delete("/:id", async (req, res) => {
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+router.delete(
+    "/groupId/:groupId/hostelAdmissionId/:hostelAdmissionId",
+    TokenService.checkPermission(["EAC4"]),
+    async (req, res) => {
+        try {
+            const hostelAdmissionId = req.params.hostelAdmissionId;
+            const groupId = req.params.groupId;
+            const Data = await service.deleteByStudentsAddmisionId(
+                hostelAdmissionId,
+                groupId
+            );
+            if (!Data) {
+                res.status(404).json({ error: "data not found to delete" });
+            } else {
+                res.status(201).json(Data);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
 
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
@@ -135,7 +158,7 @@ router.get("/all/hostelAdmission", async (req, res) => {
 });
 router.get(
     "/all/getByGroupId/:groupId",
-    TokenService.checkPermission(["EAC1"]),
+    // TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
@@ -191,7 +214,7 @@ router.get(
     }
 );
 router.delete(
-    "/groupId/:groupId/hostelAdmissionId/:hostelAdmissionId",
+    "/deleteData/groupId/:groupId/hostelAdmissionId/:hostelAdmissionId",
     TokenService.checkPermission(["EMA4"]),
     async (req, res) => {
         try {

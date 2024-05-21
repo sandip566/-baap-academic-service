@@ -18,7 +18,46 @@ class hostelPaymentService extends BaseService {
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
+    async getByAdmissionAndEmpId(hostelAdmissionId, feesDetailsId, empId) {
+        return this.execute(() => {
+            return this.model
+                .findOne({
+                    hostelAdmissionId: hostelAdmissionId,
+                    feesDetailsId: feesDetailsId,
+                    empId: empId,
+                })
+                .sort({ _id: -1 });
+        });
+    }
+    
+    async updatePaidAmountInDatabase(
+        hostelPaymentId,
+        totalPaidAmount,
+        remainingAmount
+    ) {
+        try {
+            const feesPayment = await hostelPaymentModel.findOne({
+                hostelPaymentId: hostelPaymentId,
+            });
+            if (!feesPayment) {
+                return {
+                    success: false,
+                    error: "Fees payment record not found.",
+                };
+            }
+            feesPayment.paidAmount = Math.round(totalPaidAmount);
+            feesPayment.remainingAmount = Math.round(remainingAmount);
+            await feesPayment.save();
 
+            return { success: true };
+        } catch (error) {
+            console.error(error);
+            return {
+                success: false,
+                error: "Failed to update paid amount in the database.",
+            };
+        }
+    }
     async deleteHostelPaymentId(hostelPaymentId, groupId) {
         try {
             return await hostelPaymentModel.deleteOne(hostelPaymentId, groupId);

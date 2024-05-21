@@ -14,6 +14,8 @@ class Service extends BaseService {
         };
         if (criteria.feesTemplateId)
             query.feesTemplateId = criteria.feesTemplateId;
+        if (criteria.isHostel)
+            query.isHostel = criteria.isHostel;
         if (criteria.isShowInAccounting)
             query.isShowInAccounting = criteria.isShowInAccounting;
         return this.preparePaginationAndReturnData(query, criteria);
