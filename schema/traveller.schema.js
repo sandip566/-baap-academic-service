@@ -14,27 +14,60 @@ const TravellerSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        startDate: {
-            type: String,
+        routeId: {
+            type: Number,
+            required: true,
+        },
+        stopId:{
+            type: Number,
             required: true
         },
-        endDate: {
+        fatherName: {
+            type: String,
+            required: false
+        },
+        motherName: {
+            type: String,
+            required: false
+        },
+        age: {
             type: String,
             required: true
         },
         status: {
             type: String,
-            enum: ['Draft', 'Comfirmed', 'Cancelled'],
+            enum: ['Active', 'In-active'],
             required: true
         },
-        stopId: {
+        adharCardNo: {
             type: Number,
             required: true
         },
-        totalFees: {
+        panCardNo: {
+            type: String,
+            required: true
+        },
+        medicalCertificateImg: {
+            type: String,
+            required: true
+        },
+        stopId:{
             type: Number,
+            required: true
+        },
+        totalFees:{
+            type: Number,
+            required: true
+        },
+        startDate:{
+            type: String,
+            required: true
+        },
+        endDate:{
+            type: String,
             required: true
         }
+
     },
     { timestamps: true }
 );

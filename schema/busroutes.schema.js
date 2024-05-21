@@ -3,11 +3,11 @@ const BusRoutesSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            unique: true,
+            required: true,
         },
         routeId: {
             type: Number,
-            unique: true,
+            required: true,
         },
         routeName: {
             type: String,
@@ -61,27 +61,6 @@ const BusRoutesSchema = new mongoose.Schema(
             type:Array,
             required:true
         }
-        // stopDetails: [{
-        //     stopName: {
-        //         type: String,
-        //         required: true
-        //     },
-        //     fees: {
-        //         type: Number,
-        //         required: true
-        //     },
-        //     location: {
-        //         lattitude: {
-        //             type: Number,
-        //             required: true
-        //         },
-        //         longitude: {
-        //             type: Number,
-        //             required: true
-        //         }
-        //     }
-        // }]
-        
     },
     { strict: false, timestamps: true }
 );
