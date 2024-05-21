@@ -6,49 +6,29 @@ const TransportCoordinatorSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        routeId: {
-            type: Number,
-            required: true,
-        },
-        transportCoordinatorId: {
+        empId:{
             type: Number,
             required: true
         },
-        vehicleName: {
+        panCardNo:{
             type: String,
-            required: true
+            required: false  
         },
-        driverId: {
+        adharCardNo:{
             type: Number,
-            required: true
+            required: false  
         },
-        caretakerId: {
-            type: Number,
-            required: true
-        },
-        startTime:{
+        medicalCertificateImg:{
             type: String,
-            required: true
+            required: false  
         },
-        status:{
+        startDate:{
             type: String,
-            enum:['Start','Stop'],
-            required: true
+            required: false 
         },
-        seatCount:{
-            type: Number,
-            required: true
-        },
-        vehicleNumber: {
-            type: Number,
-            required: true
-        },
-        location: {
-            type: {
-                type: String,
-                default: 'Point'
-            },
-            coordinates: [Number]
+        endDate:{
+            type: String,
+            required: false 
         }
     },
     { timestamps: true, strict: false }

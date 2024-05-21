@@ -9,43 +9,57 @@ const vehicle = new mongoose.Schema(
             type: Number,
             required: true
         },
-        vehicleName: {
-            type: String,
+        shiftId:{
+            type: Number,
             required: true
-        },
-        vehicleNumber: {
+        },  
+        empId: {
             type: Number,
             required: true
         },
+        vehicleNo: {
+            type: Number,
+            required: false
+        },
+        Diesel: {
+            type: Number,
+            required: false
+        },
+        fuelType: {
+            type: String,
+            enum: ['Petrol', 'Diesel', 'CNG'],
+            required: false
+        },
+        color: {
+            type: String,
+            required: false
+        },
         vehicleType: {
             type: String,
-            required: true
+            enum: ['Mini Bus', '4 seater', '7 seater'],
+            required: false
         },
         vehicleModel:{
             type: String,
             required: false
         },
-        vehicleCondition:{
+        wheel:{
             type: String,
             required: false
         },
-        seatCapacity:{
-            type: Number,
+        vehicleCondition:{
+            type: String,
+            enum: ['fair', 'good', 'excellent'],
+            required: false
         },
-        vehicleAddress:[{
-            village:{
-                type: String, 
-            },
-            city:{
-                type: String, 
-            },
-            state:{
-                type: String, 
-            },
-            country:{
-                type: String,  
-            }
-        }]
+        rcNo:{
+            type: String,
+            required: false
+        },
+        vehicleSeatNo:{
+            type: Number,
+            required: false
+        }
     },
     { strict: false, timestamps: true }
 );
