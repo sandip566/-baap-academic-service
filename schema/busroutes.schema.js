@@ -3,85 +3,64 @@ const BusRoutesSchema = new mongoose.Schema(
     {
         groupId: {
             type: Number,
-            unique: true,
+            required: true,
         },
         routeId: {
             type: Number,
-            unique: true,
+            required: true,
         },
         routeName: {
             type: String,
-            required: true
+            required: true,
         },
         start: {
             type: String,
-            required: true
+            required: true,
         },
         end: {
             type: String,
-            required: true
+            required: true,
         },
         shift: {
             type: String,
-            enum: ['Morning', 'Afternoon', 'Evening'],
-            required: true
+            enum: ["Morning", "Afternoon", "Evening"],
+            required: true,
         },
         driverId: {
             type: Number,
-            required: true
+            required: true,
         },
         caretakerId: {
             type: Number,
-            rrequired: true
+            rrequired: true,
         },
         vehicleId: {
             type: String,
-            required: true
+            required: true,
         },
         routetNumber: {
             type: Number,
-            required: true
+            required: true,
         },
         feesFreq: {
             type: String,
-            enum:['Monthly','Yearly','Half Yearly','Quarterly'],
-            required: true
+            enum: ["Monthly", "Yearly", "Half Yearly", "Quarterly"],
+            required: true,
         },
         currentLocaction: {
             lattitude: {
                 type: Number,
-                required: true
+                required: true,
             },
             longitude: {
                 type: Number,
-                required: true
+                required: true,
             },
         },
-        stopDetails:{
-            type:Array,
-            required:true
-        }
-        // stopDetails: [{
-        //     stopName: {
-        //         type: String,
-        //         required: true
-        //     },
-        //     fees: {
-        //         type: Number,
-        //         required: true
-        //     },
-        //     location: {
-        //         lattitude: {
-        //             type: Number,
-        //             required: true
-        //         },
-        //         longitude: {
-        //             type: Number,
-        //             required: true
-        //         }
-        //     }
-        // }]
-        
+        stopDetails: {
+            type: Array,
+            required: true,
+        },
     },
     { strict: false, timestamps: true }
 );

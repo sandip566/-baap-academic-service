@@ -53,6 +53,7 @@ router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
             roomId: req.query.roomId,
+            name:req.query.name,
             hostelId: req.query.hostelId,
             status: req.query.status,
             pageNumber: parseInt(req.query.pageNumber) || 1,

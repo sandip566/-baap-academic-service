@@ -13,7 +13,11 @@ const feesTemplate = mongoose.Schema(
         feesTemplateId: {
             type: Number,
         },
-        isShowInAccounting:{
+        isShowInAccounting: {
+            type: Boolean,
+            required: false,
+        },
+        isHostel: {
             type: Boolean,
             required: false,
         },

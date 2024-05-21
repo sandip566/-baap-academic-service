@@ -1198,14 +1198,15 @@ class StudentsAdmmisionService extends BaseService {
                         as: "students",
                     },
                 },
+               
+                {
+                    $unwind: "$students",
+                },
                 {
                     $match: {
                         "students.academicYear": academicYear,
                         "students.admissionStatus": "Confirm",
                     },
-                },
-                {
-                    $unwind: "$students",
                 },
                 {
                     $unwind: "$students.feesDetails",

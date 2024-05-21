@@ -14,6 +14,7 @@ class Service extends BaseService {
         if (criteria.roomId) query.roomId = criteria.roomId;
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
+        if (criteria.name) query.name = new RegExp(criteria.name, "i");
 
         return this.preparePaginationAndReturnData(query, criteria);
     }
