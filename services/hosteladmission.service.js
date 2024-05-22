@@ -422,7 +422,7 @@ class HostelAdmissionService extends BaseService {
                 groupId: groupId,
                 empId: query.empId,
                 hostelAdmissionId: query.hostelAdmissionId,
-                academicYear: query.academicYear,
+              
             });
 
             // let response1;
