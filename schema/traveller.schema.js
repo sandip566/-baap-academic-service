@@ -16,11 +16,11 @@ const TravellerSchema = new mongoose.Schema(
         },
         routeId: {
             type: Number,
-            required: true,
+            required: false,
         },
         stopId:{
             type: Number,
-            required: true
+            required: false
         },
         fatherName: {
             type: String,
@@ -32,44 +32,40 @@ const TravellerSchema = new mongoose.Schema(
         },
         age: {
             type: String,
-            required: true
+            required: false
         },
         status: {
             type: String,
             enum: ['Active', 'In-active'],
-            required: true
+            required: false
         },
         adharCardNo: {
             type: Number,
-            required: true
+            required: false
         },
         panCardNo: {
             type: String,
-            required: true
+            required: false
         },
         medicalCertificateImg: {
             type: String,
-            required: true
-        },
-        stopId:{
-            type: Number,
-            required: true
+            required: false
         },
         totalFees:{
             type: Number,
-            required: true
+            required: false
         },
         startDate:{
             type: String,
-            required: true
+            required: false
         },
         endDate:{
             type: String,
-            required: true
+            required: false
         }
 
     },
-    { timestamps: true }
+    { timestamps: false }
 );
 
 const TravellerModel = mongoose.model("traveller", TravellerSchema);
