@@ -35,10 +35,7 @@ const hostelPaymnetSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        academicYear: {
-            type: String,
-            required: true,
-        },
+        
         userId: {
             type: Number,
             required: false,

@@ -9,19 +9,7 @@ const HostelFeesInstallmentModel = require("../schema/hostelfeesinstallment.sche
 const hostelfeesinstallmentService = require("../services/hostelfeesinstallment.service");
 const hosteladmissionService = require("../services/hosteladmission.service");
 
-router.post(
-    "/",
-    checkSchema(require("../dto/hostelPayment.dto")),
-    async (req, res, next) => {
-        if (ValidationHelper.requestValidationErrors(req, res)) {
-            return;
-        }
-        const hostelPaymentId = Date.now();
-        req.body.hostelPaymentId = hostelPaymentId;
-        const serviceResponse = await service.create(req.body);
-        requestResponsehelper.sendResponse(res, serviceResponse);
-    }
-);
+
 router.post(
     "/",
     checkSchema(require("../dto/feesPayment.dto")),

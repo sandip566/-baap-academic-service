@@ -12,7 +12,7 @@ class HostelService extends BaseService {
             return HostelModel.findOne({ hostelId: hostelId });
         });
     }
-
+    
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
