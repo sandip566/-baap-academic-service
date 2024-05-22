@@ -16,7 +16,7 @@ const CareTakerSchema = new mongoose.Schema(
         },
         experience: {
             type: String,
-            required: true
+            required: false
         },
         medicalCertificateImg:{
             type:String,
@@ -32,11 +32,11 @@ const CareTakerSchema = new mongoose.Schema(
         },
         startDate: {
             type: String,
-            required: true
+            required: false
         },
         endDate: {
             type: String,
-            required: true
+            required: false
         }
     },
     { timestamps: true, strict: false }
