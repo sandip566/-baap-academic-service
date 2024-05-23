@@ -14,6 +14,15 @@ const HostelAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: true,
         
+        },
+        status:{
+            type: String,
+            required: false,
+        },
+        hostelInstallmentId:{
+            type: Number,
+            required: true,
+        
         }
     },
     {strict:false, timestamps: true }

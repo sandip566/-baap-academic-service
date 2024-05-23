@@ -7,6 +7,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const AssetRequestModel = require("../schema/assetrequest.schema");
 const AssetModel = require("../schema/asset.schema");
 const AssetReturnModel = require("../schema/assetreturn.schema");
+const TokenService = require("../services/token.services");
 
 router.post(
     "/",
@@ -23,7 +24,7 @@ router.post(
                 requestId: req.body.requestId,
                 groupId: req.body.groupId,
             });
-            if (req.body.returnQuantity >assetRequest.quantity) {
+            if (req.body.returnQuantity > assetRequest.quantity) {
                 return res
                     .status(400)
                     .json({ error: "You don't have any book for return" });
@@ -96,58 +97,85 @@ router.post(
         }
     }
 );
-router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        name: req.query.name,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: parseInt(req.query.pageSize) || 10,
-    };
-    const serviceResponse = await service.getAllDataByGroupId(
-        groupId,
-        criteria
+router.get(
+    "/all/getByGroupId/:groupId",
+    // TokenService.checkPermission(["EAC1"]),
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const page = parseInt(req.query.page) || 1;
+            const perPage = parseInt(req.query.limit)||10
+            const criteria = {
+                // phoneNumber: req.query.phoneNumber,
+
+                name: req.query.name,
+
+                status: req.query.status,
+                search: req.query.search,
+            };
+
+            const serviceResponse = await service.getAllDataByGroupId(
+                groupId,
+                criteria,
+                page,
+                perPage
+            );
+
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+router.get("/returnAssetId/:returnAssetId", async (req, res) => {
+    const serviceResponse = await service.getByAssetTypeId(
+        req.params.returnAssetId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get(
-    "/returnAssetId/:returnAssetId",
+router.put(
+    "/groupId/:groupId/returnAssetId/:returnAssetId",
     async (req, res) => {
-        const serviceResponse = await service.getByAssetTypeId(req.params.returnAssetId);
-        requestResponsehelper.sendResponse(res, serviceResponse);
+        try {
+            const returnAssetId = req.params.returnAssetId;
+            const groupId = req.params.groupId;
+            const newData = req.body;
+            const data = await service.updateByAssetId(
+                returnAssetId,
+                groupId,
+                newData
+            );
+            if (!data) {
+                res.status(404).json({ error: "Asset not found to update" });
+            } else {
+                res.status(201).json(data);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
 );
-router.put("/groupId/:groupId/returnAssetId/:returnAssetId", async (req, res) => {
-    try {
-      const returnAssetId = req.params.returnAssetId;
-      const groupId = req.params.groupId;
-      const newData = req.body;
-      const data = await service.updateByAssetId(returnAssetId, groupId, newData);
-      if (!data) {
-        res.status(404).json({ error: 'Asset not found to update' });
-      } else {
-        res.status(201).json(data);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+
+router.delete(
+    "/groupId/:groupId/returnAssetId/:returnAssetId",
+    async (req, res) => {
+        try {
+            const returnAssetId = req.params.returnAssetId;
+            const groupId = req.params.groupId;
+            const data = await service.deleteByAssetId(returnAssetId, groupId);
+            if (!data) {
+                res.status(404).json({ error: "Asset not found to delete" });
+            } else {
+                res.status(201).json(data);
+            }
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
     }
-  });
-  
-  router.delete("/groupId/:groupId/returnAssetId/:returnAssetId", async (req, res) => {
-    try {
-      const returnAssetId = req.params.returnAssetId;
-      const groupId = req.params.groupId;
-      const data = await service.deleteByAssetId(returnAssetId, groupId);
-      if (!data) {
-        res.status(404).json({ error: 'Asset not found to delete' });
-      } else {
-        res.status(201).json(data);
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
-    }
-  });
+);
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
 

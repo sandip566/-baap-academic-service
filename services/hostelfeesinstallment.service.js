@@ -13,22 +13,22 @@ class HostelFeesInstallmentService extends BaseService {
 
         criteria.pageSize = 10;
         if (criteria.studentId) query.studentId = criteria.studentId;
-        if (criteria.installmentId)
-            query.installmentId = criteria.installmentId;
+        if (criteria.hostelInstallmentId)
+            query.hostelInstallmentId = criteria.hostelInstallmentId;
         if (criteria.empId) query.empId = criteria.empId;
         if (criteria.installmentNo)
             query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    async getByInstallmentId(installmentId) {
+    async getByInstallmentId(hostelInstallmentId) {
         return this.execute(() => {
-            return this.model.findOne({ installmentId: installmentId });
+            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
         });
     }
-    async updateFeesInstallmentById(installmentId, newFeesDetails, newData) {
+    async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
             const updateResult = await HostelFeesInstallmentModel.findOneAndUpdate(
-                { installmentId: installmentId },
+                { hostelInstallmentId: hostelInstallmentId },
                 { feesDetails: newFeesDetails, ...newData },
                 { new: true }
             );
@@ -88,11 +88,11 @@ class HostelFeesInstallmentService extends BaseService {
             throw error;
         }
     }
-    async updateInstallmentAmount(installmentId, newAmount, newStatus) {
-        console.log(installmentId, newAmount);
+    async updateInstallmentAmount(hostelInstallmentId, newAmount, newStatus) {
+        console.log(hostelInstallmentId, newAmount);
         try {
             const updateResult = await HostelFeesInstallmentModel.findOneAndUpdate(
-                { "feesDetails.installment.installmentNo": installmentId },
+                { "feesDetails.installment.installmentNo": hostelInstallmentId },
                 {
                     $set: {
                         "feesDetails.$[outer].installment.$[inner].amount":
@@ -103,8 +103,8 @@ class HostelFeesInstallmentService extends BaseService {
                 },
                 {
                     arrayFilters: [
-                        { "outer.installment.installmentNo": installmentId },
-                        { "inner.installmentNo": installmentId },
+                        { "outer.installment.installmentNo": hostelInstallmentId },
+                        { "inner.installmentNo": hostelInstallmentId },
                     ],
                     multi: true,
                     new: true,
@@ -118,7 +118,7 @@ class HostelFeesInstallmentService extends BaseService {
 
             const feesDetail = updateResult.feesDetails.find((detail) =>
                 detail.installment.some(
-                    (installment) => installment.installmentNo === installmentId
+                    (installment) => installment.installmentNo === hostelInstallmentId
                 )
             );
             const allInstallmentsPaid = feesDetail.installment.every(

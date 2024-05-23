@@ -6,6 +6,10 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        assetId:{
+            type: Number,
+            required: false  
+        },
         requestId: {
             type: Number,
             required: false

@@ -232,10 +232,10 @@ class HostelAdmissionService extends BaseService {
             throw error;
         }
     }
-    async updateFeesInstallmentById(installmentId, newFeesDetails, newData) {
+    async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
             const updateResult = await HostelAdmissionModel.findOneAndUpdate(
-                { installmentId: installmentId },
+                { hostelInstallmentId: hostelInstallmentId },
                 { feesDetails: newFeesDetails, ...newData },
                 { new: true }
             );
@@ -296,9 +296,9 @@ class HostelAdmissionService extends BaseService {
             throw error;
         }
     }
-    async getByInstallmentId(installmentId) {
+    async getByInstallmentId(hostelInstallmentId) {
         return this.execute(() => {
-            return this.model.findOne({ installmentId: installmentId });
+            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
         });
     }
     async getfeesPayment(groupId, query) {
