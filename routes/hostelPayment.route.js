@@ -8,6 +8,7 @@ const HostelAdmissionModel = require("../schema/hosteladmission.schema");
 const HostelFeesInstallmentModel = require("../schema/hostelfeesinstallment.schema");
 const hostelfeesinstallmentService = require("../services/hostelfeesinstallment.service");
 const hosteladmissionService = require("../services/hosteladmission.service");
+const TokenService = require("../services/token.services");
 
 
 router.post(
@@ -82,11 +83,12 @@ router.post(
 
             const installmentRecord =
                 await hostelfeesinstallmentService.getByInstallmentId(
-                    req.body.installmentId
+                    req.body.hostelInstallmentId
                 );
+                console.log(installmentRecord);
             const studentInstallmentRecord =
                 await hosteladmissionService.getByInstallmentId(
-                    req.body.installmentId,
+                    req.body.hostelInstallmentId,
                     req.body.hostelAdmissionId
                 );
             if (installmentRecord) {
@@ -120,7 +122,7 @@ router.post(
                 }
 
                 await hostelfeesinstallmentService.updateFeesInstallmentById(
-                    installmentRecord.data.installmentId,
+                    installmentRecord.data.hostelInstallmentId,
                     installmentRecord.data.feesDetails,
                     installmentRecord.data
                 );
@@ -197,7 +199,7 @@ router.post(
                 }
 
                 await hosteladmissionService.updateFeesInstallmentById(
-                    studentInstallmentRecord.data.installmentId,
+                    studentInstallmentRecord.data.hostelInstallmentId,
                     studentInstallmentRecord.data.feesDetails,
                     studentInstallmentRecord.data
                 );
@@ -279,11 +281,12 @@ router.post(
 
             const installmentRecord =
                 await hostelfeesinstallmentService.getByInstallmentId(
-                    req.body.installmentId
+                    req.body.hostelInstallmentId
                 );
+                console.log(installmentRecord);
             const AddmissioninstallmentRecord =
                 await hosteladmissionService.getByInstallmentId(
-                    req.body.installmentId
+                    req.body.hostelInstallmentId
                 );
 
             if (installmentRecord) {
@@ -316,7 +319,7 @@ router.post(
                 }
 
                 await hostelfeesinstallmentService.updateFeesInstallmentById(
-                    installmentRecord.data.installmentId,
+                    installmentRecord.data.hostelInstallmentId,
                     installmentRecord.data.feesDetails,
                     installmentRecord.data
                 );
@@ -393,7 +396,7 @@ router.post(
                 }
 
                 await hosteladmissionService.updateFeesInstallmentById(
-                    AddmissioninstallmentRecord.data.installmentId,
+                    AddmissioninstallmentRecord.data.hostelInstallmentId,
                     AddmissioninstallmentRecord.data.feesDetails,
                     AddmissioninstallmentRecord.data
                 );
@@ -442,6 +445,36 @@ router.post(
 
             requestResponsehelper.sendResponse(res, serviceResponse);
         }
+    }
+);
+router.get(
+    "/getFeesStatData/:groupId",
+    // TokenService.checkPermission(["EFCL1"]),
+    async (req, res, next) => {
+        const groupId = req.params.groupId;
+        const criteria = {
+            currentDate: req.query.currentDate,
+            academicYear: req.query.academicYear,
+            startDate: req.query.startDate,
+            endDate: req.query.endDate,
+            location: req.query.location,
+            course: req.query.course,
+            class: req.query.class,
+            department: req.query.department,
+            feesTemplateId: req.query.feesTemplateId,
+            division: req.query.division,
+            month: req.query.month,
+            search: req.query.search,
+        };
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 500;
+        const serviceResponse = await service.getFeesStatData(
+            groupId,
+            criteria,
+            page,
+            limit
+        );
+        requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 router.get("/all", async (req, res) => {
