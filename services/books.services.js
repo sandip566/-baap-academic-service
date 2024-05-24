@@ -261,6 +261,7 @@ class BooksService extends BaseService {
             students.forEach((student) => {
                 studentMap[student.addmissionId] = student.name;
             });
+            
             console.log(issueLogs);
             const data = issueLogs.map((issue) => ({
                 studentName:

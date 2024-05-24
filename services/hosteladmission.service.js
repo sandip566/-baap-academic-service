@@ -7,6 +7,8 @@ const religionModel = require("../schema/religion.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const hostelPaymentModel = require("../schema/hostelPayment.schema");
 const courseModel = require("../schema/courses.schema");
+const hostelPremises=require("../schema/hostelPremises.schema")
+const { aggregate } = require("../schema/feesPayment.schema");
 
 class HostelAdmissionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -232,6 +234,64 @@ class HostelAdmissionService extends BaseService {
             throw error;
         }
     }
+    async getAdmissionListing(groupId, academicYear) {
+        console.log(groupId, academicYear);
+        try {
+            let pipeLine = await hostelPremises.aggregate([
+                { 
+                    $match: { groupId: Number(groupId) } 
+                },
+                { 
+                    $project: { _id: 0, hostelId: 1, hostelName: 1 } 
+                },
+                {
+                    $lookup: {
+                        from: "hosteladmissions",
+                        let: { hostelId: "$hostelId" },
+                        pipeline: [
+                            { $match: { academicYear: academicYear } },
+                            { $unwind: "$hostelDetails" },
+                            { $match: { $expr: { $eq: ["$hostelDetails.hostelId", "$$hostelId"] } } },
+                            { $group: { _id: "$hostelDetails.hostelId", studentCount: { $sum: 1 } } }
+                        ],
+                        as: "hostelStudentCount"
+                    }
+                },
+                { 
+                    $unwind: {
+                        path: "$hostelStudentCount",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: { hostelId: "$hostelId", hostelName: "$hostelName" },
+                        totalStudents: { $sum: { $ifNull: ["$hostelStudentCount.studentCount", 0] } }
+                    }
+                },
+                { 
+                    $project: { 
+                        _id: 0, 
+                        hostelId: "$_id.hostelId", 
+                        hostelName: "$_id.hostelName", 
+                        totalStudents: 1 
+                    }
+                },
+                { 
+                    $sort: { hostelId: 1 }
+                }
+            ]);
+            let response={
+                status:"success",
+                data:pipeLine
+            }
+            return response;
+        } catch (error) {
+            console.error(error);
+            throw new Error("Error getting admission listing");
+        }
+    }
+    
     async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
             const updateResult = await HostelAdmissionModel.findOneAndUpdate(

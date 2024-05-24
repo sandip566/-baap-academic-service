@@ -86,22 +86,22 @@ class hostelPaymentService extends BaseService {
                 //         criteria.department
                 //     );
                 // }
-                // if (criteria.course) {
-                //     matchStage["courseDetails.course_id"] = Number(
-                //         criteria.course
-                //     );
-                // }
-                // if (criteria.class) {
-                //     matchStage["courseDetails.class_id"] = Number(
-                //         criteria.class
-                //     );
-                // }
+                if (criteria.hostelId) {
+                    matchStage["hostelDetails.hostelId"] = Number(
+                        criteria.hostelId
+                    );
+                }
+                if (criteria.roomId) {
+                    matchStage["hostelDetails.roomId"] = Number(
+                        criteria.roomId
+                    );
+                }
 
-                // if (criteria.division) {
-                //     matchStage["courseDetails.division_id"] = Number(
-                //         criteria.division
-                //     );
-                // }
+                if (criteria.bedId) {
+                    matchStage["hostelDetails.bedId"] = Number(
+                        criteria.bedId
+                    );
+                }
 
                 let admissionData = await HostelAdmissionModel.aggregate([
                     { $match: matchStage },
@@ -332,7 +332,7 @@ class hostelPaymentService extends BaseService {
         });
     }
 
-    async getFeesTotalCount(groupId, criteria, page, limit) {
+    async getHostelFeesTotalCount(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
@@ -453,63 +453,63 @@ class hostelPaymentService extends BaseService {
                         return false;
                     });
                 }
-                // if (criteria.course) {
-                //     query.course = criteria.course;
-                //     admissionData = admissionData.filter((data) => {
-                //         if (
-                //             data.courseDetails &&
-                //             data.courseDetails.length > 0
-                //         ) {
-                //             const matchingCourses = data.courseDetails.some(
-                //                 (course) =>
-                //                     course.course_id &&
-                //                     course.course_id.toString() ===
-                //                         query.course.toString()
-                //             );
-                //             // console.log("matchingCourses", matchingCourses);
-                //             return matchingCourses;
-                //         }
-                //         return false;
-                //     });
-                // }
+                if (criteria.hostelId) {
+                    query.hostelId = criteria.hostelId;
+                    admissionData = admissionData.filter((data) => {
+                        if (
+                            data.hostelDetails &&
+                            data.hostelDetails.length > 0
+                        ) {
+                            const matchingCourses = data.hostelDetails.some(
+                                (course) =>
+                                    course.hostelId &&
+                                    course.hostelId.toString() ===
+                                        query.hostelId.toString()
+                            );
+                            // console.log("matchingCourses", matchingCourses);
+                            return matchingCourses;
+                        }
+                        return false;
+                    });
+                }
 
-                // if (criteria.class) {
-                //     query.class = criteria.class;
-                //     admissionData = admissionData.filter((data) => {
-                //         if (
-                //             data.courseDetails &&
-                //             data.courseDetails.length > 0
-                //         ) {
-                //             let matchingclasses = data.courseDetails.some(
-                //                 (classes) =>
-                //                     classes.class_id &&
-                //                     classes.class_id.toString() ===
-                //                         query.class.toString()
-                //             );
-                //             return matchingclasses;
-                //         }
-                //         return false;
-                //     });
-                // }
+                if (criteria.roomId) {
+                    query.roomId = criteria.roomId;
+                    admissionData = admissionData.filter((data) => {
+                        if (
+                            data.hostelDetails &&
+                            data.hostelDetails.length > 0
+                        ) {
+                            let matchingclasses = data.hostelDetails.some(
+                                (classes) =>
+                                    classes.roomId &&
+                                    classes.roomId.toString() ===
+                                        query.roomId.toString()
+                            );
+                            return matchingclasses;
+                        }
+                        return false;
+                    });
+                }
 
-                // if (criteria.division) {
-                //     query.division = criteria.division;
-                //     admissionData = admissionData.filter((data) => {
-                //         if (
-                //             data.courseDetails &&
-                //             data.courseDetails.length > 0
-                //         ) {
-                //             let matchingdivision = data.courseDetails.some(
-                //                 (divisions) =>
-                //                     divisions.division_id &&
-                //                     divisions.division_id.toString() ===
-                //                         query.division.toString()
-                //             );
-                //             return matchingdivision;
-                //         }
-                //         return false;
-                //     });
-                // }
+                if (criteria.bedId) {
+                    query.bedId = criteria.bedId;
+                    admissionData = admissionData.filter((data) => {
+                        if (
+                            data.hostelDetails &&
+                            data.hostelDetails.length > 0
+                        ) {
+                            let matchingdivision = data.hostelDetails.some(
+                                (divisions) =>
+                                    divisions.bedId &&
+                                    divisions.bedId.toString() ===
+                                        query.bedId.toString()
+                            );
+                            return matchingdivision;
+                        }
+                        return false;
+                    });
+                }
 
                 let coursePayments = {};
                 courseData.forEach((course) => {

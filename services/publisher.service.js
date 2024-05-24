@@ -6,7 +6,7 @@ class publisherService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria, skip, limit) {
+    async getAllDataByGroupId(groupId, criteria) {
         try {
             const searchFilter = {
                 groupId: groupId,

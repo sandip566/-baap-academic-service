@@ -458,11 +458,11 @@ router.get(
             startDate: req.query.startDate,
             endDate: req.query.endDate,
             location: req.query.location,
-            course: req.query.course,
-            class: req.query.class,
+            hostelId: req.query.hostelId,
+            roomId: req.query.roomId,
             department: req.query.department,
             feesTemplateId: req.query.feesTemplateId,
-            division: req.query.division,
+            bedId: req.query.bedId,
             month: req.query.month,
             search: req.query.search,
         };
@@ -478,7 +478,7 @@ router.get(
     }
 );
 router.get(
-    "/getFeesTotalCount/:groupId",
+    "/getHostelFeesTotalCount/:groupId",
     // TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
@@ -488,16 +488,16 @@ router.get(
             startDate: req.query.startDate,
             endDate: req.query.endDate,
             location: req.query.location,
-            course: req.query.course,
-            class: req.query.class,
+            hostelId: req.query.hostelId,
+            roomId: req.query.roomId,
             department: req.query.department,
             feesTemplateId: req.query.feesTemplateId,
-            division: req.query.division,
+            bedId: req.query.bedId,
             month: req.query.month,
             search: req.query.search,
         };
 
-        const serviceResponse = await service.getFeesTotalCount(
+        const serviceResponse = await service.getHostelFeesTotalCount(
             groupId,
             criteria
         );

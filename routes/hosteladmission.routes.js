@@ -280,6 +280,25 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get(
+    "/HostelAdmissionListing/groupId/:groupId/academicYear/:academicYear",
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const academicYear = req.params.academicYear;
+
+            const courseData = await service.getAdmissionListing(
+                groupId,
+                academicYear
+            );
+            res.json(courseData);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
 router.get("/gethostelAdmissionId/:hostelAdmissionId", async (req, res) => {
     const serviceResponse = await service.getByHostelId(
         req.params.hostelAdmissionId

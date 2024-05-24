@@ -1,22 +1,59 @@
 const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 const LibraryPaymentModel = require("../schema/librarypayment.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const configurationModel=require("../schema/configuration.schema");
+const configurationModel = require("../schema/configuration.schema");
 class LibraryPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async getAllDataByGroupId(groupId, criteria) {
+        try {
+            const query = {
+                groupId: Number(groupId),
+            };
 
-    getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        criteria.pageSize = 10;
-        if (criteria.libraryPaymentId)
-            query.libraryPaymentId = criteria.libraryPaymentId;
-        if (criteria.empId) query.empId = criteria.empId;
-        if (criteria.userId) query.userId = criteria.userId;
-        return this.preparePaginationAndReturnData(query, criteria);
+            if (criteria.libraryPaymentId)
+                query.libraryPaymentId = criteria.libraryPaymentId;
+            if (criteria.empId) query.empId = criteria.empId;
+            if (criteria.userId) query.userId = criteria.userId;
+
+            const pageSize = Number(criteria.limit) || 10;
+            const currentPage = Number(criteria.page) || 1;
+            const skip = (currentPage - 1) * pageSize;
+
+            const pipeLine = await LibraryPaymentModel.aggregate([
+                { $match: query },
+                {
+                    $lookup: {
+                        from: "studentsadmissions",
+                        localField: "addmissionId",
+                        foreignField: "addmissionId",
+                        as: "addmissionId",
+                    },
+                },
+                { $unwind: "$addmissionId" },
+                { $skip: skip },
+                { $limit: pageSize },
+            ]).exec();
+
+            const totalDocuments = await LibraryPaymentModel.countDocuments(
+                query
+            );
+            const totalPages = Math.ceil(totalDocuments / pageSize);
+            const response = {
+                status: "Success",
+                data: pipeLine,
+                totalItemsCount: totalDocuments,
+                totalPages: totalPages,
+                pageSize: pageSize,
+                currentPage: currentPage,
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error in getAllDataByGroupId:", error);
+            throw error;
+        }
     }
 
     async deleteLibraryPaymentById(libraryPaymentId, groupId) {
@@ -29,11 +66,14 @@ class LibraryPaymentService extends BaseService {
             throw error;
         }
     }
-    async  getPenalty(groupId, userId, bookIssueLogId) {
+    async getPenalty(groupId, userId, bookIssueLogId) {
         try {
-            
-            let configurationsData = await configurationModel.findOne({ groupId: groupId });
-            let configurationKey = parseInt(configurationsData.libraryPerDayCharges); 
+            let configurationsData = await configurationModel.findOne({
+                groupId: groupId,
+            });
+            let configurationKey = parseInt(
+                configurationsData.libraryPerDayCharges
+            );
             let pipeLine = [
                 {
                     $match: {
@@ -47,7 +87,7 @@ class LibraryPaymentService extends BaseService {
                     $project: {
                         groupId: 1,
                         userId: 1,
-                        bookId:1,
+                        bookId: 1,
                         bookIssueLogId: 1,
                         isReturn: 1,
                         isOverdue: 1,
@@ -59,7 +99,12 @@ class LibraryPaymentService extends BaseService {
                                 then: {
                                     $ceil: {
                                         $divide: [
-                                            { $subtract: ["$$NOW", "$dueDate"] },
+                                            {
+                                                $subtract: [
+                                                    "$$NOW",
+                                                    "$dueDate",
+                                                ],
+                                            },
                                             1000 * 60 * 60 * 24,
                                         ],
                                     },
@@ -77,7 +122,7 @@ class LibraryPaymentService extends BaseService {
                     },
                 },
             ];
-    
+
             let response = await bookIssueLogModel.aggregate(pipeLine).exec();
             let data = {
                 data: response[0],
@@ -88,7 +133,6 @@ class LibraryPaymentService extends BaseService {
             throw error;
         }
     }
-    
 
     async updateLibraryPaymentById(libraryPaymentId, groupId, newData) {
         try {

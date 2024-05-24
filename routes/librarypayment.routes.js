@@ -25,7 +25,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         libraryPaymentId: req.query.libraryPaymentId,
         empId: req.query.empId,
         userId:req.query.userId,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
+        page: req.query.page ,
+        limit: req.query.limit 
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,

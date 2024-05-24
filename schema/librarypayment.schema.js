@@ -31,7 +31,7 @@ const LibraryPaymentSchema = new mongoose.Schema(
             default:Date.now()
         }
     },
-    { timestamps: true,statics:false }
+    { timestamps: true,statics:false ,strict:false}
 );
 
 const LibraryPaymentModel = mongoose.model("librarypayment", LibraryPaymentSchema);
