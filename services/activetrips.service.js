@@ -11,22 +11,64 @@ class ActiveTripsService extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.tripId) query.tripId = criteria.tripId;
-        if (criteria.search) {
-            const searchRegex = new RegExp(criteria.search, "i");
-            query.$or = [
-                { driverName: searchRegex },
-            ];
-            const numericSearch = parseInt(criteria.search);
-            if (!isNaN(numericSearch)) {
-                query.$or.push({ phoneNumber: numericSearch });
+    async getAllDataByGroupId(groupId, query, page, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { tripname: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { regex: query.search, $options: "i" } },
+                        { tripId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { tripname: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                    ];
+                }
             }
+
+            if (query.tripId) {
+                searchFilter.tripId = query.tripId;
+            }
+
+            if (query.tripName) {
+                searchFilter.tripName = { $regex: query.name, $options: "i" };
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            }
+
+            const count = await ActiveTripsModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await ActiveTripsModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
         }
-        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteTripHistroyById(tripId, groupId) {

@@ -36,17 +36,18 @@ router.get("/getVehicleId/:vehicleId", async (req, res, next) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const criteria = {
+    const query = {
         vehicleId: req.query.vehicleId,
-        vehicleName: req.query.vehicleName,
-        vehicleNumber: req.query.vehicleNumber,
-        search: req.query.search,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: parseInt(req.query.pageSize) || 10,
+        driverName: req.query.driverName,
+        phoneNumber: req.query.phoneNumber,
     };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit);
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        query,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

@@ -5,24 +5,64 @@ class driverervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.driverId) query.driverId = criteria.driverId;
-        if (criteria.phoneNumber) query.phoneNumber = criteria.phoneNumber;
-        if (criteria.driverName) query.driverName = new RegExp(criteria.driverName, "i");
-        if (criteria.search) {
-            const searchRegex = new RegExp(criteria.search, "i");
-            query.$or = [
-                { driverName: searchRegex },
-            ];
-            const numericSearch = parseInt(criteria.search);
-            if (!isNaN(numericSearch)) {
-                query.$or.push({ phoneNumber: numericSearch });
+    async getAllDataByGroupId(groupId, query, page, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { driverName: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { regex: query.search, $options: "i" } },
+                        { driverId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { driverName: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                    ];
+                }
             }
+
+            if (query.driverId) {
+                searchFilter.driverId = query.driverId;
+            }
+
+            if (query.driverName) {
+                searchFilter.driverName = { $regex: query.name, $options: "i" };
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            }
+
+            const count = await driverModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await driverModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
         }
-        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async getBydriverId(driverId) {
