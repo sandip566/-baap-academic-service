@@ -1005,11 +1005,12 @@ class StudentsAdmmisionService extends BaseService {
             );
             // Fetch feesPayment data based on specific IDs
             const feesPaymentData = await FeesPaymentModel.find({
-                groupId: groupId,
+                groupId:Number (groupId),
                 empId: query.empId,
                 addmissionId: query.addmissionId,
                 academicYear: query.academicYear,
             });
+            console.log(feesPaymentData);
 
             // let response1;
             let modifiedFeesPaymentData = [];
@@ -1027,9 +1028,9 @@ class StudentsAdmmisionService extends BaseService {
                         for (const feesDetail of addmissionData.courseDetails) {
                             let feesAdditionalData = {};
 
-                            if (feesDetail.course_id) {
+                            if (feesDetail?.course_id) {
                                 const courseData = await courseModel.findOne({
-                                    courseId: feesDetail.course_id,
+                                    courseId: feesDetail?.course_id,
                                 });
                                 feesAdditionalData.course_id = courseData
                                     ? courseData.courseName
@@ -1045,14 +1046,14 @@ class StudentsAdmmisionService extends BaseService {
                         const convertedObject =
                             feesDetailsWithAdditionalData.reduce(
                                 (acc, course) => {
-                                    acc = { courseName: course.course_id };
+                                    acc = { courseName: course?.course_id };
                                     return acc;
                                 },
                                 {}
                             );
                         response1.push({
                             ...feesPayment._doc,
-                            courseName: convertedObject.courseName,
+                            courseName: convertedObject?.courseName,
                         });
                         modifiedFeesPaymentData.push(
                             ...feesDetailsWithAdditionalData

@@ -20,7 +20,7 @@ class hostelPaymentService extends BaseService {
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
-    async getFeesStatData(groupId, criteria, page, limit) {
+    async getHostelStatastics(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
                 const skip = (page - 1) * limit;
@@ -331,6 +331,361 @@ class hostelPaymentService extends BaseService {
             }
         });
     }
+
+    async getFeesTotalCount(groupId, criteria, page, limit) {
+        return this.execute(async () => {
+            try {
+                const skip = (page - 1) * limit;
+
+                const query = {
+                    groupId: groupId,
+                };
+
+                let courseData = await hostelPremisesModel.find({
+                    groupId: groupId,
+                });
+                let hostelId;
+                let courseFee;
+                let admissionData = await HostelAdmissionModel.find({
+                    groupId: groupId,
+                    // academicYear: criteria.academicYear,
+                    admissionStatus: "Confirm",
+                });
+                console.log(admissionData);
+                let feesData = await this.model.find({
+                    groupId: groupId,
+                    // academicYear: criteria.academicYear,
+                    // isShowInAccounting: true,
+                });
+
+                console.log(
+                    "criteria.currentDate, criteria.currentDate,feesData",
+                    feesData.length
+                );
+                const currentDateValue = criteria.currentDate
+                    ? criteria.currentDate
+                    : null;
+                // console.log(currentDateValue);
+                const currentDateObj = currentDateValue
+                    ? new Date(currentDateValue)
+                    : null;
+
+                if (currentDateObj) {
+                    const year = currentDateObj.getFullYear();
+                    const month = String(
+                        currentDateObj.getMonth() + 1
+                    ).padStart(2, "0");
+                    const day = String(currentDateObj.getDate()).padStart(
+                        2,
+                        "0"
+                    );
+                    const formattedDate = `${year}/${month}/${day}`;
+
+                    feesData = feesData.filter(
+                        (fee) => fee.currentDate === formattedDate
+                    );
+                }
+                if (criteria.startDate && criteria.endDate) {
+                    feesData = feesData.filter((fee) => {
+                        return (
+                            fee.currentDate >= criteria.startDate &&
+                            fee.currentDate <= criteria.endDate
+                        );
+                    });
+                }
+
+                if (criteria.month) {
+                    query.month = criteria.month;
+                    const month = query.month.padStart(2, "0");
+                    feesData = feesData.filter((data) => {
+                        const currentDate = new Date(data.currentDate);
+                        const dataMonth = String(
+                            currentDate.getMonth() + 1
+                        ).padStart(2, "0");
+                        return dataMonth === month;
+                    });
+                }
+
+                if (criteria.academicYear) {
+                    query.academicYear = criteria.academicYear;
+                    feesData = feesData.filter(
+                        (data) => data.academicYear === query.academicYear
+                    );
+                }
+
+                if (criteria.location) {
+                    query.location = criteria.location;
+                    admissionData = admissionData.filter(
+                        (data) => data.location == query.location
+                    );
+                }
+
+                if (criteria.department) {
+                    query.department = criteria.department;
+                    admissionData = admissionData.filter((data) => {
+                        if (
+                            data.courseDetails &&
+                            data.courseDetails.length > 0
+                        ) {
+                            let matchingdepartment = data.courseDetails.some(
+                                (departments) =>
+                                    departments.department_id &&
+                                    departments.department_id.toString() ===
+                                        query.department.toString()
+                            );
+                            return matchingdepartment;
+                        }
+                        return false;
+                    });
+                }
+                if (criteria.feesTemplateId) {
+                    query.feesTemplateId = criteria.feesTemplateId;
+                    admissionData = admissionData.filter((data) => {
+                        if (data.feesDetails && data.feesDetails.length > 0) {
+                            let matchingfeesTemplateId = data.feesDetails.some(
+                                (feesTemplate) =>
+                                    feesTemplate.feesTemplateId &&
+                                    feesTemplate.feesTemplateId.toString() ===
+                                        query.feesTemplateId.toString()
+                            );
+                            return matchingfeesTemplateId;
+                        }
+                        return false;
+                    });
+                }
+                // if (criteria.course) {
+                //     query.course = criteria.course;
+                //     admissionData = admissionData.filter((data) => {
+                //         if (
+                //             data.courseDetails &&
+                //             data.courseDetails.length > 0
+                //         ) {
+                //             const matchingCourses = data.courseDetails.some(
+                //                 (course) =>
+                //                     course.course_id &&
+                //                     course.course_id.toString() ===
+                //                         query.course.toString()
+                //             );
+                //             // console.log("matchingCourses", matchingCourses);
+                //             return matchingCourses;
+                //         }
+                //         return false;
+                //     });
+                // }
+
+                // if (criteria.class) {
+                //     query.class = criteria.class;
+                //     admissionData = admissionData.filter((data) => {
+                //         if (
+                //             data.courseDetails &&
+                //             data.courseDetails.length > 0
+                //         ) {
+                //             let matchingclasses = data.courseDetails.some(
+                //                 (classes) =>
+                //                     classes.class_id &&
+                //                     classes.class_id.toString() ===
+                //                         query.class.toString()
+                //             );
+                //             return matchingclasses;
+                //         }
+                //         return false;
+                //     });
+                // }
+
+                // if (criteria.division) {
+                //     query.division = criteria.division;
+                //     admissionData = admissionData.filter((data) => {
+                //         if (
+                //             data.courseDetails &&
+                //             data.courseDetails.length > 0
+                //         ) {
+                //             let matchingdivision = data.courseDetails.some(
+                //                 (divisions) =>
+                //                     divisions.division_id &&
+                //                     divisions.division_id.toString() ===
+                //                         query.division.toString()
+                //             );
+                //             return matchingdivision;
+                //         }
+                //         return false;
+                //     });
+                // }
+
+                let coursePayments = {};
+                courseData.forEach((course) => {
+                    hostelId = course.hostelId;
+                    // courseFee = course.Fees;
+                    coursePayments[course.hostelName] = {
+                        totalPaidAmount: 0,
+                        totalRemainingAmount: 0,
+                        hostelId: hostelId,
+                        // courseFee: courseFee,
+                    };
+                });
+
+                admissionData.forEach((admission) => {
+                    if (
+                        admission.hostelDetails &&
+                        admission.hostelDetails.length > 0
+                    ) {
+                        admission.hostelDetails.forEach((courseDetail) => {
+                            const hostelId = courseDetail?.hostelId;
+
+                            const courseExists = courseData.find(
+                                (course) => course.hostelId === hostelId
+                            );
+                            console.log("courseExists", courseExists);
+                            if (courseExists) {
+                                const hostelName = courseExists.hostelName;
+
+                                const paymentsForCourse = feesData.filter(
+                                    (payment) =>
+                                        payment.hostelAdmissionId ===
+                                        admission.hostelAdmissionId
+                                );
+                                console.log(
+                                    "paymentsForCourse",
+                                    paymentsForCourse
+                                );
+                                const paidAmountForCourse =
+                                    paymentsForCourse.reduce(
+                                        (total, payment) =>
+                                            total +
+                                            parseFloat(payment.paidAmount || 0),
+                                        0
+                                    );
+                                console.log(
+                                    "paidAmountForCourse",
+                                    paidAmountForCourse
+                                );
+
+                                const remainingAmountForCourse =
+                                    paymentsForCourse.reduce(
+                                        (total, paymentArray, currentIndex) => {
+                                            const lastIndex =
+                                                currentIndex ===
+                                                paymentsForCourse.length - 1
+                                                    ? paymentArray
+                                                    : null;
+
+                                            const remainingAmount = lastIndex
+                                                ? parseFloat(
+                                                      lastIndex.remainingAmount ||
+                                                          0
+                                                  )
+                                                : 0;
+
+                                            return total + remainingAmount;
+                                        },
+                                        0
+                                    );
+
+                                if (!coursePayments[hostelName].noOfStudents) {
+                                    coursePayments[hostelName].noOfStudents = 0;
+                                }
+                                coursePayments[hostelName].noOfStudents++;
+
+                                if (!coursePayments[hostelName].hostelId) {
+                                    coursePayments[hostelName].hostelId =
+                                        hostelId;
+                                }
+                                // if (!coursePayments[courseName].courseFee) {
+                                //     coursePayments[courseName].courseFee =
+                                //         courseFee;
+                                // }
+
+                                coursePayments[hostelName].totalPaidAmount +=
+                                    paidAmountForCourse;
+
+                                coursePayments[
+                                    hostelName
+                                ].totalRemainingAmount +=
+                                    remainingAmountForCourse;
+                            }
+                        });
+                    }
+                });
+                let formattedCoursePayments = Object.keys(coursePayments).map(
+                    (courseName) => {
+                        console.log(courseName);
+                        let lastPaymentPerAdmission = {};
+
+                        let totalFee = 0;
+
+                        admissionData.forEach((admission) => {
+                            const hostelAdmissionId =
+                                admission.hostelAdmissionId;
+
+                            const correspondingPayment = feesData.find(
+                                (payment) =>
+                                    payment.hostelAdmissionId ===
+                                    hostelAdmissionId
+                            );
+
+                            if (
+                                correspondingPayment &&
+                                correspondingPayment.hostelName === courseName
+                            ) {
+                                totalFee += correspondingPayment.hostelFee;
+                            }
+                            console.log(totalFee);
+                        });
+
+                        console.log(
+                            "Total fee for course '" +
+                                courseName +
+                                "': " +
+                                totalFee
+                        );
+
+                        return {
+                            name: courseName,
+                            courseId: coursePayments[courseName].hostelId,
+                            courseFee: totalFee,
+                            TotalCourseFee:
+                                coursePayments[courseName].hostelFee *
+                                    coursePayments[courseName].noOfStudents ||
+                                0,
+                            noOfStudents:
+                                coursePayments[courseName].noOfStudents || 0,
+                            totalPaidAmount:
+                                coursePayments[courseName].totalPaidAmount,
+                            totalRemainingAmount:
+                                coursePayments[courseName].totalRemainingAmount,
+                        };
+                    }
+                );
+                let totalPaidAmount = 0;
+                let totalRemainingAmount = 0;
+                let totalCourseFee = 0;
+                let totalCourseFee1 = 0;
+                formattedCoursePayments.forEach((course) => {
+                    totalPaidAmount += course.totalPaidAmount || 0;
+                    totalRemainingAmount += course.totalRemainingAmount || 0;
+                });
+
+                totalCourseFee = formattedCoursePayments.reduce(
+                    (total, course) => {
+                        return total + parseFloat(course.courseFee || 0);
+                    },
+                    0
+                );
+                let response = {
+                    coursePayments: formattedCoursePayments,
+                    totalItemsCount: admissionData.length,
+                    totalFees: totalPaidAmount + totalRemainingAmount || 0,
+                    totalPaidFees: totalPaidAmount,
+                    totalPendingFees: totalRemainingAmount,
+                };
+
+                return response;
+            } catch (error) {
+                console.error("Error occurred:", error);
+                throw error;
+            }
+        });
+    }
+
     async getByAdmissionAndEmpId(hostelAdmissionId, feesDetailsId, empId) {
         return this.execute(() => {
             return this.model

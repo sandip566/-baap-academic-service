@@ -32,10 +32,6 @@ router.post("/issue-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
             req.body;
-        // const currentDate = new Date();
-        // const dueDate = new Date(currentDate);
-        // dueDate.setDate(dueDate.getDate() + 5);
-
         const existingReservation = await bookIssueLogModel.findOne({
             addmissionId: addmissionId,
             bookId: bookId,
@@ -68,7 +64,7 @@ router.post("/issue-book", async (req, res) => {
             groupId,
             bookId
         );
-        if (!isAvailable || isAvailable.availableCount <= 0) {
+        if (!isAvailable || isAvailable.availableCount < 0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for issuing. Available count is zero.",
@@ -112,6 +108,12 @@ router.post("/return-book", async (req, res) => {
             addmissionId: addmissionId,
             isReturn: false,
         });
+        if(existingReservation?.isOverdue==true){
+            return res.status(409).json({
+                success: false,
+                error: "First Paid Payment,Your Log is OverDue",
+            }); 
+        }
         if (!existingReservation) {
             return res.status(400).json({
                 success: false,

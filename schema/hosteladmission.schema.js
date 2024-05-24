@@ -21,7 +21,7 @@ const HostelAdmissionSchema = new mongoose.Schema(
         },
         hostelInstallmentId:{
             type: Number,
-            required: true,
+            required: false,
         
         }
     },

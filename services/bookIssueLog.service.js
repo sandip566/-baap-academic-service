@@ -201,7 +201,7 @@ class BookIssueLogService extends BaseService {
                         diffTime / (1000 * 60 * 60 * 24)
                     );
 
-                    if (diffDays > 0) {
+                    if (diffDays >= 0) {
                         await bookIssueLogModel.updateOne(
                             { _id: bookIssue._id },
                             { $set: { isOverdue: true } }
@@ -217,7 +217,7 @@ class BookIssueLogService extends BaseService {
                     const diffDays = Math.ceil(
                         diffTime / (1000 * 60 * 60 * 24)
                     );
-                    return diffDays > 0;
+                    return diffDays >= 0;
                 })
                 .map((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);

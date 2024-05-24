@@ -65,7 +65,7 @@ const TravellerSchema = new mongoose.Schema(
         }
 
     },
-    { timestamps: false }
+    {strict:false, timestamps: false }
 );
 
 const TravellerModel = mongoose.model("traveller", TravellerSchema);

@@ -47,6 +47,7 @@ class LibraryPaymentService extends BaseService {
                     $project: {
                         groupId: 1,
                         userId: 1,
+                        bookId:1,
                         bookIssueLogId: 1,
                         isReturn: 1,
                         isOverdue: 1,

@@ -28,7 +28,7 @@ const documentConfigurationModel = new mongoose.Schema({
     documentTitle: String,
     expiryDate: Date,
     formDate: Date,
-    documentUrl: String,
+    // documentUrl: String,
     documentId: Number
 }, { strict: false, timestamps: true });
 
