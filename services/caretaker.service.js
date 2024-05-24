@@ -12,24 +12,64 @@ class CareTakerService extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.careTakerId) query.careTakerId = criteria.careTakerId;
-        if (criteria.phoneNumber) query.phoneNumber = criteria.phoneNumber;
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        if (criteria.search) {
-            const searchRegex = new RegExp(criteria.search, "i");
-            query.$or = [
-                { driverName: searchRegex },
-            ];
-            const numericSearch = parseInt(criteria.search);
-            if (!isNaN(numericSearch)) {
-                query.$or.push({ phoneNumber: numericSearch });
+    async getAllDataByGroupId(groupId, query, page, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { careTakername: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { regex: query.search, $options: "i" } },
+                        { careTakerId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { careTakername: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                    ];
+                }
             }
+
+            if (query.careTakerId) {
+                searchFilter.careTakerId = query.careTakerId;
+            }
+
+            if (query.careTakerName) {
+                searchFilter.careTakerName = { $regex: query.name, $options: "i" };
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            }
+
+            const count = await CareTakerModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await CareTakerModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
         }
-        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteTripHistroyById(careTakerId, groupId) {
@@ -43,7 +83,7 @@ class CareTakerService extends BaseService {
         }
     }
 
-    async updatedriverById(careTakerId, groupId, newData) {
+    async updatecareTakerById(careTakerId, groupId, newData) {
         try {
             const updatedVisitor = await CareTakerModel.findOneAndUpdate(
                 { careTakerId: careTakerId, groupId: groupId },

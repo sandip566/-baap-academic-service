@@ -12,24 +12,64 @@ class vehicleervice extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.vehicleId) query.vehicleId = criteria.vehicleId;
-        if (criteria.vehicleNumber) query.vehicleNumber = criteria.vehicleNumber;
-        if (criteria.vehicleName) query.vehicleName = new RegExp(criteria.vehicleName, "i");
-        if (criteria.search) {
-            const searchRegex = new RegExp(criteria.search, "i");
-            query.$or = [
-                { vehicleName: searchRegex },
-            ];
-            const numericSearch = parseInt(criteria.search);
-            if (!isNaN(numericSearch)) {
-                query.$or.push({ vehicleNumber: numericSearch });
+    async getAllDataByGroupId(groupId, query, page, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { vehicleName: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { regex: query.search, $options: "i" } },
+                        { vehicleId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { vehicleName: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                    ];
+                }
             }
+
+            if (query.vehicleId) {
+                searchFilter.vehicleId = query.vehicleId;
+            }
+
+            if (query.vehicleName) {
+                searchFilter.vehicleName = { $regex: query.name, $options: "i" };
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            }
+
+            const count = await vehicleModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await vehicleModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
         }
-        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteTripHistroyById(vehicleId, groupId) {

@@ -60,17 +60,18 @@ router.get("/all/busRoutes", async (req, res) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const criteria = {
+    const query = {
         routeId: req.query.routeId,
         routeName: req.query.routeName,
-        rootNumber: req.query.rootNumber,
-        busName: req.query.busName,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: parseInt(req.query.pageSize) || 10,
+        phoneNumber: req.query.phoneNumber,
     };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit);
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        query,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

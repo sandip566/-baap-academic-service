@@ -54,17 +54,18 @@ router.get("/getcareTakerId/:careTakerId", async (req, res, next) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const criteria = {
+    const query = {
         careTakerId: req.query.careTakerId,
-        name: req.query.name,
+        careTakerName: req.query.careTakerName,
         phoneNumber: req.query.phoneNumber,
-        search: req.query.search,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: parseInt(req.query.pageSize) || 10,
     };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit);
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        query,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -78,7 +79,7 @@ router.delete("/groupId/:groupId/careTakerId/:careTakerId", async (req, res) => 
             groupId: groupId,
         });
         if (!Data) {
-            res.status(404).json({ error: "driver data not found to delete" });
+            res.status(404).json({ error: "careTaker data not found to delete" });
         } else {
             res.status(201).json(Data);
         }
@@ -93,7 +94,7 @@ router.put("/groupId/:groupId/careTakerId/:careTakerId", async (req, res) => {
         const careTakerId = req.params.careTakerId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updatedriverById(
+        const updateData = await service.updatecareTakerById(
             careTakerId,
             groupId,
             newData
