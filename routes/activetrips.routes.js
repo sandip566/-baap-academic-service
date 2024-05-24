@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const tripId=+Date.now();
-        req.body.tripId=tripId
+        const tripId = +Date.now();
+        req.body.tripId = tripId
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -60,9 +60,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
     };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit);
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        criteria,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
