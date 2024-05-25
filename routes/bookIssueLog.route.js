@@ -8,6 +8,7 @@ const Book = require("../schema/books.schema");
 const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 const booksServices = require("../services/books.services");
 const shelfModel = require("../schema/shelf.schema");
+const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 
 router.post(
     "/",
@@ -30,50 +31,95 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
-            req.body;
-        const existingReservation = await bookIssueLogModel.findOne({
+        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } = req.body;
+
+        // Validate that bookId is a number
+        if (isNaN(bookId)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid bookId. It should be a number.",
+            });
+        }
+
+        // Convert bookId to a number
+        const bookIdNumber = Number(bookId);
+
+        // Check if the admission status is "Confirm"
+        const studentAdmission = await StudentsAdmissionModel.findOne({
+            groupId: groupId,
             addmissionId: addmissionId,
-            bookId: bookId,
+        });
+
+        if (!studentAdmission) {
+            return res.status(400).json({
+                success: false,
+                error: "Admission ID not found.",
+            });
+        }
+
+        if (studentAdmission.admissionStatus === "Cancel") {
+            return res.status(400).json({
+                success: false,
+                error: "The admission ID has been canceled.",
+            });
+        }
+
+        if (studentAdmission.admissionStatus === "Draft") {
+            return res.status(400).json({
+                success: false,
+                error: "The admission ID has a status of 'Draft'.",
+            });
+        }
+
+        if (studentAdmission.admissionStatus !== "Confirm") {
+            return res.status(400).json({
+                success: false,
+                error: "The admission ID does not have a confirmed status.",
+            });
+        }
+
+        const existingReservation = await bookIssueLogModel.findOne({
+            groupId: groupId,
+            addmissionId: addmissionId,
+            bookId: bookIdNumber,
             isReturn: false,
         });
+
         if (existingReservation) {
             return res.status(400).json({
                 success: false,
                 error: "There is already an unreturned reservation for this book and admission ID.",
             });
         }
-        const checkIssuedCount = await service.checkIssuedCount(
-            groupId,
-            addmissionId
-        );
-        if (checkIssuedCount == false) {
+
+        const checkIssuedCount = await service.checkIssuedCount(groupId, addmissionId);
+        if (!checkIssuedCount) {
             return res.status(400).json({
                 success: false,
-                error: "You book issueing limit exceeded",
+                error: "You have exceeded your book issuing limit.",
             });
         }
+
         const isOverdue = await service.checkOverdueStatus(addmissionId);
         if (isOverdue) {
             return res.status(400).json({
                 success: false,
-                error: "Overdue book returned needed",
+                error: "Overdue book return needed.",
             });
         }
-        const isAvailable = await service.checkBookAvailability(
-            groupId,
-            bookId
-        );
-        if (!isAvailable || isAvailable.availableCount < 0) {
+
+        const isAvailable = await service.checkBookAvailability(groupId, bookIdNumber);
+        if (!isAvailable || isAvailable.availableCount <= 0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for issuing. Available count is zero.",
             });
         }
-        const bookIssueLogId = +Date.now();
+
+        const bookIssueLogId = Date.now(); 
         const newReservation = {
             groupId: groupId,
-            bookId: bookId,
+            bookId: bookIdNumber,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
             dueDate: dueDate,
@@ -81,12 +127,15 @@ router.post("/issue-book", async (req, res) => {
             userId: userId,
             isReturn: false,
         };
+
         const createdReservation = await service.create(newReservation);
+
         await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
+            { bookId: bookIdNumber, availableCount: { $gt: 0 } },
             { $inc: { availableCount: -1 } },
             { new: true }
         );
+
         res.status(201).json({
             success: true,
             reservation: createdReservation,
@@ -100,19 +149,22 @@ router.post("/issue-book", async (req, res) => {
     }
 });
 
+
 router.post("/return-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, returnDate } = req.body;
+
         const existingReservation = await bookIssueLogModel.findOne({
+            groupId: groupId,
             bookId: bookId,
             addmissionId: addmissionId,
             isReturn: false,
         });
-        if(existingReservation?.isOverdue==true){
+        if (existingReservation?.isOverdue == true) {
             return res.status(409).json({
                 success: false,
                 error: "First Paid Payment,Your Log is OverDue",
-            }); 
+            });
         }
         if (!existingReservation) {
             return res.status(400).json({
@@ -261,7 +313,7 @@ router.post("/reserve-book", async (req, res) => {
             userId,
             totalCopies,
             ISBN,
-            bookName
+            bookName,
         } = req.body;
         const serviceResponse = service.reserveBook(groupId, bookId);
         if (!serviceResponse) {

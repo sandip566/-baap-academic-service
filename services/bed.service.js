@@ -9,6 +9,7 @@ class BedService extends BaseService {
         const query = {
             groupId: groupId,
         };
+        if (criteria.status) query.status = criteria.status;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }

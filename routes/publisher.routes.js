@@ -31,7 +31,7 @@ router.get("/all", async (req, res) => {
 });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    try {
+   
         const groupId = req.params.groupId;
         const criteria = {
             publisherName: req.query.publisherName,
@@ -44,32 +44,15 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 100;
-        const skip = (page - 1) * limit;
+      
 
-        const { searchFilter } = await service.getAllDataByGroupId(
+        const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria,
-            skip,
+            page,
             limit
         );
-        const totalCount = await publisherModel.countDocuments(searchFilter);
-        const publisher = await publisherModel
-            .find(searchFilter)
-            .skip(skip)
-            .limit(limit)
-            .exec();
-
-        res.json({
-            status: "Success",
-            data: {
-                items: publisher,
-                totalCount: totalCount,
-            },
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
-    }
+        requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.delete(
     "/groupId/:groupId/publisherId/:publisherId",

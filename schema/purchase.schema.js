@@ -34,9 +34,9 @@ const PurchaseSchema = new mongoose.Schema(
             type: String,
             enum: ["Upi", "Cash", "Cheque"],
         },
-        bookName: {
+        name: {
             type: String,
-            required: false,
+            required: true,
         },
         quantity: {
             type: Number,

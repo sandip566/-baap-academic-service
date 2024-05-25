@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
 const service = require("../services/rooms.services");
+const RoomsModel = require("../schema/rooms.schema");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
@@ -12,9 +13,37 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const roomId = +Date.now();
-        req.body.roomId = roomId;
-        const serviceResponse = await service.create(req.body);
+        const existingRoom = await RoomsModel.findOne({
+            groupId: req.body.groupId,
+            hostelId: req.body.hostelId,
+            floorNo: req.body.floorNo,
+        });
+
+        if (existingRoom) {
+            return res
+                .status(400)
+                .json({ error: "Rooms Already Exist For This Hostel,Floor" });
+        }
+
+        const floorNo = req.body.floorNo;
+        const numberOfRooms = req.body.numberOfRooms;
+        const assignRoomNumber = req.body.assignRoomNumber;
+
+        const [startRoom, endRoom] = assignRoomNumber.split("-").map(Number);
+
+        const roomsData = [];
+        for (let i = startRoom; i <= endRoom; i++) {
+            const roomId = Date.now() + Math.floor(Math.random() * 1000000);
+            const roomData = {
+                roomId: roomId,
+                floorNo: floorNo,
+                roomNo: i,
+                ...req.body,
+            };
+            roomsData.push(roomData);
+        }
+
+        const serviceResponse = await service.create(roomsData);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
@@ -53,7 +82,9 @@ router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
             roomId: req.query.roomId,
-            name:req.query.name,
+            hostelId: req.query.hostelId,
+            floorNo: req.query.floorNo,
+            name: req.query.name,
             hostelId: req.query.hostelId,
             status: req.query.status,
             pageNumber: parseInt(req.query.pageNumber) || 1,

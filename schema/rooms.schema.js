@@ -1,28 +1,40 @@
 const mongoose = require("mongoose");
 
 const room = new mongoose.Schema(
-  {
-    groupId: {
-      type: Number,
-      require: false
+    {
+        groupId: {
+            type: Number,
+            required: false,
+        },
+        roomId: {
+            type: Number,
+            required: false,
+        },
+        hostelId: {
+            type: Number,
+            required: true,
+        },
+        floorNo: {
+            type: Number,
+            required: true,
+        },
+        numberOfRooms: {
+            type: Number,
+            required: true,
+        },
+        name: {
+            type: String,
+        },
+        capacity: {
+            type: Number,
+            required: true,
+        },
+        status:{
+          type: String,
+          required: false,
+        }
     },
-    roomId: {
-      type: Number,
-      require: false
-    },
-    name: {
-      type: String
-    },
-   
-    capacity: {
-      type: Number,
-    },
-    hostelId: {
-      type: Number,
-      require: false
-    }
-  },
-  { strict: false, timestamps: true }
+    { strict: false, timestamps: true }
 );
 room.plugin(require("mongoose-autopopulate"));
 const roomModel = mongoose.model("rooms", room);

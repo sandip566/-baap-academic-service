@@ -13,7 +13,16 @@ const BedSchema = new mongoose.Schema(
         bedId:{
             type:Number,
             strict: false
-        }
+        },
+        bedNumber:{
+            type:Number,
+            strict: true
+        },
+        status:{
+            type: String,
+            required: false,
+            default: "available"
+          }
     },
     {strict:false, timestamps: true }
 );

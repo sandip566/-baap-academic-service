@@ -6,11 +6,9 @@ class publisherService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria, page, limit) {
         try {
-            const searchFilter = {
-                groupId: groupId,
-            };
+            const searchFilter = { groupId: groupId };
 
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -36,22 +34,32 @@ class publisherService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-                        {
-                            email: { $regex: new RegExp(criteria.search, "i") },
-                        },
+                        { email: { $regex: new RegExp(criteria.search, "i") } },
                     ];
                 }
             }
+
             if (criteria.phoneNumber) {
                 searchFilter.phoneNumber = criteria.phoneNumber;
             }
+
             if (criteria.publisherName) {
                 searchFilter.publisherName = {
                     $regex: new RegExp(criteria.publisherName, "i"),
                 };
             }
 
-            return { searchFilter };
+            const sortOrder = { createdAt: -1 };
+
+            const skip = (page - 1) * limit;
+
+            const data = await publisherModel
+                .find(searchFilter)
+                .sort(sortOrder)
+                .skip(skip)
+                .limit(limit);
+
+            return { data };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw new Error("An error occurred while processing the request.");

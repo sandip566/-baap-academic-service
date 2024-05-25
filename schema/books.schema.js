@@ -6,6 +6,10 @@ const booksSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        purchaseId: {
+            type: Number,
+            required: true,
+        },
         groupId: {
             type: Number,
             required: false,
