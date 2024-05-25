@@ -53,24 +53,26 @@ router.get("/getTripId/:tripId", async (req, res, next) => {
 });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    const groupId = req.params.groupId;
-    const criteria = {
-        tripId: req.query.tripId,
-        search: req.query.search,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: parseInt(req.query.pageSize) || 10,
-    };
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit);
-    const serviceResponse = await service.getAllDataByGroupId(
-        groupId,
-        criteria,
-        page,
-        limit
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            tripId: req.query.tripId,
+            userId: req.query.userId,
+            routeId: req.query.routeId,
+            vehicleId: req.query.vehicleId,
+            driverId: req.query.driverId,
+            careTakerId: req.query.careTakerId,
+            page: req.query.page,
+            limit: req.query.limit
+        };
 
+        const serviceResponse = await service.getAllDataByGroupId(groupId, criteria);
+        res.status(200).json(serviceResponse);
+    } catch (error) {
+        console.error("Error in fetching data:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 router.delete("/groupId/:groupId/tripId/:tripId", async (req, res) => {
     try {
         const tripId = req.params.tripId;

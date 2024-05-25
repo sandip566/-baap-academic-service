@@ -11,66 +11,93 @@ class ActiveTripsService extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, query, page, limit) {
+    async getAllDataByGroupId(groupId, criteria) {
         try {
-            const searchFilter = {
-                groupId: groupId,
+            const query = {
+                groupId: Number(groupId),
             };
 
-            if (query.search) {
-                const numericSearch = parseInt(query.search);
-                if (!isNaN(numericSearch)) {
-                    searchFilter.$or = [
-                        { tripname: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { regex: query.search, $options: "i" } },
-                        { tripId: numericSearch },
-                    ];
-                } else {
-                    searchFilter.$or = [
-                        { tripname: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { $regex: query.search, $options: "i" } },
-                    ];
-                }
-            }
+            if (criteria.tripId)
+                query.tripId = criteria.tripId;
 
-            if (query.tripId) {
-                searchFilter.tripId = query.tripId;
-            }
+            if (criteria.userId)
+                query.userId = criteria.userId;
 
-            if (query.tripName) {
-                searchFilter.tripName = { $regex: query.name, $options: "i" };
-            }
+            if (criteria.routeId)
+                query.routeId = criteria.routeId;
 
-            if (query.phoneNumber) {
-                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
-            }
+            if (criteria.vehicleId)
+                query.vehicleId = criteria.vehicleId;
 
-            const count = await ActiveTripsModel.countDocuments(searchFilter);
-            const totalPages = Math.ceil(count / limit);
-            const skip = (page - 1) * limit;
-            const services = await ActiveTripsModel.find(searchFilter)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit);
+            if (criteria.careTakerId)
+                query.careTakerId = criteria.careTakerId;
 
+            if (criteria.driverId)
+                query.driverId = criteria.driverId;
+
+            const pageSize = Number(criteria.limit) || 10;
+            const currentPage = Number(criteria.page) || 1;
+            const skip = (currentPage - 1) * pageSize;
+
+            const pipeLine = await ActiveTripsModel.aggregate([
+                { $match: query },
+                {
+                    "$lookup": {
+                        "from": "busroutes",
+                        "localField": "routeId",
+                        "foreignField": "routeId",
+                        "as": "routeId"
+                    }
+                },
+                { $unwind: "$routeId" },
+                {
+                    "$lookup": {
+                        "from": "vehicles",
+                        "localField": "vehicleId",
+                        "foreignField": "vehicleId",
+                        "as": "vehicleId"
+                    }
+                },
+                { $unwind: "$vehicleId" },
+                {
+                    "$lookup": {
+                        "from": "drivers",
+                        "localField": "driverId",
+                        "foreignField": "driverId",
+                        "as": "driverId"
+                    }
+                },
+                { $unwind: "$driverId" },
+                {
+                    $lookup: {
+                        from: "caretakers",
+                        localField: "careTakerId",
+                        foreignField: "careTakerId",
+                        as: "careTakerId",
+                    },
+                },
+                { $unwind: "$careTakerId" },
+                { $skip: skip },
+                { $limit: pageSize },
+            ]);
+
+            const totalDocuments = await ActiveTripsModel.countDocuments(query);
+            const totalPages = Math.ceil(totalDocuments / pageSize);
             const response = {
                 status: "Success",
-                data: {
-                    items: services,
-                    totalItemsCount: count,
-                    page,
-                    limit,
-                    totalPages
-                },
+                data: pipeLine,
+                totalItemsCount: totalDocuments,
+                totalPages: totalPages,
+                pageSize: pageSize,
+                currentPage: currentPage,
             };
 
             return response;
         } catch (error) {
-            console.error("Error:", error);
+            console.error("Error in getAllDataByGroupId:", error);
             throw error;
         }
     }
-
     async deleteTripHistroyById(tripId, groupId) {
         try {
             return await ActiveTripsModel.deleteOne(

@@ -18,54 +18,44 @@ const TravellerSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        stopId:{
+        stopId: {
             type: Number,
             required: false
         },
-        fatherName: {
-            type: String,
-            required: false
-        },
-        motherName: {
-            type: String,
-            required: false
-        },
-        age: {
-            type: String,
-            required: false
-        },
+        emergrncyContact: [{
+            emergrncyContact1: {
+                type: Number,
+                required: true
+            },
+            emergrncyContact2: {
+                type: Number,
+                required: true
+            }
+        }],
         status: {
             type: String,
             enum: ['Active', 'In-active'],
             required: false
         },
-        adharCardNo: {
+        fitnessCertificateImg: {
+            type: String,
+            required: false
+        },
+        totalFees: {
             type: Number,
             required: false
         },
-        panCardNo: {
+        startDate: {
             type: String,
             required: false
         },
-        medicalCertificateImg: {
-            type: String,
-            required: false
-        },
-        totalFees:{
-            type: Number,
-            required: false
-        },
-        startDate:{
-            type: String,
-            required: false
-        },
-        endDate:{
+        endDate: {
             type: String,
             required: false
         }
 
     },
-    {strict:false, timestamps: false }
+    { strict: false, timestamps: false }
 );
 
 const TravellerModel = mongoose.model("traveller", TravellerSchema);

@@ -6,6 +6,9 @@ const ActiveTripsSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
+        userId:{
+            type: Number,
+        },
         tripId: {
             type: Number,
             required: true
