@@ -129,10 +129,10 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async updateBookIssueLogById(bookIssueLogId, newData) {
+    async updateBookIssueLogById(bookIssueLogId,groupId, newData) {
         try {
             const updateBookIssueLog = await bookIssueLogModel.findOneAndUpdate(
-                { bookIssueLogId: bookIssueLogId },
+                { bookIssueLogId: bookIssueLogId,groupId:groupId },
                 { $set: newData },
                 { new: true }
             );
