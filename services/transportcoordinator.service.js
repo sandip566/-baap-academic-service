@@ -12,12 +12,55 @@ class transportcoordinatorervice extends BaseService {
         });
     }
 
-    async   getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.transportCoordinatorId) query.transportCoordinatorId = criteria.transportCoordinatorId;
-        return this.preparePaginationAndReturnData(query, criteria);
+    
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+            if (search) {
+                const numericSearch = parseInt(search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { name: { $regex: search, $options: "i" } },
+                    ];
+                }
+            }
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
+            }
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
+            }
+
+            const count = await transportcoordinatorModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await transportcoordinatorModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
     }
 
     async deletetransportcoordinatorById(transportCoordinatorId, groupId) {

@@ -6,7 +6,7 @@ const DriverSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        empId:{
+        empId: {
             type: Number,
             required: true
         },
@@ -14,21 +14,17 @@ const DriverSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        dateOfBirth: {
+            type: String,
+            required: false
+        },
         experience: {
             type: String,
             required: true
         },
-        medicalCertificateImg:{
-            type:String,
-            required:false
-        },
-        adharCardNo:{
-            type:Number,
-            required:false
-        },
-        panCardNo:{
-            type:String,
-            required:false 
+        fitnessCertificate: {
+            type: String,
+            required: false
         },
         licenceImg: {
             type: String,

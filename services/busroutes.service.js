@@ -6,38 +6,29 @@ class BusRoutesService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async getAllDataByGroupId(groupId, query, page, limit) {
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
             };
-
-            if (query.search) {
-                const numericSearch = parseInt(query.search);
+            if (search) {
+                const numericSearch = parseInt(search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { routename: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { regex: query.search, $options: "i" } },
-                        { routeId: numericSearch },
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { routename: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                        { name: { $regex: search, $options: "i" } },
                     ];
                 }
             }
-
-            if (query.routeId) {
-                searchFilter.routeId = query.routeId;
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
             }
-
-            if (query.routeName) {
-                searchFilter.routeName = { $regex: query.name, $options: "i" };
-            }
-
-            if (query.phoneNumber) {
-                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
             const count = await BusRoutesModel.countDocuments(searchFilter);
@@ -47,7 +38,6 @@ class BusRoutesService extends BaseService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-
             const response = {
                 status: "Success",
                 data: {
