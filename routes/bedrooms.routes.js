@@ -51,15 +51,18 @@ router.get("/:id", async (req, res) => {
 });
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
+    const page = parseInt(req.query.page) || 1;
+    const perPage = parseInt(req.query.limit) || 10;
     const criteria = {
         name: req.query.name,
         hostelId: req.query.hostelId,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-        pageSize: parseInt(req.query.pageSize) || 10,
+       
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        criteria,
+        page,
+        perPage
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

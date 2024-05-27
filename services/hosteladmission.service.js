@@ -136,7 +136,7 @@ class HostelAdmissionService extends BaseService {
             const totalItemsCount = await HostelAdmissionModel.countDocuments(
                 searchFilter
             );
-
+ 
             const response = {
                 status: "Success",
                 data: {
