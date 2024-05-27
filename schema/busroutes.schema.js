@@ -9,7 +9,7 @@ const BusRoutesSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        routeName: {
+        name: {
             type: String,
             required: true,
         },
@@ -38,7 +38,7 @@ const BusRoutesSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        routetNumber: {
+        number: {
             type: Number,
             required: true,
         },

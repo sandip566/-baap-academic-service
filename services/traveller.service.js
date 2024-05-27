@@ -11,39 +11,29 @@ class TravellerService extends BaseService {
             return this.model.findOne({ travellerId: travellerId });
         });
     }
-
-    async getAllDataByGroupId(groupId, query, page, limit) {
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
             };
-
-            if (query.search) {
-                const numericSearch = parseInt(query.search);
+            if (search) {
+                const numericSearch = parseInt(search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { travellerName: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { regex: query.search, $options: "i" } },
-                        { travellerId: numericSearch },
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { travellerName: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                        { name: { $regex: search, $options: "i" } },
                     ];
                 }
             }
-
-            if (query.travellerId) {
-                searchFilter.travellerId = query.travellerId;
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
             }
-
-            if (query.travellerName) {
-                searchFilter.travellerName = { $regex: query.name, $options: "i" };
-            }
-
-            if (query.phoneNumber) {
-                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
             const count = await TravellerModel.countDocuments(searchFilter);
@@ -53,7 +43,6 @@ class TravellerService extends BaseService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-
             const response = {
                 status: "Success",
                 data: {

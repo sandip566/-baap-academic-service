@@ -6,29 +6,26 @@ const TransportCoordinatorSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        empId:{
+        empId: {
             type: Number,
             required: true
         },
-        panCardNo:{
+        
+        dateOfBirth: {
             type: String,
-            required: false  
+            required: false
         },
-        adharCardNo:{
-            type: Number,
-            required: false  
-        },
-        medicalCertificateImg:{
+        fitnessCertificate: {
             type: String,
-            required: false  
+            required: false
         },
-        startDate:{
+        startDate: {
             type: String,
-            required: false 
+            required: false
         },
-        endDate:{
+        endDate: {
             type: String,
-            required: false 
+            required: false
         }
     },
     { timestamps: true, strict: false }
