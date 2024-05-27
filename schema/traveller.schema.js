@@ -32,12 +32,16 @@ const TravellerSchema = new mongoose.Schema(
                 required: true
             }
         }],
+        dateOfBirth: {
+            type: String,
+            required: false
+        },
         status: {
             type: String,
             enum: ['Active', 'In-active'],
             required: false
         },
-        fitnessCertificateImg: {
+        fitnessCertificate: {
             type: String,
             required: false
         },

@@ -5,38 +5,29 @@ class driverervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, query, page, limit) {
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
             };
-
-            if (query.search) {
-                const numericSearch = parseInt(query.search);
+            if (search) {
+                const numericSearch = parseInt(search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { driverName: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { regex: query.search, $options: "i" } },
-                        { driverId: numericSearch },
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { driverName: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                        { name: { $regex: search, $options: "i" } },
                     ];
                 }
             }
-
-            if (query.driverId) {
-                searchFilter.driverId = query.driverId;
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
             }
-
-            if (query.driverName) {
-                searchFilter.driverName = { $regex: query.name, $options: "i" };
-            }
-
-            if (query.phoneNumber) {
-                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
             const count = await driverModel.countDocuments(searchFilter);
@@ -46,7 +37,6 @@ class driverervice extends BaseService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-
             const response = {
                 status: "Success",
                 data: {

@@ -12,38 +12,29 @@ class vehicleervice extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, query, page, limit) {
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
             };
-
-            if (query.search) {
-                const numericSearch = parseInt(query.search);
+            if (search) {
+                const numericSearch = parseInt(search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { vehicleName: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { regex: query.search, $options: "i" } },
-                        { vehicleId: numericSearch },
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { vehicleName: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: { $regex: query.search, $options: "i" } },
+                        { name: { $regex: search, $options: "i" } },
                     ];
                 }
             }
-
-            if (query.vehicleId) {
-                searchFilter.vehicleId = query.vehicleId;
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
             }
-
-            if (query.vehicleName) {
-                searchFilter.vehicleName = { $regex: query.name, $options: "i" };
-            }
-
-            if (query.phoneNumber) {
-                searchFilter.phoneNumber = { $regex: query.phoneNumber, $options: "i" };
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
             const count = await vehicleModel.countDocuments(searchFilter);
@@ -53,7 +44,6 @@ class vehicleervice extends BaseService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
-
             const response = {
                 status: "Success",
                 data: {

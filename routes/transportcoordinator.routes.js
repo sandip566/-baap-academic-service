@@ -45,13 +45,11 @@ router.get("/all/TransportCoordinator", async (req, res) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const criteria = {
-        transportCoordinatorId: req.query.transportCoordinatorId,
-      
-    };
+    let { phoneNumber, name, search, page, limit } = req.query;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit);
     const serviceResponse = await service.getAllDataByGroupId(
-        groupId,
-        criteria
+        groupId, phoneNumber, name, search, page, limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

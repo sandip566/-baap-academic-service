@@ -9,13 +9,17 @@ const vehicle = new mongoose.Schema(
             type: Number,
             required: true
         },
-        shiftId:{
+        shiftId: {
             type: Number,
             required: true
-        },  
+        },
         empId: {
             type: Number,
             required: true
+        },
+        VINNo: {
+            type: Number,
+            required: false
         },
         vehicleNo: {
             type: Number,
@@ -30,6 +34,9 @@ const vehicle = new mongoose.Schema(
             enum: ['Petrol', 'Diesel', 'CNG'],
             required: false
         },
+        phoneNumber:{
+            type: Number,
+        },
         color: {
             type: String,
             required: false
@@ -39,24 +46,24 @@ const vehicle = new mongoose.Schema(
             enum: ['Mini Bus', '4 seater', '7 seater'],
             required: false
         },
-        vehicleModel:{
+        Model: {
             type: String,
             required: false
         },
-        wheel:{
+        wheel: {
             type: String,
             required: false
         },
-        vehicleCondition:{
+        vehicleCondition: {
             type: String,
             enum: ['fair', 'good', 'excellent'],
             required: false
         },
-        rcNo:{
+        rcNo: {
             type: String,
             required: false
         },
-        vehicleSeatNo:{
+        SeatNo: {
             type: Number,
             required: false
         }
