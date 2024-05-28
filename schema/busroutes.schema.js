@@ -47,7 +47,7 @@ const BusRoutesSchema = new mongoose.Schema(
             enum: ["Monthly", "Yearly", "Half Yearly", "Quarterly"],
             required: true,
         },
-        currentLocaction: {
+        currentLocation: {
             lattitude: {
                 type: Number,
                 required: true,
