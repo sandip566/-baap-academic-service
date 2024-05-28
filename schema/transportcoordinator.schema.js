@@ -10,7 +10,10 @@ const TransportCoordinatorSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        
+        transportCoordinatorId:{
+            type: Number,
+            required: false
+        },
         dateOfBirth: {
             type: String,
             required: false

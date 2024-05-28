@@ -23,11 +23,15 @@ router.post(
                 return {
                     _id: new mongoose.Types.ObjectId(),
                     stopId: stopId,
-                    stopDetails: stopDetailsData,
+                    stopName: stopDetailsData.stopName,
+                    fees: stopDetailsData.fees,
+                    location: {
+                        lattitude: stopDetailsData.location.lattitude,
+                        longitude: stopDetailsData.location.longitude
+                    }
                 };
-            });
-                
-        }
+            });     
+        }  
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
