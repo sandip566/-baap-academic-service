@@ -1005,7 +1005,7 @@ class StudentsAdmmisionService extends BaseService {
             );
             // Fetch feesPayment data based on specific IDs
             const feesPaymentData = await FeesPaymentModel.find({
-                groupId:Number (groupId),
+                groupId:Number(groupId),
                 empId: query.empId,
                 addmissionId: query.addmissionId,
                 academicYear: query.academicYear,
@@ -1093,6 +1093,125 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+    async getIndividualStudentData(groupId, query) {
+        try {
+            const userId = query.userId;
+            const academicYear = query.academicYear;
+    
+            let data = await StudentsAdmissionModel.aggregate([
+                {
+                    $match: {
+                        groupId:Number (groupId),
+                        userId:Number (userId)
+                    }
+                },
+                {
+                    $unwind: "$feesDetails"
+                },
+                {
+                    $lookup: {
+                        from: "feestemplates",
+                        localField: "feesDetails.feesTemplateId",
+                        foreignField: "feesTemplateId",
+                        as: "feesDetails.feesTemplateId"
+                    }
+                },
+                {
+                    $unwind: "$feesDetails.feesTemplateId"
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        groupId: { $first: "$groupId" },
+                        userId: { $first: "$userId" },
+                        academicYear: { $first: "$academicYear" },
+                        addmissionId: { $first: "$addmissionId" },
+                        roleId: { $first: "$roleId" },
+                        location: { $first: "$location" },
+                        phoneNumber: { $first: "$phoneNumber" },
+                        admissionStatus: { $first: "$admissionStatus" },
+                        dateOfBirth: { $first: "$dateOfBirth" },
+                        profile_img: { $first: "$profile_img" },
+                        title: { $first: "$title" },
+                        firstName: { $first: "$firstName" },
+                        middleName: { $first: "$middleName" },
+                        lastName: { $first: "$lastName" },
+                        gender: { $first: "$gender" },
+                        religion: { $first: "$religion" },
+                        caste: { $first: "$caste" },
+                        email: { $first: "$email" },
+                        password: { $first: "$password" },
+                        name: { $first: "$name" },
+                        empId: { $first: "$empId" },
+                        createdAt: { $first: "$createdAt" },
+                        updatedAt: { $first: "$updatedAt" },
+                        __v: { $first: "$__v" },
+                        courseDetails: { $first: "$courseDetails" },
+                        feesDetails: { $push: "$feesDetails" },
+                        installmentId: { $first: "$installmentId" },
+                        status: { $first: "$status" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "feespayments",
+                        let: { admissionId: "$addmissionId", userId: "$userId", academicYear: academicYear },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ["$addmissionId", "$$admissionId"] },
+                                            { $eq: ["$userId", "$$userId"] },
+                                            { $eq: ["$academicYear", "$$academicYear"] } // Ensuring matching academicYear
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                $sort: { "createdAt": -1 } // Sorting by createdAt to get the latest record
+                            }
+                        ],
+                        as: "feespayments"
+                    }
+                },
+                {
+                    $addFields: {
+                        totalPaidAmount: {
+                            $sum: {
+                                $map: {
+                                    input: "$feespayments",
+                                    as: "payment",
+                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
+                                }
+                            }
+                        },
+                        lastRemainingAmount: {
+                            $ifNull: [
+                                { $arrayElemAt: ["$feespayments.remainingAmount", 0] }, // Assuming remainingAmount field in feespayments
+                                0
+                            ]
+                        }
+                    }
+                }
+            ]);
+    
+            const response = {
+                status: "Success",
+                data: {
+                    items: data,
+                    totalItemsCount: data.length,
+                },
+            };
+    
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
+    
+    
 
     async findLatestAdmission() {
         try {

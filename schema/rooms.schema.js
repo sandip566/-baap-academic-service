@@ -32,6 +32,7 @@ const room = new mongoose.Schema(
         status:{
           type: String,
           required: false,
+          default: "available"
         }
     },
     { strict: false, timestamps: true }

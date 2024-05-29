@@ -385,27 +385,28 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-// router.get("/all/apps/:groupId", async (req, res) => {
-//     try {
-//         const groupId = req.params.groupId;
-//         const criteria = {
-//             // phoneNumber: req.query.phoneNumber,
-//             firstName: req.query.firstName,
-//             phoneNumber: req.query.phoneNumber,
-//             lastName: req.query.lastName,
-//             search: req.query.search,
-//             addmissionId: req.query.addmissionId,
-//             academicYear: req.query.academicYear,
-//             empId: req.query.empId,
-//         };
+router.get("/getFeesStructure/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            // phoneNumber: req.query.phoneNumber,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            search: req.query.search,
+            addmissionId: req.query.addmissionId,
+            academicYear: req.query.academicYear,
+            userId: req.query.userId,
+            empId: req.query.empId,
+        };
 
-//         const serviceResponse = await service.getfeesPayment(groupId, criteria);
-//         requestResponsehelper.sendResponse(res, serviceResponse);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ error: "Internal Server Error" });
-//     }
-// });
+        const serviceResponse = await service.getIndividualStudentData(groupId, criteria);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 router.get(
     "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",

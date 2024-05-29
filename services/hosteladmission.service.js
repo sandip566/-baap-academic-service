@@ -234,8 +234,8 @@ class HostelAdmissionService extends BaseService {
             throw error;
         }
     }
-    async getAdmissionListing(groupId, academicYear) {
-        console.log(groupId, academicYear);
+    async getAdmissionListing(groupId) {
+        console.log(groupId);
         try {
             let pipeLine = await hostelPremises.aggregate([
                 { 
@@ -249,7 +249,7 @@ class HostelAdmissionService extends BaseService {
                         from: "hosteladmissions",
                         let: { hostelId: "$hostelId" },
                         pipeline: [
-                            { $match: { academicYear: academicYear } },
+                            // { $match: { academicYear: academicYear } },
                             { $unwind: "$hostelDetails" },
                             { $match: { $expr: { $eq: ["$hostelDetails.hostelId", "$$hostelId"] } } },
                             { $group: { _id: "$hostelDetails.hostelId", studentCount: { $sum: 1 } } }
@@ -291,6 +291,158 @@ class HostelAdmissionService extends BaseService {
             throw new Error("Error getting admission listing");
         }
     }
+    async getIndividualStudentData(groupId, query) {
+        try {
+            const userId = Number(query.userId);
+    
+            let data = await HostelAdmissionModel.aggregate([
+                {
+                    $match: {
+                        groupId: Number(groupId),
+                        userId: userId
+                    }
+                },
+                {
+                    $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "feestemplates",
+                        localField: "feesDetails.feesTemplateId",
+                        foreignField: "feesTemplateId",
+                        as: "feesDetails.feesTemplateId"
+                    }
+                },
+                {
+                    $unwind: { path: "$feesDetails.feesTemplateId", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $unwind: { path: "$hostelDetails", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "hostels",
+                        localField: "hostelDetails.hostelId",
+                        foreignField: "hostelId",
+                        as: "hostelDetails.hostelId"
+                    }
+                },
+                {
+                    $unwind: { path: "$hostelDetails.hostelId", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "beds",
+                        localField: "hostelDetails.bedId",
+                        foreignField: "bedId",
+                        as: "hostelDetails.bedId"
+                    }
+                },
+                {
+                    $unwind: { path: "$hostelDetails.bedId", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "rooms",
+                        localField: "hostelDetails.roomId",
+                        foreignField: "roomId",
+                        as: "hostelDetails.roomId"
+                    }
+                },
+                {
+                    $unwind: { path: "$hostelDetails.roomId", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        groupId: { $first: "$groupId" },
+                        userId: { $first: "$userId" },
+                        academicYear: { $first: "$academicYear" },
+                        hostelAdmissionId: { $first: "$hostelAdmissionId" },
+                        roleId: { $first: "$roleId" },
+                        location: { $first: "$location" },
+                        phoneNumber: { $first: "$phoneNumber" },
+                        admissionStatus: { $first: "$admissionStatus" },
+                        dateOfBirth: { $first: "$dateOfBirth" },
+                        profile_img: { $first: "$profile_img" },
+                        title: { $first: "$title" },
+                        firstName: { $first: "$firstName" },
+                        middleName: { $first: "$middleName" },
+                        lastName: { $first: "$lastName" },
+                        gender: { $first: "$gender" },
+                        religion: { $first: "$religion" },
+                        caste: { $first: "$caste" },
+                        email: { $first: "$email" },
+                        password: { $first: "$password" },
+                        name: { $first: "$name" },
+                        empId: { $first: "$empId" },
+                        createdAt: { $first: "$createdAt" },
+                        updatedAt: { $first: "$updatedAt" },
+                        __v: { $first: "$__v" },
+                        hostelDetails: { $push: "$hostelDetails" },
+                        feesDetails: { $push: "$feesDetails" },
+                        installmentId: { $first: "$installmentId" },
+                        status: { $first: "$status" }
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "hostelpayments",
+                        let: { hostelAdmissionId: "$hostelAdmissionId", userId: "$userId" },
+                        pipeline: [
+                            {
+                                $match: {
+                                    $expr: {
+                                        $and: [
+                                            { $eq: ["$hostelAdmissionId", "$$hostelAdmissionId"] },
+                                            { $eq: ["$userId", "$$userId"] },
+                                        ]
+                                    }
+                                }
+                            },
+                            {
+                                $sort: { createdAt: -1 } // Sorting by createdAt to get the latest record
+                            }
+                        ],
+                        as: "feespayments"
+                    }
+                },
+                {
+                    $addFields: {
+                        totalPaidAmount: {
+                            $sum: {
+                                $map: {
+                                    input: "$feespayments",
+                                    as: "payment",
+                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
+                                }
+                            }
+                        },
+                        lastRemainingAmount: {
+                            $ifNull: [
+                                { $arrayElemAt: ["$feespayments.remainingAmount", -1] }, // Extracting remainingAmount from the last payment
+                                0
+                            ]
+                        }
+                    }
+                }
+            ]);
+    
+            const response = {
+                status: "Success",
+                data: {
+                    items: data,
+                    totalItemsCount: data.length,
+                },
+            };
+    
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
+    
     
     async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {

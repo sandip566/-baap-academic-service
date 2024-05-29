@@ -5,6 +5,7 @@ const service = require("../services/bedrooms.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const BedModel = require("../schema/bed.schema");
+const BedRoomsModel = require("../schema/bedrooms.schema");
 
 router.post(
     "/",
@@ -31,6 +32,19 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+router.get('/findData/bedCount', async (req, res) => {
+  try {
+    const groupId = req.query.groupId;
+    const hostelId = req.query.hostelId;
+    const roomId = req.query.roomId;
+
+    const serviceResponse = await service.findavailableBed( hostelId, roomId,groupId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+  } catch (error) {
+    console.error('Error retrieving available beds:', error);
+    res.status(500).json({ error: 'An error occurred while retrieving available beds.' });
+  }
+});
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -49,6 +63,7 @@ router.get("/:id", async (req, res) => {
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const page = parseInt(req.query.page) || 1;
@@ -56,6 +71,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         name: req.query.name,
         hostelId: req.query.hostelId,
+        status: req.query.status,
+        roomId:req.query.roomId
        
     };
     const serviceResponse = await service.getAllDataByGroupId(

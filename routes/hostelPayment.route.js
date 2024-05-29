@@ -9,6 +9,9 @@ const HostelFeesInstallmentModel = require("../schema/hostelfeesinstallment.sche
 const hostelfeesinstallmentService = require("../services/hostelfeesinstallment.service");
 const hosteladmissionService = require("../services/hosteladmission.service");
 const TokenService = require("../services/token.services");
+const { findOne } = require("../schema/rooms.schema");
+const BedRoomsModel = require("../schema/bedrooms.schema");
+const roomModel = require("../schema/rooms.schema");
 
 
 router.post(
@@ -242,7 +245,45 @@ router.post(
                         }
                     });
                 });
+
             }
+            let datata=await HostelAdmissionModel.findOne({
+                hostelAdmissionId:req.body.hostelAdmissionId
+
+            })
+           
+            const { hostelDetails } = datata;
+            for (const detail of hostelDetails ) {
+                await BedRoomsModel.updateOne(
+                    { 'beds.bedId': detail.bedId, hostelId: detail.hostelId, roomId: detail.roomId },
+                    { $set: { 'beds.$.status': 'Confirm' } }
+                );
+            }
+            for (const detail of hostelDetails) {
+                const room = await BedRoomsModel.findOne({ roomId: detail.roomId });
+                if (room) {
+                    const allBedsConfirmed = room.beds.every(bed => bed.status === 'Confirm');
+                    const someBedsConfirmed = room.beds.some(bed => bed.status === 'Confirm');
+                    const someBedsReserved = room.beds.some(bed => bed.status === 'reserved');
+
+                    let newRoomStatus;
+                    if (allBedsConfirmed) {
+                        newRoomStatus = 'notAvailable';
+                    } else if (someBedsConfirmed || someBedsReserved) {
+                        newRoomStatus = 'reserved';
+                    } else {
+                        newRoomStatus = 'available';
+                    }
+    
+
+                   // Update the room status in RoomsModel
+                await roomModel.updateOne(
+                    { roomId: detail.roomId },
+                    { $set: { status: newRoomStatus } }
+                );
+                }
+            }
+
             serviceResponse.data.paidAmount = totalPaidAmount;
             serviceResponse.data.remainingAmount = remainingAmount;
 
@@ -440,6 +481,43 @@ router.post(
                     });
                 });
             }
+            let datata=await HostelAdmissionModel.findOne({
+                hostelAdmissionId:req.body.hostelAdmissionId
+
+            })
+           
+            const { hostelDetails } = datata;
+            for (const detail of hostelDetails ) {
+                await BedRoomsModel.updateOne(
+                    { 'beds.bedId': detail.bedId, hostelId: detail.hostelId, roomId: detail.roomId },
+                    { $set: { 'beds.$.status': 'Confirm' } }
+                );
+            }
+            for (const detail of hostelDetails) {
+                const room = await BedRoomsModel.findOne({ roomId: detail.roomId });
+                if (room) {
+                    const allBedsConfirmed = room.beds.every(bed => bed.status === 'Confirm');
+                    const someBedsConfirmed = room.beds.some(bed => bed.status === 'Confirm');
+                    const someBedsReserved = room.beds.some(bed => bed.status === 'Reserved');
+
+                    let newRoomStatus;
+                    if (allBedsConfirmed) {
+                        newRoomStatus = 'NotAvailable';
+                    } else if (someBedsConfirmed || someBedsReserved) {
+                        newRoomStatus = 'Reserved';
+                    } else {
+                        newRoomStatus = 'Available';
+                    }
+    
+
+                   // Update the room status in RoomsModel
+                await roomModel.updateOne(
+                    { roomId: detail.roomId },
+                    { $set: { status: newRoomStatus } }
+                );
+                }
+            }
+
             serviceResponse.data.paidAmount = totalPaidAmount;
             serviceResponse.data.remainingAmount = remainingAmount;
 

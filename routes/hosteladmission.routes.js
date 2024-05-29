@@ -6,6 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
 const hostelfeesinstallmentService = require("../services/hostelfeesinstallment.service");
+const bedroomModel=require("../schema/bedrooms.schema")
 
 router.post(
     "/",
@@ -76,6 +77,25 @@ router.post("/hostelAdmission/save", async (req, res, next) => {
 
                     console.log(feesinstallmentResponse);
                 }
+                if (req.body.hostelDetails) {
+                    for (const detail of req.body.hostelDetails) {
+                        const { hostelId, roomId, bedId } = detail;
+            
+                        const bedRoom = await bedroomModel.findOne({
+                            hostelId: hostelId,
+                            roomId: roomId,
+                            'beds.bedId': bedId
+                        });
+            
+                        if (bedRoom) {
+                            const bedIndex = bedRoom.beds.findIndex(bed => bed.bedId === bedId);
+                            if (bedIndex !== -1) {
+                                bedRoom.beds[bedIndex].status = 'reserved';
+                                await bedRoom.save();
+                            }
+                        }
+                    }
+                }
                 const serviceResponse = await service.updateUser(
                     req.body.hostelAdmissionId,
                     req.body.groupId,
@@ -102,7 +122,25 @@ router.post("/hostelAdmission/save", async (req, res, next) => {
 
                     req.body.feesDetails = updatedInstallments;
                 }
-                console.log(serviceResponse);
+                if (req.body.hostelDetails) {
+                    for (const detail of req.body.hostelDetails) {
+                        const { hostelId, roomId, bedId } = detail;
+            
+                        const bedRoom = await bedroomModel.findOne({
+                            hostelId: hostelId,
+                            roomId: roomId,
+                            'beds.bedId': bedId
+                        });
+            
+                        if (bedRoom) {
+                            const bedIndex = bedRoom.beds.findIndex(bed => bed.bedId === bedId);
+                            if (bedIndex !== -1) {
+                                bedRoom.beds[bedIndex].status = 'reserved';
+                                await bedRoom.save();
+                            }
+                        }
+                    }
+                }
                 requestResponsehelper.sendResponse(res, serviceResponse);
             }
         }
@@ -282,15 +320,15 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
 });
 
 router.get(
-    "/HostelAdmissionListing/groupId/:groupId/academicYear/:academicYear",
+    "/HostelAdmissionListing/groupId/:groupId",
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
-            const academicYear = req.params.academicYear;
+            // const academicYear = req.params.academicYear;
 
             const courseData = await service.getAdmissionListing(
                 groupId,
-                academicYear
+                // academicYear
             );
             res.json(courseData);
         } catch (error) {
@@ -299,6 +337,28 @@ router.get(
         }
     }
 );
+router.get("/getFeesStructure/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            // phoneNumber: req.query.phoneNumber,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            search: req.query.search,
+            addmissionId: req.query.addmissionId,
+            academicYear: req.query.academicYear,
+            userId: req.query.userId,
+            empId: req.query.empId,
+        };
+
+        const serviceResponse = await service.getIndividualStudentData(groupId, criteria);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 router.get("/gethostelAdmissionId/:hostelAdmissionId", async (req, res) => {
     const serviceResponse = await service.getByHostelId(
         req.params.hostelAdmissionId

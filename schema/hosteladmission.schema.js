@@ -8,7 +8,7 @@ const HostelAdmissionSchema = new mongoose.Schema(
         },
         name: {
             type: String,
-            required: true,
+            required: false,
         },
         hostelAdmissionId:{
             type: Number,

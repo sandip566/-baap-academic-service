@@ -21,16 +21,11 @@ const BusRoutesSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        shift: {
-            type: String,
-            enum: ["Morning", "Afternoon", "Evening"],
-            required: true,
-        },
         driverId: {
             type: Number,
             required: true,
         },
-        caretakerId: {
+        careTakerId: {
             type: Number,
             rrequired: true,
         },
@@ -44,7 +39,6 @@ const BusRoutesSchema = new mongoose.Schema(
         },
         feesFreq: {
             type: String,
-            enum: ["Monthly", "Yearly", "Half Yearly", "Quarterly"],
             required: true,
         },
         currentLocation: {

@@ -10,6 +10,9 @@ const BedRoomsSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        roomId:{
+            type: Number,
+        },
         bedRoomId: {
             type: Number,
             required: true,
@@ -27,7 +30,7 @@ const BedRoomsSchema = new mongoose.Schema(
                 status: {
                     type: String,
                     required: true,
-                    enum: ["available", "reserved", "confirmed", "cancelled"],
+                    // enum: ["available", "reserved", "confirmed", "cancelled"],
                     default: "available",
                 },
             },
