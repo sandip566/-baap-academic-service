@@ -9,6 +9,10 @@ const BusRoutesSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        userId:{
+            type: Number,
+            required: false,
+        },
         name: {
             type: String,
             required: true,

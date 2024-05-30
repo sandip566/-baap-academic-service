@@ -1,6 +1,6 @@
 const BusRoutesModel = require("../schema/busroutes.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-
+const serviceResponse = require("@baapcompany/core-api/services/serviceResponse");
 class BusRoutesService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -61,6 +61,23 @@ class BusRoutesService extends BaseService {
             return this.model.findOne({ routeId: routeId });
         });
     }
+
+    async getRouteByuserId(userId) {
+        try {
+            const routeData = await this.model.find({ userId: userId });
+    
+            if (!routeData) {
+                return null;
+            }
+            return new serviceResponse({
+                data: routeData,
+            });
+        } catch (error) {
+            console.error("Error in getRouteByuserId service:", error);
+            throw error;
+        }
+    }
+    
 
     async deleteRoute(routeId, groupId) {
         try {
