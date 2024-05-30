@@ -82,6 +82,16 @@ router.get("/getrouteId/:routeId", async (req, res, next) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getRoutesByuserId/:userId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getRouteByuserId(
+        req.params.userId
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 router.delete("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
         const routeId = req.params.routeId;

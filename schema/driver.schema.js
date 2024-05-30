@@ -6,7 +6,7 @@ const DriverSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        empId: {
+        userId: {
             type: Number,
             required: true
         },
