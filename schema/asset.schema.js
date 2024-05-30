@@ -51,7 +51,7 @@ const AssetSchema = new mongoose.Schema(
       required: false
     },
     serialNo: {
-      type: Number,
+      type: String,
       required: false
     },
     modelName: {

@@ -36,6 +36,9 @@ const bookIssueLogSchema = new mongoose.Schema(
         isReturn:{
             type:Boolean
         },
+        isReserve:{
+            type:Boolean
+        },
         isOverdue:{
             type:Boolean,
             default:false

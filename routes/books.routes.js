@@ -142,7 +142,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 const publisher = await publisherModel.findOne({
                     publisherId: book.publisherId,
                 });
-                return { ...book._doc, shelf, department, publisher };
+                const bookId = await booksModel.findOne({
+                    bookId: book.bookId,
+                });
+                return { ...book._doc, shelf, department, publisher,bookId };
             })
         );
         const count = await service.getBooksCount(groupId);
