@@ -30,8 +30,8 @@ router.post(
                         longitude: stopDetailsData.location.longitude
                     }
                 };
-            });     
-        }  
+            });
+        }
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -128,4 +128,18 @@ router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
+    const { groupId, userId } = req.params;
+    const { currentLat, currentLong } = req.query;
+
+    try {
+        let rute = await service.getNearestStop(groupId, userId, parseFloat(currentLat), parseFloat(currentLong));
+        res.json(rute);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 module.exports = router;

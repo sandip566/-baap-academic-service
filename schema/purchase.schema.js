@@ -50,6 +50,10 @@ const PurchaseSchema = new mongoose.Schema(
             type: String,
             enum: ["Delivered", "Shipped", "Pending", "Canceled", "Processing"],
         },
+        ISBN: {
+            type: String,
+            required: false
+        }
     },
     { strict: false, timestamps: true }
 );
