@@ -62,6 +62,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.delete("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
         const travellerId = req.params.travellerId;
