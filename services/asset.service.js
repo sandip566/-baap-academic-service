@@ -15,29 +15,28 @@ class AssetService extends BaseService {
     async getAssetDashboard(groupId, criteria) {
         try {
             const query = {
-                groupId:Number(groupId),
+                groupId: Number(groupId),
             };
-            console.log(query);
-    
+
             if (criteria.modelName) query.modelName = new RegExp(criteria.modelName, "i");
-    
+
             const result = await AssetModel.aggregate([
                 { $match: query },
                 {
                     $lookup: {
-                        from: "assetrequests",
+                        from: "assets",
                         localField: "assetId",
                         foreignField: "assetId",
-                        as: "assetRequests"
+                        as: "assets"
                     }
                 },
-                { $unwind: "$assetRequests" },
+                { $unwind: "$assets" },
                 {
                     $group: {
-                        _id: null,
+                        _id: 0,
                         totalCurrentValue: { $sum: "$currentValue" },
                         totalAvailable: { $sum: "$available" },
-                        totalReturnQuantity: { $sum: "$assetRequests.returnQuantity" }
+                        totalReturnQuantity: { $sum: "$assets.returnQuantity" }
                     }
                 },
                 {
@@ -46,18 +45,18 @@ class AssetService extends BaseService {
                     }
                 }
             ]).exec()
-            console.log(result);
-    let response={
-        data:result
-    }
+            let response = {
+                data: result
+            }
+
             return response;
         } catch (error) {
             console.error("Error in getAssetDashboard:", error);
-            throw error; // Rethrow the error to be caught by the calling function
+            throw error;
         }
     }
-    
-    
+
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
