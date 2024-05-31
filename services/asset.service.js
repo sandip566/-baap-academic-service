@@ -12,6 +12,7 @@ class AssetService extends BaseService {
             });
         });
     }
+
     async getAssetDashboard(groupId, criteria) {
         try {
             const query = {
@@ -24,30 +25,61 @@ class AssetService extends BaseService {
                 { $match: query },
                 {
                     $lookup: {
-                        from: "assets",
+                        from: "assetrequests",
                         localField: "assetId",
                         foreignField: "assetId",
-                        as: "assets"
+                        as: "assetrequests"
                     }
                 },
-                { $unwind: "$assets" },
+                {
+                    $unwind: {
+                        path: "$assetrequests",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
                 {
                     $group: {
-                        _id: 0,
-                        totalCurrentValue: { $sum: "$currentValue" },
-                        totalAvailable: { $sum: "$available" },
-                        totalReturnQuantity: { $sum: "$assets.returnQuantity" }
+                        _id: "$assetId",
+                        totalCurrentValue: { $first: "$currentValue" },
+                        totalAvailable: { $first: "$available" },
+                        totalReturnQuantity: {
+                            $sum: {
+                                $cond: [{ $eq: ["$assetrequests.status", "Return"] }, "$assetrequests.returnQuantity", 0]
+                            }
+                        },
+                        issuedCount: {
+                            $sum: {
+                                $cond: [{ $eq: ["$assetrequests.status", "Issued"] }, "$assetrequests.quantity", 0]
+                            }
+                        }
                     }
                 },
                 {
                     $addFields: {
-                        totalIssued: { $subtract: ["$totalCurrentValue", "$totalAvailable"] }
+                        totalIssued: "$issuedCount",
+                        totalAvailableAfterIssued: {
+                            $subtract: [
+                                "$totalAvailable",
+                                { $subtract: ["$issuedCount", "$totalReturnQuantity"] }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalCurrentValue: { $sum: "$totalCurrentValue" },
+                        totalAvailable: { $sum: "$totalAvailableAfterIssued" },
+                        totalReturnQuantity: { $sum: "$totalReturnQuantity" },
+                        totalIssued: { $sum: "$totalIssued" }
                     }
                 }
-            ]).exec()
+            ]).exec();
+
             let response = {
+                status: "Success",
                 data: result
-            }
+            };
 
             return response;
         } catch (error) {
