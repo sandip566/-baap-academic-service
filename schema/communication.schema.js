@@ -1,18 +1,31 @@
 const mongoose = require("mongoose");
 
 const chatSchema = new mongoose.Schema({
-
-    communicationId: Number,
-
-    sender:String,
-
-    receiver: String,
-
-    userId: Number,
-
-    handledBy: String,
-
-    message: String,
+   
+    communicationId: {
+      type: Number,
+      required: false,
+  },
+    sender: {
+      type: String,
+      required: false,
+  },
+    receiver: {
+      type: String,
+      required: false,
+  },
+    userId: {
+      type: Number,
+      required: false,
+  },
+    handledBy: {
+      type: String,
+      required: false,
+  },
+    message: {
+      type: String,
+      required: false,
+  },
 
     groupId: {
         type: Number,
