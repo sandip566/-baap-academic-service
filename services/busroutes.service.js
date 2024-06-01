@@ -99,5 +99,71 @@ class BusRoutesService extends BaseService {
             throw error;
         }
     }
+
+    async getNearestStop(groupId, userId, currentLat, currentLong) {
+        let routes = await BusRoutesModel.find({
+            groupId: Number(groupId),
+            userId: Number(userId)
+        });
+
+        if (!routes || routes.length === 0) {
+            return { message: "No routes found" };
+        }
+
+        const haversineDistance = (lat1, lon1, lat2, lon2) => {
+            const toRad = (value) => value * Math.PI / 180;
+            const R = 6371;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        };
+
+        for (let route of routes) {
+            let nearestStop = null;
+            let minDistance = Infinity;
+
+            const activeStops = route.stopDetails.filter(stop => !stop.isPassed);
+
+            for (let stop of activeStops) {
+                const distance = haversineDistance(currentLat, currentLong, stop.location.lattitude, stop.location.longitude);
+
+                if (distance === 0) {
+                    stop.isPassed = true;
+                    await route.save();
+                    continue;
+                }
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestStop = stop;
+                }
+            }
+
+            route.nearestStop = nearestStop ? {
+                ...nearestStop,
+                distance: minDistance
+            } : 'YOUR TRIP IS COMPLETED.';
+        }
+
+        return routes.map(route => ({
+            groupId: route.groupId,
+            userId: route.userId,
+            routeId: route.routeId,
+            name: route.name,
+            start: route.start,
+            end: route.end,
+            driverId: route.driverId,
+            careTakerId: route.careTakerId,
+            vehicleId: route.vehicleId,
+            number: route.number,
+            feesFreq: route.feesFreq,
+            nearestStop: route.nearestStop
+        }));
+    }
+
 }
 module.exports = new BusRoutesService(BusRoutesModel, "busroutes");

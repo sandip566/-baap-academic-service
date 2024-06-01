@@ -12,15 +12,15 @@ class AssetService extends BaseService {
             });
         });
     }
+
     async getAssetDashboard(groupId, criteria) {
         try {
             const query = {
-                groupId:Number(groupId),
+                groupId: Number(groupId),
             };
-            console.log(query);
-    
+
             if (criteria.modelName) query.modelName = new RegExp(criteria.modelName, "i");
-    
+
             const result = await AssetModel.aggregate([
                 { $match: query },
                 {
@@ -28,36 +28,67 @@ class AssetService extends BaseService {
                         from: "assetrequests",
                         localField: "assetId",
                         foreignField: "assetId",
-                        as: "assetRequests"
+                        as: "assetrequests"
                     }
                 },
-                { $unwind: "$assetRequests" },
+                {
+                    $unwind: {
+                        path: "$assetrequests",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
                 {
                     $group: {
-                        _id: null,
-                        totalCurrentValue: { $sum: "$currentValue" },
-                        totalAvailable: { $sum: "$available" },
-                        totalReturnQuantity: { $sum: "$assetRequests.returnQuantity" }
+                        _id: "$assetId",
+                        totalCurrentValue: { $first: "$currentValue" },
+                        totalAvailable: { $first: "$available" },
+                        totalReturnQuantity: {
+                            $sum: {
+                                $cond: [{ $eq: ["$assetrequests.status", "Return"] }, "$assetrequests.returnQuantity", 0]
+                            }
+                        },
+                        issuedCount: {
+                            $sum: {
+                                $cond: [{ $eq: ["$assetrequests.status", "Issued"] }, "$assetrequests.quantity", 0]
+                            }
+                        }
                     }
                 },
                 {
                     $addFields: {
-                        totalIssued: { $subtract: ["$totalCurrentValue", "$totalAvailable"] }
+                        totalIssued: "$issuedCount",
+                        totalAvailableAfterIssued: {
+                            $subtract: [
+                                "$totalAvailable",
+                                { $subtract: ["$issuedCount", "$totalReturnQuantity"] }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalCurrentValue: { $sum: "$totalCurrentValue" },
+                        totalAvailable: { $sum: "$totalAvailableAfterIssued" },
+                        totalReturnQuantity: { $sum: "$totalReturnQuantity" },
+                        totalIssued: { $sum: "$totalIssued" }
                     }
                 }
-            ]).exec()
-            console.log(result);
-    let response={
-        data:result
-    }
+            ]).exec();
+
+            let response = {
+                status: "Success",
+                data: result
+            };
+
             return response;
         } catch (error) {
             console.error("Error in getAssetDashboard:", error);
-            throw error; // Rethrow the error to be caught by the calling function
+            throw error;
         }
     }
-    
-    
+
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,

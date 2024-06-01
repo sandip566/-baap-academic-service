@@ -22,16 +22,10 @@ const TravellerSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        emergrncyContact: [{
-            emergrncyContact1: {
-                type: Number,
-                required: true
-            },
-            emergrncyContact2: {
-                type: Number,
-                required: true
-            }
-        }],
+        emergrncyContact: {
+            type: Array,
+            required: false
+        },
         dateOfBirth: {
             type: String,
             required: false

@@ -48,11 +48,11 @@ const BusRoutesSchema = new mongoose.Schema(
         currentLocation: {
             lattitude: {
                 type: Number,
-                required: true,
+                required: false,
             },
             longitude: {
                 type: Number,
-                required: true,
+                required: false,
             },
         },
         stopDetails: {
