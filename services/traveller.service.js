@@ -1,16 +1,35 @@
 const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-
+const BusRouteModel = require("../schema/busroutes.schema")
 class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    async getBytravellerId(travellerId) {
-        return this.execute(() => {
-            return this.model.findOne({ travellerId: travellerId });
-        });
+    async getBytravellerId(groupId, travellerId) {
+        let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
+        const routeId = traveller.routeId
+
+        if (!routeId) {
+            throw new Error("routeId not found.");
+        }
+
+        let route = await BusRouteModel.findOne({ groupId: groupId, routeId: routeId })
+
+        let responseData = {
+            status: "Success",
+            data: {
+                traveller: {
+                    ...traveller.toObject(),
+                    routeId: route.toObject()
+                }
+            }
+        };
+
+        return responseData;
     }
+
+
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
