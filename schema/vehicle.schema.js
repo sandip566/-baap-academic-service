@@ -21,8 +21,8 @@ const vehicle = new mongoose.Schema(
             type: Number,
             required: false
         },
-        vehicleNo: {
-            type: Number,
+        vehicalNo: {
+            type: String,
             required: false
         },
         Diesel: {
@@ -34,7 +34,7 @@ const vehicle = new mongoose.Schema(
             enum: ['Petrol', 'Diesel', 'CNG'],
             required: false
         },
-        phoneNumber:{
+        phoneNumber: {
             type: Number,
         },
         color: {
