@@ -36,11 +36,11 @@ router.get("/getVehicleId/:vehicleId", async (req, res, next) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    let { phoneNumber, name, search, page, limit } = req.query;
+    let { vehicleNo, name, search, page, limit } = req.query;
     page = parseInt(page) || 1;
     limit = parseInt(limit);
     const serviceResponse = await service.getAllDataByGroupId(
-        groupId, phoneNumber, name, search, page, limit
+        groupId, vehicleNo, name, search, page, limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
