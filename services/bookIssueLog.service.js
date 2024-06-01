@@ -5,7 +5,7 @@ const studentAdmissionModel = require("../schema/studentAdmission.schema.js");
 const { addListener } = require("../schema/publisher.schema.js");
 const studentAdmissionServices = require("./studentAdmission.services.js");
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema.js");
-const configurationModel=require("../schema/configuration.schema.js");
+const configurationModel = require("../schema/configuration.schema.js");
 class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -15,7 +15,7 @@ class BookIssueLogService extends BaseService {
             const searchFilter = { groupId };
             const bookMap = await this.getBookMap();
             const studentMap = await this.getStudentMap();
-    
+
             // Handle search criteria
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
@@ -35,17 +35,17 @@ class BookIssueLogService extends BaseService {
                     ];
                 }
             }
-    
+
             // Apply additional criteria
             if (criteria.isReturn !== undefined) searchFilter.isReturn = criteria.isReturn;
             if (criteria.isReserve !== undefined) searchFilter.isReserve = criteria.isReserve;
             if (criteria.status) searchFilter.status = criteria.status;
             if (criteria.isOverdue !== undefined) searchFilter.isOverdue = criteria.isOverdue;
             if (criteria.userId) searchFilter.userId = criteria.userId;
-    
+
             // Fetch book issue logs based on the filter
             const bookIssueLogs = await bookIssueLogModel.find(searchFilter);
-    
+
             // Populate books and students for each log
             const populatedBooks = await Promise.all(
                 bookIssueLogs.map(async (log) => {
@@ -54,11 +54,11 @@ class BookIssueLogService extends BaseService {
                     return { ...log._doc, books, student };
                 })
             );
-    
+
             // Get counts
             const count = await this.getCount(groupId);
             const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
-    
+
             return {
                 populatedBookIssueLog: populatedBooks,
                 count,
@@ -110,10 +110,11 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async updateBookIssueLogById(bookIssueLogId,groupId, newData) {
+    async updateBookIssueLogById(groupId, bookIssueLogId, newData) {
         try {
+            console.log("query2", { groupId: groupId, bookIssueLogId: bookIssueLogId });
             const updateBookIssueLog = await bookIssueLogModel.findOneAndUpdate(
-                { bookIssueLogId: bookIssueLogId,groupId:groupId },
+                { groupId: groupId, bookIssueLogId: Number(bookIssueLogId) },
                 { $set: newData },
                 { new: true }
             );
@@ -122,6 +123,7 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
+
 
     async checkOverdueStatus(addmissionId) {
         try {
