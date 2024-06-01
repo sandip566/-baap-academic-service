@@ -10,6 +10,10 @@ const GatepassSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        managerUserId: {
+            type: Number,
+            required: false
+        },
         gatepassId: {
             type: Number,
             required: false

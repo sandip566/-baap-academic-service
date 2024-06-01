@@ -4,6 +4,7 @@ const noticeBoardSchema = new mongoose.Schema(
     {
         noticeBoardId: {
             type: Number,
+            required: false
         },
         groupId: {
             type: Number,
@@ -11,10 +12,15 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         title: {
             type: String,
+            required: false
         },
         content: {
             type: String,
             required: false,
+        },
+        imageUrl: {
+            type: String,
+            required: false
         },
         noticePostDate: {
             type: Date,
@@ -22,6 +28,7 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         noticeExpiryDate: {
             type: String,
+            required: false
         },
         isActive: {
             type: Boolean,
@@ -29,6 +36,7 @@ const noticeBoardSchema = new mongoose.Schema(
         },
         createNotice: {
             type: String,
+            required: false
         },
     },
     { strict: false, timestamps: true }

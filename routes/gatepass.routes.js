@@ -46,6 +46,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         userId: req.query.userId,
         gatepassId: req.query.gatepassId,
         reason: req.query.reason,
+        managerUserId: req.query.managerUserId,
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
     };
