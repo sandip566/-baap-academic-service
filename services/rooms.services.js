@@ -12,14 +12,16 @@ class Service extends BaseService {
         page,
         limit,
         reverseOrder = true
-    ) {
+    ) 
+    
+    {
         const query = {
             groupId: Number(groupId),
         };
-        criteria.pageSize = 10;
-        if (criteria.roomId) query.roomId = criteria.roomId;
-        if (criteria.floorNo) query.floorNo = criteria.floorNo;
-        if (criteria.hostelId) query.hostelId = criteria.hostelId;
+       
+        if (criteria.roomId) query.roomId =Number (criteria.roomId);
+        if (criteria.floorNo) query.floorNo = Number (criteria.floorNo);
+        if (criteria.hostelId) query.hostelId = Number(criteria.hostelId);
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         const currentPage = page;
