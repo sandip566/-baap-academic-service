@@ -10,13 +10,13 @@ class noticeBoardService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.noticeBoardId)
-            query.noticeBoardId = criteria.noticeBoardId;
+        if (criteria.noticeBoardId) query.noticeBoardId = criteria.noticeBoardId;
         if (criteria.title) query.title = new RegExp(criteria.title, "i");
+        if (criteria.isActive) query.isActive = criteria.isActive;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteNoticeBoardByNo(noticeBoardId, groupId) {
+    async deleteNoticeBoardById(noticeBoardId, groupId) {
         try {
             return await noticeBoardModel.deleteOne(noticeBoardId, groupId);
         } catch (error) {
@@ -24,17 +24,25 @@ class noticeBoardService extends BaseService {
         }
     }
 
-    async updateNoticeBoardByNo(noticeBoardId, groupId, newData) {
+    async updateNoticeBoardById(noticeBoardId, groupId, newData) {
         try {
-            const updateNoticeBoard = await noticeBoardModel.findOneAndUpdate(
+            const updatedNoticeBoard = await noticeBoardModel.findOneAndUpdate(
                 { noticeBoardId: noticeBoardId, groupId: groupId },
                 newData,
                 { new: true }
             );
-            return updateNoticeBoard;
+            return updatedNoticeBoard;
         } catch (error) {
             throw error;
         }
+    }
+
+    async getByDataId(noticeBoardId) {
+        return this.execute(() => {
+            return noticeBoardModel.findOne({
+                noticeBoardId: noticeBoardId,
+            });
+        });
     }
 }
 module.exports = new noticeBoardService(noticeBoardModel, "noticeBoard");

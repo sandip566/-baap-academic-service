@@ -16,6 +16,7 @@ class GatepassService extends BaseService {
                 query.$or = [
                     { userId: numericSearch },
                     { gatepassId: numericSearch },
+                    { managerUserId: numericSearch }
                 ];
             } else {
                 query.$or = [
@@ -28,6 +29,7 @@ class GatepassService extends BaseService {
         if (criteria.reason) query.reason = new RegExp(criteria.reason, "i");
         if (criteria.userId) query.userId = criteria.userId;
         if (criteria.gatepassId) query.gatepassId = criteria.gatepassId;
+        if (criteria.managerUserId) query.managerUserId = criteria.managerUserId
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
