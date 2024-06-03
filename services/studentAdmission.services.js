@@ -1163,13 +1163,13 @@ class StudentsAdmmisionService extends BaseService {
                                         $and: [
                                             { $eq: ["$addmissionId", "$$admissionId"] },
                                             { $eq: ["$userId", "$$userId"] },
-                                            { $eq: ["$academicYear", "$$academicYear"] } // Ensuring matching academicYear
+                                            { $eq: ["$academicYear", "$$academicYear"] } 
                                         ]
                                     }
                                 }
                             },
                             {
-                                $sort: { "createdAt": -1 } // Sorting by createdAt to get the latest record
+                                $sort: { "createdAt": -1 } 
                             }
                         ],
                         as: "feespayments"
@@ -1182,13 +1182,13 @@ class StudentsAdmmisionService extends BaseService {
                                 $map: {
                                     input: "$feespayments",
                                     as: "payment",
-                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
+                                    in: { $toDouble: "$$payment.paidAmount" } 
                                 }
                             }
                         },
                         lastRemainingAmount: {
                             $ifNull: [
-                                { $arrayElemAt: ["$feespayments.remainingAmount", 0] }, // Assuming remainingAmount field in feespayments
+                                { $arrayElemAt: ["$feespayments.remainingAmount", 0] },
                                 0
                             ]
                         }

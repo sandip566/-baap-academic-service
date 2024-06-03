@@ -12,15 +12,13 @@ class Service extends BaseService {
         page,
         limit,
         reverseOrder = true
-    ) 
-    
-    {
+    ) {
         const query = {
             groupId: Number(groupId),
         };
-       
-        if (criteria.roomId) query.roomId =Number (criteria.roomId);
-        if (criteria.floorNo) query.floorNo = Number (criteria.floorNo);
+
+        if (criteria.roomId) query.roomId = Number(criteria.roomId);
+        if (criteria.floorNo) query.floorNo = Number(criteria.floorNo);
         if (criteria.hostelId) query.hostelId = Number(criteria.hostelId);
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
@@ -42,6 +40,20 @@ class Service extends BaseService {
                 {
                     $unwind: {
                         path: "$hostelId",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $lookup: {
+                        from: "rooms",
+                        localField: "roomId",
+                        foreignField: "roomId",
+                        as: "roomId",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$roomId",
                         preserveNullAndEmptyArrays: true,
                     },
                 },
