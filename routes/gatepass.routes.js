@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/gatepass.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const GatepassModel = require("../schema/gatepass.schema")
 
 router.post(
     "/",
@@ -11,6 +12,13 @@ router.post(
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
+        }
+        const existingGatepass = await GatepassModel.findOne({
+            userId: req.body.userId,
+            status: 'Active'
+        });
+        if (existingGatepass) {
+            return res.status(400).json({ message: 'Your last gatepass is active.' });
         }
         const gatepassId = +Date.now();
         req.body.gatepassId = gatepassId;
