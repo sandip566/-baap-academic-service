@@ -606,6 +606,8 @@ class StudentsAdmmisionService extends BaseService {
                     searchFilter.$or = [
                         { firstName: { $regex: query.search, $options: "i" } },
                         { lastName: { $regex: query.search, $options: "i" } },
+                        { name: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: query.search }
                     ];
                 }
             }
@@ -1005,7 +1007,7 @@ class StudentsAdmmisionService extends BaseService {
             );
             // Fetch feesPayment data based on specific IDs
             const feesPaymentData = await FeesPaymentModel.find({
-                groupId:Number(groupId),
+                groupId: Number(groupId),
                 empId: query.empId,
                 addmissionId: query.addmissionId,
                 academicYear: query.academicYear,
@@ -1071,9 +1073,9 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.academicYear == query.academicYear &&
-                        data.addmissionId == query.addmissionId,
+                    data.empId === query.empId &&
+                    data.academicYear == query.academicYear &&
+                    data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -1097,12 +1099,12 @@ class StudentsAdmmisionService extends BaseService {
         try {
             const userId = query.userId;
             const academicYear = query.academicYear;
-    
+
             let data = await StudentsAdmissionModel.aggregate([
                 {
                     $match: {
-                        groupId:Number (groupId),
-                        userId:Number (userId)
+                        groupId: Number(groupId),
+                        userId: Number(userId)
                     }
                 },
                 {
@@ -1195,7 +1197,7 @@ class StudentsAdmmisionService extends BaseService {
                     }
                 }
             ]);
-    
+
             const response = {
                 status: "Success",
                 data: {
@@ -1203,15 +1205,15 @@ class StudentsAdmmisionService extends BaseService {
                     totalItemsCount: data.length,
                 },
             };
-    
+
             return response;
         } catch (error) {
             console.error("Error:", error);
             throw error;
         }
     }
-    
-    
+
+
 
     async findLatestAdmission() {
         try {
@@ -1318,7 +1320,7 @@ class StudentsAdmmisionService extends BaseService {
                         as: "students",
                     },
                 },
-               
+
                 {
                     $unwind: "$students",
                 },
