@@ -26,7 +26,7 @@ router.get("/getByInstallmentStatus/hostelInstallmentId/:hostelInstallmentId", a
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getByInstallmentStatus(
+    const serviceResponse = await service.getByInstallmentId(
         req.params.hostelInstallmentId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);

@@ -262,6 +262,48 @@ class HostelAdmissionService extends BaseService {
             throw error;
         }
     }
+    async getByAddmissionId(hostelAdmissionId) {
+        try {
+            const studentAdmission = await this.model.findOne({
+                hostelAdmissionId: hostelAdmissionId,
+            });
+            console.log(studentAdmission);
+            if (!studentAdmission) {
+                throw new Error("Student admission not found");
+            }
+
+            let additionalData = {};
+
+            // Process fees details
+            if (
+                studentAdmission.feesDetails &&
+                studentAdmission.feesDetails.length > 0
+            ) {
+                additionalData.feesDetails = await Promise.all(
+                    studentAdmission.feesDetails.map(async (feesDetail) => {
+                        let feesAdditionalData = {};
+
+                        if (feesDetail.feesTemplateId) {
+                            const feesTemplate =
+                                await feesTemplateModel.findOne({
+                                    feesTemplateId: feesDetail.feesTemplateId,
+                                });
+                            feesAdditionalData.feesTemplateId = feesTemplate;
+                        }
+
+                        return { ...feesDetail, ...feesAdditionalData };
+                    })
+                );
+            }
+            let response = {
+                status: "success",
+                data: { ...studentAdmission._doc, ...additionalData },
+            };
+            return response;
+        } catch (error) {
+            throw error;
+        }
+    }
     async getAdmissionListing(groupId) {
         console.log(groupId);
         try {

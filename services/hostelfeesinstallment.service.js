@@ -25,51 +25,7 @@ class HostelFeesInstallmentService extends BaseService {
             return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
         });
     }
-    async getByInstallmentStatus(hostelInstallmentId) {
-        let overdue;
-        const installmentData = await this.execute(() => {
-            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
-        });
-        console.log(installmentData.data);
-
-        if (
-            installmentData.data?.feesDetails &&
-            Array.isArray(installmentData.data.feesDetails)
-        ) {
-            installmentData.data.feesDetails.forEach((feesDetailItem) => {
-                if (
-                    feesDetailItem.installment &&
-                    Array.isArray(feesDetailItem.installment)
-                ) {
-                    feesDetailItem.installment.forEach((installment) => {
-                        if (installment.status === "pending") {
-                            let installmentDate = new Date(installment.date);
-                            let currentDate = new Date();
-                            let currentDateFormatted = currentDate
-                                .toISOString()
-                                .slice(0, 10)
-                                .replace(/-/g, "/");
-                            let installmentDateFormat = installmentDate
-                                .toISOString()
-                                .slice(0, 10)
-                                .replace(/-/g, "/");
-
-                            if (installmentDateFormat < currentDateFormatted) {
-                                overdue = installment.overdue = true;
-                                console.log("Installment is overdue");
-                            }
-                        }
-                    });
-                }
-            });
-        }
-console.log(installmentData.data);
-        return {
-            status: {
-                isDue: overdue ? "overdue" : installmentData.data?.status,
-            },
-        };
-    }
+ 
 
     async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
