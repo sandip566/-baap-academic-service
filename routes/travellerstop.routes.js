@@ -13,7 +13,7 @@ router.post(
             return;
         }
         travellerStopId = +Date.now();
-        req.body. travellerStopId  =  travellerStopId 
+        req.body.travellerStopId = travellerStopId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }

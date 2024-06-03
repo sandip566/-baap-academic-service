@@ -13,7 +13,7 @@ router.post(
             return;
         }
         driverRouteId = +Date.now();
-        req.body.driverRouteId = driverRouteId
+        req.body.driverRouteId = driverRouteId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -42,13 +42,19 @@ router.get("/all/driverRoutes", async (req, res) => {
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-router.get("/groupId/:groupId/driverRouteId/:driverRouteId", async (req, res, next) => {
-    if (ValidationHelper.requestValidationErrors(req, res)) {
-        return;
-    }
-    const serviceResponse = await service.getByBusRouteId(req.params.groupId,req.params.driverRouteId);
+router.get(
+    "/groupId/:groupId/driverRouteId/:driverRouteId",
+    async (req, res, next) => {
+        if (ValidationHelper.requestValidationErrors(req, res)) {
+            return;
+        }
+        const serviceResponse = await service.getByBusRouteId(
+            req.params.groupId,
+            req.params.driverRouteId
+        );
 
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 
 module.exports = router;

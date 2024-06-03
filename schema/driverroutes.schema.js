@@ -12,12 +12,12 @@ const DriverRoutesSchema = new mongoose.Schema(
         },
         driverRoutes: {
             type: Array,
-            required: true
+            required: true,
         },
         driverId: {
             type: Number,
             required: false,
-        }
+        },
     },
     { strict: false, timestamps: true }
 );
