@@ -161,32 +161,53 @@ router.post("/return-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, returnDate } = req.body;
 
+        if (!returnDate) {
+            return res.status(400).json({
+                success: false,
+                error: "returnDate is required",
+            });
+        }
+
+        const parsedReturnDate = new Date(returnDate);
+        if (isNaN(parsedReturnDate)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid return date",
+            });
+        }
+
         const existingReservation = await bookIssueLogModel.findOne({
             groupId: groupId,
             bookId: bookId,
             addmissionId: addmissionId,
             isReturn: false,
         });
-        if (existingReservation?.isOverdue == true) {
-            return res.status(409).json({
-                success: false,
-                error: "First Paid Payment,Your Log is OverDue",
-            });
-        }
+
         if (!existingReservation) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not currently issued to the specified group.",
             });
         }
+
+        if (existingReservation.isOverdue) {
+            return res.status(409).json({
+                success: false,
+                error: "First Paid Payment, Your Log is OverDue",
+            });
+        }
+
         const updatedReservation = await service.updateBookIssueLogById(
+            groupId,
             existingReservation.bookIssueLogId,
-            { isReturn: true, returnDate: new Date() }
+            { isReturn: true, returnDate: parsedReturnDate }
         );
+
         await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
+            { bookId: bookId },
             { $inc: { availableCount: 1 } }
         );
+
         res.status(200).json({
             success: true,
             reservation: updatedReservation,
@@ -199,6 +220,7 @@ router.post("/return-book", async (req, res) => {
         });
     }
 });
+
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -423,7 +445,7 @@ router.post("/reserve-book", async (req, res) => {
             const removedReservation = await bookIssueLogModel.findOneAndUpdate(
                 {
                     bookId: bookId,
-                    bookIssueLogId:bookIssueLogId,
+                    bookIssueLogId: bookIssueLogId,
                     addmissionId: addmissionId,
                     status: "Reserved",
                     isReserve: true,
