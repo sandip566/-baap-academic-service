@@ -2,44 +2,44 @@ const mongoose = require("mongoose");
 
 const DriverSchema = new mongoose.Schema(
     {
-        driverName: {
-            type: String,
-            required: true,
+        groupId: {
+            type: Number,
+            required: true
+        },
+        userId: {
+            type: Number,
+            required: true
         },
         driverId: {
             type: Number,
             required: false
         },
-        driverNo: {
-            type: Number,
-            required: true
+        dateOfBirth: {
+            type: String,
+            required: false
         },
-        driverCount: {
-            type: Number,
-            require: true
-        },
-        driverAddress: {
+        experience: {
             type: String,
             required: true
         },
-        busId: {
-            type: Number,
-
+        fitnessCertificate: {
+            type: String,
+            required: false
         },
-        groupId: {
-            type: Number,
-            required: false,
+        licenceImg: {
+            type: String,
+            required: false
         },
-        driverLicenceNo: {
-            type: Number,
+        startDate: {
+            type: String,
             required: true
         },
-        driverJoingDate: {
-            type: Number,
+        endDate: {
+            type: String,
             required: true
         }
     },
-    { timestamps: true ,strict:false}
+    { timestamps: true, strict: false }
 );
 
 const DriverModel = mongoose.model("driver", DriverSchema);

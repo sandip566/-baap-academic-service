@@ -6,29 +6,78 @@ class transportcoordinatorervice extends BaseService {
         super(dbModel, entityName);
     }
 
- async   getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.transportcoordinatorId) query.transportcoordinatorId = criteria.transportcoordinatorId;
-        return this.preparePaginationAndReturnData(query, criteria);
+    async getBytransportCoordinatorId(transportCoordinatorId) {
+        return this.execute(() => {
+            return this.model.findOne({ transportCoordinatorId: transportCoordinatorId });
+        });
     }
 
-    async deleteTripHistroyById(transportcoordinatorId, groupId) {
+    
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
-            return await transportcoordinatorModel.deleteOne({
-                transportcoordinatorId: transportcoordinatorId,
+            const searchFilter = {
                 groupId: groupId,
-            });
+            };
+            if (search) {
+                const numericSearch = parseInt(search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { name: { $regex: search, $options: "i" } },
+                    ];
+                }
+            }
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
+            }
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
+            }
+
+            const count = await transportcoordinatorModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await transportcoordinatorModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
+
+    async deletetransportcoordinatorById(transportCoordinatorId, groupId) {
+        try {
+            return await transportcoordinatorModel.deleteOne(
+                transportCoordinatorId,
+                groupId
+            );
         } catch (error) {
             throw error;
         }
     }
 
-    async updatetransportcoordinatorById(transportcoordinatorId, groupId, newData) {
+    async updateTransportCoordinatorById(transportCoordinatorId, groupId, newData) {
         try {
             const updatedVisitor = await transportcoordinatorModel.findOneAndUpdate(
-                { transportcoordinatorId: transportcoordinatorId, groupId: groupId },
+                { transportCoordinatorId: transportCoordinatorId, groupId: groupId },
                 newData,
                 { new: true }
             );

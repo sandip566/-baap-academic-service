@@ -34,10 +34,7 @@ const PurchaseSchema = new mongoose.Schema(
             type: String,
             enum: ["Upi", "Cash", "Cheque"],
         },
-        bookName: {
-            type: String,
-            required: false,
-        },
+       
         quantity: {
             type: Number,
             required: false,
@@ -50,6 +47,10 @@ const PurchaseSchema = new mongoose.Schema(
             type: String,
             enum: ["Delivered", "Shipped", "Pending", "Canceled", "Processing"],
         },
+        ISBN: {
+            type: String,
+            required: false
+        }
     },
     { strict: false, timestamps: true }
 );

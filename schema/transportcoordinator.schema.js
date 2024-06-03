@@ -2,24 +2,36 @@ const mongoose = require("mongoose");
 
 const TransportCoordinatorSchema = new mongoose.Schema(
     {
-        name: {
+        groupId: {
+            type: Number,
+            required: true
+        },
+        empId: {
+            type: Number,
+            required: true
+        },
+        transportCoordinatorId:{
+            type: Number,
+            required: false
+        },
+        dateOfBirth: {
             type: String,
-            required: true,
+            required: false
         },
-        email: {
+        fitnessCertificate: {
             type: String,
-            required: true,
-            unique: true,
+            required: false
         },
-        transportcoordinatorId: {
-            type: Number
-        },
-        phone: {
+        startDate: {
             type: String,
-            required: true,
+            required: false
         },
+        endDate: {
+            type: String,
+            required: false
+        }
     },
-    { timestamps: true ,strict:false}
+    { timestamps: true, strict: false }
 );
 
 const TransportCoordinatorModel = mongoose.model("transportcoordinator", TransportCoordinatorSchema);

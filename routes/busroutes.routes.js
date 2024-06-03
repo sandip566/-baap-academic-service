@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
 const service = require("../services/busroutes.service");
+const { default: mongoose } = require("mongoose");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
@@ -14,6 +15,23 @@ router.post(
         }
         const routeId = +Date.now();
         req.body.routeId = routeId;
+        if (!req.body.stopDetails || req.body.stopDetails.length === 0) {
+            req.body.stopDetails = [];
+        } else {
+            req.body.stopDetails = req.body.stopDetails.map((stopDetailsData) => {
+                const stopId = Date.now() + Math.floor(Math.random() * 10000);
+                return {
+                    _id: new mongoose.Types.ObjectId(),
+                    stopId: stopId,
+                    stopName: stopDetailsData.stopName,
+                    fees: stopDetailsData.fees,
+                    location: {
+                        lattitude: stopDetailsData.location.lattitude,
+                        longitude: stopDetailsData.location.longitude
+                    }
+                };
+            });
+        }
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -46,15 +64,30 @@ router.get("/all/busRoutes", async (req, res) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const criteria = {
-        routeId: req.query.routeId,
-        routeName: req.query.routeName,
-        schedule: req.query.schedule,
-        pageNumber: parseInt(req.query.pageNumber) || 1,
-    };
+    let { phoneNumber, name, search, page, limit } = req.query;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit);
     const serviceResponse = await service.getAllDataByGroupId(
-        groupId,
-        criteria
+        groupId, phoneNumber, name, search, page, limit
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/getrouteId/:routeId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByrouteId(req.params.routeId);
+
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/getRoutesByuserId/:userId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getRouteByuserId(
+        req.params.userId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -105,4 +138,18 @@ router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
+    const { groupId, userId } = req.params;
+    const { currentLat, currentLong } = req.query;
+
+    try {
+        let rute = await service.getNearestStop(groupId, userId, parseFloat(currentLat), parseFloat(currentLong));
+        res.json(rute);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+});
+
+
 module.exports = router;

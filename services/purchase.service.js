@@ -40,11 +40,17 @@ class PurchaseService extends BaseService {
                         { purchaseId: numericSearch },
                         { unitPrice: numericSearch },
                         { quantity: numericSearch },
+                        { ISBN: criteria.search }
                     ];
                 } else {
                     searchFilter.$or = [
                         {
                             book: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                        {
+                            ISBN: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
@@ -67,9 +73,14 @@ class PurchaseService extends BaseService {
                     $regex: new RegExp(criteria.orderStatus, "i"),
                 };
             }
-            if (criteria.book) {
-                searchFilter.book = {
-                    $regex: new RegExp(criteria.book, "i"),
+            if (criteria.name) {
+                searchFilter.name = {
+                    $regex: new RegExp(criteria.name, "i"),
+                };
+            }
+            if (criteria.ISBN) {
+                searchFilter.ISBN = {
+                    $regex: new RegExp(criteria.ISBN, "i"),
                 };
             }
 

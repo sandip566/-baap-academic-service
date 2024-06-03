@@ -64,7 +64,7 @@ class documentConfiguration extends BaseService {
     ) {
         try {
             const updatedDocumntConfigration =
-                await this.dbModel.findOneAndUpdate(
+                await this.model.findOneAndUpdate(
                     {
                         documntConfigurationId: documntConfigurationId,
                         groupId: groupId,

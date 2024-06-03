@@ -9,6 +9,7 @@ const shelfModel = require("../schema/shelf.schema");
 const deparmentModel = require("../schema/department.schema");
 const publisherModel = require("../schema/publisher.schema");
 const bookIssueLogModel = require("../schema/bookIssueLog.schema");
+const PurchaseModel = require("../schema/purchase.schema");
 router.post(
     "/",
     checkSchema(require("../dto/books.dto")),
@@ -16,28 +17,55 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        if (req.body.totalCopies !== undefined) {
-            req.body.availableCount = req.body.totalCopies;
-        }
-        const shelfId = req.body.shelfId; // Assuming the shelfId is provided in the request body
-        const shelf = await shelfModel.find({ shelfId });
-        if (!shelf) {
-            return res.status(404).json({ error: "Shelf not found" });
-        }
-        if (shelf.availableCapacity <= 0) {
-            return res.status(400).json({
-                error: "This shelf is not available for storing books. Available capacity is zero.",
+
+        try {
+            let purchaseData = await PurchaseModel.findOne({
+                groupId: req.body.groupId,
+                purchaseId: req.body.purchaseId,
+            });
+
+            if (!purchaseData) {
+                return res.status(400).json({
+                    success: false,
+                    error: "This book has not been purchased",
+                });
+            }
+
+            if (req.body.totalCopies !== undefined) {
+                req.body.availableCount = req.body.totalCopies;
+            }
+
+            const shelfId = req.body.shelfId;
+            const shelf = await shelfModel.findOne({ shelfId });
+
+            if (!shelf) {
+                return res.status(404).json({ error: "Shelf not found" });
+            }
+
+            if (shelf.availableCapacity <= 0) {
+                return res.status(400).json({
+                    error: "This shelf is not available for storing books. Available capacity is zero.",
+                });
+            }
+
+            await shelfModel.findOneAndUpdate(
+                { shelfId: shelfId, availableCapacity: { $gt: 0 } },
+                { $inc: { availableCapacity: -1, currentInventory: 1 } },
+                { new: true }
+            );
+
+            const bookId = +Date.now();
+            req.body.bookId = bookId;
+
+            const serviceResponse = await service.create(req.body);
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error("Error in creating book:", error);
+            res.status(500).json({
+                success: false,
+                error: "Internal Server Error",
             });
         }
-        await shelfModel.findOneAndUpdate(
-            { shelfId: shelfId, availableCapacity: { $gt: 0 } },
-            { $inc: { availableCapacity: -1, currentInventory: 1 } },
-            { new: true }
-        );
-        const bookId = +Date.now();
-        req.body.bookId = bookId;
-        const serviceResponse = await service.create(req.body);
-        requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
 
@@ -114,7 +142,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 const publisher = await publisherModel.findOne({
                     publisherId: book.publisherId,
                 });
-                return { ...book._doc, shelf, department, publisher };
+                const bookId = await booksModel.findOne({
+                    bookId: book.bookId,
+                });
+                return { ...book._doc, shelf, department, publisher,bookId };
             })
         );
         const count = await service.getBooksCount(groupId);
@@ -136,9 +167,11 @@ router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
         const bookId = req.params.bookId;
-        const data = await service.deleteBookById (groupId,bookId);
+        const data = await service.deleteBookById(groupId, bookId);
         if (data === false) {
-            res.status(400).json({ error: "book is issued it cannot be deleted." });
+            res.status(400).json({
+                error: "book is issued it cannot be deleted.",
+            });
         } else if (!data) {
             res.status(404).json({ error: "Book not found." });
         } else {

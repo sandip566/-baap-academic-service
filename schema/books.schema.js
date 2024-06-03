@@ -6,6 +6,10 @@ const booksSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        purchaseId: {
+            type: Number,
+            required: true,
+        },
         groupId: {
             type: Number,
             required: false,
@@ -52,7 +56,8 @@ const booksSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            enum: ["Available", "Lost", "Loaned", "Reserved", "NotAvailable"],
+            // enum: ["Available", "Lost", "Loaned", "Reserved", "NotAvailable"],
+            default:"available"
         },
     },
     { strict: false, timestamps: true }

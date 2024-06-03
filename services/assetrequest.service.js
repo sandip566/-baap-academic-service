@@ -1,7 +1,8 @@
 const AssetRequestModel = require("../schema/assetrequest.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
-
+const bookModel = require("../schema/books.schema");
+const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 class AssetRequestService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -23,51 +24,37 @@ class AssetRequestService extends BaseService {
 
 
     async getAllDataByGroupId(groupId, criteria) {
-        try {
-            const searchFilter = {
-                groupId: groupId,
-            };
-            if (criteria.search) {
-                const numericSearch = parseInt(criteria.search);
-                if (!isNaN(numericSearch)) {
-                    searchFilter.$or = [
-                        { empId: numericSearch },
-                        { userId: numericSearch },
-                    ];
-                } else {
-                    searchFilter.$or = [
-                        {
-                            name: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                        {
-                            status: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                        {
-                            category: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-
-
-
-                    ];
-                }
+        const query = {
+            groupId: groupId,
+        };
+        if (criteria.search) {
+            const numericSearch = parseInt(criteria.search);
+            if (!isNaN(numericSearch)) {
+                query.$or = [
+                    { userName: { $regex: criteria.search, $options: "i" } },
+                    { status: { $regex: criteria.search, $options: "i" } },
+                    { empId: numericSearch },
+                    { userId: numericSearch },
+                ];
+            } else {
+                query.$or = [
+                    { userName: { $regex: criteria.search, $options: "i" } },
+                    { status: { $regex: criteria.search, $options: "i" } },
+                ];
             }
-            // if (criteria.customerId) {
-            //     const numericCustomerId = parseInt(criteria.customerId);
-            //     if (!isNaN(numericCustomerId)) {
-            //         searchFilter.customerId = numericCustomerId;
-            //     }
-            // }
-
-            return { searchFilter };
-        } catch (error) {
-            throw error;
         }
+        if (criteria.name) query.name = new RegExp(criteria.name, "i");
+        if (criteria.userName)
+            query.userName = new RegExp(criteria.userName, "i");
+        if (criteria.status) query.status = new RegExp(criteria.status, "i");
+        if (criteria.type) query.type = new RegExp(criteria.type, "i");
+        if (criteria.category)
+            query.category = new RegExp(criteria.category, "i");
+        if (criteria.empId) query.empId = criteria.empId;
+        if (criteria.managerUserId)
+            query.managerUserId = criteria.managerUserId;
+        if (criteria.userId) query.userId = criteria.userId;
+        return this.preparePaginationAndReturnData(query, criteria);
     }
 
     async deleteByDataId(requestId, groupId) {
@@ -123,6 +110,51 @@ class AssetRequestService extends BaseService {
             });
         }
     }
+    async getClearanceData(groupId, userId) {
+        try {
+            let assetData = await AssetRequestModel.find({
+                groupId: groupId,
+                userId: userId,
+                status: "Issued",
+            });
+            console.log(assetData);
+
+            let bookData = await bookIssueLogModel.find({
+                groupId: groupId,
+                userId: userId,
+                isReturn: false,
+            });
+            console.log(bookData);
+            let bookIds = bookData.map((log) => log.bookId);
+
+            let bookDetailsMap = await bookModel
+                .find({ bookId: { $in: bookIds } })
+                .then((books) => {
+                    let map = {};
+                    books.forEach((book) => {
+                        map[book.bookId] = book;
+                    });
+                    return map;
+                });
+
+            let enrichedBookData = bookData.map((log) => {
+                return {
+                    ...log.toObject(),
+                    bookId: bookDetailsMap[log.bookId],
+                };
+            });
+
+            let response = {
+                bookData: enrichedBookData,
+                assetData: assetData,
+            };
+
+            return response;
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
 
     async getAssetsDetailsById(userId) {
         return this.execute(() => {
@@ -131,5 +163,12 @@ class AssetRequestService extends BaseService {
             });
         });
     }
+    async getAssetsDetailsByRequestId(requestId) {
+        return this.execute(() => {
+            return AssetRequestModel.find({
+                requestId: requestId,
+            });
+        });
+    }
 }
-module.exports = new AssetRequestService(AssetRequestModel, 'assetrequest');
+module.exports = new AssetRequestService(AssetRequestModel, "assetrequest");

@@ -5,13 +5,60 @@ class driverervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
+        try {
+            const searchFilter = {
+                groupId: groupId,
+            };
+            if (search) {
+                const numericSearch = parseInt(search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { name: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { name: { $regex: search, $options: "i" } },
+                    ];
+                }
+            }
+            if (name) {
+                searchFilter.name = { $regex: name, $options: "i" };
+            }
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
+            }
 
- async   getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.driverId) query.driverId = criteria.driverId;
-        return this.preparePaginationAndReturnData(query, criteria);
+            const count = await driverModel.countDocuments(searchFilter);
+            const totalPages = Math.ceil(count / limit);
+            const skip = (page - 1) * limit;
+            const services = await driverModel.find(searchFilter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit);
+            const response = {
+                status: "Success",
+                data: {
+                    items: services,
+                    totalItemsCount: count,
+                    page,
+                    limit,
+                    totalPages
+                },
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
+
+    async getBydriverId(driverId) {
+        return this.execute(() => {
+            return this.model.findOne({ driverId: driverId });
+        });
     }
 
     async deleteTripHistroyById(driverId, groupId) {
@@ -38,6 +85,6 @@ class driverervice extends BaseService {
         }
     }
 
-   
+
 }
 module.exports = new driverervice(driverModel, "driver");

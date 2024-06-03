@@ -14,8 +14,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const documentId = Date.now();
-        req.body.documentId = documentId;
+        const documntConfigurationId = Date.now();
+        req.body.documntConfigurationId = documntConfigurationId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -28,6 +28,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             documntConfigurationId: req.query.documntConfigurationId,
             userId: req.query.userId,
+            category:req.query.category,
             roleId: req.query.roleId,
             addmissionId: req.query.addmissionId,
             academicYear: req.query.academicYear,
@@ -84,6 +85,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 filteredDocuments = documentConfigurations.filter(
                     (documentConfiguration) => {
                         return documentConfiguration.userId == criteria.userId;
+                    }
+                );
+            }else if (criteria.category) {
+                filteredDocuments = documentConfigurations.filter(
+                    (documentConfiguration) => {
+                        return documentConfiguration.category == criteria.category;
                     }
                 );
             }

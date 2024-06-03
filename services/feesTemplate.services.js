@@ -10,9 +10,16 @@ class Service extends BaseService {
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
+            
         };
         if (criteria.feesTemplateId)
             query.feesTemplateId = criteria.feesTemplateId;
+        if (criteria.isHostel)
+            query.isHostel = criteria.isHostel;
+        if (criteria.type)
+            query.type = criteria.type;
+        if (criteria.isShowInAccounting)
+            query.isShowInAccounting = criteria.isShowInAccounting;
         return this.preparePaginationAndReturnData(query, criteria);
     }
     async getByfeesTemplateId(feesTemplateId) {

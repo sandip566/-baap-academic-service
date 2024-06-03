@@ -5,6 +5,89 @@ class AssetService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async getByAssetTypeId(assetId) {
+        return this.execute(() => {
+            return AssetReturnModel.findOne({
+                returnAssetId: returnAssetId,
+            });
+        });
+    }
+
+    async getAssetDashboard(groupId, criteria) {
+        try {
+            const query = {
+                groupId: Number(groupId),
+            };
+
+            if (criteria.modelName) query.modelName = new RegExp(criteria.modelName, "i");
+
+            const result = await AssetModel.aggregate([
+                { $match: query },
+                {
+                    $lookup: {
+                        from: "assetrequests",
+                        localField: "assetId",
+                        foreignField: "assetId",
+                        as: "assetrequests"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$assetrequests",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $group: {
+                        _id: "$assetId",
+                        totalCurrentValue: { $first: "$currentValue" },
+                        totalAvailable: { $first: "$available" },
+                        totalReturnQuantity: {
+                            $sum: {
+                                $cond: [{ $eq: ["$assetrequests.status", "Return"] }, "$assetrequests.returnQuantity", 0]
+                            }
+                        },
+                        issuedCount: {
+                            $sum: {
+                                $cond: [{ $eq: ["$assetrequests.status", "Issued"] }, "$assetrequests.quantity", 0]
+                            }
+                        }
+                    }
+                },
+                {
+                    $addFields: {
+                        totalIssued: "$issuedCount",
+                        totalAvailableAfterIssued: {
+                            $subtract: [
+                                "$totalAvailable",
+                                { $subtract: ["$issuedCount", "$totalReturnQuantity"] }
+                            ]
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalCurrentValue: { $sum: "$totalCurrentValue" },
+                        totalAvailable: { $sum: "$totalAvailableAfterIssued" },
+                        totalReturnQuantity: { $sum: "$totalReturnQuantity" },
+                        totalIssued: { $sum: "$totalIssued" }
+                    }
+                }
+            ]).exec();
+
+            let response = {
+                status: "Success",
+                data: result
+            };
+
+            return response;
+        } catch (error) {
+            console.error("Error in getAssetDashboard:", error);
+            throw error;
+        }
+    }
+
 
     getAllDataByGroupId(groupId, criteria) {
         const query = {

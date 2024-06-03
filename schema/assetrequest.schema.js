@@ -6,6 +6,10 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        assetId:{
+            type: Number,
+            required: false  
+        },
         requestId: {
             type: Number,
             required: false
@@ -18,7 +22,15 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
+        managerUserId:{
+            type: Number,
+            required: false
+        },
         name: {
+            type: String,
+            required: false,
+        },
+        userName:{
             type: String,
             required: false,
         },

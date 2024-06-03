@@ -33,11 +33,9 @@ class BooksService extends BaseService {
                         { availableCount: numericSearch },
                     ];
                 } else {
-
                     const shelfId =
                         shelfMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
-
                         { shelfId: shelfId },
                         {
                             shelfName: {
@@ -56,7 +54,6 @@ class BooksService extends BaseService {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
-
                     ];
                 }
             }
@@ -71,7 +68,6 @@ class BooksService extends BaseService {
                     return { searchFilter: {}, departmentMap: {} };
                 }
             }
-
 
             if (criteria.shelfName) {
                 const shelfnameLowercase = criteria.shelfName.toLowerCase();
@@ -108,7 +104,9 @@ class BooksService extends BaseService {
             const departmentMap = {};
             departments.forEach((department) => {
                 if (department.departmentName) {
-                    const departmentName = department.departmentName.trim().toLowerCase();
+                    const departmentName = department.departmentName
+                        .trim()
+                        .toLowerCase();
                     departmentMap[departmentName] = department.departmentId;
                 }
             });
@@ -139,7 +137,9 @@ class BooksService extends BaseService {
         const publisherMap = {};
         publishers.forEach((publisher) => {
             if (publisher.publisherName) {
-                const publisherName = publisher.publisherName.trim().toLowerCase();
+                const publisherName = publisher.publisherName
+                    .trim()
+                    .toLowerCase();
                 publisherMap[publisherName] = publisher.publisherId;
             }
         });
@@ -152,11 +152,17 @@ class BooksService extends BaseService {
 
     async deleteBookById(groupId, bookId) {
         try {
-            const groupID=parseInt(groupId);
-            const bookID=parseInt(bookId);
-            const isIssuedBook = await bookIssueLogModel.find({ groupId: groupID, bookId: bookID });
-            if (isIssuedBook.length===0) {
-                const result = await booksModel.deleteOne({ groupId: groupID, bookId: bookID });
+            const groupID = parseInt(groupId);
+            const bookID = parseInt(bookId);
+            const isIssuedBook = await bookIssueLogModel.find({
+                groupId: groupID,
+                bookId: bookID,
+            });
+            if (isIssuedBook.length === 0) {
+                const result = await booksModel.deleteOne({
+                    groupId: groupID,
+                    bookId: bookID,
+                });
                 return result;
             } else {
                 return false;
@@ -165,7 +171,7 @@ class BooksService extends BaseService {
             throw error;
         }
     }
-    
+
     async updateBookById(bookId, groupId, newData) {
         try {
             const updateBook = await booksModel.findOneAndUpdate(
@@ -215,13 +221,9 @@ class BooksService extends BaseService {
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
-                    searchFilter.$or = [
-                        { ISBN: numericSearch }
-                     ];
+                    searchFilter.$or = [{ ISBN: numericSearch }];
                 } else {
-                    searchFilter.$or = [
-                        { RFID: criteria.search },
-                    ];
+                    searchFilter.$or = [{ RFID: criteria.search }];
                 }
             }
 
@@ -241,29 +243,34 @@ class BooksService extends BaseService {
                     const shelf = await shelfModel.findOne({
                         shelfId: book.shelfId,
                     });
-                    
+
                     return { ...book._doc, shelf };
                 })
             );
-            
+
             const issueLogs = await bookIssueLogModel.find({
                 bookId: { $in: books.map((book) => book.bookId) },
                 isReturn: false,
             });
             const studentIds = issueLogs.map((issue) => issue.addmissionId);
-            console.log(studentIds)
+            console.log(studentIds);
             const students = await Student.find({
                 addmissionId: { $in: studentIds },
             });
             const studentMap = {};
             students.forEach((student) => {
-                studentMap[student.addmissionId] = student.firstName;
+                studentMap[student.addmissionId] = student.name;
             });
-
+            
+            console.log(issueLogs);
             const data = issueLogs.map((issue) => ({
                 studentName:
-                    studentMap[issue.addmissionId] || "Unknown Student",
+                studentMap[issue.addmissionId] || "Unknown Student",
                 issueDate: issue.issuedDate,
+                bookIssueLogId: issue.bookIssueLogId,
+                userId: issue.userId,
+                addmissionId: issue.addmissionId,
+                isOverdue: issue.isOverdue,
             }));
             return {
                 data: "books",
@@ -280,7 +287,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) { }
+        } catch (error) {}
     }
 }
 module.exports = new BooksService(booksModel, "books");

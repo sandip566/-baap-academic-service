@@ -28,8 +28,8 @@ const documentConfigurationModel = new mongoose.Schema({
     documentTitle: String,
     expiryDate: Date,
     formDate: Date,
-    documentUrl: String,
-    documentId: Number
+    // documentUrl: String,
+    documntConfigurationId: Number
 }, { strict: false, timestamps: true });
 
 // Create mongoose model

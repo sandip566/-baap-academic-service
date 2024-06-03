@@ -104,8 +104,8 @@ class feesPaymentService extends BaseService {
                         familyDetails: [
                             {
                                 father_phone_number:
-                                    admissionData?.familyDetails[0]
-                                        ?.father_phone_number,
+                                    admissionData?.familyDetails?.[0]
+                                        ?.father_phone_number ?? null,
                             },
                         ],
                     };
@@ -720,6 +720,7 @@ class feesPaymentService extends BaseService {
                             as: "feesPaymentData",
                         },
                     },
+
                     { $match: feesMatchStage },
                     {
                         $addFields: {
@@ -727,9 +728,23 @@ class feesPaymentService extends BaseService {
                                 $sum: {
                                     $map: {
                                         input: "$feesPaymentData",
+
                                         as: "payment",
                                         in: {
-                                            $toDouble: "$$payment.paidAmount",
+                                            $cond: [
+                                                {
+                                                    $eq: [
+                                                        "$$payment.isShowInAccounting",
+                                                        false,
+                                                    ],
+                                                },
+                                                {
+                                                    $toDouble:
+                                                        "$$payment.paidAmount",
+                                                },
+                                                0,
+                                            ],
+                                            // $toDouble: "$$payment.paidAmount",
                                         },
                                     },
                                 },
@@ -882,6 +897,22 @@ class feesPaymentService extends BaseService {
                     "feesPaymentData.isShowInAccounting": true,
                 };
 
+                if (criteria.search) {
+                    const numericSearch = parseInt(criteria.search);
+                    if (!isNaN(numericSearch)) {
+                        matchStage.$or = [
+                            { firstName: { $regex: criteria.search, $options: "i" } },
+                            { lastName: { $regex: criteria.search, $options: "i" } },
+                            { phoneNumber: numericSearch },
+                            { addmissionId: numericSearch },
+                        ];
+                    } else {
+                        matchStage.$or = [
+                            { firstName: { $regex: criteria.search, $options: "i" } },
+                            { lastName: { $regex: criteria.search, $options: "i" } },
+                        ];
+                    }
+                }
                 if (criteria.currentDate) {
                     feesMatchStage["feesPaymentData.currentDate"] =
                         criteria.currentDate;
@@ -1189,11 +1220,11 @@ class feesPaymentService extends BaseService {
                     academicYear: criteria.academicYear,
                     admissionStatus: "Confirm",
                 });
-
+console.log(admissionData);
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
-                    isShowInAccounting: false,
+                    isShowInAccounting: true,
                 });
 
                 console.log(
@@ -1511,7 +1542,8 @@ class feesPaymentService extends BaseService {
                 throw error;
             }
         });
-    }
+    }  
+
     async getDonationFeesListCount(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
@@ -1533,7 +1565,7 @@ class feesPaymentService extends BaseService {
                 let feesData = await this.model.find({
                     groupId: groupId,
                     academicYear: criteria.academicYear,
-                    isShowInAccounting: true,
+                    isShowInAccounting: false,
                 });
 
                 console.log(

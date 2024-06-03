@@ -9,7 +9,7 @@ const feesInstallmentServices = require("../services/feesInstallment.services");
 const documentConfigurationService = require("../services/documentConfiguration.services");
 const TokenService = require("../services/token.services");
 const multer = require("multer");
-const DocumentConfiguration=require("../schema/documentConfiguration.schema")
+const DocumentConfiguration = require("../schema/documentConfiguration.schema");
 const upload = multer();
 const xlsx = require("xlsx");
 const { isDate } = require("moment");
@@ -63,25 +63,45 @@ router.post("/data/save", async (req, res, next) => {
                 req.body.addmissionId
             );
             if (existingDocument.data !== null) {
+                //                 if (req.body.documents && req.body.documents.length > 0) {
+                //                     for (const documentData of req.body.documents) {
+                //                         const updatedDocument = {
+                //                             documentTitle: documentData.documentTitle || "",
+                //                             expiryDate: documentData.expiryDate || "",
+                //                             formDate: documentData.formDate|| "",
+                //                             documentUrl: documentData.documentUrl || "",
+                //                             groupId: req.body.groupId ,
+                //                             userId: req.body.userId
+                //                         };
+                // console.log(updatedDocument);
+                //                         const documentUpdateResponse = await documentConfigurationService.updateUser(
+                //                             req.body.groupId,
+                //                             req.body.addmissionId,
+                //                             updatedDocument
+                //                         );
+                //                         console.log(documentUpdateResponse);
+                //                     }
+                //                 }
                 if (req.body.documents && req.body.documents.length > 0) {
                     for (const documentData of req.body.documents) {
-                        const updatedDocument = {
+                        const documentId =
+                            Date.now() + Math.floor(Math.random() * 1000);
+                        const document = new DocumentConfiguration({
                             documentTitle: documentData.documentTitle || "",
                             expiryDate: documentData.expiryDate || "",
-                            formDate: documentData.formDate|| "",
+                            formDate: documentData.formDate || "",
                             documentUrl: documentData.documentUrl || "",
-                            groupId: req.body.groupId 
-                        };
-
-                        const documentUpdateResponse = await documentConfigurationService.updateUser(
-                            req.body.groupId,
-                            req.body.addmissionId,
-                            updatedDocument 
-                        );
-                        console.log(documentUpdateResponse);
+                            documntConfigurationId: documentId,
+                            groupId: req.body.groupId,
+                            userId: req.body.userId,
+                            addmissionId: req.body.addmissionId,
+                            empId: req.body.empId,
+                            roleId: req.body.roleId,
+                        });
+                        console.log(document);
+                        await document.save();
                     }
                 }
-        
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
@@ -136,24 +156,25 @@ router.post("/data/save", async (req, res, next) => {
                 const serviceResponse = await service.create(req.body);
                 if (req.body.documents && req.body.documents.length > 0) {
                     for (const documentData of req.body.documents) {
-                        const documentId = Date.now() + Math.floor(Math.random() * 1000);
+                        const documentId =
+                            Date.now() + Math.floor(Math.random() * 1000);
                         const document = new DocumentConfiguration({
                             documentTitle: documentData.documentTitle || "",
                             expiryDate: documentData.expiryDate || "",
                             formDate: documentData.formDate || "",
                             documentUrl: documentData.documentUrl || "",
-                            documentId: documentId,
+                            documntConfigurationId: documentId,
                             groupId: req.body.groupId,
-                            userId:req.body.userId,
-                            addmissionId:req.body.addmissionId,
-                            empId:req.body.empId,
-                            roleId:req.body.roleId,
-                            
+                            userId: req.body.userId,
+                            addmissionId: req.body.addmissionId,
+                            empId: req.body.empId,
+                            roleId: req.body.roleId,
                         });
+                        console.log(document);
                         await document.save();
                     }
                 }
-            
+
                 if (req.body.feesDetails) {
                     const installmentId = +Date.now();
                     req.body.installmentId = installmentId;
@@ -262,9 +283,11 @@ router.get(
                 phoneNumber: req.query.phoneNumber,
                 lastName: req.query.lastName,
                 admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
+                roleId: req.query.roleId,
                 search: req.query.search,
                 CourseName: req.query.CourseName,
-                className: req.query.className
+                className: req.query.className,
             };
 
             const serviceResponse = await service.getAllDataByGroupId(
@@ -281,21 +304,28 @@ router.get(
         }
     }
 );
-
 router.get(
-    "/all/confirmAdmission/:groupId",
+    "/all/getDonationDataByGroupId/:groupId",
+    TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
             const page = parseInt(req.query.page) || 1;
             const perPage = parseInt(req.query.limit);
             const criteria = {
+                // phoneNumber: req.query.phoneNumber,
+                academicYear: req.query.academicYear,
                 firstName: req.query.firstName,
                 phoneNumber: req.query.phoneNumber,
                 lastName: req.query.lastName,
-                className: req.query.className
+                admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
+                search: req.query.search,
+                CourseName: req.query.CourseName,
+                className: req.query.className,
             };
-            const serviceResponse = await service.getAllByGroupId(
+
+            const serviceResponse = await service.getDonationDataByGroupId(
                 groupId,
                 criteria,
                 page,
@@ -309,7 +339,30 @@ router.get(
         }
     }
 );
+router.get("/all/confirmAdmission/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const page = parseInt(req.query.page) || 1;
+        const perPage = parseInt(req.query.limit);
+        const criteria = {
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            className: req.query.className,
+        };
+        const serviceResponse = await service.getAllByGroupId(
+            groupId,
+            criteria,
+            page,
+            perPage
+        );
 
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 router.get("/all/getfeesPayment/:groupId", async (req, res) => {
     try {
@@ -332,6 +385,28 @@ router.get("/all/getfeesPayment/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.get("/getFeesStructure/:groupId", async (req, res) => {
+    try {
+        const groupId = req.params.groupId;
+        const criteria = {
+            // phoneNumber: req.query.phoneNumber,
+            firstName: req.query.firstName,
+            phoneNumber: req.query.phoneNumber,
+            lastName: req.query.lastName,
+            search: req.query.search,
+            addmissionId: req.query.addmissionId,
+            academicYear: req.query.academicYear,
+            userId: req.query.userId,
+            empId: req.query.empId,
+        };
+
+        const serviceResponse = await service.getIndividualStudentData(groupId, criteria);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 router.get(
     "/all/getAdmissionListing/groupId/:groupId/academicYear/:academicYear",
@@ -341,6 +416,24 @@ router.get(
             const academicYear = req.params.academicYear;
 
             const courseData = await service.getAdmissionListing(
+                groupId,
+                academicYear
+            );
+            res.json(courseData);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+router.get(
+    "/all/getDonationAdmissionListing/groupId/:groupId/academicYear/:academicYear",
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const academicYear = req.params.academicYear;
+
+            const courseData = await service.getAdmissionListingForDonation(
                 groupId,
                 academicYear
             );
@@ -429,27 +522,24 @@ router.get("/all/getByGroupId/searching/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, result);
 });
 
-router.put(
-    "/groupId/:groupId/userId/:userId",
-    async (req, res) => {
-        try {
-            const groupId = parseInt(req.params.groupId);
-            const userId = parseInt(req.params.userId);
-            const newData = req.body;
-            const updatedData = await service.updateByUserId(
-                groupId,
-                userId,
-                newData
-            );
-            if (!updatedData) {
-                res.status(404).json({ error: " not found to update" });
-            } else {
-                res.status(201).json(updatedData);
-            }
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ error: "Internal Server Error" });
+router.put("/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const userId = parseInt(req.params.userId);
+        const newData = req.body;
+        const updatedData = await service.updateByUserId(
+            groupId,
+            userId,
+            newData
+        );
+        if (!updatedData) {
+            res.status(404).json({ error: " not found to update" });
+        } else {
+            res.status(201).json(updatedData);
         }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
     }
-);
+});
 module.exports = router;
