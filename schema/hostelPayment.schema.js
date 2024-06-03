@@ -35,7 +35,10 @@ const hostelPaymnetSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        
+        hostelInstallmentId:{
+            type: Number,
+            required: true,
+        },
         userId: {
             type: Number,
             required: false,

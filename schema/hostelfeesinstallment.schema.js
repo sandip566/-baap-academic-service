@@ -17,7 +17,11 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
         hostelAdmissionId:{
             type: Number,
             required: false,
-        }
+        },
+        status: {
+            type: String,
+            default: "pending",
+        },
     },
     {strict:false, timestamps: true }
 );

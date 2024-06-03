@@ -22,7 +22,15 @@ router.delete("/:id", async (req, res) => {
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
+router.get("/getByInstallmentStatus/hostelInstallmentId/:hostelInstallmentId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByInstallmentStatus(
+        req.params.hostelInstallmentId
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
 

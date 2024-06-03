@@ -16,6 +16,7 @@ class hostelPaymentService extends BaseService {
         if (criteria.hostelPaymentId)
             query.hostelPaymentId = criteria.hostelPaymentId;
         if (criteria.studentId) query.studentId = criteria.studentId;
+        if (criteria.hostelInstallmentId) query.hostelInstallmentId = criteria.hostelInstallmentId;
         if (criteria.memberId) query.memberId = criteria.memberId;
         if (criteria.hostelId) query.hostelId = criteria.hostelId;
         return this.preparePaginationAndReturnData(query, criteria);

@@ -615,6 +615,7 @@ router.get("/getAllupdateHostelPayment/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         hostelPaymentId: req.query.hostelPaymentId,
+        hostelInstallmentId:req.query.hostelInstallmentId,
         studentId: req.query.studentId,
         mmemberId: req.query.memberId,
         hostelId: req.query.hostelId,
