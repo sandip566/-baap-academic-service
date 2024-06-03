@@ -19,11 +19,11 @@ const GatepassSchema = new mongoose.Schema(
             required: false
         },
         dateLeaving: {
-            type: Date,
+            type: String,
             required: false
         },
         returnDate: {
-            type: Date,
+            type: String,
             required: false
         },
         reason: {
@@ -32,7 +32,18 @@ const GatepassSchema = new mongoose.Schema(
         },
         status: {
             type: String,
-            required: false
+            required: false,
+            default: "Active"
+        },
+        approvedByManager: {
+            type: String,
+            required: false,
+            default: "pending"
+        },
+        approvedByParent: {
+            type: String,
+            required: false,
+            default: "pending"
         }
     },
     { strict: false, timestamps: true }
