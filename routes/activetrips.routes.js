@@ -113,5 +113,40 @@ router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
     }
 });
 
+router.get("/groupId/:groupId/tripId/:tripId", async (req, res) => {
+    try {
+        const { groupId, tripId } = req.params;
+        const { lat, long } = req.query
+        const trip = await service.getActiveTrip(groupId, tripId, lat, long)
+        res.json(trip)
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
+router.get("/groupId/:groupId", async (req, res) => {
+    try {
+        const { groupId } = req.params;
+        const { status } = req.query
+        const trip = await service.getActiveTripByStatus(groupId, status)
+        res.json(trip)
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
+
+router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
+    try {
+        const { groupId, tripId } = req.params
+        const travellerId = req.query.travellerId
+
+        const updateTraveller = await service.updateActiveTrip(groupId, tripId, travellerId)
+        res.json(updateTraveller)
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
 
 module.exports = router;
