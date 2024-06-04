@@ -67,6 +67,7 @@ class feesPaymentService extends BaseService {
                         className: { $first: "$className" },
                         courseName: { $first: "$courseName" },
                         updatedAt: { $first: "$updatedAt" },
+                        feesPaymentId: { $first: "$feesPaymentId" },
                     },
                 },
                 {
@@ -78,6 +79,7 @@ class feesPaymentService extends BaseService {
                     $project: {
                         admissionId: "$_id",
                         totalPaidAmount: 1,
+                        feesPaymentId:1,
                         lastRemainingAmount: 1,
                         className: 1,
                         courseName: 1,
@@ -85,7 +87,7 @@ class feesPaymentService extends BaseService {
                 },
             ]);
             aggregationResult.sort((a, b) => b.updatedAt - a.updatedAt);
-            console.log(aggregationResult);
+            console.log("aggregationResult", aggregationResult);
             const combinedDataArray = [];
 
             for (const result of aggregationResult) {
@@ -113,6 +115,7 @@ class feesPaymentService extends BaseService {
                         paidAmount: totalPaidAmount,
                         className: result?.className,
                         courseName: result?.courseName,
+                        feesPaymentId:result?.feesPaymentId,
                         remainingAmount: lastRemainingAmount,
                         admissionId: admissionId,
                         addmissionId: admissionDetails,
