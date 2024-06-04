@@ -26,7 +26,7 @@ class GatepassService extends BaseService {
                 ];
             }
         }
-        if (criteria.status) query.status = new RegExp(criteria.status, "i");
+        if (criteria.status) query.status = criteria.status;
         if (criteria.reason) query.reason = new RegExp(criteria.reason, "i");
         if (criteria.userId) query.userId = criteria.userId;
         if (criteria.gatepassId) query.gatepassId = criteria.gatepassId;
