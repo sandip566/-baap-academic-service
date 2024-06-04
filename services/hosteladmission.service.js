@@ -94,7 +94,7 @@ class HostelAdmissionService extends BaseService {
                 { $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true } },
                 {
                     $lookup: {
-                        from: "feestemplates", // The name of the fees template collection
+                        from: "feestemplates",
                         localField: "feesDetails.feesTemplateId",
                         foreignField: "feesTemplateId",
                         as: "feesTemplateDetails",
@@ -127,6 +127,34 @@ class HostelAdmissionService extends BaseService {
                         },
                     },
                 },
+                { $unwind: { path: "$hostelDetails", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "hostelpremises",
+                        localField: "hostelDetails.hostelId", 
+                        foreignField: "hostelId",
+                        as: "hostelDetails.hostelId", 
+                    },
+                },
+                { $unwind: { path: "$hostelDetails.hostelId", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "roooms",
+                        localField: "hostelDetails.roomId", 
+                        foreignField: "roomId",
+                        as: "hostelDetails.roomId", 
+                    },
+                },
+                { $unwind: { path: "$hostelDetails.roomId", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "beds",
+                        localField: "hostelDetails.bedId", 
+                        foreignField: "bedId",
+                        as: "hostelDetails.bedId", 
+                    },
+                },
+                { $unwind: { path: "$hostelDetails.bedId", preserveNullAndEmptyArrays: true } },
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
                 { $skip: skip },
                 { $limit: perPage },
