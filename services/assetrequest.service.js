@@ -170,5 +170,37 @@ class AssetRequestService extends BaseService {
             });
         });
     }
+
+
+    async bulkUploadAssetRequest(data) {
+        try {
+            const { name, userName, groupId, describe,
+            quantity,priority,location,available,
+            userId,managerId,type,status
+             } = data;
+
+            console.log("Query", {
+                groupId: groupId,
+                name: name,
+                userName:userName,
+                describe:describe,
+                quantity:quantity,
+                priority:priority,
+                location:location,
+                available:available,
+                userId:userId,
+                managerId:managerId,
+                type:type,
+                status:status
+
+            });
+            const document = new AssetRequestModel(data);
+            const assetRequest = await document.save();
+            return assetRequest;
+        } catch (error) {
+            console.error("Error uploading to MongoDB:", error.message);
+            throw error;
+        }
+    } 
 }
 module.exports = new AssetRequestService(AssetRequestModel, "assetrequest");

@@ -6,6 +6,10 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const assetModel=require("../schema/asset.schema");
 const AssetRequestModel = require("../schema/assetrequest.schema");
+
+const multer = require("multer");
+const upload = multer();
+const xlsx = require("xlsx");
 router.post(
     "/",
     checkSchema(require("../dto/assetrequest.dto")),
@@ -180,4 +184,66 @@ router.get("/getClearanceData/groupId/:groupId/userId/:userId", async (req, res)
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+router.post(
+    "/bulkUploadAssetRequest",
+    upload.single("excelFile"),
+    async (req, res) => {
+        if (!req.file) {
+            return res.status(400).send("No file uploaded.");
+        }
+
+        const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+        const headers = jsonData[0];
+
+        const uploadedData = [];
+
+        for (let i = 1; i < jsonData.length; i++) {
+            const requestId = +Date.now();
+            const row = jsonData[i];
+            const data = createAssetRequestDataObject(headers, row);
+
+            if (row.every((value) => value === null || value === "")) {
+                continue;
+            }
+
+            data.requestId = requestId;
+
+            if (data && Object.keys(data).length > 0) {
+                const result = await service.bulkUploadAssetRequest(data);
+                uploadedData.push(result);
+            }
+        }
+        console.log(uploadedData);
+
+        res.status(200).json({
+            message: "File uploaded and processed successfully.",
+            uploadedData: uploadedData,
+        });
+    }
+);
+
+
+function createAssetRequestDataObject(headers, row) {
+    const data = {};
+    for (let i = 0; i < headers.length; i++) {
+        const header = headers[i];
+        const value = row[i];
+
+        if (header === "groupId" && !isNaN(value) && value !== undefined) {
+            data[header] = Number(value);
+        } else if (header === "name" && value !== undefined) {
+            data[header] = value;
+        } else if (value !== undefined) {
+            data[header] = value;
+        }
+    }
+    return data;
+}
+
 module.exports = router;
