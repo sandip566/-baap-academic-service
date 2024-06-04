@@ -314,10 +314,11 @@ router.put(
 
 router.get("/book-issues/overdue/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const addmissionId = req.query.addmissionId;
+    const { addmissionId, bookIssueLogId } = req.query;
     const bookIssues = await service.fetchBookIssuesWithOverdue(
         groupId,
-        addmissionId
+        addmissionId,
+        bookIssueLogId
     );
     requestResponsehelper.sendResponse(res, bookIssues);
 });
