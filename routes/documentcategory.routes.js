@@ -47,7 +47,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         roleId: req.query.roleId,
-        documenCategoryId:req.query.documenCategoryId,
+        documenCategoryId: req.query.documenCategoryId,
         userId: req.query.userId,
     };
     const serviceResponse = await service.getAllDataByGroupId(
@@ -57,16 +57,16 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/documenCategoryId/:documenCategoryId", async (req, res) => {
+router.delete("/groupId/:groupId/documentCategoryId/:documentCategoryId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const documenCategoryId = req.params.documenCategoryId;
-      
-        const Data = await service.deleteByDataId( groupId,documenCategoryId);
-        if (!Data) {
-            res.status(404).json({ error: "Data not found to delete" });
+        const documentCategoryId = req.params.documentCategoryId;
+
+        const data = await service.deleteByDataId(groupId, documentCategoryId);
+        if (data) {
+            res.status(200).json(data);
         } else {
-            res.status(201).json(Data);
+            res.status(404).json({ message: "Document category not found" });
         }
     } catch (error) {
         console.error(error);
@@ -74,12 +74,12 @@ router.delete("/groupId/:groupId/documenCategoryId/:documenCategoryId", async (r
     }
 });
 
-router.put("/groupId/:groupId/documenCategoryId/:documenCategoryId", async (req, res) => {
+router.put("/groupId/:groupId/documentCategoryId/:documentCategoryId", async (req, res) => {
     try {
-        const documenCategoryId = req.params.documenCategoryId;
+        const documentCategoryId = req.params.documentCategoryId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const Data = await service.updateDataById(documenCategoryId, groupId, newData);
+        const Data = await service.updateDataById(groupId, documentCategoryId, newData);
         if (!Data) {
             res.status(404).json({ error: "Data not found to update" });
         } else {

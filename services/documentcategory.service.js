@@ -16,13 +16,13 @@ class DocumentCategoryService extends BaseService {
         if (criteria.description)
             query.description = new RegExp(criteria.description, "i");
         return this.preparePaginationAndReturnData(query, criteria);
-        
+
     }
 
-    async updateDataById(documenCategoryId, groupId, newData) {
+    async updateDataById(groupId, documentCategoryId, newData) {
         try {
             const updatedData = await DocumentCategoryModel.findOneAndUpdate(
-                { documenCategoryId:documenCategoryId, groupId: groupId },
+                { groupId: Number(groupId), documentCategoryId: Number(documentCategoryId) },
                 newData,
                 { new: true }
             );
@@ -32,13 +32,12 @@ class DocumentCategoryService extends BaseService {
         }
     }
 
-    async deleteByDataId(groupId, documenCategoryId) {
+    async deleteByDataId(groupId, documentCategoryId) {
         try {
-            const deleteData = await DocumentCategoryModel.deleteOne({
-                groupId: groupId,
-                documenCategoryId: documenCategoryId,
+            const deleteData = await DocumentCategoryModel.findOneAndDelete({
+                groupId: Number(groupId),
+                documentCategoryId: Number(documentCategoryId),
             });
-            console.log(deleteData);
             return deleteData;
         } catch (error) {
             throw error;

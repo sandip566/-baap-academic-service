@@ -109,10 +109,10 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-    async getBybookIssueLogId(groupId,bookIssueLogId) {
+    async getBybookIssueLogId(groupId, bookIssueLogId) {
         return this.execute(() => {
             return bookIssueLogModel.findOne({
-                groupId:groupId,
+                groupId: groupId,
                 bookIssueLogId: bookIssueLogId,
             });
         });
@@ -132,9 +132,10 @@ class BookIssueLogService extends BaseService {
     }
 
 
-    async checkOverdueStatus(addmissionId) {
+    async checkOverdueStatus(groupId, addmissionId) {
         try {
             const existingReservation = await bookIssueLogModel.findOne({
+                groupId: groupId,
                 addmissionId: addmissionId,
                 isOverdue: true,
             });
@@ -245,6 +246,7 @@ class BookIssueLogService extends BaseService {
                             updatedAt: book.updatedAt,
                             __v: book.__v,
                         },
+                        bookIssueLogId: bookIssueLogId,
                         bookIssueDate,
                         addmissionId: student.addmissionId,
                         studentName: student ? student.name : "Unknown Student",
@@ -396,9 +398,9 @@ class BookIssueLogService extends BaseService {
 
     async checkBookAvailability(groupId, bookId) {
         try {
-            const book = await Book.find({ groupId: groupId, bookId: bookId });
-            console.log(book);
-            return book;
+            const book = await Book.findOne({ groupId: Number(groupId), bookId: Number(bookId) });
+            const availableCount = book.availableCount
+            return availableCount;
         } catch (error) {
             throw error;
         }

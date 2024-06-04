@@ -32,21 +32,8 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
-            req.body;
+        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } = req.body;
 
-        // Validate that bookId is a number
-        if (isNaN(bookId)) {
-            return res.status(400).json({
-                success: false,
-                error: "Invalid bookId. It should be a number.",
-            });
-        }
-
-        // Convert bookId to a number
-        const bookIdNumber = Number(bookId);
-
-        // Check if the admission status is "Confirm"
         const studentAdmission = await StudentsAdmissionModel.findOne({
             groupId: groupId,
             addmissionId: addmissionId,
@@ -80,10 +67,19 @@ router.post("/issue-book", async (req, res) => {
             });
         }
 
+        const isOverdue = await service.checkOverdueStatus(groupId, addmissionId)
+
+        if (isOverdue) {
+            return res.status(400).json({
+                success: false,
+                error: "Alredy this book is not return",
+            });
+        }
+
         const existingReservation = await bookIssueLogModel.findOne({
             groupId: groupId,
             addmissionId: addmissionId,
-            bookId: bookIdNumber,
+            bookId: bookId,
             isReturn: false,
         });
 
@@ -94,30 +90,8 @@ router.post("/issue-book", async (req, res) => {
             });
         }
 
-        const checkIssuedCount = await service.checkIssuedCount(
-            groupId,
-            addmissionId
-        );
-        if (!checkIssuedCount) {
-            return res.status(400).json({
-                success: false,
-                error: "You have exceeded your book issuing limit.",
-            });
-        }
-
-        const isOverdue = await service.checkOverdueStatus(addmissionId);
-        if (isOverdue) {
-            return res.status(400).json({
-                success: false,
-                error: "Overdue book return needed.",
-            });
-        }
-
-        const isAvailable = await service.checkBookAvailability(
-            groupId,
-            bookIdNumber
-        );
-        if (!isAvailable || isAvailable.availableCount <= 0) {
+        const isAvailable = await service.checkBookAvailability(groupId, bookId);
+        if (isAvailable <= 0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for issuing. Available count is zero.",
@@ -127,11 +101,11 @@ router.post("/issue-book", async (req, res) => {
         const bookIssueLogId = Date.now();
         const newReservation = {
             groupId: groupId,
-            bookId: bookIdNumber,
+            bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
             dueDate: dueDate,
-            issuedDate: new Date(),
+            issuedDate: issuedDate,
             userId: userId,
             isReturn: false,
         };
@@ -139,7 +113,7 @@ router.post("/issue-book", async (req, res) => {
         const createdReservation = await service.create(newReservation);
 
         await Book.findOneAndUpdate(
-            { bookId: bookIdNumber, availableCount: { $gt: 0 } },
+            { bookId: bookId, availableCount: { $gt: 0 } },
             { $inc: { availableCount: -1 } },
             { new: true }
         );
@@ -156,10 +130,11 @@ router.post("/issue-book", async (req, res) => {
         });
     }
 });
+
 router.get(
     "/groupId/:groupId/bookIssueLogId/:bookIssueLogId",
     async (req, res) => {
-        const serviceResponse = await service.getBybookIssueLogId(req.params.groupId,req.params.bookIssueLogId);
+        const serviceResponse = await service.getBybookIssueLogId(req.params.groupId, req.params.bookIssueLogId);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
@@ -292,7 +267,7 @@ router.put(
             const updatebookIssueLog = await service.updateBookIssueLogById(
                 groupId,
                 bookIssueLogId,
-                
+
                 newData
             );
             if (!updatebookIssueLog) {
