@@ -10,7 +10,7 @@ const DocumentCategorySchema = new mongoose.Schema(
         }
 
     },
-    { timestamps: true }
+    {strict:false, timestamps: true }
 );
 
 const DocumentCategoryModel = mongoose.model("documentcategory", DocumentCategorySchema);
