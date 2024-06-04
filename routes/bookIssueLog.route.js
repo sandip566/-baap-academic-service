@@ -156,7 +156,13 @@ router.post("/issue-book", async (req, res) => {
         });
     }
 });
-
+router.get(
+    "/groupId/:groupId/bookIssueLogId/:bookIssueLogId",
+    async (req, res) => {
+        const serviceResponse = await service.getBybookIssueLogId(req.params.groupId,req.params.bookIssueLogId);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.post("/return-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, returnDate } = req.body;
@@ -284,8 +290,9 @@ router.put(
             const groupId = req.params.groupId;
             const newData = req.body;
             const updatebookIssueLog = await service.updateBookIssueLogById(
-                bookIssueLogId,
                 groupId,
+                bookIssueLogId,
+                
                 newData
             );
             if (!updatebookIssueLog) {

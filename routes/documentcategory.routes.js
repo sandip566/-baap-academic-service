@@ -59,9 +59,10 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 
 router.delete("/groupId/:groupId/documenCategoryId/:documenCategoryId", async (req, res) => {
     try {
-        const documenCategoryId = req.params.documenCategoryId;
         const groupId = req.params.groupId;
-        const Data = await service.deleteByDataId(documenCategoryId, groupId);
+        const documenCategoryId = req.params.documenCategoryId;
+      
+        const Data = await service.deleteByDataId( groupId,documenCategoryId);
         if (!Data) {
             res.status(404).json({ error: "Data not found to delete" });
         } else {

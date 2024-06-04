@@ -109,7 +109,14 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-
+    async getBybookIssueLogId(groupId,bookIssueLogId) {
+        return this.execute(() => {
+            return bookIssueLogModel.findOne({
+                groupId:groupId,
+                bookIssueLogId: bookIssueLogId,
+            });
+        });
+    }
     async updateBookIssueLogById(groupId, bookIssueLogId, newData) {
         try {
             console.log("query2", { groupId: groupId, bookIssueLogId: bookIssueLogId });

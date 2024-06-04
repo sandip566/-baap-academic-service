@@ -32,16 +32,14 @@ class DocumentCategoryService extends BaseService {
         }
     }
 
-    async deleteByDataId(documenCategoryId, groupId) {
+    async deleteByDataId(groupId, documenCategoryId) {
         try {
-            const deleteData = await DocumentCategoryModel.findOneAndDelete({
-                documenCategoryId: documenCategoryId,
+            const deleteData = await DocumentCategoryModel.deleteOne({
                 groupId: groupId,
+                documenCategoryId: documenCategoryId,
             });
-            return {
-                data: deleteData,
-                message: "Data deleted successfully",
-            };
+            console.log(deleteData);
+            return deleteData;
         } catch (error) {
             throw error;
         }

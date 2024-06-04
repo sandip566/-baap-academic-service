@@ -3,10 +3,12 @@ const mongoose = require("mongoose");
 const DocumentCategorySchema = new mongoose.Schema(
     {
         documenCategoryId:{
-            type:Number
+            type:Number,
+            required:true,
         },
         groupId:{
-            type:Number
+            type:Number,
+            required:true,
         }
 
     },
