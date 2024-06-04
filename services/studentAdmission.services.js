@@ -470,7 +470,8 @@ class StudentsAdmmisionService extends BaseService {
             const services = await studentAdmissionModel
                 .find(searchFilter)
                 .skip(skip)
-                .limit(limit);
+                .limit(limit)
+                .sort({ createdAt: reverseOrder ? -1 : 1 });
 
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
@@ -558,11 +559,11 @@ class StudentsAdmmisionService extends BaseService {
                 })
             );
 
-            servicesWithData.sort((a, b) => {
-                const dateA = new Date(a.createdAt);
-                const dateB = new Date(b.createdAt);
-                return reverseOrder ? dateB - dateA : dateA - dateB;
-            });
+            // servicesWithData.sort((a, b) => {
+            //     const dateA = new Date(a.createdAt);
+            //     const dateB = new Date(b.createdAt);
+            //     return reverseOrder ? dateB - dateA : dateA - dateB;
+            // });
 
             const totalItemsCount = await studentAdmissionModel.countDocuments(
                 searchFilter
@@ -607,7 +608,7 @@ class StudentsAdmmisionService extends BaseService {
                         { firstName: { $regex: query.search, $options: "i" } },
                         { lastName: { $regex: query.search, $options: "i" } },
                         { name: { $regex: query.search, $options: "i" } },
-                        { phoneNumber: query.search }
+                        { phoneNumber: query.search },
                     ];
                 }
             }
@@ -1073,9 +1074,9 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                    data.empId === query.empId &&
-                    data.academicYear == query.academicYear &&
-                    data.addmissionId == query.addmissionId,
+                        data.empId === query.empId &&
+                        data.academicYear == query.academicYear &&
+                        data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -1104,22 +1105,22 @@ class StudentsAdmmisionService extends BaseService {
                 {
                     $match: {
                         groupId: Number(groupId),
-                        userId: Number(userId)
-                    }
+                        userId: Number(userId),
+                    },
                 },
                 {
-                    $unwind: "$feesDetails"
+                    $unwind: "$feesDetails",
                 },
                 {
                     $lookup: {
                         from: "feestemplates",
                         localField: "feesDetails.feesTemplateId",
                         foreignField: "feesTemplateId",
-                        as: "feesDetails.feesTemplateId"
-                    }
+                        as: "feesDetails.feesTemplateId",
+                    },
                 },
                 {
-                    $unwind: "$feesDetails.feesTemplateId"
+                    $unwind: "$feesDetails.feesTemplateId",
                 },
                 {
                     $group: {
@@ -1151,31 +1152,45 @@ class StudentsAdmmisionService extends BaseService {
                         courseDetails: { $first: "$courseDetails" },
                         feesDetails: { $push: "$feesDetails" },
                         installmentId: { $first: "$installmentId" },
-                        status: { $first: "$status" }
-                    }
+                        status: { $first: "$status" },
+                    },
                 },
                 {
                     $lookup: {
                         from: "feespayments",
-                        let: { admissionId: "$addmissionId", userId: "$userId", academicYear: academicYear },
+                        let: {
+                            admissionId: "$addmissionId",
+                            userId: "$userId",
+                            academicYear: academicYear,
+                        },
                         pipeline: [
                             {
                                 $match: {
                                     $expr: {
                                         $and: [
-                                            { $eq: ["$addmissionId", "$$admissionId"] },
+                                            {
+                                                $eq: [
+                                                    "$addmissionId",
+                                                    "$$admissionId",
+                                                ],
+                                            },
                                             { $eq: ["$userId", "$$userId"] },
-                                            { $eq: ["$academicYear", "$$academicYear"] } 
-                                        ]
-                                    }
-                                }
+                                            {
+                                                $eq: [
+                                                    "$academicYear",
+                                                    "$$academicYear",
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                },
                             },
                             {
-                                $sort: { "createdAt": -1 } 
-                            }
+                                $sort: { createdAt: -1 },
+                            },
                         ],
-                        as: "feespayments"
-                    }
+                        as: "feespayments",
+                    },
                 },
                 {
                     $addFields: {
@@ -1184,18 +1199,23 @@ class StudentsAdmmisionService extends BaseService {
                                 $map: {
                                     input: "$feespayments",
                                     as: "payment",
-                                    in: { $toDouble: "$$payment.paidAmount" } 
-                                }
-                            }
+                                    in: { $toDouble: "$$payment.paidAmount" },
+                                },
+                            },
                         },
                         lastRemainingAmount: {
                             $ifNull: [
-                                { $arrayElemAt: ["$feespayments.remainingAmount", 0] },
-                                0
-                            ]
-                        }
-                    }
-                }
+                                {
+                                    $arrayElemAt: [
+                                        "$feespayments.remainingAmount",
+                                        0,
+                                    ],
+                                },
+                                0,
+                            ],
+                        },
+                    },
+                },
             ]);
 
             const response = {
@@ -1212,8 +1232,6 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-
-
 
     async findLatestAdmission() {
         try {

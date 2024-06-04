@@ -182,7 +182,7 @@ router.delete(
 
             if (findId) {
                 console.log("Fees Template is assigned to Fees Details");
-                res.status(409).send({ error: "Fees Template is assigned" });
+                res.status(409).send({ error: "Fees Template is Assigned To Someone" });
             } else {
                 const data = await service.deletefeesTemplateById(
                     groupId,

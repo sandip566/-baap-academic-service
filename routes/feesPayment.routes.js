@@ -449,7 +449,7 @@ router.post(
 
 router.get(
     "/getRecoveryData/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
