@@ -4,7 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/hostelPremises.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-
+const hostelData = require("../schema/hostelPremises.schema");
 router.post(
     "/",
     checkSchema(require("../dto/hostelPremises.dto")),
@@ -22,7 +22,6 @@ router.post(
 router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
-
 });
 
 router.delete("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
@@ -41,7 +40,6 @@ router.delete("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
     }
 });
 
-
 router.put("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
     try {
         const hostelId = req.params.hostelId;
@@ -58,21 +56,16 @@ router.put("/groupId/:groupId/hostelId/:hostelId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-router.get(
-    "/getHostelId/:hostelId",
-    async (req, res) => {
-        const serviceResponse = await service.getByHostelId(req.params.hostelId);
-        requestResponsehelper.sendResponse(res, serviceResponse);
-    }
-);
+router.get("/getHostelId/:hostelId", async (req, res) => {
+    const serviceResponse = await service.getByHostelId(req.params.hostelId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-      
         hostelId: req.query.hostelId,
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
-
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -85,7 +78,6 @@ router.get("/hostelId/:id", async (req, res) => {
     const serviceResponse = await service.getDataById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
@@ -100,5 +92,23 @@ router.delete("/:id", async (req, res) => {
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
     requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.get("/get-hostel-floors/:hostelId", async (req, res) => {
+    const hostelId = parseInt(req.params.hostelId);
+    if (!hostelId) {
+        return res.status(400).json({ error: "Hostel ID is required" });
+    }
+    const hostel = await hostelData.aggregate([
+        { $match: { hostelId: parseInt(hostelId) } },
+    ]);
+    if (!hostel) {
+        return res.status(404).json({ error: "Hostel not found" });
+    }
+    const floors = [];
+    for (let i = 1; i <= hostel[0].numberOfFloors; i++) {
+        floors.push({ label: `Floor ${i}`, value: i, hostelId: hostelId });
+    }
+    res.json({ floors });
 });
 module.exports = router;

@@ -19,10 +19,10 @@ class TravellerService extends BaseService {
         let responseData = {
             status: "Success",
             data: {
-                traveller: {
+               
                     ...traveller.toObject(),
                     routeId: route.toObject()
-                }
+                
             }
         };
 
