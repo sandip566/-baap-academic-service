@@ -156,18 +156,23 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async fetchBookIssuesWithOverdue(groupId, addmissionId) {
+    async fetchBookIssuesWithOverdue(groupId, addmissionId, bookIssueLogId) {
         try {
             const currDate = new Date();
             const finePerDay = 5;
             let query = {
-                groupId: groupId,
+                groupId: Number(groupId),
                 isReturn: false,
             };
 
             if (addmissionId) {
-                query.addmissionId = addmissionId;
+                query.addmissionId = Number(addmissionId);
             }
+
+            if (bookIssueLogId) {
+                query.bookIssueLogId = Number(bookIssueLogId);
+            }
+
             const bookIssues = await bookIssueLogModel.find(query);
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
@@ -176,18 +181,18 @@ class BookIssueLogService extends BaseService {
                 addmissionId: { $in: studentIds },
             });
             const books = await Book.find({ bookId: { $in: bookIds } });
+
             await Promise.all(
                 bookIssues.map(async (bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
                     if (diffDays >= 0) {
+                        const totalFine = diffDays * finePerDay;
                         await bookIssueLogModel.updateOne(
                             { _id: bookIssue._id },
-                            { $set: { isOverdue: true } }
+                            { $set: { isOverdue: true, totalFine: totalFine } }
                         );
                     }
                 })
@@ -197,33 +202,46 @@ class BookIssueLogService extends BaseService {
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     return diffDays >= 0;
                 })
                 .map((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     const student = students.find(
-                        (student) =>
-                            student.addmissionId === bookIssue.addmissionId
+                        (student) => student.addmissionId === bookIssue.addmissionId
                     );
-                    const book = books.find(
-                        (book) => book.bookId === bookIssue.bookId
-                    );
+                    const book = books.find((book) => book.bookId === bookIssue.bookId);
                     let bookIssueDate = bookIssue.issueDate;
                     const totalFine = diffDays * finePerDay;
-                    var response = {
+                    let response = {
+                        _id: bookIssue._id,
+                        bookId: bookIssue.bookId,
+                        book: {
+                            _id: book._id,
+                            bookId: book.bookId,
+                            name: book.name,
+                            purchaseId: book.purchaseId,
+                            groupId: book.groupId,
+                            author: book.author,
+                            ISBN: book.ISBN,
+                            totalCopies: book.totalCopies,
+                            availableCount: book.availableCount,
+                            shelfId: book.shelfId,
+                            status: book.status,
+                            vendorId: book.vendorId,
+                            rackName: book.rackName,
+                            rackNumber: book.rackNumber,
+                            book_img: book.book_img,
+                            createdAt: book.createdAt,
+                            updatedAt: book.updatedAt,
+                            __v: book.__v,
+                        },
                         bookIssueDate,
                         addmissionId: student.addmissionId,
                         studentName: student ? student.name : "Unknown Student",
-                        image: student
-                            ? student.profile_img
-                            : "image is not provided",
+                        image: student ? student.profile_img : "image is not provided",
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
