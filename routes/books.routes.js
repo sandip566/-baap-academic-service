@@ -133,19 +133,20 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
 
         const populatedBooks = await Promise.all(
             books.map(async (book) => {
-                const shelf = await shelfModel.findOne({
-                    shelfId: book.shelfId,
-                });
-                const department = await deparmentModel.findOne({
-                    departmentId: book.departmentId,
-                });
-                const publisher = await publisherModel.findOne({
-                    publisherId: book.publisherId,
-                });
-                const bookId = await booksModel.findOne({
+                const shelf = await shelfModel.findOne({ shelfId: book.shelfId });
+                const department = await deparmentModel.findOne({ departmentId: book.departmentId });
+                const publisher = await publisherModel.findOne({ publisherId: book.publisherId });
+
+                return {
+                    _id: book._id,
                     bookId: book.bookId,
-                });
-                return { ...book._doc, shelf, department, publisher, bookId };
+                    book: {
+                        ...book._doc,
+                    },
+                    shelf,
+                    department,
+                    publisher
+                };
             })
         );
         const count = await service.getBooksCount(groupId);
@@ -162,6 +163,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         res.status(500).send("Server Error");
     }
 });
+
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
     try {
