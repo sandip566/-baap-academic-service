@@ -166,8 +166,8 @@ class ActiveTripsService extends BaseService {
 
         route.stopDetails.forEach(stop => {
             const stopLocation = {
-                latitude: stop.stopDetails.location.lattitude,
-                longitude: stop.stopDetails.location.longitude
+                latitude: stop.location.lattitude,
+                longitude: stop.location.longitude
             };
 
             const distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, stopLocation.latitude, stopLocation.longitude);
@@ -180,8 +180,8 @@ class ActiveTripsService extends BaseService {
         const distanceToNearestStop = calculateDistance(
             currentLocation.latitude,
             currentLocation.longitude,
-            nearestStop.stopDetails.location.lattitude,
-            nearestStop.stopDetails.location.longitude,
+            nearestStop.location.lattitude,
+            nearestStop.location.longitude,
             'm'
         );
 
@@ -191,8 +191,8 @@ class ActiveTripsService extends BaseService {
 
             route.stopDetails.forEach(stop => {
                 const stopLocation = {
-                    latitude: stop.stopDetails.location.lattitude,
-                    longitude: stop.stopDetails.location.longitude
+                    latitude: stop.location.lattitude,
+                    longitude: stop.location.longitude
                 };
 
                 const distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, stopLocation.latitude, stopLocation.longitude);
