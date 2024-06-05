@@ -195,101 +195,126 @@ class StudentsAdmmisionService extends BaseService {
         //     throw error;
         // }
         try {
-          
-    
-            let data = await studentAdmissionModel.aggregate([
-                {
-                    $match: {
-                        addmissionId: Number(addmissionId)
-                    }
-                },
-                {
-                    $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $lookup: {
-                        from: "feestemplates",
-                        localField: "feesDetails.feesTemplateId",
-                        foreignField: "feesTemplateId",
-                        as: "feesDetails.feesTemplate"
-                    }
-                },
-                {
-                    $unwind: { path: "$feesDetails.feesTemplate", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $unwind: { path: "$courseDetails", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $lookup: {
-                        from: "courses",
-                        localField: "courseDetails.course_id",
-                        foreignField: "courseId",
-                        as: "courseDetails.course_id"
-                    }
-                },
-                {
-                    $unwind: { path: "$courseDetails.course_id", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $lookup: {
-                        from: "classes",
-                        localField: "courseDetails.class_id",
-                        foreignField: "classId",
-                        as: "courseDetails.class_id"
-                    }
-                },
-                {
-                    $unwind: { path: "$courseDetails.class_id", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $lookup: {
-                        from: "divisions",
-                        localField: "courseDetails.division_id",
-                        foreignField: "divisionId",
-                        as: "courseDetails.division_id"
-                    }
-                },
-                {
-                    $unwind: { path: "$courseDetails.division_id", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $lookup: {
-                        from: "departments",
-                        localField: "courseDetails.department_id",
-                        foreignField: "departmentId",
-                        as: "courseDetails.department_id"
-                    }
-                },
-                {
-                    $unwind: { path: "$courseDetails.department_id", preserveNullAndEmptyArrays: true }
-                },
-                {
-                    $group: {
-                        _id: "$_id",
-                        feesDetails: { $push: "$feesDetails" },
-                        courseDetails: { $push: "$courseDetails" },
-                        otherFields: { $first: "$$ROOT" }
-                    }
-                },
-                {
-                    $replaceRoot: {
-                        newRoot: {
-                            $mergeObjects: ["$otherFields", { feesDetails: "$feesDetails", courseDetails: "$courseDetails" }]
-                        }
-                    }
-                }
-            ]).exec()
-            
-    
+            let data = await studentAdmissionModel
+                .aggregate([
+                    {
+                        $match: {
+                            addmissionId: Number(addmissionId),
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$feesDetails",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "feestemplates",
+                            localField: "feesDetails.feesTemplateId",
+                            foreignField: "feesTemplateId",
+                            as: "feesDetails.feesTemplate",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$feesDetails.feesTemplate",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "courses",
+                            localField: "courseDetails.course_id",
+                            foreignField: "courseId",
+                            as: "courseDetails.course_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.course_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "classes",
+                            localField: "courseDetails.class_id",
+                            foreignField: "classId",
+                            as: "courseDetails.class_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.class_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "divisions",
+                            localField: "courseDetails.division_id",
+                            foreignField: "divisionId",
+                            as: "courseDetails.division_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.division_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "departments",
+                            localField: "courseDetails.department_id",
+                            foreignField: "departmentId",
+                            as: "courseDetails.department_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.department_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$_id",
+                            feesDetails: { $push: "$feesDetails" },
+                            courseDetails: { $push: "$courseDetails" },
+                            otherFields: { $first: "$$ROOT" },
+                        },
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: {
+                                $mergeObjects: [
+                                    "$otherFields",
+                                    {
+                                        feesDetails: "$feesDetails",
+                                        courseDetails: "$courseDetails",
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ])
+                .exec();
+
             const response = {
                 status: "Success",
-                data: {
-                    items: data,
-                    totalItemsCount: data.length,
-                },
+                data: data[0],
+
+                totalItemsCount: data.length,
             };
-    
+
             return response;
         } catch (error) {
             console.error("Error:", error);
