@@ -26,7 +26,7 @@ class PurchaseService extends BaseService {
             throw error;
         }
     }
-    async getAllDataByGroupId(groupId, criteria, skip, limit) {
+    async getAllDataByGroupId(groupId, criteria, skip, limit,) {
         try {
             const searchFilter = {
                 groupId: groupId,

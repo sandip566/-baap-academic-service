@@ -218,8 +218,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
-        pageNumber: req.query.pageNumber || 1,
-        pageSize: req.query.pageSize || 10,
+        // pageNumber: req.query.pageNumber || 1,
+        // pageSize: req.query.pageSize || 10,
         search: req.query.search,
         userId: req.query.userId,
         isOverdue: req.query.isOverdue,
@@ -227,9 +227,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         isReturn: req.query.isReturn,
         studentName: req.query.studentName,
     };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        criteria,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
