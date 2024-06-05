@@ -7,6 +7,12 @@ class TravellerService extends BaseService {
         super(dbModel, entityName);
     }
 
+    // async getTravellerRouteId(groupId,routeId) {
+    //     return this.execute(() => {
+    //         return this.model.find({ groupId,routeId });
+    //     });
+    // }
+
     async getBytravellerId(groupId, travellerId) {
         let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
         const routeId = traveller.routeId
@@ -30,11 +36,11 @@ class TravellerService extends BaseService {
         return responseData;
     }
 
-    async getTravellersByRouteID(routeId) {
+    async getTravellersByRouteId(groupId,routeId) {
         try {
-            const routeData = await this.model.find({ routeId: routeId });
+            const routeData = await this.model.find({ groupId:groupId, routeId: routeId });
     
-            if (!routeData) {
+            if (routeData.length === 0) {
                 return null;
             }
             return new serviceResponse({

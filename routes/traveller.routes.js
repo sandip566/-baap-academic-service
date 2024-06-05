@@ -82,15 +82,25 @@ router.delete("/groupId/:groupId/travellerId/:travellerId", async (req, res) => 
     }
 });
 
-router.get("/getTravellersByRouteID/:routeId", async (req, res, next) => {
+router.get("/getTravellersByRouteId/groupId/:groupId/routeId/:routeId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getTravellersByRouteID(
+    const serviceResponse = await service.getTravellersByRouteId(
+        req.params.groupId,
         req.params.routeId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
+// router.get("getTravellerrouteId/groupId/:groupId/routeId/:routeId", async (req, res, next) => {
+//     if (ValidationHelper.requestValidationErrors(req, res)) {
+//         return;
+//     }
+//     const serviceResponse = await service.getTravellerrouteId(req.params.groupId,req.params.routeId);
+
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+// });
 
 router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
