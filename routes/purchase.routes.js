@@ -94,6 +94,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             vendorId: req.query.vendorId,
             purchaseId: req.query.purchaseId,
+            name:req.query.name,
             search: req.query.search,
             orderStatus: req.query.orderStatus,
             book: req.query.book,

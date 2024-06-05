@@ -73,6 +73,7 @@ class PurchaseService extends BaseService {
                     $regex: new RegExp(criteria.orderStatus, "i"),
                 };
             }
+            
             if (criteria.name) {
                 searchFilter.name = {
                     $regex: new RegExp(criteria.name, "i"),
