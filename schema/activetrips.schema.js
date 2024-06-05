@@ -48,7 +48,7 @@ const ActiveTripsSchema = new mongoose.Schema(
         status: {
             type: String,
             required: true,
-            default: 'new'
+            default: 'active'
         }
     },
     { timestamps: true, strict: false }
