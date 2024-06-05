@@ -15,6 +15,11 @@ const HostelAdmissionSchema = new mongoose.Schema(
             required: true,
         
         },
+        admissionStatus: {
+            type: String,
+            required: false,
+            default: "Draft",
+        },
         status:{
             type: String,
             required: false,

@@ -154,44 +154,145 @@ class StudentsAdmmisionService extends BaseService {
     }
 
     async getByAddmissionId(addmissionId) {
+        // try {
+        //     const studentAdmission = await this.model.findOne({
+        //         addmissionId: addmissionId,
+        //     });
+        //     console.log(studentAdmission);
+        //     if (!studentAdmission) {
+        //         throw new Error("Student admission not found");
+        //     }
+
+        //     let additionalData = {};
+
+        //     // Process fees details
+        //     if (
+        //         studentAdmission.feesDetails &&
+        //         studentAdmission.feesDetails.length > 0
+        //     ) {
+        //         additionalData.feesDetails = await Promise.all(
+        //             studentAdmission.feesDetails.map(async (feesDetail) => {
+        //                 let feesAdditionalData = {};
+
+        //                 if (feesDetail.feesTemplateId) {
+        //                     const feesTemplate =
+        //                         await feesTemplateModel.findOne({
+        //                             feesTemplateId: feesDetail.feesTemplateId,
+        //                         });
+        //                     feesAdditionalData.feesTemplateId = feesTemplate;
+        //                 }
+
+        //                 return { ...feesDetail, ...feesAdditionalData };
+        //             })
+        //         );
+        //     }
+        //     let response = {
+        //         status: "success",
+        //         data: { ...studentAdmission._doc, ...additionalData },
+        //     };
+        //     return response;
+        // } catch (error) {
+        //     throw error;
+        // }
         try {
-            const studentAdmission = await this.model.findOne({
-                addmissionId: addmissionId,
-            });
-            console.log(studentAdmission);
-            if (!studentAdmission) {
-                throw new Error("Student admission not found");
-            }
-
-            let additionalData = {};
-
-            // Process fees details
-            if (
-                studentAdmission.feesDetails &&
-                studentAdmission.feesDetails.length > 0
-            ) {
-                additionalData.feesDetails = await Promise.all(
-                    studentAdmission.feesDetails.map(async (feesDetail) => {
-                        let feesAdditionalData = {};
-
-                        if (feesDetail.feesTemplateId) {
-                            const feesTemplate =
-                                await feesTemplateModel.findOne({
-                                    feesTemplateId: feesDetail.feesTemplateId,
-                                });
-                            feesAdditionalData.feesTemplateId = feesTemplate;
+          
+    
+            let data = await studentAdmissionModel.aggregate([
+                {
+                    $match: {
+                        addmissionId: Number(addmissionId)
+                    }
+                },
+                {
+                    $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "feestemplates",
+                        localField: "feesDetails.feesTemplateId",
+                        foreignField: "feesTemplateId",
+                        as: "feesDetails.feesTemplate"
+                    }
+                },
+                {
+                    $unwind: { path: "$feesDetails.feesTemplate", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $unwind: { path: "$courseDetails", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "courses",
+                        localField: "courseDetails.course_id",
+                        foreignField: "courseId",
+                        as: "courseDetails.course_id"
+                    }
+                },
+                {
+                    $unwind: { path: "$courseDetails.course_id", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "classes",
+                        localField: "courseDetails.class_id",
+                        foreignField: "classId",
+                        as: "courseDetails.class_id"
+                    }
+                },
+                {
+                    $unwind: { path: "$courseDetails.class_id", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "divisions",
+                        localField: "courseDetails.division_id",
+                        foreignField: "divisionId",
+                        as: "courseDetails.division_id"
+                    }
+                },
+                {
+                    $unwind: { path: "$courseDetails.division_id", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $lookup: {
+                        from: "departments",
+                        localField: "courseDetails.department_id",
+                        foreignField: "departmentId",
+                        as: "courseDetails.department_id"
+                    }
+                },
+                {
+                    $unwind: { path: "$courseDetails.department_id", preserveNullAndEmptyArrays: true }
+                },
+                {
+                    $group: {
+                        _id: "$_id",
+                        feesDetails: { $push: "$feesDetails" },
+                        courseDetails: { $push: "$courseDetails" },
+                        otherFields: { $first: "$$ROOT" }
+                    }
+                },
+                {
+                    $replaceRoot: {
+                        newRoot: {
+                            $mergeObjects: ["$otherFields", { feesDetails: "$feesDetails", courseDetails: "$courseDetails" }]
                         }
-
-                        return { ...feesDetail, ...feesAdditionalData };
-                    })
-                );
-            }
-            let response = {
-                status: "success",
-                data: { ...studentAdmission._doc, ...additionalData },
+                    }
+                }
+            ]).exec()
+            
+    
+            const response = {
+                status: "Success",
+                data: {
+                    items: data,
+                    totalItemsCount: data.length,
+                },
             };
+    
             return response;
         } catch (error) {
+            console.error("Error:", error);
             throw error;
         }
     }
