@@ -1,6 +1,7 @@
 const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const BusRouteModel = require("../schema/busroutes.schema")
+const BusRouteModel = require("../schema/busroutes.schema");
+const serviceResponse = require("@baapcompany/core-api/services/serviceResponse");
 class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -29,6 +30,21 @@ class TravellerService extends BaseService {
         return responseData;
     }
 
+    async getTravellersByRouteID(routeId) {
+        try {
+            const routeData = await this.model.find({ routeId: routeId });
+    
+            if (!routeData) {
+                return null;
+            }
+            return new serviceResponse({
+                data: routeData,
+            });
+        } catch (error) {
+            console.error("Error in getRouteByrouteId service:", error);
+            throw error;
+        }
+    }
 
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
