@@ -484,14 +484,14 @@ class HostelAdmissionService extends BaseService {
                                 $map: {
                                     input: "$feespayments",
                                     as: "payment",
-                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
+                                    in: { $toDouble: "$$payment.paidAmount" } 
                                 }
                             }
                         },
                         lastRemainingAmount: {
                             $ifNull: [
-                                { $arrayElemAt: ["$feespayments.remainingAmount", -1] }, // Extracting remainingAmount from the last payment
-                                0
+                                { $arrayElemAt: ["$feespayments.remainingAmount", -1] },
+                               0
                             ]
                         }
                     }
