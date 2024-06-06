@@ -1,81 +1,36 @@
 const express = require("express");
 const router = express.Router();
-const { checkSchema } = require("express-validator");
+const verifyToken = require("../middleware/validateToken.middleware");
 const service = require("../services/communication.services");
-const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
-const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
-// Get all chats
-router.get('/', async (req, res) => {
-    try {
-      const chats = await service.getAllChats();
-      res.json(chats);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
+const validateChatData = (req, res, next) => {
+    const { receiver, handledBy, message, groupId, senderId, receiverId } = req.body;
+    if (!receiver || !handledBy || !message || !groupId || !senderId || !receiverId) {
+        return res.status(400).json({ error: 'Missing required fields' });
     }
-  });
-  
-  // Send a message
-  router.post('/send', async (req, res) => {
-    try {
-      const { sender, receiver, message } = req.body;
-      const newChat = await service.saveChat({ sender, receiver, message });
-      res.json(newChat);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-  
-  // Customer sends a message to L1 Team
-  router.post('/send-customer', async (req, res) => {
-    try {
-      const { receiver,handledBy, message, userId ,groupId } = req.body;
-      const communicationId = req.body.communicationId;
+    next();
+};
 
-      if(!communicationId){
-          const newCommunicationId = +Date.now();
-          const newChat = await service.saveChat({ userId, receiver, handledBy, message, groupId, communicationId: newCommunicationId});
-          return res.json(newChat);
-        }
-      const newChat = await service.saveChat({ userId, receiver, handledBy, message, groupId, communicationId});
-      res.json(newChat);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
-  
-  // L1 Team sends a message to Customer
-  router.post('/send-L1', async (req, res) => {
+router.post('/send-customer', validateChatData, async (req, res) => {
     try {
-      const { receiver, message, userId, handledBy ,sender, groupId} = req.body;
-      const communicationId = req.body.communicationId; 
-      const newChat = await service.saveChat({ sender, receiver, userId, message, communicationId, groupId, handledBy});
-      res.json(newChat);
+        const { receiver, handledBy, message, groupId, senderId, receiverId } = req.body;
+        const newChat = await service.saveChat({ receiver, handledBy, message, groupId, senderId, receiverId });
+        res.json(newChat);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        console.error('Error in /send-customer:', error); 
+        res.status(500).json({ error: error.message });
     }
-  });
+});
 
-  // Get chats by groupId and communicationId
-router.get('/:groupId/:communicationId', async (req, res) => {
-    try {
-      const communicationId = req.params.communicationId;
-      const chats = await service.getChatsByCommunicationId(communicationId);
-      res.json(chats);
-    } catch (error) {
-      res.status(500).json({ error: error.message });
-    }
-  });
 
-  // Delete chats by groupId and communicationId
-router.delete('/:groupId/:communicationId', async (req, res) => {
+router.get('/by-sender-receiver/:senderId/:receiverId', async (req, res) => {
     try {
-      const communicationId = req.params.communicationId;
-      const result = await service.deleteChatsByCommunicationId(communicationId);
-      res.json({ message: `Deleted ${result.deletedCount} chats for communicationId: ${communicationId}` });
+        const { senderId, receiverId } = req.params;
+        const chats = await service.getChatsBySenderIdAndReceiverId(senderId, receiverId);
+        res.json(chats);
     } catch (error) {
-      res.status(500).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
-  });
+});
 
 module.exports = router;
