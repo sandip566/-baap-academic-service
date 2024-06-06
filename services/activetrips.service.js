@@ -285,7 +285,6 @@ class ActiveTripsService extends BaseService {
                 longitude: parseFloat(lastLocation.long)
             };
             const activeTrips = [activeTrip];
-
             const nearestRoute = await this.findNearestBusRoute(groupId, currentLocationData);
             console.log(nearestRoute);
 
