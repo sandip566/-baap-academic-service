@@ -4,8 +4,8 @@ const verifyToken = require("../middleware/validateToken.middleware");
 const service = require("../services/communication.services");
 
 const validateChatData = (req, res, next) => {
-    const { receiver, handledBy, message, groupId, senderId, receiverId } = req.body;
-    if (!receiver || !handledBy || !message || !groupId || !senderId || !receiverId) {
+    const { receiver, sender, message, groupId, senderId, receiverId } = req.body;
+    if (!receiver || !sender || !message || !groupId || !senderId || !receiverId) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
     next();
@@ -13,8 +13,8 @@ const validateChatData = (req, res, next) => {
 
 router.post('/send-customer', validateChatData, async (req, res) => {
     try {
-        const { receiver, handledBy, message, groupId, senderId, receiverId } = req.body;
-        const newChat = await service.saveChat({ receiver, handledBy, message, groupId, senderId, receiverId });
+        const { receiver, sender, message, groupId, senderId, receiverId } = req.body;
+        const newChat = await service.saveChat({ receiver, sender, message, groupId, senderId, receiverId });
         res.json(newChat);
     } catch (error) {
         console.error('Error in /send-customer:', error); 
