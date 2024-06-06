@@ -128,10 +128,18 @@ class ActiveTripsService extends BaseService {
 
     async getActiveTrip(groupId, tripId, lat, long) {
         let query = { groupId: Number(groupId), tripId: Number(tripId) };
+
         const trip = await ActiveTripsModel.findOne(query);
+
         if (!trip) {
             return null;
         }
+        const existingLatitude = trip.currentLocation.find(location => location.lat === lat);
+        if (!existingLatitude) {
+            trip.currentLocation.push({ lat, long });
+        }
+
+        const updatedTrip = await trip.save();
 
         const driver = await DriverModel.findOne({ groupId: Number(groupId), driverId: trip.driverId });
         const caretaker = await CareTakerModel.findOne({ groupId: Number(groupId), careTakerId: trip.careTakerId });
@@ -264,6 +272,89 @@ class ActiveTripsService extends BaseService {
                 items: activeTrips
             }
         }
+    }
+
+    async getTrip(groupId, tripId) {
+        try {
+            let query = { groupId: Number(groupId), tripId: tripId }
+            const activeTrip = await ActiveTripsModel.findOne(query);
+
+            const lastLocation = activeTrip.currentLocation[activeTrip.currentLocation.length - 1];
+            const currentLocationData = {
+                latitude: parseFloat(lastLocation.lat),
+                longitude: parseFloat(lastLocation.long)
+            };
+            const activeTrips = [activeTrip];
+            const nearestRoute = await this.findNearestBusRoute(groupId, currentLocationData);
+            console.log(nearestRoute);
+
+            return {
+                data: {
+                    activeTrips,
+                    nearestRoute
+                }
+            };
+        } catch (error) {
+            throw new Error("Error in getTrip function: " + error.message);
+        }
+    }
+
+    async findNearestBusRoute(groupId, currentLocation) {
+        try {
+            const busRoutes = await BusRouteModel.find({ groupId: Number(groupId) });
+
+            let nearestRoute = null;
+            let minDistance = Number.MAX_SAFE_INTEGER;
+
+            for (const route of busRoutes) {
+                for (const stop of route.stopDetails) {
+                    const stopLocation = {
+                        latitude: stop.location.lattitude,
+                        longitude: stop.location.longitude
+                    };
+                    function calculateDistance(lat1, lon1, lat2, lon2, unit = 'km') {
+                        const R = 6371;
+                        const dLat = (lat2 - lat1) * Math.PI / 180;
+                        const dLon = (lon2 - lon1) * Math.PI / 180;
+                        const a =
+                            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                        const distance = R * c;
+
+                        if (unit === 'm') {
+                            return distance * 1000;
+                        }
+                        return distance;
+                    }
+                    const distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, stopLocation.latitude, stopLocation.longitude);
+
+                    if (distance < minDistance) {
+                        minDistance = distance;
+                        nearestRoute = route;
+                        nearestRoute.nearestStop = {
+                            name: stop.stopName,
+                            distance: distance.toFixed(2) + ' km',
+                            arrivalTime: this.calculateArrivalTime(distance)
+                        };
+                    }
+                }
+            }
+
+            return nearestRoute;
+        } catch (error) {
+            throw new Error("Error in findNearestBusRoute function: " + error.message);
+        }
+    }
+
+    calculateArrivalTime(distance) {
+        const averageSpeed = 30;
+        const arrivalTimeInHours = distance / averageSpeed;
+        const hours = Math.floor(arrivalTimeInHours);
+        const minutes = Math.round((arrivalTimeInHours - hours) * 60);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} hr`;
+
     }
 
 }
