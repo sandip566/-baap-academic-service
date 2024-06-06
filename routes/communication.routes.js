@@ -12,7 +12,7 @@ router.post('/send-customer', async (req, res) => {
         if (!communicationId) {
             communicationId = await service.getCommunicationIdByUserIds(userId, receiver);
             if (!communicationId) {
-                communicationId = +Date.now();  // Generate new ID if no existing ID is found
+                communicationId = +Date.now();  
             }
         }
         
@@ -31,7 +31,7 @@ router.post('/send-L1', async (req, res) => {
         if (!communicationId) {
             communicationId = await service.getCommunicationIdByUserIds(sender, receiver);
             if (!communicationId) {
-                communicationId = +Date.now();  // Generate new ID if no existing ID is found
+                communicationId = +Date.now();  
             }
         }
 
