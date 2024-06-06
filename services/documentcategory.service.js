@@ -15,6 +15,7 @@ class DocumentCategoryService extends BaseService {
         if (criteria.documenCategoryId) query.documenCategoryId = criteria.documenCategoryId;
         if (criteria.description)
             query.description = new RegExp(criteria.description, "i");
+        if (criteria.name) query.name = new RegExp(criteria.name, "i")
         return this.preparePaginationAndReturnData(query, criteria);
 
     }
