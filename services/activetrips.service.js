@@ -153,9 +153,11 @@ class ActiveTripsService extends BaseService {
         if (!trip) {
             return null;
         }
-        const existingLatitude = trip.currentLocation.find(location => location.lat === lat);
-        if (!existingLatitude) {
-            trip.currentLocation.push({ lat, long });
+
+        const lastLocation = trip.currentLocation[trip.currentLocation.length - 1];
+
+        if (!lastLocation || lastLocation.lat !== parseFloat(lat) || lastLocation.long !== parseFloat(long)) {
+            trip.currentLocation.push({ lat: parseFloat(lat), long: parseFloat(long) });
         }
 
         const updatedTrip = await trip.save();
