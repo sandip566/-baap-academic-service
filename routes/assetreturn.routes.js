@@ -109,7 +109,6 @@ router.get(
                 // phoneNumber: req.query.phoneNumber,
 
                 name: req.query.name,
-
                 status: req.query.status,
                 search: req.query.search,
             };

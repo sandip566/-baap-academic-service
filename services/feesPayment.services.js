@@ -509,6 +509,7 @@ class feesPaymentService extends BaseService {
                     .map((data, index) => ({
                         candidateName: data?.name,
                         addmissionId: data?.addmissionId,
+                        academicYear: data?.academicYear,
                         className: data?.feesPaymentData?.className,
                         courseFees: data?.feesPaymentData?.courseFee,
                         courseName: data?.feesPaymentData?.courseName,
