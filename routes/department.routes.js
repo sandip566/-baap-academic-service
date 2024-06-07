@@ -97,6 +97,33 @@ router.get(
     }
 );
 
+router.get(
+    "/usingInviteLink/getByGroupId/:groupId",
+   
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const criteria = {
+                departmentName: req.query.departmentName,
+                search: req.query.search,
+                departmentHead: req.query.departmentHead,
+                academicYearId: req.query.academicYearId,
+            };
+            const searchFilter = service.getAllDataByGroupId(groupId, criteria);
+            const departments = await departmentModel.find(searchFilter);
+            res.json({
+                status: "success",
+                data: {
+                    items: departments,
+                    totalItemsCount: departments.length,
+                },
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(500).send("Server Error");
+        }
+    }
+);
 router.put(
     "/groupId/:groupId/departmentId/:departmentId",
     TokenService.checkPermission(["EMD3"]),
