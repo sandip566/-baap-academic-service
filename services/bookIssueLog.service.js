@@ -356,6 +356,7 @@ class BookIssueLogService extends BaseService {
                 );
 
                 return {
+                    bookIssueLogId:item.bookIssueLogId,
                     bookIssueDate: item.issuedDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,
