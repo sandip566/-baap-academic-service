@@ -11,6 +11,24 @@ class LibraryPaymentService extends BaseService {
             const query = {
                 groupId: Number(groupId),
             };
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    query.$or = [
+                        { paidAmount: numericSearch }
+                    ];
+                }
+                 else {
+                    query.$or = [
+                        {
+                            username: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                       
+                    ];
+                }
+             }
 
             if (criteria.libraryPaymentId)
                 query.libraryPaymentId = criteria.libraryPaymentId;
