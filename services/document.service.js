@@ -38,26 +38,30 @@ class DocumentService extends BaseService {
     async getAllDataByGroupId(groupId, criteria) {
         try {
             const query = {
-                groupId:Number (groupId),
+                groupId: Number(groupId),
             };
-    
-            if (criteria.roleId) query.roleId =Number (criteria.roleId);
-            if (criteria.userId) query.userId =Number (criteria.userId);
+
+            if (criteria.roleId) query.roleId = Number(criteria.roleId);
+            if (criteria.userId) query.userId = Number(criteria.userId);
             if (criteria.title) query.title = new RegExp(criteria.title, "i");
-            if (criteria.description) query.description = new RegExp(criteria.description, "i");
-    
+            if (criteria.description)
+                query.description = new RegExp(criteria.description, "i");
+
             if (criteria.userId && criteria.category) {
                 query.userId = criteria.userId;
                 query.category = criteria.category;
             } else {
-                if (criteria.userId) query.userId = Number (criteria.userId);
-                if (criteria.documentCategoryId) query.documentCategoryId =Number (criteria.documentCategoryId);
+                if (criteria.userId) query.userId = Number(criteria.userId);
+                if (criteria.documentCategoryId)
+                    query.documentCategoryId = Number(
+                        criteria.documentCategoryId
+                    );
             }
-    
+
             const pageSize = Number(criteria.pageSize) || 10;
             const currentPage = Number(criteria.pageNumber) || 1;
             const skip = (currentPage - 1) * pageSize;
-    
+
             let admissionData = await DocumentModel.aggregate([
                 { $match: query },
                 {
@@ -74,30 +78,30 @@ class DocumentService extends BaseService {
                         preserveNullAndEmptyArrays: true,
                     },
                 },
-              
+
                 { $skip: skip },
                 { $limit: pageSize },
-            ]).exec()
-    
+            ]).exec();
+
             const totalDocuments = await DocumentModel.countDocuments(query);
             const totalPages = Math.ceil(totalDocuments / pageSize);
-    
+
             const response = {
                 status: "Success",
-                data: {items:admissionData},
+                data: { items: admissionData },
                 totalItemsCount: totalDocuments,
                 totalPages: totalPages,
                 pageSize: pageSize,
                 currentPage: currentPage,
             };
-    
+
             return response;
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw error;
         }
     }
-    
+
     async updateDataById(documentId, groupId, newData) {
         try {
             const updatedData = await DocumentModel.findOneAndUpdate(
@@ -172,6 +176,5 @@ class DocumentService extends BaseService {
             return DocumentModel.findOne({ documentId: documentId });
         });
     }
-
 }
 module.exports = new DocumentService(DocumentModel, "document");
