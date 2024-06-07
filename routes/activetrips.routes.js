@@ -97,13 +97,11 @@ router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
         const tripId = req.params.tripId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updatedriverById(
-            tripId,
-            groupId,
-            newData
-        );
+       
+        const updateData = await service.updatedriverById(tripId, groupId, newData);
+       
         if (!updateData) {
-            res.status(404).json({ error: "data not found to update" });
+            res.status(404).json({ error: "Data not found to update" });
         } else {
             res.status(200).json(updateData);
         }

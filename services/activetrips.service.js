@@ -115,12 +115,31 @@ class ActiveTripsService extends BaseService {
 
     async updatedriverById(tripId, groupId, newData) {
         try {
-            const updatedVisitor = await ActiveTripsModel.findOneAndUpdate(
-                { tripId: tripId, groupId: groupId },
-                newData,
-                { new: true }
-            );
-            return updatedVisitor;
+            const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
+   
+            if (!existingTrip) {
+                const newTrip = new ActiveTripsModel({
+                    tripId: tripId,
+                    groupId: groupId,
+                    ...newData
+                });
+                return await newTrip.save();
+            } else {
+                const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
+                const updatedTravellers = newData.onBoaredTraveller || [];
+   
+                updatedTravellers.forEach(newTraveller => {
+                    const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
+                    if (index !== -1) {
+                        existingOnBoardTravellers[index] = newTraveller;
+                    } else {
+                        existingOnBoardTravellers.push(newTraveller);
+                    }
+                });
+                    existingTrip.onBoaredTraveller = existingOnBoardTravellers;
+                const updatedTrip = await existingTrip.save();
+                return updatedTrip;
+            }
         } catch (error) {
             throw error;
         }
