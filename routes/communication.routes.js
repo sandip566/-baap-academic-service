@@ -13,21 +13,39 @@ const validateChatData = (req, res, next) => {
 
 router.post('/send-customer', validateChatData, async (req, res) => {
     try {
-        const { receiver, sender, message, groupId, senderId, receiverId } = req.body;
-        const newChat = await service.saveChat({ receiver, sender, message, groupId, senderId, receiverId });
+        const newChat = await service.saveChat(req.body);
         res.json(newChat);
     } catch (error) {
-        console.error('Error in /send-customer:', error); 
+        console.error('Error in /send-customer:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-
 router.get('/by-sender-receiver/:senderId/:receiverId', async (req, res) => {
     try {
         const { senderId, receiverId } = req.params;
-        const chats = await service.getChatsBySenderIdAndReceiverId(senderId, receiverId);
-        res.json(chats);
+        const lastChat = await service.getChatsBySenderIdAndReceiverId(senderId, receiverId);
+        res.json(lastChat);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.get('/all-chats/:senderId/:receiverId', async (req, res) => {
+    try {
+        const { senderId, receiverId } = req.params;
+        const allChats = await service.getAllChatsBySenderIdAndReceiverId(senderId, receiverId);
+        res.json(allChats);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete('/delete-chat/:chatId', async (req, res) => {
+    try {
+        const { chatId } = req.params;
+        const deletedChat = await service.deleteChatById(chatId);
+        res.json(deletedChat);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
