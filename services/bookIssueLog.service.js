@@ -10,7 +10,7 @@ class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria, page, limit) {
         try {
             const searchFilter = { groupId };
             const bookMap = await this.getBookMap();
@@ -23,41 +23,59 @@ class BookIssueLogService extends BaseService {
                     searchFilter.$or = [
                         { userId: numericSearch },
                         { bookIssueLogId: numericSearch },
+                        {ISBN:numericSearch}
                     ];
                 } else {
-                    const bookId = bookMap[criteria.search.trim().toLowerCase()];
-                    const admissionId = studentMap[criteria.search.trim().toLowerCase()];
+                    const bookId =
+                        bookMap[criteria.search.trim().toLowerCase()];
+                    const admissionId =
+                        studentMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
                         { bookId },
                         { name: { $regex: new RegExp(criteria.search, "i") } },
                         { admissionId },
-                        { firstName: { $regex: new RegExp(criteria.search, "i") } },
+                        {
+                            firstName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
                     ];
                 }
             }
 
-            // Apply additional criteria
-            if (criteria.isReturn !== undefined) searchFilter.isReturn = criteria.isReturn;
-            if (criteria.isReserve !== undefined) searchFilter.isReserve = criteria.isReserve;
+            if (criteria.isReturn !== undefined)
+                searchFilter.isReturn = criteria.isReturn;
+            if (criteria.isReserve !== undefined)
+                searchFilter.isReserve = criteria.isReserve;
             if (criteria.status) searchFilter.status = criteria.status;
-            if (criteria.isOverdue !== undefined) searchFilter.isOverdue = criteria.isOverdue;
+            if (criteria.isOverdue !== undefined)
+                searchFilter.isOverdue = criteria.isOverdue;
             if (criteria.userId) searchFilter.userId = criteria.userId;
+            const sortOrder = { createdAt: -1 };
 
-            // Fetch book issue logs based on the filter
-            const bookIssueLogs = await bookIssueLogModel.find(searchFilter);
+            const skip = (page - 1) * limit;
 
-            // Populate books and students for each log
+            const bookIssueLogs = await bookIssueLogModel
+                .find(searchFilter)
+                .sort(sortOrder)
+                .skip(skip)
+                .limit(limit);
+
             const populatedBooks = await Promise.all(
                 bookIssueLogs.map(async (log) => {
                     const books = await Book.findOne({ bookId: log.bookId });
-                    const student = await studentAdmissionModel.findOne({ addmissionId: log.addmissionId });
+                    const student = await studentAdmissionModel.findOne({
+                        addmissionId: log.addmissionId,
+                    });
                     return { ...log._doc, books, student };
                 })
             );
 
             // Get counts
             const count = await this.getCount(groupId);
-            const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
+            const totalCount = await bookIssueLogModel.countDocuments(
+                searchFilter
+            );
 
             return {
                 populatedBookIssueLog: populatedBooks,
@@ -66,7 +84,9 @@ class BookIssueLogService extends BaseService {
             };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
-            throw new Error("An error occurred while processing the request. Please try again later.");
+            throw new Error(
+                "An error occurred while processing the request. Please try again later."
+            );
         }
     }
     async getBookMap() {
@@ -119,7 +139,10 @@ class BookIssueLogService extends BaseService {
     }
     async updateBookIssueLogById(groupId, bookIssueLogId, newData) {
         try {
-            console.log("query2", { groupId: groupId, bookIssueLogId: bookIssueLogId });
+            console.log("query2", {
+                groupId: groupId,
+                bookIssueLogId: bookIssueLogId,
+            });
             const updateBookIssueLog = await bookIssueLogModel.findOneAndUpdate(
                 { groupId: groupId, bookIssueLogId: Number(bookIssueLogId) },
                 { $set: newData },
@@ -130,7 +153,6 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-
 
     async checkOverdueStatus(groupId, addmissionId) {
         try {
@@ -194,7 +216,9 @@ class BookIssueLogService extends BaseService {
                 bookIssues.map(async (bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const diffDays = Math.ceil(
+                        diffTime / (1000 * 60 * 60 * 24)
+                    );
 
                     if (diffDays >= 0) {
                         const totalFine = diffDays * finePerDay;
@@ -210,17 +234,24 @@ class BookIssueLogService extends BaseService {
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    const diffDays = Math.ceil(
+                        diffTime / (1000 * 60 * 60 * 24)
+                    );
                     return diffDays >= 0;
                 })
                 .map((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
                     const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const student = students.find(
-                        (student) => student.addmissionId === bookIssue.addmissionId
+                    const diffDays = Math.ceil(
+                        diffTime / (1000 * 60 * 60 * 24)
                     );
-                    const book = books.find((book) => book.bookId === bookIssue.bookId);
+                    const student = students.find(
+                        (student) =>
+                            student.addmissionId === bookIssue.addmissionId
+                    );
+                    const book = books.find(
+                        (book) => book.bookId === bookIssue.bookId
+                    );
                     let bookIssueDate = bookIssue.issueDate;
                     const totalFine = diffDays * finePerDay;
                     let response = {
@@ -246,11 +277,13 @@ class BookIssueLogService extends BaseService {
                             updatedAt: book.updatedAt,
                             __v: book.__v,
                         },
-                        bookIssueLogId: bookIssueLogId,
+                        bookIssueLogId: bookIssue.bookIssueLogId,
                         bookIssueDate,
                         addmissionId: student.addmissionId,
                         studentName: student ? student.name : "Unknown Student",
-                        image: student ? student.profile_img : "image is not provided",
+                        image: student
+                            ? student.profile_img
+                            : "image is not provided",
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
@@ -398,8 +431,11 @@ class BookIssueLogService extends BaseService {
 
     async checkBookAvailability(groupId, bookId) {
         try {
-            const book = await Book.findOne({ groupId: Number(groupId), bookId: Number(bookId) });
-            const availableCount = book.availableCount
+            const book = await Book.findOne({
+                groupId: Number(groupId),
+                bookId: Number(bookId),
+            });
+            const availableCount = book.availableCount;
             return availableCount;
         } catch (error) {
             throw error;

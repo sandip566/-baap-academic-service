@@ -3,6 +3,7 @@ const BaseService = require("@baapcompany/core-api/services/base.service");
 const BusRouteModel = require("../schema/busroutes.schema")
 const CareTakerModel = require("../schema/caretaker.schema")
 const DriverModel = require("../schema/driver.schema")
+const VehicleModel = require("../schema/vehicle.schema")
 
 class ActiveTripsService extends BaseService {
     constructor(dbModel, entityName) {
@@ -132,8 +133,9 @@ class ActiveTripsService extends BaseService {
             return null;
         }
 
-        const driver = await DriverModel.findOne({ driverId: trip.driverId }).select('name expexperience phoneNumber email profile');
-        const caretaker = await CareTakerModel.findOne({ careTakerId: trip.careTakerId }).select('name expexperience phoneNumber email profile');
+        const driver = await DriverModel.findOne({ groupId: Number(groupId), driverId: trip.driverId });
+        const caretaker = await CareTakerModel.findOne({ groupId: Number(groupId), careTakerId: trip.careTakerId });
+        const vehicle = await VehicleModel.findOne({ groupId: Number(groupId), vehicleId: trip.vehicleId });
 
         const routeId = trip.routeId;
         const route = await BusRouteModel.findOne({ groupId: Number(groupId), routeId: routeId });
@@ -175,7 +177,6 @@ class ActiveTripsService extends BaseService {
                 nearestStop = stop;
             }
         });
-
         const distanceToNearestStop = calculateDistance(
             currentLocation.latitude,
             currentLocation.longitude,
@@ -215,18 +216,21 @@ class ActiveTripsService extends BaseService {
             nearestStop.arrivalTime = formattedArrivalTime;
         }
 
+        const onBoardTravellers = trip.onBoaredTraveller || [];
+        const onBoardTravellersCount = onBoardTravellers.filter(traveller => traveller.inTime).length;
+
         return {
             trip: {
                 ...trip._doc,
                 driverId: driver,
-                careTakerId: caretaker
+                careTakerId: caretaker,
+                routeId: route,
+                vehicleId: vehicle
             },
+            onBoardTravellersCount,
             nearestStop
         };
     }
-
-
-
 
     async updateActiveTrip(groupId, tripId, travellerId, updateData) {
         const query = {
@@ -261,7 +265,6 @@ class ActiveTripsService extends BaseService {
             }
         }
     }
-
 
 }
 

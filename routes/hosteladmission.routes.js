@@ -29,7 +29,8 @@ router.post("/hostelAdmission/save", async (req, res, next) => {
 
         if (req.body.hostelAdmissionId) {
             const existingDocument = await service.getByAddmissionIdData(
-                req.body.hostelAdmissionId
+                req.body.hostelAdmissionId,
+                req.body.userId
             );
             console.log(existingDocument);
             console.log("existingDocument", existingDocument.data !== null);

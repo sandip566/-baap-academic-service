@@ -94,6 +94,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             vendorId: req.query.vendorId,
             purchaseId: req.query.purchaseId,
+            name:req.query.name,
             search: req.query.search,
             orderStatus: req.query.orderStatus,
             book: req.query.book,
@@ -110,13 +111,18 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             groupId,
             criteria,
             skip,
-            limit
+            limit,
+         
         );
         const totalCount = await PurchaseModel.countDocuments(searchFilter);
         const purchase = await PurchaseModel.find(searchFilter)
+        .sort({ createdAt: -1 }) 
             .skip(skip)
             .limit(limit)
-            .exec();
+            .exec()
+            
+
+            
 
         res.json({
             status: "Success",

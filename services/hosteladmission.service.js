@@ -480,19 +480,23 @@ class HostelAdmissionService extends BaseService {
                 {
                     $addFields: {
                         totalPaidAmount: {
-                            $sum: {
-                                $map: {
-                                    input: "$feespayments",
-                                    as: "payment",
-                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
+                            $toInt: {
+                                $sum: {
+                                    $map: {
+                                        input: "$feespayments",
+                                        as: "payment",
+                                        in: { $toDouble: "$$payment.paidAmount" }
+                                    }
                                 }
                             }
                         },
                         lastRemainingAmount: {
-                            $ifNull: [
-                                { $arrayElemAt: ["$feespayments.remainingAmount", -1] }, // Extracting remainingAmount from the last payment
-                                0
-                            ]
+                            $toInt: {
+                                $ifNull: [
+                                    { $arrayElemAt: ["$feespayments.remainingAmount", -1] },
+                                    0
+                                ]
+                            }
                         }
                     }
                 }
@@ -768,9 +772,9 @@ class HostelAdmissionService extends BaseService {
             });
         });
     }
-    async getByAddmissionIdData(hostelAdmissionId) {
+    async getByAddmissionIdData(hostelAdmissionId,userId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId });
+            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId,userId: userId });
         });
     }
     async updateUser(hostelAdmissionId, groupId, data) {
