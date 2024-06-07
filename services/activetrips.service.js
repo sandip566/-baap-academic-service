@@ -116,7 +116,7 @@ class ActiveTripsService extends BaseService {
     async updatedriverById(tripId, groupId, newData) {
         try {
             const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
-   
+
             if (!existingTrip) {
                 const newTrip = new ActiveTripsModel({
                     tripId: tripId,
@@ -127,7 +127,7 @@ class ActiveTripsService extends BaseService {
             } else {
                 const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
                 const updatedTravellers = newData.onBoaredTraveller || [];
-   
+
                 updatedTravellers.forEach(newTraveller => {
                     const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
                     if (index !== -1) {
@@ -136,7 +136,7 @@ class ActiveTripsService extends BaseService {
                         existingOnBoardTravellers.push(newTraveller);
                     }
                 });
-                    existingTrip.onBoaredTraveller = existingOnBoardTravellers;
+                existingTrip.onBoaredTraveller = existingOnBoardTravellers;
                 const updatedTrip = await existingTrip.save();
                 return updatedTrip;
             }
@@ -295,22 +295,25 @@ class ActiveTripsService extends BaseService {
 
     async getTrip(groupId, tripId) {
         try {
-            let query = { groupId: Number(groupId), tripId: tripId }
+            let query = { groupId: Number(groupId), tripId: tripId };
             const activeTrip = await ActiveTripsModel.findOne(query);
+
+            if (!activeTrip) {
+                throw new Error('No active trip found.');
+            }
 
             const lastLocation = activeTrip.currentLocation[activeTrip.currentLocation.length - 1];
             const currentLocationData = {
                 latitude: parseFloat(lastLocation.lat),
                 longitude: parseFloat(lastLocation.long)
             };
-            const activeTrips = [activeTrip];
-            const nearestRoute = await this.findNearestBusRoute(groupId, currentLocationData);
-            console.log(nearestRoute);
+
+            const nearestStop = await this.findNearestBusStop(groupId, activeTrip.routeId, currentLocationData);
 
             return {
                 data: {
-                    activeTrips,
-                    nearestRoute
+                    activeTrip,
+                    nearestStop
                 }
             };
         } catch (error) {
@@ -318,52 +321,66 @@ class ActiveTripsService extends BaseService {
         }
     }
 
-    async findNearestBusRoute(groupId, currentLocation) {
+    async findNearestBusStop(groupId, routeId, currentLocation) {
         try {
-            const busRoutes = await BusRouteModel.find({ groupId: Number(groupId) });
+            const busRoute = await BusRouteModel.findOne({ groupId: Number(groupId), routeId: Number(routeId) });
 
-            let nearestRoute = null;
+            if (!busRoute) {
+                throw new Error('No bus route found.');
+            }
+
+            let nearestStop = null;
             let minDistance = Number.MAX_SAFE_INTEGER;
 
-            for (const route of busRoutes) {
-                for (const stop of route.stopDetails) {
-                    const stopLocation = {
-                        latitude: stop.location.lattitude,
-                        longitude: stop.location.longitude
+            function calculateDistance(lat1, lon1, lat2, lon2, unit = 'km') {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const distance = R * c;
+
+                if (unit === 'm') {
+                    return distance * 1000;
+                }
+                return distance;
+            }
+
+            for (const stop of busRoute.stopDetails) {
+                const stopLocation = {
+                    latitude: stop.location.lattitude,
+                    longitude: stop.location.longitude
+                };
+                const distance = calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    stopLocation.latitude,
+                    stopLocation.longitude
+                );
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestStop = {
+                        _id: stop._id,
+                        stopId: stop.stopId,
+                        stopName: stop.stopName,
+                        fees: stop.fees,
+                        location: {
+                            lattitude: stop.location.lattitude,
+                            longitude: stop.location.longitude
+                        },
+                        distance: distance.toFixed(2) + ' km',
+                        arrivalTime: this.calculateArrivalTime(distance)
                     };
-                    function calculateDistance(lat1, lon1, lat2, lon2, unit = 'km') {
-                        const R = 6371;
-                        const dLat = (lat2 - lat1) * Math.PI / 180;
-                        const dLon = (lon2 - lon1) * Math.PI / 180;
-                        const a =
-                            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                            Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                            Math.sin(dLon / 2) * Math.sin(dLon / 2);
-                        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-                        const distance = R * c;
-
-                        if (unit === 'm') {
-                            return distance * 1000;
-                        }
-                        return distance;
-                    }
-                    const distance = calculateDistance(currentLocation.latitude, currentLocation.longitude, stopLocation.latitude, stopLocation.longitude);
-
-                    if (distance < minDistance) {
-                        minDistance = distance;
-                        nearestRoute = route;
-                        nearestRoute.nearestStop = {
-                            name: stop.stopName,
-                            distance: distance.toFixed(2) + ' km',
-                            arrivalTime: this.calculateArrivalTime(distance)
-                        };
-                    }
                 }
             }
 
-            return nearestRoute;
+            return nearestStop;
         } catch (error) {
-            throw new Error("Error in findNearestBusRoute function: " + error.message);
+            throw new Error("Error in findNearestBusStop function: " + error.message);
         }
     }
 
@@ -373,7 +390,6 @@ class ActiveTripsService extends BaseService {
         const hours = Math.floor(arrivalTimeInHours);
         const minutes = Math.round((arrivalTimeInHours - hours) * 60);
         return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} hr`;
-
     }
 
 }
