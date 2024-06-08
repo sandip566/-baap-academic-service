@@ -1,16 +1,57 @@
 const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-
+const BusRouteModel = require("../schema/busroutes.schema");
+const serviceResponse = require("@baapcompany/core-api/services/serviceResponse");
 class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
 
-    async getBytravellerId(travellerId) {
-        return this.execute(() => {
-            return this.model.findOne({ travellerId: travellerId });
-        });
+    // async getTravellerRouteId(groupId,routeId) {
+    //     return this.execute(() => {
+    //         return this.model.find({ groupId,routeId });
+    //     });
+    // }
+
+    async getBytravellerId(groupId, travellerId) {
+        let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
+        const routeId = traveller.routeId
+
+        if (!routeId) {
+            throw new Error("routeId not found.");
+        }
+
+        let route = await BusRouteModel.findOne({ groupId: groupId, routeId: routeId })
+
+        let responseData = {
+            status: "Success",
+            data: {
+               
+                    ...traveller.toObject(),
+                    routeId: route.toObject()
+                
+            }
+        };
+
+        return responseData;
     }
+
+    async getTravellersByRouteId(groupId,routeId) {
+        try {
+            const routeData = await this.model.find({ groupId:groupId, routeId: routeId });
+    
+            if (routeData.length === 0) {
+                return null;
+            }
+            return new serviceResponse({
+                data: routeData,
+            });
+        } catch (error) {
+            console.error("Error in getRouteByrouteId service:", error);
+            throw error;
+        }
+    }
+
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {

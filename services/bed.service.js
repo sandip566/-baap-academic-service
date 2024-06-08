@@ -10,6 +10,7 @@ class BedService extends BaseService {
             groupId: groupId,
         };
         if (criteria.status) query.status = criteria.status;
+        if (criteria.numberOfBed) query.numberOfBed = criteria.numberOfBed;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         return this.preparePaginationAndReturnData(query, criteria);
     }

@@ -12,7 +12,7 @@ class vehicleervice extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, vehicleNo, name, search, page, limit) {
+    async getAllDataByGroupId(groupId, ownerName,vehicalNo,phoneNumber, search, page, limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -21,20 +21,26 @@ class vehicleervice extends BaseService {
                 const numericSearch = parseInt(search);
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
-                        { name: { $regex: search, $options: "i" } },
-                        { vehicleNo: numericSearch },
+                        { ownerName: { $regex: search, $options: "i" } },
+                        { vehicalNo: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
-                        { name: { $regex: search, $options: "i" } },
+                        { ownerName: { $regex: search, $options: "i" } },
+                        { vehicalNo: { $regex: ".*" + search + ".*", $options: "i" } },
                     ];
                 }
             }
-            if (name) {
-                searchFilter.name = { $regex: name, $options: "i" };
+
+            if (ownerName) {
+                searchFilter.ownerName = { $regex: ownerName, $options: "i" };
             }
-            if (vehicleNo) {
-                searchFilter.vehicleNo = { $regex: vehicleNo, $options: "i" };
+            if (vehicalNo) {
+                searchFilter.vehicalNo = { $regex: vehicalNo, $options: "i" };
+            }
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
             const count = await vehicleModel.countDocuments(searchFilter);

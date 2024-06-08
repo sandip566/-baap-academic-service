@@ -6,7 +6,7 @@ const ActiveTripsSchema = new mongoose.Schema(
             type: Number,
             required: true
         },
-        userId:{
+        userId: {
             type: Number,
         },
         tripId: {
@@ -40,6 +40,15 @@ const ActiveTripsSchema = new mongoose.Schema(
         endtDate: {
             type: String,
             required: false
+        },
+        onBoaredTraveller: {
+            type: Array,
+            required: false
+        },
+        status: {
+            type: String,
+            required: true,
+            default: 'active'
         }
     },
     { timestamps: true, strict: false }

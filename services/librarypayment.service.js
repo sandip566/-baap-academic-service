@@ -6,21 +6,37 @@ class LibraryPaymentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria, page, limit) {
         try {
             const query = {
                 groupId: Number(groupId),
             };
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                if (!isNaN(numericSearch)) {
+                    query.$or = [
+                        { paidAmount: numericSearch }
+                    ];
+                }
+                 else {
+                    query.$or = [
+                        {
+                            username: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                       
+                    ];
+                }
+             }
 
             if (criteria.libraryPaymentId)
                 query.libraryPaymentId = criteria.libraryPaymentId;
             if (criteria.empId) query.empId = criteria.empId;
             if (criteria.userId) query.userId = criteria.userId;
-
-            const pageSize = Number(criteria.limit) || 10;
-            const currentPage = Number(criteria.page) || 1;
+            const pageSize = limit || 10;
+            const currentPage = page || 1;
             const skip = (currentPage - 1) * pageSize;
-
             const pipeLine = await LibraryPaymentModel.aggregate([
                 { $match: query },
                 {
@@ -32,6 +48,7 @@ class LibraryPaymentService extends BaseService {
                     },
                 },
                 { $unwind: "$addmissionId" },
+                { $sort: { createdAt: -1 } },
                 { $skip: skip },
                 { $limit: pageSize },
             ]).exec();

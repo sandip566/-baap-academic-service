@@ -25,12 +25,18 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         libraryPaymentId: req.query.libraryPaymentId,
         empId: req.query.empId,
         userId:req.query.userId,
-        page: req.query.page ,
-        limit: req.query.limit 
+        search:req.query.search,
+        // username:req.query.search
+        // page: req.query.page ,
+        // limit: req.query.limit 
     };
+    const page = parseInt(req.query.pageNumber) || 1;
+    const limit = parseInt(req.query.pageSize) || 100;
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        criteria,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

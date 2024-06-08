@@ -155,43 +155,129 @@ class StudentsAdmmisionService extends BaseService {
 
     async getByAddmissionId(addmissionId) {
         try {
-            const studentAdmission = await this.model.findOne({
-                addmissionId: addmissionId,
-            });
-            console.log(studentAdmission);
-            if (!studentAdmission) {
-                throw new Error("Student admission not found");
-            }
+            let data = await studentAdmissionModel
+                .aggregate([
+                    {
+                        $match: {
+                            addmissionId: Number(addmissionId),
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$feesDetails",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "feestemplates",
+                            localField: "feesDetails.feesTemplateId",
+                            foreignField: "feesTemplateId",
+                            as: "feesDetails.feesTemplate",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$feesDetails.feesTemplate",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "courses",
+                            localField: "courseDetails.course_id",
+                            foreignField: "courseId",
+                            as: "courseDetails.course_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.course_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "classes",
+                            localField: "courseDetails.class_id",
+                            foreignField: "classId",
+                            as: "courseDetails.class_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.class_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "divisions",
+                            localField: "courseDetails.division_id",
+                            foreignField: "divisionId",
+                            as: "courseDetails.division_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.division_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "departments",
+                            localField: "courseDetails.department_id",
+                            foreignField: "departmentId",
+                            as: "courseDetails.department_id",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.department_id",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$_id",
+                            feesDetails: { $push: "$feesDetails" },
+                            courseDetails: { $push: "$courseDetails" },
+                            otherFields: { $first: "$$ROOT" },
+                        },
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: {
+                                $mergeObjects: [
+                                    "$otherFields",
+                                    {
+                                        feesDetails: "$feesDetails",
+                                        courseDetails: "$courseDetails",
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                ])
+                .exec();
 
-            let additionalData = {};
+            const response = {
+                status: "Success",
+                data: data[0],
 
-            // Process fees details
-            if (
-                studentAdmission.feesDetails &&
-                studentAdmission.feesDetails.length > 0
-            ) {
-                additionalData.feesDetails = await Promise.all(
-                    studentAdmission.feesDetails.map(async (feesDetail) => {
-                        let feesAdditionalData = {};
-
-                        if (feesDetail.feesTemplateId) {
-                            const feesTemplate =
-                                await feesTemplateModel.findOne({
-                                    feesTemplateId: feesDetail.feesTemplateId,
-                                });
-                            feesAdditionalData.feesTemplateId = feesTemplate;
-                        }
-
-                        return { ...feesDetail, ...feesAdditionalData };
-                    })
-                );
-            }
-            let response = {
-                status: "success",
-                data: { ...studentAdmission._doc, ...additionalData },
+                totalItemsCount: data.length,
             };
+
             return response;
         } catch (error) {
+            console.error("Error:", error);
             throw error;
         }
     }
@@ -470,7 +556,8 @@ class StudentsAdmmisionService extends BaseService {
             const services = await studentAdmissionModel
                 .find(searchFilter)
                 .skip(skip)
-                .limit(limit);
+                .limit(limit)
+                .sort({ createdAt: reverseOrder ? -1 : 1 });
 
             const servicesWithData = await Promise.all(
                 services.map(async (service) => {
@@ -558,11 +645,11 @@ class StudentsAdmmisionService extends BaseService {
                 })
             );
 
-            servicesWithData.sort((a, b) => {
-                const dateA = new Date(a.createdAt);
-                const dateB = new Date(b.createdAt);
-                return reverseOrder ? dateB - dateA : dateA - dateB;
-            });
+            // servicesWithData.sort((a, b) => {
+            //     const dateA = new Date(a.createdAt);
+            //     const dateB = new Date(b.createdAt);
+            //     return reverseOrder ? dateB - dateA : dateA - dateB;
+            // });
 
             const totalItemsCount = await studentAdmissionModel.countDocuments(
                 searchFilter
@@ -606,6 +693,8 @@ class StudentsAdmmisionService extends BaseService {
                     searchFilter.$or = [
                         { firstName: { $regex: query.search, $options: "i" } },
                         { lastName: { $regex: query.search, $options: "i" } },
+                        { name: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: query.search },
                     ];
                 }
             }
@@ -1005,7 +1094,7 @@ class StudentsAdmmisionService extends BaseService {
             );
             // Fetch feesPayment data based on specific IDs
             const feesPaymentData = await FeesPaymentModel.find({
-                groupId:Number(groupId),
+                groupId: Number(groupId),
                 empId: query.empId,
                 addmissionId: query.addmissionId,
                 academicYear: query.academicYear,
@@ -1097,27 +1186,27 @@ class StudentsAdmmisionService extends BaseService {
         try {
             const userId = query.userId;
             const academicYear = query.academicYear;
-    
+
             let data = await StudentsAdmissionModel.aggregate([
                 {
                     $match: {
-                        groupId:Number (groupId),
-                        userId:Number (userId)
-                    }
+                        groupId: Number(groupId),
+                        userId: Number(userId),
+                    },
                 },
                 {
-                    $unwind: "$feesDetails"
+                    $unwind: "$feesDetails",
                 },
                 {
                     $lookup: {
                         from: "feestemplates",
                         localField: "feesDetails.feesTemplateId",
                         foreignField: "feesTemplateId",
-                        as: "feesDetails.feesTemplateId"
-                    }
+                        as: "feesDetails.feesTemplateId",
+                    },
                 },
                 {
-                    $unwind: "$feesDetails.feesTemplateId"
+                    $unwind: "$feesDetails.feesTemplateId",
                 },
                 {
                     $group: {
@@ -1149,31 +1238,45 @@ class StudentsAdmmisionService extends BaseService {
                         courseDetails: { $first: "$courseDetails" },
                         feesDetails: { $push: "$feesDetails" },
                         installmentId: { $first: "$installmentId" },
-                        status: { $first: "$status" }
-                    }
+                        status: { $first: "$status" },
+                    },
                 },
                 {
                     $lookup: {
                         from: "feespayments",
-                        let: { admissionId: "$addmissionId", userId: "$userId", academicYear: academicYear },
+                        let: {
+                            admissionId: "$addmissionId",
+                            userId: "$userId",
+                            academicYear: academicYear,
+                        },
                         pipeline: [
                             {
                                 $match: {
                                     $expr: {
                                         $and: [
-                                            { $eq: ["$addmissionId", "$$admissionId"] },
+                                            {
+                                                $eq: [
+                                                    "$addmissionId",
+                                                    "$$admissionId",
+                                                ],
+                                            },
                                             { $eq: ["$userId", "$$userId"] },
-                                            { $eq: ["$academicYear", "$$academicYear"] } // Ensuring matching academicYear
-                                        ]
-                                    }
-                                }
+                                            {
+                                                $eq: [
+                                                    "$academicYear",
+                                                    "$$academicYear",
+                                                ],
+                                            },
+                                        ],
+                                    },
+                                },
                             },
                             {
-                                $sort: { "createdAt": -1 } // Sorting by createdAt to get the latest record
-                            }
+                                $sort: { createdAt: -1 },
+                            },
                         ],
-                        as: "feespayments"
-                    }
+                        as: "feespayments",
+                    },
                 },
                 {
                     $addFields: {
@@ -1182,20 +1285,25 @@ class StudentsAdmmisionService extends BaseService {
                                 $map: {
                                     input: "$feespayments",
                                     as: "payment",
-                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
-                                }
-                            }
+                                    in: { $toDouble: "$$payment.paidAmount" },
+                                },
+                            },
                         },
                         lastRemainingAmount: {
                             $ifNull: [
-                                { $arrayElemAt: ["$feespayments.remainingAmount", 0] }, // Assuming remainingAmount field in feespayments
-                                0
-                            ]
-                        }
-                    }
-                }
+                                {
+                                    $arrayElemAt: [
+                                        "$feespayments.remainingAmount",
+                                        0,
+                                    ],
+                                },
+                                0,
+                            ],
+                        },
+                    },
+                },
             ]);
-    
+
             const response = {
                 status: "Success",
                 data: {
@@ -1203,15 +1311,13 @@ class StudentsAdmmisionService extends BaseService {
                     totalItemsCount: data.length,
                 },
             };
-    
+
             return response;
         } catch (error) {
             console.error("Error:", error);
             throw error;
         }
     }
-    
-    
 
     async findLatestAdmission() {
         try {
@@ -1318,7 +1424,7 @@ class StudentsAdmmisionService extends BaseService {
                         as: "students",
                     },
                 },
-               
+
                 {
                     $unwind: "$students",
                 },

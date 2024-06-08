@@ -27,7 +27,7 @@ router.post(
             if (req.body.returnQuantity > assetRequest.quantity) {
                 return res
                     .status(400)
-                    .json({ error: "You don't have any book for return" });
+                    .json({ error: "You don't have any asset for return" });
             }
             const serviceResponse = await service.create(req.body);
 
@@ -109,7 +109,6 @@ router.get(
                 // phoneNumber: req.query.phoneNumber,
 
                 name: req.query.name,
-
                 status: req.query.status,
                 search: req.query.search,
             };

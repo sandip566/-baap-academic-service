@@ -126,7 +126,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         );
         const totalCount = await booksModel.countDocuments(searchFilter);
         const books = await booksModel
+
             .find(searchFilter)
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .exec();
@@ -142,10 +144,17 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
                 const publisher = await publisherModel.findOne({
                     publisherId: book.publisherId,
                 });
-                const bookId = await booksModel.findOne({
+
+                return {
+                    _id: book._id,
                     bookId: book.bookId,
-                });
-                return { ...book._doc, shelf, department, publisher,bookId };
+                    book: {
+                        ...book._doc,
+                    },
+                    shelf,
+                    department,
+                    publisher,
+                };
             })
         );
         const count = await service.getBooksCount(groupId);

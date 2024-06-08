@@ -26,7 +26,7 @@ class PurchaseService extends BaseService {
             throw error;
         }
     }
-    async getAllDataByGroupId(groupId, criteria, skip, limit) {
+    async getAllDataByGroupId(groupId, criteria, skip, limit,) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -73,6 +73,7 @@ class PurchaseService extends BaseService {
                     $regex: new RegExp(criteria.orderStatus, "i"),
                 };
             }
+            
             if (criteria.name) {
                 searchFilter.name = {
                     $regex: new RegExp(criteria.name, "i"),

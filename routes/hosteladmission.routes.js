@@ -29,7 +29,8 @@ router.post("/hostelAdmission/save", async (req, res, next) => {
 
         if (req.body.hostelAdmissionId) {
             const existingDocument = await service.getByAddmissionIdData(
-                req.body.hostelAdmissionId
+                req.body.hostelAdmissionId,
+                req.body.userId
             );
             console.log(existingDocument);
             console.log("existingDocument", existingDocument.data !== null);
@@ -358,6 +359,15 @@ router.get("/getFeesStructure/:groupId", async (req, res) => {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
+});
+router.get("/getByAddmissionId/:hostelAdmissionId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByAddmissionId(
+        req.params.hostelAdmissionId
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/gethostelAdmissionId/:hostelAdmissionId", async (req, res) => {
     const serviceResponse = await service.getByHostelId(

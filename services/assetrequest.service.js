@@ -8,6 +8,21 @@ class AssetRequestService extends BaseService {
         super(dbModel, entityName);
     }
 
+    // async getAllDataByGroupId(groupId, criteria) {
+    //     const query = {
+    //         groupId: groupId,
+    //     };
+    //     if (criteria.name) query.name = new RegExp(criteria.name, "i");
+    //     if (criteria.status) query.status = new RegExp(criteria.status, "i");
+    //     if (criteria.type) query.type = new RegExp(criteria.type, "i");
+    //     if (criteria.category) query.category = new RegExp(criteria.category, "i");
+    //     if (criteria.empId) query.empId = criteria.empId;
+    //     if (criteria.userId) query.userId = criteria.userId;
+    //     return this.preparePaginationAndReturnData(query, criteria);
+    // }
+
+
+
     async getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
@@ -155,5 +170,37 @@ class AssetRequestService extends BaseService {
             });
         });
     }
+
+
+    async bulkUploadAssetRequest(data) {
+        try {
+            const { name, userName, groupId, describe,
+            quantity,priority,location,available,
+            userId,managerId,type,status
+             } = data;
+
+            console.log("Query", {
+                groupId: groupId,
+                name: name,
+                userName:userName,
+                describe:describe,
+                quantity:quantity,
+                priority:priority,
+                location:location,
+                available:available,
+                userId:userId,
+                managerId:managerId,
+                type:type,
+                status:status
+
+            });
+            const document = new AssetRequestModel(data);
+            const assetRequest = await document.save();
+            return assetRequest;
+        } catch (error) {
+            console.error("Error uploading to MongoDB:", error.message);
+            throw error;
+        }
+    } 
 }
 module.exports = new AssetRequestService(AssetRequestModel, "assetrequest");

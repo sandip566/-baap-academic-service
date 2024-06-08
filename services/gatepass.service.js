@@ -1,5 +1,6 @@
 const GatepassModel = require("../schema/gatepass.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const StudentAdmissionModel = require("../schema/studentAdmission.schema")
 
 class GatepassService extends BaseService {
     constructor(dbModel, entityName) {
@@ -16,6 +17,7 @@ class GatepassService extends BaseService {
                 query.$or = [
                     { userId: numericSearch },
                     { gatepassId: numericSearch },
+                    { managerUserId: numericSearch }
                 ];
             } else {
                 query.$or = [
@@ -24,11 +26,39 @@ class GatepassService extends BaseService {
                 ];
             }
         }
-        if (criteria.status) query.status = new RegExp(criteria.status, "i");
+        if (criteria.status) query.status = criteria.status;
         if (criteria.reason) query.reason = new RegExp(criteria.reason, "i");
         if (criteria.userId) query.userId = criteria.userId;
         if (criteria.gatepassId) query.gatepassId = criteria.gatepassId;
-        return this.preparePaginationAndReturnData(query, criteria);
+        if (criteria.managerUserId) query.managerUserId = criteria.managerUserId;
+
+        const pageNumber = criteria.pageNumber;
+        const pageSize = criteria.pageSize;
+        const skip = (pageNumber - 1) * pageSize;
+        const limit = pageSize;
+
+        const gatepassData = await GatepassModel.find(query)
+            .skip(skip)
+            .limit(limit)
+            .exec();
+
+        await Promise.all(gatepassData.map(async (gatepass) => {
+            const studentAdmission = await StudentAdmissionModel.findOne({ userId: gatepass.userId }).exec();
+            if (studentAdmission && studentAdmission.familyDetails && studentAdmission.familyDetails.length > 0) {
+                const familyDetail = studentAdmission.familyDetails.find(detail => detail.father_name);
+                gatepass.fatherName = familyDetail ? familyDetail.father_name : null;
+            } else {
+                gatepass.fatherName = null;
+            }
+        }));
+        const result = gatepassData.map(gp => ({
+            ...gp.toObject(),
+            fatherName: gp.fatherName
+        }));
+        return {
+            data: result,
+            totalCount: await GatepassModel.countDocuments(query).exec()
+        };
     }
 
     async deleteByDataId(gatepassId, groupId) {

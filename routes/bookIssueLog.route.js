@@ -32,21 +32,8 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } =
-            req.body;
+        const { groupId, bookId, addmissionId, issuedDate, dueDate, userId } = req.body;
 
-        // Validate that bookId is a number
-        if (isNaN(bookId)) {
-            return res.status(400).json({
-                success: false,
-                error: "Invalid bookId. It should be a number.",
-            });
-        }
-
-        // Convert bookId to a number
-        const bookIdNumber = Number(bookId);
-
-        // Check if the admission status is "Confirm"
         const studentAdmission = await StudentsAdmissionModel.findOne({
             groupId: groupId,
             addmissionId: addmissionId,
@@ -80,10 +67,19 @@ router.post("/issue-book", async (req, res) => {
             });
         }
 
+        const isOverdue = await service.checkOverdueStatus(groupId, addmissionId)
+
+        if (isOverdue) {
+            return res.status(400).json({
+                success: false,
+                error: "Alredy this book is not return",
+            });
+        }
+
         const existingReservation = await bookIssueLogModel.findOne({
             groupId: groupId,
             addmissionId: addmissionId,
-            bookId: bookIdNumber,
+            bookId: bookId,
             isReturn: false,
         });
 
@@ -94,30 +90,8 @@ router.post("/issue-book", async (req, res) => {
             });
         }
 
-        const checkIssuedCount = await service.checkIssuedCount(
-            groupId,
-            addmissionId
-        );
-        if (!checkIssuedCount) {
-            return res.status(400).json({
-                success: false,
-                error: "You have exceeded your book issuing limit.",
-            });
-        }
-
-        const isOverdue = await service.checkOverdueStatus(addmissionId);
-        if (isOverdue) {
-            return res.status(400).json({
-                success: false,
-                error: "Overdue book return needed.",
-            });
-        }
-
-        const isAvailable = await service.checkBookAvailability(
-            groupId,
-            bookIdNumber
-        );
-        if (!isAvailable || isAvailable.availableCount <= 0) {
+        const isAvailable = await service.checkBookAvailability(groupId, bookId);
+        if (isAvailable <= 0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for issuing. Available count is zero.",
@@ -127,11 +101,11 @@ router.post("/issue-book", async (req, res) => {
         const bookIssueLogId = Date.now();
         const newReservation = {
             groupId: groupId,
-            bookId: bookIdNumber,
+            bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
             dueDate: dueDate,
-            issuedDate: new Date(),
+            issuedDate: issuedDate,
             userId: userId,
             isReturn: false,
         };
@@ -139,7 +113,7 @@ router.post("/issue-book", async (req, res) => {
         const createdReservation = await service.create(newReservation);
 
         await Book.findOneAndUpdate(
-            { bookId: bookIdNumber, availableCount: { $gt: 0 } },
+            { bookId: bookId, availableCount: { $gt: 0 } },
             { $inc: { availableCount: -1 } },
             { new: true }
         );
@@ -157,9 +131,31 @@ router.post("/issue-book", async (req, res) => {
     }
 });
 
+router.get(
+    "/groupId/:groupId/bookIssueLogId/:bookIssueLogId",
+    async (req, res) => {
+        const serviceResponse = await service.getBybookIssueLogId(req.params.groupId, req.params.bookIssueLogId);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    }
+);
 router.post("/return-book", async (req, res) => {
     try {
         const { groupId, bookId, addmissionId, returnDate } = req.body;
+
+        if (!returnDate) {
+            return res.status(400).json({
+                success: false,
+                error: "returnDate is required",
+            });
+        }
+
+        const parsedReturnDate = new Date(returnDate);
+        if (isNaN(parsedReturnDate)) {
+            return res.status(400).json({
+                success: false,
+                error: "Invalid return date",
+            });
+        }
 
         const existingReservation = await bookIssueLogModel.findOne({
             groupId: groupId,
@@ -167,26 +163,32 @@ router.post("/return-book", async (req, res) => {
             addmissionId: addmissionId,
             isReturn: false,
         });
-        if (existingReservation?.isOverdue == true) {
-            return res.status(409).json({
-                success: false,
-                error: "First Paid Payment,Your Log is OverDue",
-            });
-        }
+
         if (!existingReservation) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not currently issued to the specified group.",
             });
         }
+
+        if (existingReservation.isOverdue === true) {
+            return res.status(409).json({
+                success: false,
+                error: "First Paid Payment, Your Log is OverDue",
+            });
+        }
+
         const updatedReservation = await service.updateBookIssueLogById(
+            groupId,
             existingReservation.bookIssueLogId,
-            { isReturn: true, returnDate: new Date() }
+            { isReturn: true, returnDate: parsedReturnDate }
         );
+
         await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
+            { bookId: bookId },
             { $inc: { availableCount: 1 } }
         );
+
         res.status(200).json({
             success: true,
             reservation: updatedReservation,
@@ -199,6 +201,7 @@ router.post("/return-book", async (req, res) => {
         });
     }
 });
+
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -215,8 +218,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
-        pageNumber: req.query.pageNumber || 1,
-        pageSize: req.query.pageSize || 10,
+        // pageNumber: req.query.pageNumber || 1,
+        // pageSize: req.query.pageSize || 10,
         search: req.query.search,
         userId: req.query.userId,
         isOverdue: req.query.isOverdue,
@@ -224,9 +227,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         isReturn: req.query.isReturn,
         studentName: req.query.studentName,
     };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria
+        criteria,
+        page,
+        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -262,8 +269,9 @@ router.put(
             const groupId = req.params.groupId;
             const newData = req.body;
             const updatebookIssueLog = await service.updateBookIssueLogById(
-                bookIssueLogId,
                 groupId,
+                bookIssueLogId,
+
                 newData
             );
             if (!updatebookIssueLog) {
@@ -285,10 +293,11 @@ router.put(
 
 router.get("/book-issues/overdue/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    const addmissionId = req.query.addmissionId;
+    const { addmissionId, bookIssueLogId } = req.query;
     const bookIssues = await service.fetchBookIssuesWithOverdue(
         groupId,
-        addmissionId
+        addmissionId,
+        bookIssueLogId
     );
     requestResponsehelper.sendResponse(res, bookIssues);
 });
@@ -423,7 +432,7 @@ router.post("/reserve-book", async (req, res) => {
             const removedReservation = await bookIssueLogModel.findOneAndUpdate(
                 {
                     bookId: bookId,
-                    bookIssueLogId:bookIssueLogId,
+                    bookIssueLogId: bookIssueLogId,
                     addmissionId: addmissionId,
                     status: "Reserved",
                     isReserve: true,

@@ -94,7 +94,7 @@ class HostelAdmissionService extends BaseService {
                 { $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true } },
                 {
                     $lookup: {
-                        from: "feestemplates", // The name of the fees template collection
+                        from: "feestemplates",
                         localField: "feesDetails.feesTemplateId",
                         foreignField: "feesTemplateId",
                         as: "feesTemplateDetails",
@@ -127,6 +127,34 @@ class HostelAdmissionService extends BaseService {
                         },
                     },
                 },
+                { $unwind: { path: "$hostelDetails", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "hostelpremises",
+                        localField: "hostelDetails.hostelId", 
+                        foreignField: "hostelId",
+                        as: "hostelDetails.hostelId", 
+                    },
+                },
+                { $unwind: { path: "$hostelDetails.hostelId", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "roooms",
+                        localField: "hostelDetails.roomId", 
+                        foreignField: "roomId",
+                        as: "hostelDetails.roomId", 
+                    },
+                },
+                { $unwind: { path: "$hostelDetails.roomId", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "beds",
+                        localField: "hostelDetails.bedId", 
+                        foreignField: "bedId",
+                        as: "hostelDetails.bedId", 
+                    },
+                },
+                { $unwind: { path: "$hostelDetails.bedId", preserveNullAndEmptyArrays: true } },
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
                 { $skip: skip },
                 { $limit: perPage },
@@ -231,6 +259,48 @@ class HostelAdmissionService extends BaseService {
             return response;
         } catch (error) {
             console.error("Error:", error);
+            throw error;
+        }
+    }
+    async getByAddmissionId(hostelAdmissionId) {
+        try {
+            const studentAdmission = await this.model.findOne({
+                hostelAdmissionId: hostelAdmissionId,
+            });
+            console.log(studentAdmission);
+            if (!studentAdmission) {
+                throw new Error("Student admission not found");
+            }
+
+            let additionalData = {};
+
+            // Process fees details
+            if (
+                studentAdmission.feesDetails &&
+                studentAdmission.feesDetails.length > 0
+            ) {
+                additionalData.feesDetails = await Promise.all(
+                    studentAdmission.feesDetails.map(async (feesDetail) => {
+                        let feesAdditionalData = {};
+
+                        if (feesDetail.feesTemplateId) {
+                            const feesTemplate =
+                                await feesTemplateModel.findOne({
+                                    feesTemplateId: feesDetail.feesTemplateId,
+                                });
+                            feesAdditionalData.feesTemplateId = feesTemplate;
+                        }
+
+                        return { ...feesDetail, ...feesAdditionalData };
+                    })
+                );
+            }
+            let response = {
+                status: "success",
+                data: { ...studentAdmission._doc, ...additionalData },
+            };
+            return response;
+        } catch (error) {
             throw error;
         }
     }
@@ -410,19 +480,23 @@ class HostelAdmissionService extends BaseService {
                 {
                     $addFields: {
                         totalPaidAmount: {
-                            $sum: {
-                                $map: {
-                                    input: "$feespayments",
-                                    as: "payment",
-                                    in: { $toDouble: "$$payment.paidAmount" } // Assuming paidAmount field in feespayments
+                            $toInt: {
+                                $sum: {
+                                    $map: {
+                                        input: "$feespayments",
+                                        as: "payment",
+                                        in: { $toDouble: "$$payment.paidAmount" }
+                                    }
                                 }
                             }
                         },
                         lastRemainingAmount: {
-                            $ifNull: [
-                                { $arrayElemAt: ["$feespayments.remainingAmount", -1] }, // Extracting remainingAmount from the last payment
-                                0
-                            ]
+                            $toInt: {
+                                $ifNull: [
+                                    { $arrayElemAt: ["$feespayments.remainingAmount", -1] },
+                                    0
+                                ]
+                            }
                         }
                     }
                 }
@@ -698,9 +772,9 @@ class HostelAdmissionService extends BaseService {
             });
         });
     }
-    async getByAddmissionIdData(hostelAdmissionId) {
+    async getByAddmissionIdData(hostelAdmissionId,userId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId });
+            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId,userId: userId });
         });
     }
     async updateUser(hostelAdmissionId, groupId, data) {

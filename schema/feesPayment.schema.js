@@ -38,6 +38,10 @@ const feesPaymentSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
+        remainingAmount: {
+            type: String,
+            required: false,
+        },
         userId: {
             type: Number,
             required: false,

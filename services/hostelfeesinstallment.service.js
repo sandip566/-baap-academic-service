@@ -25,6 +25,8 @@ class HostelFeesInstallmentService extends BaseService {
             return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
         });
     }
+ 
+
     async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
             const updateResult = await HostelFeesInstallmentModel.findOneAndUpdate(

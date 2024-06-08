@@ -5,18 +5,17 @@ const studentAdmissionModel = require("../schema/studentAdmission.schema.js");
 const { addListener } = require("../schema/publisher.schema.js");
 const studentAdmissionServices = require("./studentAdmission.services.js");
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema.js");
-const configurationModel=require("../schema/configuration.schema.js");
+const configurationModel = require("../schema/configuration.schema.js");
 class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria, page, limit) {
         try {
             const searchFilter = { groupId };
             const bookMap = await this.getBookMap();
             const studentMap = await this.getStudentMap();
     
-            // Handle search criteria
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
@@ -36,17 +35,21 @@ class BookIssueLogService extends BaseService {
                 }
             }
     
-            // Apply additional criteria
             if (criteria.isReturn !== undefined) searchFilter.isReturn = criteria.isReturn;
             if (criteria.isReserve !== undefined) searchFilter.isReserve = criteria.isReserve;
             if (criteria.status) searchFilter.status = criteria.status;
             if (criteria.isOverdue !== undefined) searchFilter.isOverdue = criteria.isOverdue;
             if (criteria.userId) searchFilter.userId = criteria.userId;
+            const sortOrder = { createdAt: -1 };
     
-            // Fetch book issue logs based on the filter
-            const bookIssueLogs = await bookIssueLogModel.find(searchFilter);
+            const skip = (page - 1) * limit;
     
-            // Populate books and students for each log
+            const bookIssueLogs = await bookIssueLogModel
+                .find(searchFilter)
+                .sort(sortOrder)
+                .skip(skip)
+                .limit(limit);
+    
             const populatedBooks = await Promise.all(
                 bookIssueLogs.map(async (log) => {
                     const books = await Book.findOne({ bookId: log.bookId });
@@ -55,12 +58,15 @@ class BookIssueLogService extends BaseService {
                 })
             );
     
-            // Get counts
+            const filteredBooks = criteria.search && isNaN(parseInt(criteria.search))
+                ? populatedBooks.filter(log => log.books && log.books.name.toLowerCase().includes(criteria.search.toLowerCase()))
+                : populatedBooks;
+    
             const count = await this.getCount(groupId);
             const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
     
             return {
-                populatedBookIssueLog: populatedBooks,
+                populatedBookIssueLog: filteredBooks,
                 count,
                 totalCount,
             };
@@ -69,6 +75,7 @@ class BookIssueLogService extends BaseService {
             throw new Error("An error occurred while processing the request. Please try again later.");
         }
     }
+    
     async getBookMap() {
         try {
             const books = await Book.find();
@@ -109,11 +116,22 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-
-    async updateBookIssueLogById(bookIssueLogId,groupId, newData) {
+    async getBybookIssueLogId(groupId, bookIssueLogId) {
+        return this.execute(() => {
+            return bookIssueLogModel.findOne({
+                groupId: groupId,
+                bookIssueLogId: bookIssueLogId,
+            });
+        });
+    }
+    async updateBookIssueLogById(groupId, bookIssueLogId, newData) {
         try {
+            console.log("query2", {
+                groupId: groupId,
+                bookIssueLogId: bookIssueLogId,
+            });
             const updateBookIssueLog = await bookIssueLogModel.findOneAndUpdate(
-                { bookIssueLogId: bookIssueLogId,groupId:groupId },
+                { groupId: groupId, bookIssueLogId: Number(bookIssueLogId) },
                 { $set: newData },
                 { new: true }
             );
@@ -123,9 +141,10 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async checkOverdueStatus(addmissionId) {
+    async checkOverdueStatus(groupId, addmissionId) {
         try {
             const existingReservation = await bookIssueLogModel.findOne({
+                groupId: groupId,
                 addmissionId: addmissionId,
                 isOverdue: true,
             });
@@ -154,18 +173,23 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async fetchBookIssuesWithOverdue(groupId, addmissionId) {
+    async fetchBookIssuesWithOverdue(groupId, addmissionId, bookIssueLogId) {
         try {
             const currDate = new Date();
             const finePerDay = 5;
             let query = {
-                groupId: groupId,
+                groupId: Number(groupId),
                 isReturn: false,
             };
 
             if (addmissionId) {
-                query.addmissionId = addmissionId;
+                query.addmissionId = Number(addmissionId);
             }
+
+            if (bookIssueLogId) {
+                query.bookIssueLogId = Number(bookIssueLogId);
+            }
+
             const bookIssues = await bookIssueLogModel.find(query);
 
             const studentIds = bookIssues.map((issue) => issue.addmissionId);
@@ -174,6 +198,7 @@ class BookIssueLogService extends BaseService {
                 addmissionId: { $in: studentIds },
             });
             const books = await Book.find({ bookId: { $in: bookIds } });
+
             await Promise.all(
                 bookIssues.map(async (bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
@@ -183,9 +208,10 @@ class BookIssueLogService extends BaseService {
                     );
 
                     if (diffDays >= 0) {
+                        const totalFine = diffDays * finePerDay;
                         await bookIssueLogModel.updateOne(
                             { _id: bookIssue._id },
-                            { $set: { isOverdue: true } }
+                            { $set: { isOverdue: true, totalFine: totalFine } }
                         );
                     }
                 })
@@ -215,7 +241,30 @@ class BookIssueLogService extends BaseService {
                     );
                     let bookIssueDate = bookIssue.issueDate;
                     const totalFine = diffDays * finePerDay;
-                    var response = {
+                    let response = {
+                        _id: bookIssue._id,
+                        bookId: bookIssue.bookId,
+                        book: {
+                            _id: book._id,
+                            bookId: book.bookId,
+                            name: book.name,
+                            purchaseId: book.purchaseId,
+                            groupId: book.groupId,
+                            author: book.author,
+                            ISBN: book.ISBN,
+                            totalCopies: book.totalCopies,
+                            availableCount: book.availableCount,
+                            shelfId: book.shelfId,
+                            status: book.status,
+                            vendorId: book.vendorId,
+                            rackName: book.rackName,
+                            rackNumber: book.rackNumber,
+                            book_img: book.book_img,
+                            createdAt: book.createdAt,
+                            updatedAt: book.updatedAt,
+                            __v: book.__v,
+                        },
+                        bookIssueLogId: bookIssue.bookIssueLogId,
                         bookIssueDate,
                         addmissionId: student.addmissionId,
                         studentName: student ? student.name : "Unknown Student",
@@ -307,6 +356,7 @@ class BookIssueLogService extends BaseService {
                 );
 
                 return {
+                    bookIssueLogId:item.bookIssueLogId,
                     bookIssueDate: item.issuedDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,
@@ -369,9 +419,12 @@ class BookIssueLogService extends BaseService {
 
     async checkBookAvailability(groupId, bookId) {
         try {
-            const book = await Book.find({ groupId: groupId, bookId: bookId });
-            console.log(book);
-            return book;
+            const book = await Book.findOne({
+                groupId: Number(groupId),
+                bookId: Number(bookId),
+            });
+            const availableCount = book.availableCount;
+            return availableCount;
         } catch (error) {
             throw error;
         }

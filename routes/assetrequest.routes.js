@@ -4,7 +4,12 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/assetrequest.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const assetModel=require("../schema/asset.schema");
+const AssetRequestModel = require("../schema/assetrequest.schema");
 
+const multer = require("multer");
+const upload = multer();
+const xlsx = require("xlsx");
 router.post(
     "/",
     checkSchema(require("../dto/assetrequest.dto")),
@@ -67,6 +72,27 @@ router.get("/all/assetRequest", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
+// router.get("/all/getByGroupId/:groupId", async (req, res) => {
+//   const groupId = req.params.groupId;
+//   const criteria = {
+//     name: req.query.name,
+//     type: req.query.type,
+//     status: req.query.status,
+//     category: req.query.category,
+//     empId: req.query.empId,
+//     userId: req.query.userId,
+//     pageNumber: parseInt(req.query.pageNumber) || 1,
+//     pageSize: parseInt(req.query.pageSize) || 10,
+//   };
+//   const serviceResponse = await service.getAllDataByGroupId(
+//     groupId,
+//     criteria
+//   );
+//   requestResponsehelper.sendResponse(res, serviceResponse);
+// });
+
+
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
@@ -158,4 +184,66 @@ router.get("/getClearanceData/groupId/:groupId/userId/:userId", async (req, res)
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
+router.post(
+    "/bulkUploadAssetRequest",
+    upload.single("excelFile"),
+    async (req, res) => {
+        if (!req.file) {
+            return res.status(400).send("No file uploaded.");
+        }
+
+        const workbook = xlsx.read(req.file.buffer, { type: "buffer" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const jsonData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
+
+        const headers = jsonData[0];
+
+        const uploadedData = [];
+
+        for (let i = 1; i < jsonData.length; i++) {
+            const requestId = +Date.now();
+            const row = jsonData[i];
+            const data = createAssetRequestDataObject(headers, row);
+
+            if (row.every((value) => value === null || value === "")) {
+                continue;
+            }
+
+            data.requestId = requestId;
+
+            if (data && Object.keys(data).length > 0) {
+                const result = await service.bulkUploadAssetRequest(data);
+                uploadedData.push(result);
+            }
+        }
+        console.log(uploadedData);
+
+        res.status(200).json({
+            message: "File uploaded and processed successfully.",
+            uploadedData: uploadedData,
+        });
+    }
+);
+
+
+function createAssetRequestDataObject(headers, row) {
+    const data = {};
+    for (let i = 0; i < headers.length; i++) {
+        const header = headers[i];
+        const value = row[i];
+
+        if (header === "groupId" && !isNaN(value) && value !== undefined) {
+            data[header] = Number(value);
+        } else if (header === "name" && value !== undefined) {
+            data[header] = value;
+        } else if (value !== undefined) {
+            data[header] = value;
+        }
+    }
+    return data;
+}
+
 module.exports = router;

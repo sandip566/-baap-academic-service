@@ -8,9 +8,13 @@ const BedSchema = new mongoose.Schema(
           },
         name: {
             type: String,
-            required: true,
+            required: false,
         },
         bedId:{
+            type:Number,
+            strict: false
+        },
+        numberOfBed:{
             type:Number,
             strict: false
         },
