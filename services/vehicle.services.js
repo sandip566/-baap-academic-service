@@ -12,7 +12,7 @@ class vehicleervice extends BaseService {
         });
     }
 
-    async getAllDataByGroupId(groupId, vehicalNo, ownerName, search, page, limit) {
+    async getAllDataByGroupId(groupId, ownerName,vehicalNo,phoneNumber, search, page, limit) {
         try {
             const searchFilter = {
                 groupId: groupId,
@@ -23,6 +23,7 @@ class vehicleervice extends BaseService {
                     searchFilter.$or = [
                         { ownerName: { $regex: search, $options: "i" } },
                         { vehicalNo: { $regex: search, $options: "i" } },
+                        { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
@@ -37,6 +38,9 @@ class vehicleervice extends BaseService {
             }
             if (vehicalNo) {
                 searchFilter.vehicalNo = { $regex: vehicalNo, $options: "i" };
+            }
+            if (phoneNumber) {
+                searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
             const count = await vehicleModel.countDocuments(searchFilter);

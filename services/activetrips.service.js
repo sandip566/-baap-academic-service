@@ -4,6 +4,7 @@ const BusRouteModel = require("../schema/busroutes.schema")
 const CareTakerModel = require("../schema/caretaker.schema")
 const DriverModel = require("../schema/driver.schema")
 const VehicleModel = require("../schema/vehicle.schema")
+const TravellerModel = require('../schema/traveller.schema')
 
 class ActiveTripsService extends BaseService {
     constructor(dbModel, entityName) {
@@ -304,6 +305,19 @@ class ActiveTripsService extends BaseService {
                 throw new Error('No active trip found.');
             }
 
+            const onBoaredTravellers = await Promise.all(
+                activeTrip.onBoaredTraveller.map(async (traveller) => {
+                    const travellerDetails = await TravellerModel.findOne({ groupId: groupId, travellerId: traveller.travellerId });
+                    if (!travellerDetails) {
+                        throw new Error(`No traveller found with travellerId: ${traveller.travellerId}`);
+                    }
+                    return {
+                        ...traveller,
+                        travellerDetails
+                    };
+                })
+            );
+
             const lastLocation = activeTrip.currentLocation[activeTrip.currentLocation.length - 1];
             const currentLocationData = {
                 latitude: parseFloat(lastLocation.lat),
@@ -314,7 +328,10 @@ class ActiveTripsService extends BaseService {
 
             return {
                 data: {
-                    activeTrip,
+                    activeTrip: {
+                        ...activeTrip.toObject(),
+                        onBoaredTraveller: onBoaredTravellers
+                    },
                     nearestStop
                 }
             };
