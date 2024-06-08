@@ -115,12 +115,31 @@ class ActiveTripsService extends BaseService {
 
     async updatedriverById(tripId, groupId, newData) {
         try {
-            const updatedVisitor = await ActiveTripsModel.findOneAndUpdate(
-                { tripId: tripId, groupId: groupId },
-                newData,
-                { new: true }
-            );
-            return updatedVisitor;
+            const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
+
+            if (!existingTrip) {
+                const newTrip = new ActiveTripsModel({
+                    tripId: tripId,
+                    groupId: groupId,
+                    ...newData
+                });
+                return await newTrip.save();
+            } else {
+                const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
+                const updatedTravellers = newData.onBoaredTraveller || [];
+
+                updatedTravellers.forEach(newTraveller => {
+                    const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
+                    if (index !== -1) {
+                        existingOnBoardTravellers[index] = newTraveller;
+                    } else {
+                        existingOnBoardTravellers.push(newTraveller);
+                    }
+                });
+                existingTrip.onBoaredTraveller = existingOnBoardTravellers;
+                const updatedTrip = await existingTrip.save();
+                return updatedTrip;
+            }
         } catch (error) {
             throw error;
         }
@@ -128,10 +147,18 @@ class ActiveTripsService extends BaseService {
 
     async getActiveTrip(groupId, tripId, lat, long) {
         let query = { groupId: Number(groupId), tripId: Number(tripId) };
+
         const trip = await ActiveTripsModel.findOne(query);
+
         if (!trip) {
             return null;
         }
+        const existingLatitude = trip.currentLocation.find(location => location.lat === lat);
+        if (!existingLatitude) {
+            trip.currentLocation.push({ lat, long });
+        }
+
+        const updatedTrip = await trip.save();
 
         const driver = await DriverModel.findOne({ groupId: Number(groupId), driverId: trip.driverId });
         const caretaker = await CareTakerModel.findOne({ groupId: Number(groupId), careTakerId: trip.careTakerId });
@@ -264,6 +291,105 @@ class ActiveTripsService extends BaseService {
                 items: activeTrips
             }
         }
+    }
+
+    async getTrip(groupId, tripId) {
+        try {
+            let query = { groupId: Number(groupId), tripId: tripId };
+            const activeTrip = await ActiveTripsModel.findOne(query);
+
+            if (!activeTrip) {
+                throw new Error('No active trip found.');
+            }
+
+            const lastLocation = activeTrip.currentLocation[activeTrip.currentLocation.length - 1];
+            const currentLocationData = {
+                latitude: parseFloat(lastLocation.lat),
+                longitude: parseFloat(lastLocation.long)
+            };
+
+            const nearestStop = await this.findNearestBusStop(groupId, activeTrip.routeId, currentLocationData);
+
+            return {
+                data: {
+                    activeTrip,
+                    nearestStop
+                }
+            };
+        } catch (error) {
+            throw new Error("Error in getTrip function: " + error.message);
+        }
+    }
+
+    async findNearestBusStop(groupId, routeId, currentLocation) {
+        try {
+            const busRoute = await BusRouteModel.findOne({ groupId: Number(groupId), routeId: Number(routeId) });
+
+            if (!busRoute) {
+                throw new Error('No bus route found.');
+            }
+
+            let nearestStop = null;
+            let minDistance = Number.MAX_SAFE_INTEGER;
+
+            function calculateDistance(lat1, lon1, lat2, lon2, unit = 'km') {
+                const R = 6371;
+                const dLat = (lat2 - lat1) * Math.PI / 180;
+                const dLon = (lon2 - lon1) * Math.PI / 180;
+                const a =
+                    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+                const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+                const distance = R * c;
+
+                if (unit === 'm') {
+                    return distance * 1000;
+                }
+                return distance;
+            }
+
+            for (const stop of busRoute.stopDetails) {
+                const stopLocation = {
+                    latitude: stop.location.lattitude,
+                    longitude: stop.location.longitude
+                };
+                const distance = calculateDistance(
+                    currentLocation.latitude,
+                    currentLocation.longitude,
+                    stopLocation.latitude,
+                    stopLocation.longitude
+                );
+
+                if (distance < minDistance) {
+                    minDistance = distance;
+                    nearestStop = {
+                        _id: stop._id,
+                        stopId: stop.stopId,
+                        stopName: stop.stopName,
+                        fees: stop.fees,
+                        location: {
+                            lattitude: stop.location.lattitude,
+                            longitude: stop.location.longitude
+                        },
+                        distance: distance.toFixed(2) + ' km',
+                        arrivalTime: this.calculateArrivalTime(distance)
+                    };
+                }
+            }
+
+            return nearestStop;
+        } catch (error) {
+            throw new Error("Error in findNearestBusStop function: " + error.message);
+        }
+    }
+
+    calculateArrivalTime(distance) {
+        const averageSpeed = 30;
+        const arrivalTimeInHours = distance / averageSpeed;
+        const hours = Math.floor(arrivalTimeInHours);
+        const minutes = Math.round((arrivalTimeInHours - hours) * 60);
+        return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')} hr`;
     }
 
 }

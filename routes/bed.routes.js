@@ -50,7 +50,8 @@ router.get(
         const groupId = req.params.groupId;
         const criteria = {
             name: req.query.name,
-            status: req.query.status
+            status: req.query.status,
+            numberOfBed: req.query.numberOfBed
         };
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,

@@ -14,6 +14,10 @@ const BedSchema = new mongoose.Schema(
             type:Number,
             strict: false
         },
+        numberOfBed:{
+            type:Number,
+            strict: false
+        },
         bedNumber:{
             type:Number,
             strict: true

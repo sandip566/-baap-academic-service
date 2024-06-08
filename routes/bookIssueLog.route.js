@@ -171,7 +171,7 @@ router.post("/return-book", async (req, res) => {
             });
         }
 
-        if (existingReservation.isOverdue) {
+        if (existingReservation.isOverdue === true) {
             return res.status(409).json({
                 success: false,
                 error: "First Paid Payment, Your Log is OverDue",
