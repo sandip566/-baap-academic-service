@@ -6,18 +6,18 @@ class CommunicationService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-   
     formatDate(timestamp) {
         const date = new Date(timestamp);
+        const utcOffset = 330; 
+        const istDate = new Date(date.getTime() + (utcOffset * 60 * 1000));
     
-        const day = ("0" + date.getDate()).slice(-2);
+        const day = ("0" + istDate.getUTCDate()).slice(-2);
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        const month = monthNames[date.getMonth()];
-        const year = date.getFullYear();
+        const month = monthNames[istDate.getUTCMonth()];
+        const year = istDate.getUTCFullYear();
     
-        let hours = date.getHours();
-        const minutes = ("0" + date.getMinutes()).slice(-2);
-    
+        let hours = istDate.getUTCHours();
+        const minutes = ("0" + istDate.getUTCMinutes()).slice(-2);
         const ampm = hours >= 12 ? 'PM' : 'AM';
         hours = hours % 12 || 12; 
     
