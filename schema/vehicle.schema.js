@@ -9,17 +9,17 @@ const vehicle = new mongoose.Schema(
             type: Number,
             required: true
         },
+        ownerName: {
+            type: String,
+            required: true
+        },
+        phoneNumber: {
+            type: Number,
+            required: true
+        },
         shiftId: {
             type: Number,
             required: true
-        },
-        empId: {
-            type: Number,
-            required: true
-        },
-        VINNo: {
-            type: Number,
-            required: false
         },
         vehicalNo: {
             type: String,
@@ -33,9 +33,6 @@ const vehicle = new mongoose.Schema(
             type: String,
             enum: ['Petrol', 'Diesel', 'CNG'],
             required: false
-        },
-        phoneNumber: {
-            type: Number,
         },
         color: {
             type: String,
