@@ -15,7 +15,7 @@ class BookIssueLogService extends BaseService {
             const searchFilter = { groupId };
             const bookMap = await this.getBookMap();
             const studentMap = await this.getStudentMap();
-    
+
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
@@ -24,47 +24,67 @@ class BookIssueLogService extends BaseService {
                         { bookIssueLogId: numericSearch },
                     ];
                 } else {
-                    const bookId = bookMap[criteria.search.trim().toLowerCase()];
-                    const admissionId = studentMap[criteria.search.trim().toLowerCase()];
+                    const bookId =
+                        bookMap[criteria.search.trim().toLowerCase()];
+                    const admissionId =
+                        studentMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
                         { bookId },
                         { name: { $regex: new RegExp(criteria.search, "i") } },
                         { admissionId },
-                        { firstName: { $regex: new RegExp(criteria.search, "i") } },
+                        {
+                            firstName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
                     ];
                 }
             }
-    
-            if (criteria.isReturn !== undefined) searchFilter.isReturn = criteria.isReturn;
-            if (criteria.isReserve !== undefined) searchFilter.isReserve = criteria.isReserve;
+
+            if (criteria.isReturn !== undefined)
+                searchFilter.isReturn = criteria.isReturn;
+            if (criteria.isReserve !== undefined)
+                searchFilter.isReserve = criteria.isReserve;
             if (criteria.status) searchFilter.status = criteria.status;
-            if (criteria.isOverdue !== undefined) searchFilter.isOverdue = criteria.isOverdue;
+            if (criteria.isOverdue !== undefined)
+                searchFilter.isOverdue = criteria.isOverdue;
             if (criteria.userId) searchFilter.userId = criteria.userId;
             const sortOrder = { createdAt: -1 };
-    
+
             const skip = (page - 1) * limit;
-    
+
             const bookIssueLogs = await bookIssueLogModel
                 .find(searchFilter)
                 .sort(sortOrder)
                 .skip(skip)
                 .limit(limit);
-    
+
             const populatedBooks = await Promise.all(
                 bookIssueLogs.map(async (log) => {
                     const books = await Book.findOne({ bookId: log.bookId });
-                    const student = await studentAdmissionModel.findOne({ addmissionId: log.addmissionId });
+                    const student = await studentAdmissionModel.findOne({
+                        addmissionId: log.addmissionId,
+                    });
                     return { ...log._doc, books, student };
                 })
             );
-    
-            const filteredBooks = criteria.search && isNaN(parseInt(criteria.search))
-                ? populatedBooks.filter(log => log.books && log.books.name.toLowerCase().includes(criteria.search.toLowerCase()))
-                : populatedBooks;
-    
+
+            const filteredBooks =
+                criteria.search && isNaN(parseInt(criteria.search))
+                    ? populatedBooks.filter(
+                          (log) =>
+                              log.books &&
+                              log.books.name
+                                  .toLowerCase()
+                                  .includes(criteria.search.toLowerCase())
+                      )
+                    : populatedBooks;
+
             const count = await this.getCount(groupId);
-            const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
-    
+            const totalCount = await bookIssueLogModel.countDocuments(
+                searchFilter
+            );
+
             return {
                 populatedBookIssueLog: filteredBooks,
                 count,
@@ -72,10 +92,12 @@ class BookIssueLogService extends BaseService {
             };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
-            throw new Error("An error occurred while processing the request. Please try again later.");
+            throw new Error(
+                "An error occurred while processing the request. Please try again later."
+            );
         }
     }
-    
+
     async getBookMap() {
         try {
             const books = await Book.find();
@@ -173,7 +195,12 @@ class BookIssueLogService extends BaseService {
         }
     }
 
-    async fetchBookIssuesWithOverdue(groupId, addmissionId, bookIssueLogId) {
+    async fetchBookIssuesWithOverdue(
+        groupId,
+        addmissionId,
+        bookIssueLogId,
+        userId
+    ) {
         try {
             const currDate = new Date();
             const finePerDay = 5;
@@ -185,6 +212,9 @@ class BookIssueLogService extends BaseService {
             if (addmissionId) {
                 query.addmissionId = Number(addmissionId);
             }
+            if (userId) {
+                query.userId = Number(userId);
+            }
 
             if (bookIssueLogId) {
                 query.bookIssueLogId = Number(bookIssueLogId);
@@ -192,11 +222,11 @@ class BookIssueLogService extends BaseService {
 
             const bookIssues = await bookIssueLogModel.find(query);
 
-            const studentIds = bookIssues.map((issue) => issue.addmissionId);
+            // const studentIds = bookIssues.map((issue) => issue.addmissionId);
             const bookIds = bookIssues.map((issue) => issue.bookId);
-            const students = await studentAdmissionModel.find({
-                addmissionId: { $in: studentIds },
-            });
+            // const students = await studentAdmissionModel.find({
+            //     addmissionId: { $in: studentIds },
+            // });
             const books = await Book.find({ bookId: { $in: bookIds } });
 
             await Promise.all(
@@ -232,10 +262,10 @@ class BookIssueLogService extends BaseService {
                     const diffDays = Math.ceil(
                         diffTime / (1000 * 60 * 60 * 24)
                     );
-                    const student = students.find(
-                        (student) =>
-                            student.addmissionId === bookIssue.addmissionId
-                    );
+                    // const student = students.find(
+                    //     (student) =>
+                    //         student.addmissionId === bookIssue.addmissionId
+                    // );
                     const book = books.find(
                         (book) => book.bookId === bookIssue.bookId
                     );
@@ -266,10 +296,12 @@ class BookIssueLogService extends BaseService {
                         },
                         bookIssueLogId: bookIssue.bookIssueLogId,
                         bookIssueDate,
-                        addmissionId: student.addmissionId,
-                        studentName: student ? student.name : "Unknown Student",
-                        image: student
-                            ? student.profile_img
+                        // addmissionId: student.addmissionId,
+                        studentName: bookIssue
+                            ? bookIssue.name
+                            : "Unknown Student",
+                        image: bookIssue
+                            ? bookIssue.profile_img
                             : "image is not provided",
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
@@ -356,7 +388,7 @@ class BookIssueLogService extends BaseService {
                 );
 
                 return {
-                    bookIssueLogId:item.bookIssueLogId,
+                    bookIssueLogId: item.bookIssueLogId,
                     bookIssueDate: item.issuedDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,
@@ -410,7 +442,10 @@ class BookIssueLogService extends BaseService {
     }
     async reserveBook(groupId, bookId) {
         try {
-            const book = await Book.find({ groupId: groupId, bookId: bookId });
+            const book = await Book.findOne({
+                groupId: groupId,
+                bookId: bookId,
+            });
             return book;
         } catch (error) {
             throw error;

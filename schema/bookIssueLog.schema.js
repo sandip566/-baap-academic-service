@@ -5,6 +5,10 @@ const bookIssueLogSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        userId:{
+            type:Number,
+            required: true,
+        },
         labmembershipNumber: {
             type: Number,
             require: false,
@@ -26,9 +30,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        userId: {
-            type: Number
-        },
+        
         status:{
             type:String,
             enum:["Reserved","Returned","Issued","Overdue"]
