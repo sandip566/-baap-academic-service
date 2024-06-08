@@ -6,26 +6,31 @@ class CommunicationService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
-    // Centralize date formatting
     formatDate(timestamp) {
         const date = new Date(timestamp);
-        const day = ("0" + date.getDate()).slice(-2);
-        const month = ("0" + (date.getMonth() + 1)).slice(-2);
-        const year = date.getFullYear();
-        const hours = ("0" + date.getHours()).slice(-2);
-        const minutes = ("0" + date.getMinutes()).slice(-2);
-
-        return `${day}/${month}/${year} ${hours}:${minutes}`;
+        const utcOffset = 330; 
+        const istDate = new Date(date.getTime() + (utcOffset * 60 * 1000));
+    
+        const day = ("0" + istDate.getUTCDate()).slice(-2);
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        const month = monthNames[istDate.getUTCMonth()];
+        const year = istDate.getUTCFullYear();
+    
+        let hours = istDate.getUTCHours();
+        const minutes = ("0" + istDate.getUTCMinutes()).slice(-2);
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12; 
+    
+        return `${day} ${month},${year} ${hours}:${minutes} ${ampm}`;
     }
-
+    
+    
     async saveChat(data) {
         try {
             const { senderId, receiverId } = data;
             const communicationId = await this.findOrCreateCommunicationId(senderId, receiverId);
             const newChat = new this.model({ ...data, communicationId });
-            const savedChat = await newChat.save();
-            // Format date before sending response
+            const savedChat = await newChat.save(); 
             const formattedChat = {
                 ...savedChat.toObject(),
                 formattedDateTime: this.formatDate(savedChat.timestamp)
