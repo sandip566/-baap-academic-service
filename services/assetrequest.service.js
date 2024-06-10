@@ -24,8 +24,11 @@ class AssetRequestService extends BaseService {
     // }
 
     async getAllDataByGroupId(groupId, criteria) {
+        const pageNumber = criteria.pageNumber;
+        const pageSize = criteria.pageSize;
+    
         const query = {
-            groupId: groupId,
+            groupId: Number(groupId),
         };
         if (criteria.search) {
             const numericSearch = parseInt(criteria.search);
@@ -54,9 +57,24 @@ class AssetRequestService extends BaseService {
         if (criteria.managerUserId)
             query.managerUserId = criteria.managerUserId;
         if (criteria.userId) query.userId = criteria.userId;
-        return this.preparePaginationAndReturnData(query, criteria);
+    
+        const totalItemsCount = await AssetRequestModel.countDocuments(query);
+        const assetRequest = await AssetRequestModel.aggregate([
+            { $match: query },
+            { $sort: { createdAt: -1 } },
+            { $skip: (pageNumber - 1) * pageSize },
+            { $limit: pageSize }
+        ]);
+    
+        return {
+            status: "Success",
+            data: {
+                items: assetRequest,
+                totalItemsCount,
+            },
+        };
     }
-
+    
     async deleteByDataId(requestId, groupId) {
         try {
             const deleteData = await AssetRequestModel.findOneAndDelete({
@@ -74,19 +92,27 @@ class AssetRequestService extends BaseService {
 
     async updateDataById(requestId, groupId, newData) {
         try {
-            const assetRequest = await AssetRequestModel.findOneAndUpdate(
-                { requestId: requestId, groupId: groupId },
-                newData,
-                { new: true }
-            );
-            if (assetRequest.status === "issued") {
+            const assetRequest = await AssetRequestModel.findOne({ requestId: requestId, groupId: groupId });
+            if (!assetRequest) {
+                return { error: "Asset request not found" };
+            }
+
+            if (assetRequest.status === "Issued" && newData.status === "Issued") {
+                return { error: "This request has already been issued" };
+            }
+
+            if (newData.status === "Issued") {
                 const updateResponse = await this.updateAssetCount(assetRequest.assetId, assetRequest.quantity);
                 if (updateResponse !== "Asset count updated successfully") {
                     return { error: updateResponse };
                 }
             }
+
+            assetRequest.status = newData.status;
+            await assetRequest.save();
             return assetRequest;
         } catch (error) {
+            console.error("Error in updateDataById:", error);
             throw error;
         }
     }
@@ -97,6 +123,7 @@ class AssetRequestService extends BaseService {
             if (!asset) {
                 return "Asset not found";
             }
+
             const currentAvailable = Number(asset.available);
             if (isNaN(currentAvailable)) {
                 return "Invalid available quantity in asset";
@@ -105,14 +132,13 @@ class AssetRequestService extends BaseService {
             if (currentAvailable < quantity) {
                 return "Asset not available";
             }
-            const newAvailable = Math.max(currentAvailable - quantity, 0);
-            await AssetModel.findOneAndUpdate(
-                { assetId: assetId },
-                { available: newAvailable },
-                { new: true }
-            );
+
+            const newAvailable = currentAvailable - quantity;
+            asset.available = newAvailable;
+            await asset.save();
             return "Asset count updated successfully";
         } catch (error) {
+            console.error("Error in updateAssetCount:", error);
             throw error;
         }
     }

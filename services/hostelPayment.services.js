@@ -32,32 +32,23 @@ class hostelPaymentService extends BaseService {
                 let courseData = await hostelPremisesModel.find({
                     groupId: groupId,
                 });
-                let courseID;
-                let courseFee;
-                let paginationAdmissionData = await HostelAdmissionModel.find({
-                    groupId: Number(groupId),
-                    // academicYear: criteria.academicYear,
-                    admissionStatus: "Confirm",
-                });
+
                 let matchStage = {
                     groupId: Number(groupId),
-                    // academicYear: criteria.academicYear,
                     admissionStatus: "Confirm",
                 };
+
                 let feesMatchStage = {
                     "hostelPaymentData.groupId": Number(groupId),
-                    // "feesPaymentData.academicYear": criteria.academicYear,
-                    // "feesPaymentData.isShowInAccounting": true,
                 };
 
                 if (criteria.currentDate) {
-                    feesMatchStage["hostelPaymentData.currentDate"] =
-                        criteria.currentDate;
+                    feesMatchStage["hostelPaymentData.currentDate"] = criteria.currentDate;
                 }
 
                 let date = new Date();
                 const year = date.getFullYear();
-                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+                const month = String(date.getMonth() + 1).padStart(2, "0");
                 const day = String(date.getDate()).padStart(2, "0");
                 let currentDate = `${year}/${month}/${day}`;
 
@@ -74,34 +65,23 @@ class hostelPaymentService extends BaseService {
                         $lte: criteria.endDate,
                     };
                 }
+
                 if (criteria.feesTemplateId) {
-                    matchStage["feesDetails.feesTemplateId"] = Number(
-                        criteria.feesTemplateId
-                    );
+                    matchStage["feesDetails.feesTemplateId"] = Number(criteria.feesTemplateId);
                 }
                 if (criteria.location) {
                     matchStage["location"] = criteria.location;
                 }
-                // if (criteria.department) {
-                //     matchStage["courseDetails.department_id"] = Number(
-                //         criteria.department
-                //     );
-                // }
+
                 if (criteria.hostelId) {
-                    matchStage["hostelDetails.hostelId"] = Number(
-                        criteria.hostelId
-                    );
+                    matchStage["hostelDetails.hostelId"] = Number(criteria.hostelId);
                 }
                 if (criteria.roomId) {
-                    matchStage["hostelDetails.roomId"] = Number(
-                        criteria.roomId
-                    );
+                    matchStage["hostelDetails.roomId"] = Number(criteria.roomId);
                 }
 
                 if (criteria.bedId) {
-                    matchStage["hostelDetails.bedId"] = Number(
-                        criteria.bedId
-                    );
+                    matchStage["hostelDetails.bedId"] = Number(criteria.bedId);
                 }
 
                 let admissionData = await HostelAdmissionModel.aggregate([
@@ -131,16 +111,13 @@ class hostelPaymentService extends BaseService {
                                                                     {
                                                                         $lt: [
                                                                             {
-                                                                                $dateFromString:
-                                                                                    {
-                                                                                        dateString:
-                                                                                            "$$inst.date",
-                                                                                        format: "%Y-%m-%d",
-                                                                                    },
+                                                                                $dateFromString: {
+                                                                                    dateString: "$$inst.date",
+                                                                                    format: "%Y-%m-%d",
+                                                                                },
                                                                             },
                                                                             {
-                                                                                $toDate:
-                                                                                    currentDate,
+                                                                                $toDate: currentDate,
                                                                             },
                                                                         ],
                                                                     },
@@ -161,7 +138,6 @@ class hostelPaymentService extends BaseService {
                     {
                         $project: {
                             hostelAdmissionId: 1,
-                            // academicYear: 1,
                             admissionStatus: 1,
                             caste: 1,
                             empId: 1,
@@ -224,9 +200,6 @@ class hostelPaymentService extends BaseService {
                     {
                         $match: {
                             "hostelPaymentData.groupId": Number(groupId),
-                            // "hostelPaymentData.academicYear":
-                            //     criteria.academicYear,
-                            // "hostelPaymentData.isShowInAccounting": true,
                         },
                     },
                     {
@@ -253,11 +226,10 @@ class hostelPaymentService extends BaseService {
                                                                     $lt: [
                                                                         {
                                                                             $dateFromString:
-                                                                                {
-                                                                                    dateString:
-                                                                                        "$$item.date",
-                                                                                    format: "%Y-%m-%d",
-                                                                                },
+                                                                            {
+                                                                                dateString: "$$item.date",
+                                                                                format: "%Y-%m-%d",
+                                                                            },
                                                                         },
                                                                         currentDate,
                                                                     ],
@@ -283,18 +255,15 @@ class hostelPaymentService extends BaseService {
                             },
                         },
                     },
-
-                    // { $skip: skip },
-                    // { $limit: limit },
+                    { $sort: { createdAt: -1 } },
                 ]);
-                console.log(admissionData);
+
                 const seed = (page - 1) * limit;
                 const servicesWithData = await admissionData
                     .map((data, index) => ({
                         candidateName: data?.name,
                         hostelAdmissionId: data?.hostelAdmissionId,
-                        hostelPremisesNAme:
-                            data?.hostelPaymentData?.hostelPremisesNAme,
+                        hostelPremisesNAme: data?.hostelPaymentData?.hostelPremisesNAme,
                         numberOfRooms: data?.hostelPaymentData?.numberOfRooms,
                         numberOfBed: data?.hostelPaymentData?.numberOfBed,
                         empId: data?.empId,
@@ -304,8 +273,7 @@ class hostelPaymentService extends BaseService {
                         installmentId: data?.installmentId,
                         paidAmount: data.hostelPaymentData?.totalPaidAmount,
                         phoneNumber: data.phoneNumber,
-                        remainingAmount:
-                            data.hostelPaymentData?.remainingAmount,
+                        remainingAmount: data.hostelPaymentData?.remainingAmount,
                         status: data.overdue ? "overdue" : data.status,
                         __seed: seed + index,
                     }))
@@ -324,7 +292,6 @@ class hostelPaymentService extends BaseService {
                     totalFees: totalFees,
                     totalItemsCount: admissionData.length,
                 };
-                // console.log(admissionData);
                 return response;
             } catch (error) {
                 console.error("Error occurred:", error);
@@ -432,7 +399,7 @@ class hostelPaymentService extends BaseService {
                                 (departments) =>
                                     departments.department_id &&
                                     departments.department_id.toString() ===
-                                        query.department.toString()
+                                    query.department.toString()
                             );
                             return matchingdepartment;
                         }
@@ -447,7 +414,7 @@ class hostelPaymentService extends BaseService {
                                 (feesTemplate) =>
                                     feesTemplate.feesTemplateId &&
                                     feesTemplate.feesTemplateId.toString() ===
-                                        query.feesTemplateId.toString()
+                                    query.feesTemplateId.toString()
                             );
                             return matchingfeesTemplateId;
                         }
@@ -465,7 +432,7 @@ class hostelPaymentService extends BaseService {
                                 (course) =>
                                     course.hostelId &&
                                     course.hostelId.toString() ===
-                                        query.hostelId.toString()
+                                    query.hostelId.toString()
                             );
                             // console.log("matchingCourses", matchingCourses);
                             return matchingCourses;
@@ -485,7 +452,7 @@ class hostelPaymentService extends BaseService {
                                 (classes) =>
                                     classes.roomId &&
                                     classes.roomId.toString() ===
-                                        query.roomId.toString()
+                                    query.roomId.toString()
                             );
                             return matchingclasses;
                         }
@@ -504,7 +471,7 @@ class hostelPaymentService extends BaseService {
                                 (divisions) =>
                                     divisions.bedId &&
                                     divisions.bedId.toString() ===
-                                        query.bedId.toString()
+                                    query.bedId.toString()
                             );
                             return matchingdivision;
                         }
@@ -565,15 +532,15 @@ class hostelPaymentService extends BaseService {
                                         (total, paymentArray, currentIndex) => {
                                             const lastIndex =
                                                 currentIndex ===
-                                                paymentsForCourse.length - 1
+                                                    paymentsForCourse.length - 1
                                                     ? paymentArray
                                                     : null;
 
                                             const remainingAmount = lastIndex
                                                 ? parseFloat(
-                                                      lastIndex.remainingAmount ||
-                                                          0
-                                                  )
+                                                    lastIndex.remainingAmount ||
+                                                    0
+                                                )
                                                 : 0;
 
                                             return total + remainingAmount;
@@ -634,9 +601,9 @@ class hostelPaymentService extends BaseService {
 
                         console.log(
                             "Total fee for course '" +
-                                courseName +
-                                "': " +
-                                totalFee
+                            courseName +
+                            "': " +
+                            totalFee
                         );
 
                         return {
@@ -645,7 +612,7 @@ class hostelPaymentService extends BaseService {
                             courseFee: totalFee,
                             TotalCourseFee:
                                 coursePayments[courseName].hostelFee *
-                                    coursePayments[courseName].noOfStudents ||
+                                coursePayments[courseName].noOfStudents ||
                                 0,
                             noOfStudents:
                                 coursePayments[courseName].noOfStudents || 0,

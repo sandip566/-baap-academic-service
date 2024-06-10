@@ -4,7 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/assetrequest.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const assetModel=require("../schema/asset.schema");
+const assetModel = require("../schema/asset.schema");
 const AssetRequestModel = require("../schema/assetrequest.schema");
 
 const multer = require("multer");
@@ -103,9 +103,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         status: req.query.status,
         category: req.query.category,
         search: req.query.search,
-        managerUserId: req.query.managerUserId,
-        empId: req.query.empId,
-        userId: req.query.userId,
+        managerUserId: parseInt(req.query.managerUserId),
+        empId: parseInt(req.query.empId),
+        userId: parseInt(req.query.userId),
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
     };
@@ -142,23 +142,21 @@ router.put("/groupId/:groupId/requestId/:requestId", async (req, res) => {
     const groupId = req.params.groupId;
     const updateData = req.body;
     try {
-        const serviceResponse = await service.updateDataById(
-            requestId,
-            groupId,
-            updateData
-        );
-        if (serviceResponse) {
+        const serviceResponse = await service.updateDataById(requestId, groupId, updateData);
+        if (serviceResponse.error) {
+            return res.status(400).json({ error: serviceResponse.error });
+        } else if (serviceResponse) {
             const response = {
                 data: serviceResponse,
                 message: "Data updated successfully",
             };
-            res.status(200).json(response);
+            return res.status(200).json(response);
         } else {
-            res.status(404).json({ error: "Data not found" });
+            return res.status(404).json({ error: "Data not found" });
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

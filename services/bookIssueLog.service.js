@@ -22,6 +22,7 @@ class BookIssueLogService extends BaseService {
                     searchFilter.$or = [
                         { userId: numericSearch },
                         { bookIssueLogId: numericSearch },
+                        {ISBN:numericSearch}
                     ];
                 } else {
                     const bookId =

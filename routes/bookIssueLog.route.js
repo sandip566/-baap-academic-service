@@ -215,8 +215,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
-        // pageNumber: req.query.pageNumber || 1,
-        // pageSize: req.query.pageSize || 10,
         search: req.query.search,
         userId: req.query.userId,
         isOverdue: req.query.isOverdue,

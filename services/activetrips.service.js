@@ -117,7 +117,7 @@ class ActiveTripsService extends BaseService {
     async updatedriverById(tripId, groupId, newData) {
         try {
             const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
-
+   
             if (!existingTrip) {
                 const newTrip = new ActiveTripsModel({
                     tripId: tripId,
@@ -128,7 +128,7 @@ class ActiveTripsService extends BaseService {
             } else {
                 const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
                 const updatedTravellers = newData.onBoaredTraveller || [];
-
+   
                 updatedTravellers.forEach(newTraveller => {
                     const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
                     if (index !== -1) {
@@ -137,7 +137,7 @@ class ActiveTripsService extends BaseService {
                         existingOnBoardTravellers.push(newTraveller);
                     }
                 });
-                existingTrip.onBoaredTraveller = existingOnBoardTravellers;
+                    existingTrip.onBoaredTraveller = existingOnBoardTravellers;
                 const updatedTrip = await existingTrip.save();
                 return updatedTrip;
             }
@@ -326,11 +326,20 @@ class ActiveTripsService extends BaseService {
 
             const nearestStop = await this.findNearestBusStop(groupId, activeTrip.routeId, currentLocationData);
 
+            const routeDetails = await BusRouteModel.findOne({ routeId: activeTrip.routeId });
+            const vehicleDetails = await VehicleModel.findOne({ vehicleId: activeTrip.vehicleId });
+            const driverDetails = await DriverModel.findOne({ driverId: activeTrip.driverId });
+            const caretakerDetails = await CareTakerModel.findOne({ careTakerId: activeTrip.careTakerId });
+
             return {
                 data: {
                     activeTrip: {
                         ...activeTrip.toObject(),
-                        onBoaredTraveller: onBoaredTravellers
+                        onBoaredTraveller: onBoaredTravellers,
+                        routeDetails: routeDetails,
+                        vehicleDetails:vehicleDetails,
+                        driverDetails:driverDetails,
+                        caretakerDetails:caretakerDetails
                     },
                     nearestStop
                 }
@@ -339,6 +348,7 @@ class ActiveTripsService extends BaseService {
             throw new Error("Error in getTrip function: " + error.message);
         }
     }
+
 
     async findNearestBusStop(groupId, routeId, currentLocation) {
         try {
