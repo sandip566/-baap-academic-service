@@ -100,6 +100,39 @@ class CommunicationService extends BaseService {
         }
     }
 
+    async getLatestMessageFromEachChat() {
+        try {
+            const latestMessages = await this.model.aggregate([
+                {
+                    $sort: { timestamp: -1 }
+                },
+                {
+                    $group: {
+                        _id: {
+                            senderReceiverPair: {
+                                $cond: [
+                                    { $lt: ["$senderId", "$receiverId"] },
+                                    { senderId: "$senderId", receiverId: "$receiverId" },
+                                    { senderId: "$receiverId", receiverId: "$senderId" }
+                                ]
+                            }
+                        },
+                        latestMessage: { $first: "$$ROOT" }
+                    }
+                }
+            ]);
+            const formattedMessages = latestMessages.map(chat => ({
+                ...chat.latestMessage,
+                formattedDateTime: this.formatDate(chat.latestMessage.timestamp)
+            }));
+
+            return new ServiceResponse({ data: formattedMessages });
+        } catch (error) {
+            console.error('Error while fetching latest messages from each chat:', error);
+            throw new Error('Error while fetching latest messages from each chat');
+        }
+    }
+
     async deleteChatById(chatId) {
         try {
             const deletedChat = await this.model.findByIdAndDelete(chatId);
