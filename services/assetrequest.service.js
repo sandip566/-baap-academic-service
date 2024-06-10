@@ -24,8 +24,11 @@ class AssetRequestService extends BaseService {
     // }
 
     async getAllDataByGroupId(groupId, criteria) {
+        const pageNumber = criteria.pageNumber;
+        const pageSize = criteria.pageSize;
+    
         const query = {
-            groupId: groupId,
+            groupId: Number(groupId),
         };
         if (criteria.search) {
             const numericSearch = parseInt(criteria.search);
@@ -54,9 +57,24 @@ class AssetRequestService extends BaseService {
         if (criteria.managerUserId)
             query.managerUserId = criteria.managerUserId;
         if (criteria.userId) query.userId = criteria.userId;
-        return this.preparePaginationAndReturnData(query, criteria);
+    
+        const totalItemsCount = await AssetRequestModel.countDocuments(query);
+        const assetRequest = await AssetRequestModel.aggregate([
+            { $match: query },
+            { $sort: { createdAt: -1 } },
+            { $skip: (pageNumber - 1) * pageSize },
+            { $limit: pageSize }
+        ]);
+    
+        return {
+            status: "Success",
+            data: {
+                items: assetRequest,
+                totalItemsCount,
+            },
+        };
     }
-
+    
     async deleteByDataId(requestId, groupId) {
         try {
             const deleteData = await AssetRequestModel.findOneAndDelete({

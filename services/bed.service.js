@@ -5,14 +5,26 @@ class BedService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria) {
         const query = {
-            groupId: groupId,
+            groupId: Number(groupId),
         };
         if (criteria.status) query.status = criteria.status;
         if (criteria.numberOfBed) query.numberOfBed = criteria.numberOfBed;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        return this.preparePaginationAndReturnData(query, criteria);
+        const totalItemsCount = await BedModel.countDocuments(query)
+        const bed = await BedModel.aggregate([
+            { $match: query },
+            { $sort: { createdAt: -1 } }
+        ])
+
+        return {
+            status: "Success",
+            data: {
+                items: bed,
+                totalItemsCount,
+            },
+        }
     }
     async deleteByDataId(groupId, bedId) {
         try {
@@ -26,10 +38,10 @@ class BedService extends BaseService {
             throw error;
         }
     }
-    async updateDataById(bedId,groupId, newData) {
+    async updateDataById(bedId, groupId, newData) {
         try {
             const updateData = await BedModel.findOneAndUpdate(
-                { bedId: bedId,groupId: groupId  },
+                { bedId: bedId, groupId: groupId },
                 newData,
                 { new: true }
             );
