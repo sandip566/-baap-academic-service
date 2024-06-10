@@ -74,17 +74,24 @@ class AssetRequestService extends BaseService {
 
     async updateDataById(requestId, groupId, newData) {
         try {
-            const assetRequest = await AssetRequestModel.findOneAndUpdate(
-                { requestId: requestId, groupId: groupId },
-                newData,
-                { new: true }
-            );
-            if (assetRequest && assetRequest.status === "issued") {
+            const assetRequest = await AssetRequestModel.findOne({ requestId: requestId, groupId: groupId });
+            if (!assetRequest) {
+                return { error: "Asset request not found" };
+            }
+
+            if (assetRequest.status === "issued" && newData.status === "issued") {
+                return { error: "This request has already been issued" };
+            }
+
+            if (newData.status === "issued") {
                 const updateResponse = await this.updateAssetCount(assetRequest.assetId, assetRequest.quantity);
                 if (updateResponse !== "Asset count updated successfully") {
                     return { error: updateResponse };
                 }
             }
+
+            assetRequest.status = newData.status;
+            await assetRequest.save();
             return assetRequest;
         } catch (error) {
             console.error("Error in updateDataById:", error);
@@ -98,26 +105,26 @@ class AssetRequestService extends BaseService {
             if (!asset) {
                 return "Asset not found";
             }
+
             const currentAvailable = Number(asset.available);
             if (isNaN(currentAvailable)) {
                 return "Invalid available quantity in asset";
             }
-    
+
             if (currentAvailable < quantity) {
                 return "Asset not available";
             }
-            const newAvailable = Math.max(currentAvailable - quantity, 0);
-            await AssetModel.findOneAndUpdate(
-                { assetId: assetId },
-                { available: newAvailable },
-                { new: true }
-            );
+
+            const newAvailable = currentAvailable - quantity;
+            asset.available = newAvailable;
+            await asset.save();
             return "Asset count updated successfully";
         } catch (error) {
             console.error("Error in updateAssetCount:", error);
             throw error;
         }
     }
+
 
     async getByDataId(requestId) {
         return this.execute(() => {
