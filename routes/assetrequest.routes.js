@@ -4,7 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/assetrequest.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const assetModel=require("../schema/asset.schema");
+const assetModel = require("../schema/asset.schema");
 const AssetRequestModel = require("../schema/assetrequest.schema");
 
 const multer = require("multer");
@@ -142,28 +142,24 @@ router.put("/groupId/:groupId/requestId/:requestId", async (req, res) => {
     const groupId = req.params.groupId;
     const updateData = req.body;
     try {
-        const serviceResponse = await service.updateDataById(
-            requestId,
-            groupId,
-            updateData
-        );
-        if (serviceResponse) {
-            if (serviceResponse.error) {
-                return res.status(400).json({ error: serviceResponse.error });
-            }
+        const serviceResponse = await service.updateDataById(requestId, groupId, updateData);
+        if (serviceResponse.error) {
+            return res.status(400).json({ error: serviceResponse.error });
+        } else if (serviceResponse) {
             const response = {
                 data: serviceResponse,
                 message: "Data updated successfully",
             };
-            res.status(200).json(response);
+            return res.status(200).json(response);
         } else {
-            res.status(404).json({ error: "Data not found" });
+            return res.status(404).json({ error: "Data not found" });
         }
     } catch (error) {
-        console.error("Internal Server Error:", error);
-        res.status(500).json({ error: "Internal Server Error" });
+        console.error(error);
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 router.get("/get-assets-details-of-user/:userId", async (req, res) => {
     const serviceResponse = await service.getAssetsDetailsById(
