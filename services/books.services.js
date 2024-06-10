@@ -223,17 +223,16 @@ class BooksService extends BaseService {
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [{ ISBN: numericSearch }];
                 } else {
-                    searchFilter.$or = [{ RFID: criteria.search }];
+                    searchFilter.$or = [
+                        {
+                            name: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
+                    ];
+
                 }
             }
-
-            if (criteria.shelfId) {
-                searchFilter.shelfId = criteria.shelfId;
-            }
-            if (criteria.departmentId) {
-                searchFilter.departmentId = criteria.departmentId;
-            }
-
             const books = await booksModel.find(searchFilter);
             if (!books || books.length === 0) {
                 return { error: "Books not found" };
@@ -252,25 +251,15 @@ class BooksService extends BaseService {
                 bookId: { $in: books.map((book) => book.bookId) },
                 isReturn: false,
             });
-            const studentIds = issueLogs.map((issue) => issue.addmissionId);
-            console.log(studentIds);
-            const students = await Student.find({
-                addmissionId: { $in: studentIds },
-            });
-            const studentMap = {};
-            students.forEach((student) => {
-                studentMap[student.addmissionId] = student.name;
-            });
-            
             console.log(issueLogs);
             const data = issueLogs.map((issue) => ({
-                studentName:
-                studentMap[issue.addmissionId] || "Unknown Student",
+                studentName:issue.name,
                 issueDate: issue.issuedDate,
                 bookIssueLogId: issue.bookIssueLogId,
                 userId: issue.userId,
                 addmissionId: issue.addmissionId,
                 isOverdue: issue.isOverdue,
+                url:issue.profile_img
             }));
             return {
                 data: "books",

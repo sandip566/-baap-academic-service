@@ -17,86 +17,69 @@ router.post(
             if (ValidationHelper.requestValidationErrors(req, res)) {
                 return;
             }
-
             const returnAssetId = +Date.now();
             req.body.returnAssetId = returnAssetId;
             const assetRequest = await AssetRequestModel.findOne({
                 requestId: req.body.requestId,
                 groupId: req.body.groupId,
             });
-            if (req.body.returnQuantity > assetRequest.quantity) {
-                return res
-                    .status(400)
-                    .json({ error: "You don't have any asset for return" });
-            }
-            const serviceResponse = await service.create(req.body);
-
             if (!assetRequest) {
-                throw new Error("Asset request not found");
+                return res.status(400).json({ error: "Asset request not found" });
             }
-
-            console.log(assetRequest);
-
             const returnQuantity = Number(req.body.returnQuantity);
             if (isNaN(returnQuantity)) {
-                throw new Error("Invalid returnQuantity");
+                return res.status(400).json({ error: "Invalid returnQuantity" });
             }
-
-            const currentQuantity = Number(assetRequest.quantity);
-            if (isNaN(currentQuantity)) {
-                throw new Error("Invalid quantity in asset request");
+            if (returnQuantity > assetRequest.quantity) {
+                return res.status(400).json({ error: "You don't have enough assets for return" });
             }
-
-            const newQuantity = Math.max(currentQuantity - returnQuantity, 0);
-
             const totalreturnqty = await AssetReturnModel.find({
                 groupId: req.body.groupId,
                 requestId: req.body.requestId,
             });
-
-            console.log("totalreturnqty", totalreturnqty);
             const updatedData = await AssetRequestModel.findOneAndUpdate(
                 { requestId: req.body.requestId, groupId: req.body.groupId },
                 {
-                    quantity: newQuantity,
+                    quantity: Math.max(assetRequest.quantity - returnQuantity, 0),
                     returnQuantity: totalreturnqty.length,
                 },
                 { new: true }
             );
-
             const assetId = updatedData.assetId;
             const asset = await AssetModel.findOne({ assetId: assetId });
             if (!asset) {
-                throw new Error("Asset not found");
+                return res.status(400).json({ error: "Asset not found" });
             }
-
-            const currentAvailable = Number(asset.available);
-            if (isNaN(currentAvailable)) {
-                throw new Error("Invalid available quantity in asset");
-            }
-
             const currentValue = Number(asset.currentValue);
             if (isNaN(currentValue)) {
-                throw new Error("Invalid current value in asset");
+                return res.status(400).json({ error: "Invalid current value in asset" });
             }
-
             const newAvailable = Math.min(
-                currentAvailable + returnQuantity,
+                Number(asset.available) + returnQuantity,
                 currentValue
             );
-
             await AssetModel.findOneAndUpdate(
                 { assetId: assetId },
                 { available: newAvailable },
                 { new: true }
             );
-
-            requestResponsehelper.sendResponse(res, serviceResponse);
+            const assetAggregation = await AssetReturnModel.aggregate([
+                { $match: { assetId: assetId } },
+                { $group: { _id: null, totalReturnQuantity: { $sum: "$returnQuantity" } } }
+            ]);
+            const totalReturnQuantity = assetAggregation.length > 0 ? assetAggregation[0].totalReturnQuantity : 0;
+            await AssetModel.findOneAndUpdate(
+                { assetId: assetId },
+                { count: totalReturnQuantity },
+                { new: true }
+            );
+            requestResponsehelper.sendResponse(res, { message: "Asset return created successfully" });
         } catch (error) {
-            next(error); // Pass the error to the error handling middleware
+            next(error);
         }
     }
 );
+
 router.get(
     "/all/getByGroupId/:groupId",
     // TokenService.checkPermission(["EAC1"]),
@@ -104,22 +87,19 @@ router.get(
         try {
             const groupId = req.params.groupId;
             const page = parseInt(req.query.page) || 1;
-            const perPage = parseInt(req.query.limit)||10
+            const perPage = parseInt(req.query.limit) || 10
             const criteria = {
                 // phoneNumber: req.query.phoneNumber,
-
                 name: req.query.name,
                 status: req.query.status,
                 search: req.query.search,
             };
-
             const serviceResponse = await service.getAllDataByGroupId(
                 groupId,
                 criteria,
                 page,
                 perPage
             );
-
             requestResponsehelper.sendResponse(res, serviceResponse);
         } catch (error) {
             console.error(error);
@@ -127,12 +107,14 @@ router.get(
         }
     }
 );
+
 router.get("/returnAssetId/:returnAssetId", async (req, res) => {
     const serviceResponse = await service.getByAssetTypeId(
         req.params.returnAssetId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.put(
     "/groupId/:groupId/returnAssetId/:returnAssetId",
     async (req, res) => {
@@ -175,27 +157,24 @@ router.delete(
         }
     }
 );
+
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all/assetReturn", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
