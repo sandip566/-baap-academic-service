@@ -79,11 +79,11 @@ class AssetRequestService extends BaseService {
                 return { error: "Asset request not found" };
             }
 
-            if (assetRequest.status === "issued" && newData.status === "issued") {
+            if (assetRequest.status === "Issued" && newData.status === "Issued") {
                 return { error: "This request has already been issued" };
             }
 
-            if (newData.status === "issued") {
+            if (newData.status === "Issued") {
                 const updateResponse = await this.updateAssetCount(assetRequest.assetId, assetRequest.quantity);
                 if (updateResponse !== "Asset count updated successfully") {
                     return { error: updateResponse };
@@ -124,7 +124,6 @@ class AssetRequestService extends BaseService {
             throw error;
         }
     }
-
 
     async getByDataId(requestId) {
         return this.execute(() => {

@@ -475,6 +475,7 @@ class StudentsAdmmisionService extends BaseService {
                         { lastName: { $regex: query.search, $options: "i" } },
                         { phoneNumber: numericSearch },
                         { addmissionId: numericSearch },
+                        { userId: numericSearch }
                     ];
                 } else {
                     searchFilter.$or = [

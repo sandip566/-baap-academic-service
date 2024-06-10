@@ -160,7 +160,6 @@ router.put("/groupId/:groupId/requestId/:requestId", async (req, res) => {
     }
 });
 
-
 router.get("/get-assets-details-of-user/:userId", async (req, res) => {
     const serviceResponse = await service.getAssetsDetailsById(
         req.params.userId
