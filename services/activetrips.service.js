@@ -117,7 +117,7 @@ class ActiveTripsService extends BaseService {
     async updatedriverById(tripId, groupId, newData) {
         try {
             const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
-
+   
             if (!existingTrip) {
                 const newTrip = new ActiveTripsModel({
                     tripId: tripId,
@@ -128,7 +128,7 @@ class ActiveTripsService extends BaseService {
             } else {
                 const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
                 const updatedTravellers = newData.onBoaredTraveller || [];
-
+   
                 updatedTravellers.forEach(newTraveller => {
                     const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
                     if (index !== -1) {
@@ -137,7 +137,7 @@ class ActiveTripsService extends BaseService {
                         existingOnBoardTravellers.push(newTraveller);
                     }
                 });
-                existingTrip.onBoaredTraveller = existingOnBoardTravellers;
+                    existingTrip.onBoaredTraveller = existingOnBoardTravellers;
                 const updatedTrip = await existingTrip.save();
                 return updatedTrip;
             }
