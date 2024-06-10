@@ -45,7 +45,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             search: req.query.search,
         };
         const searchFilter = service.getAllDataByGroupId(groupId, criteria);
-        const shelf = await shelfModel.find(searchFilter);
+        const shelf = await shelfModel.find(searchFilter)
+            .sort({ createdAt: -1 });
         const count = await service.getCount();
         res.json({
             status: "success",

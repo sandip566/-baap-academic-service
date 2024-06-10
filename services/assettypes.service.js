@@ -12,15 +12,32 @@ class AssetTypesService extends BaseService {
             });
         });
     }
-    getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria) {
+        const pageNumber = criteria.pageNumber;
+        const pageSize = criteria.pageSize;
         const query = {
-            groupId: groupId,
+            groupId: Number(groupId),
         };
         if (criteria.assetTypeId) query.assetTypeId = criteria.assetTypeId;
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
 
-        return this.preparePaginationAndReturnData(query, criteria);
+        const totalItemsCount = await AssetTypesModel.countDocuments(query)
+        const assetTypes = await AssetTypesModel.aggregate([
+            { $match: query },
+            { $sort: { createdAt: -1 } },
+            { $skip: (pageNumber - 1) * pageSize },
+            { $limit: pageSize }
+        ])
+
+        return {
+            status: "Success",
+            data: {
+                items: assetTypes,
+                totalItemsCount,
+            },
+        }
     }
+
     async updateByAssetId(assetTypeId, groupId, newData) {
         try {
             const updatedData = await AssetTypesModel.findOneAndUpdate({ assetTypeId: assetTypeId, groupId: groupId }, newData, { new: true });
@@ -29,7 +46,6 @@ class AssetTypesService extends BaseService {
             throw error;
         }
     }
-
 
     async deleteByAssetId(assetTypeId, groupId) {
         try {

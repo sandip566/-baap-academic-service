@@ -94,7 +94,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         const criteria = {
             vendorId: req.query.vendorId,
             purchaseId: req.query.purchaseId,
-            name:req.query.name,
+            name: req.query.name,
             search: req.query.search,
             orderStatus: req.query.orderStatus,
             book: req.query.book,
@@ -112,18 +112,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
             criteria,
             skip,
             limit,
-         
+
         );
         const totalCount = await PurchaseModel.countDocuments(searchFilter);
         const purchase = await PurchaseModel.find(searchFilter)
-        .sort({ createdAt: -1 }) 
+            .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .exec()
-            
-
-            
-
         res.json({
             status: "Success",
             data: {
@@ -146,9 +142,9 @@ router.post("/bulkUpload", async (req, res, next) => {
         const purchaseData = req.body.map((data) => {
             return {
                 ...data,
-                purchaseId: +Date.now() ,
-                totalAmount:data.quantity *data.unitPrice
-        
+                purchaseId: +Date.now(),
+                totalAmount: data.quantity * data.unitPrice
+
             };
         });
 
