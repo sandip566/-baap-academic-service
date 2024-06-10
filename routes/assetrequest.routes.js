@@ -148,6 +148,9 @@ router.put("/groupId/:groupId/requestId/:requestId", async (req, res) => {
             updateData
         );
         if (serviceResponse) {
+            if (serviceResponse.error) {
+                return res.status(400).json({ error: serviceResponse.error });
+            }
             const response = {
                 data: serviceResponse,
                 message: "Data updated successfully",
@@ -157,7 +160,7 @@ router.put("/groupId/:groupId/requestId/:requestId", async (req, res) => {
             res.status(404).json({ error: "Data not found" });
         }
     } catch (error) {
-        console.error(error);
+        console.error("Internal Server Error:", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 });

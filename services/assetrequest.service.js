@@ -79,7 +79,7 @@ class AssetRequestService extends BaseService {
                 newData,
                 { new: true }
             );
-            if (assetRequest.status === "issued") {
+            if (assetRequest && assetRequest.status === "issued") {
                 const updateResponse = await this.updateAssetCount(assetRequest.assetId, assetRequest.quantity);
                 if (updateResponse !== "Asset count updated successfully") {
                     return { error: updateResponse };
@@ -87,6 +87,7 @@ class AssetRequestService extends BaseService {
             }
             return assetRequest;
         } catch (error) {
+            console.error("Error in updateDataById:", error);
             throw error;
         }
     }
@@ -101,7 +102,7 @@ class AssetRequestService extends BaseService {
             if (isNaN(currentAvailable)) {
                 return "Invalid available quantity in asset";
             }
-
+    
             if (currentAvailable < quantity) {
                 return "Asset not available";
             }
@@ -113,6 +114,7 @@ class AssetRequestService extends BaseService {
             );
             return "Asset count updated successfully";
         } catch (error) {
+            console.error("Error in updateAssetCount:", error);
             throw error;
         }
     }
