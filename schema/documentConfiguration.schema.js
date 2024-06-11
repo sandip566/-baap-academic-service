@@ -24,6 +24,12 @@ const documentConfigurationModel = new mongoose.Schema({
     roleId: {
         type: Number,
     },
+    documentId: {
+        type: Number
+    },
+    documentCategoryId: {
+        type: Number
+    },
     // No documents array here
     documentTitle: String,
     expiryDate: Date,
