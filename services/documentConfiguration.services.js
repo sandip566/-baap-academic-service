@@ -2,11 +2,13 @@ const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse"
 const documentConfigrationModel = require("../schema/documentConfiguration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const documntModel = require("../schema/document.schema");
+const documentCategoryModel = require("../schema/documentcategory.schema");
+
 class documentConfiguration extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async updateUser(groupId,addmissionId,data) {
+    async updateUser(groupId, addmissionId, data) {
         try {
             const resp = await documentConfigrationModel.findOneAndUpdate(
                 { addmissionId: addmissionId, groupId: groupId },
@@ -151,16 +153,61 @@ class documentConfiguration extends BaseService {
         }
     }
 
-    async getByRoleId(groupId, roleId) {
+    async getByRoleId(groupId, roleId, userId) {
         try {
             const documents = await documntModel.find({ groupId: groupId, roleId: roleId });
-            return documents;
+    
+            const documentCategoryIds = documents.map(doc => doc.documentCategoryId);
+    
+            const documentCategories = await documentCategoryModel.find({
+                documentCategoryId: { $in: documentCategoryIds }
+            });
+
+            const categoryMap = documentCategories.reduce((acc, category) => {
+                acc[category.documentCategoryId] = category.name;
+                return acc;
+            }, {});
+    
+            const groupedDocuments = documents.reduce((acc, document) => {
+                const categoryName = categoryMap[document.documentCategoryId];
+                if (!acc[categoryName]) {
+                    acc[categoryName] = [];
+                }
+                acc[categoryName].push(document);
+                return acc;
+            }, {});
+    
+            const uploadedDocuments = await documentConfigrationModel.find({ userId: userId });
+    
+            const groupedUploadedDocuments = uploadedDocuments.reduce((acc, document) => {
+                const categoryName = categoryMap[document.documentCategoryId];
+                if (!acc[categoryName]) {
+                    acc[categoryName] = [];
+                }
+                acc[categoryName].push(document);
+                return acc;
+            }, {});
+    
+            const formattedGroupedDocuments = Object.keys(groupedDocuments).map(categoryName => {
+                const uploadedDocs = groupedUploadedDocuments[categoryName] || [];
+                return {
+                    categoryName: categoryName,
+                    documents: groupedDocuments[categoryName],
+                    uploadedDocuments: uploadedDocs
+                };
+            });
+    
+            const response = {
+                status: "Success",
+                data: formattedGroupedDocuments
+            };
+    
+            return response;
         } catch (err) {
             console.error("Error fetching documents:", err);
             throw err;
         }
-    }
-
+    }    
 }
 module.exports = new documentConfiguration(
     documentConfigrationModel,
