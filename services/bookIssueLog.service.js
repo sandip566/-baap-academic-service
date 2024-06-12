@@ -15,7 +15,7 @@ class BookIssueLogService extends BaseService {
             const searchFilter = { groupId };
             const bookMap = await this.getBookMap();
             const studentMap = await this.getStudentMap();
-    
+
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
@@ -25,47 +25,67 @@ class BookIssueLogService extends BaseService {
                         {ISBN:numericSearch}
                     ];
                 } else {
-                    const bookId = bookMap[criteria.search.trim().toLowerCase()];
-                    const admissionId = studentMap[criteria.search.trim().toLowerCase()];
+                    const bookId =
+                        bookMap[criteria.search.trim().toLowerCase()];
+                    const admissionId =
+                        studentMap[criteria.search.trim().toLowerCase()];
                     searchFilter.$or = [
                         { bookId },
                         { name: { $regex: new RegExp(criteria.search, "i") } },
                         { admissionId },
-                        { firstName: { $regex: new RegExp(criteria.search, "i") } },
+                        {
+                            firstName: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
+                        },
                     ];
                 }
             }
-    
-            if (criteria.isReturn !== undefined) searchFilter.isReturn = criteria.isReturn;
-            if (criteria.isReserve !== undefined) searchFilter.isReserve = criteria.isReserve;
+
+            if (criteria.isReturn !== undefined)
+                searchFilter.isReturn = criteria.isReturn;
+            if (criteria.isReserve !== undefined)
+                searchFilter.isReserve = criteria.isReserve;
             if (criteria.status) searchFilter.status = criteria.status;
-            if (criteria.isOverdue !== undefined) searchFilter.isOverdue = criteria.isOverdue;
+            if (criteria.isOverdue !== undefined)
+                searchFilter.isOverdue = criteria.isOverdue;
             if (criteria.userId) searchFilter.userId = criteria.userId;
             const sortOrder = { createdAt: -1 };
-    
+
             const skip = (page - 1) * limit;
-    
+
             const bookIssueLogs = await bookIssueLogModel
                 .find(searchFilter)
                 .sort(sortOrder)
                 .skip(skip)
                 .limit(limit);
-    
+
             const populatedBooks = await Promise.all(
                 bookIssueLogs.map(async (log) => {
                     const books = await Book.findOne({ bookId: log.bookId });
-                    const student = await studentAdmissionModel.findOne({ addmissionId: log.addmissionId });
+                    const student = await studentAdmissionModel.findOne({
+                        addmissionId: log.addmissionId,
+                    });
                     return { ...log._doc, books, student };
                 })
             );
-    
-            const filteredBooks = criteria.search && isNaN(parseInt(criteria.search))
-                ? populatedBooks.filter(log => log.books && log.books.name.toLowerCase().includes(criteria.search.toLowerCase()))
-                : populatedBooks;
-    
+
+            const filteredBooks =
+                criteria.search && isNaN(parseInt(criteria.search))
+                    ? populatedBooks.filter(
+                          (log) =>
+                              log.books &&
+                              log.books.name
+                                  .toLowerCase()
+                                  .includes(criteria.search.toLowerCase())
+                      )
+                    : populatedBooks;
+
             const count = await this.getCount(groupId);
-            const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
-    
+            const totalCount = await bookIssueLogModel.countDocuments(
+                searchFilter
+            );
+
             return {
                 populatedBookIssueLog: filteredBooks,
                 count,
@@ -73,10 +93,12 @@ class BookIssueLogService extends BaseService {
             };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
-            throw new Error("An error occurred while processing the request. Please try again later.");
+            throw new Error(
+                "An error occurred while processing the request. Please try again later."
+            );
         }
     }
-    
+
     async getBookMap() {
         try {
             const books = await Book.find();
@@ -343,7 +365,7 @@ class BookIssueLogService extends BaseService {
                 );
 
                 return {
-                    bookIssueLogId:item.bookIssueLogId,
+                    bookIssueLogId: item.bookIssueLogId,
                     bookIssueDate: item.issuedDate,
                     dueDate: item.dueDate,
                     bookName: correspondingBook ? correspondingBook.name : null,

@@ -66,7 +66,6 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const bookIssueLogId = Date.now();
-        const newReservation = {
             groupId: groupId,
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
@@ -99,6 +98,10 @@ router.post("/issue-book", async (req, res) => {
 router.get(
     "/groupId/:groupId/bookIssueLogId/:bookIssueLogId",
     async (req, res) => {
+        const serviceResponse = await service.getBybookIssueLogId(
+            req.params.groupId,
+            req.params.bookIssueLogId
+        );
         const serviceResponse = await service.getBybookIssueLogId(
             req.params.groupId,
             req.params.bookIssueLogId
@@ -140,7 +143,6 @@ router.post("/return-book", async (req, res) => {
     }
 });
 
-
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
@@ -156,8 +158,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
-        // pageNumber: req.query.pageNumber || 1,
-        // pageSize: req.query.pageSize || 10,
         search: req.query.search,
         userId: req.query.userId,
         isOverdue: req.query.isOverdue,
@@ -276,7 +276,7 @@ router.post("/reserve-book", async (req, res) => {
  
         const studentAdmission = await StudentsAdmissionModel.findOne({
             groupId: groupId,
-            addmissionId: addmissionId,
+            userId: userId,
         });
  
         if (!studentAdmission) {
@@ -308,6 +308,7 @@ router.post("/reserve-book", async (req, res) => {
         }
  
         const serviceResponse = await service.reserveBook(groupId, bookId);
+        console.log(serviceResponse);
         if (!serviceResponse) {
             return res.status(400).json({
                 success: false,
@@ -317,7 +318,7 @@ router.post("/reserve-book", async (req, res) => {
  
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
-            addmissionId: addmissionId,
+            userId: userId,
             status: "Reserved",
         });
         if (existingReservation) {
@@ -371,7 +372,7 @@ router.post("/reserve-book", async (req, res) => {
                 {
                     bookId: bookId,
                     bookIssueLogId: bookIssueLogId,
-                    addmissionId: addmissionId,
+                    userId: userId,
                     status: "Reserved",
                     isReserve: true,
                 },

@@ -126,7 +126,6 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         );
         const totalCount = await booksModel.countDocuments(searchFilter);
         const books = await booksModel
-
             .find(searchFilter)
             .sort({ createdAt: -1 })
             .skip(skip)

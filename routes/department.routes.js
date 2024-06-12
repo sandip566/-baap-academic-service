@@ -14,7 +14,7 @@ const xlsx = require("xlsx");
 router.post(
     "/",
     checkSchema(require("../dto/department.dto")),
-   // TokenService.checkPermission(["EMD2"]),
+   TokenService.checkPermission(["EMD2"]),
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
