@@ -66,6 +66,7 @@ router.post("/issue-book", async (req, res) => {
             });
         }
         const bookIssueLogId = Date.now();
+        const newReservation = {
             groupId: groupId,
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
@@ -98,10 +99,6 @@ router.post("/issue-book", async (req, res) => {
 router.get(
     "/groupId/:groupId/bookIssueLogId/:bookIssueLogId",
     async (req, res) => {
-        const serviceResponse = await service.getBybookIssueLogId(
-            req.params.groupId,
-            req.params.bookIssueLogId
-        );
         const serviceResponse = await service.getBybookIssueLogId(
             req.params.groupId,
             req.params.bookIssueLogId
