@@ -7,12 +7,6 @@ class TravellerService extends BaseService {
         super(dbModel, entityName);
     }
 
-    // async getTravellerRouteId(groupId,routeId) {
-    //     return this.execute(() => {
-    //         return this.model.find({ groupId,routeId });
-    //     });
-    // }
-
     async getBytravellerId(groupId, travellerId) {
         let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
         const routeId = traveller.routeId
@@ -26,20 +20,20 @@ class TravellerService extends BaseService {
         let responseData = {
             status: "Success",
             data: {
-               
-                    ...traveller.toObject(),
-                    routeId: route.toObject()
-                
+
+                ...traveller.toObject(),
+                routeId: route.toObject()
+
             }
         };
 
         return responseData;
     }
 
-    async getTravellersByRouteId(groupId,routeId) {
+    async getTravellersByRouteId(groupId, routeId) {
         try {
-            const routeData = await this.model.find({ groupId:groupId, routeId: routeId });
-    
+            const routeData = await this.model.find({ groupId: groupId, routeId: routeId });
+
             if (routeData.length === 0) {
                 return null;
             }
@@ -125,6 +119,49 @@ class TravellerService extends BaseService {
             throw error;
         }
     }
+
+    async getActiveTrip(groupId, routeId) {
+        const query = {
+            groupId: Number(groupId),
+            routeId: Number(routeId)
+        };
+
+        const traveller = await TravellerModel.aggregate([
+            { $match: query },
+            {
+                $lookup: {
+                    from: 'activetrips',
+                    localField: 'routeId',
+                    foreignField: 'routeId',
+                    as: 'activeTrip'
+                }
+            },
+            { $unwind: '$activeTrip' },
+            { $match: { 'activeTrip.status': 'active' } },
+            {
+                $project: {
+                    groupId: '$activeTrip.groupId',
+                    tripId: '$activeTrip.tripId',
+                    status: '$activeTrip.status',
+                    startTime: '$activeTrip.startTime',
+                    endTime: '$activeTrip.endTime'
+                }
+            }
+        ]);
+
+        if (traveller.length === 0) {
+            return {
+                message: "Trip is not active for this route",
+                data: []
+            };
+        }
+
+        return {
+            message: "Active trip found",
+            data: traveller
+        };
+    }
+
 }
 
 module.exports = new TravellerService(TravellerModel, 'traveller');
