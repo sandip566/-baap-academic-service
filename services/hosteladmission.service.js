@@ -775,38 +775,42 @@ class HostelAdmissionService extends BaseService {
             if (!hostelAdmission) {
                 throw new Error("Hostel admission not found");
             }
+
             const feesDetails = hostelAdmission.feesDetails;
-            if (!feesDetails || feesDetails.length === 0) {
-                throw new Error("No fees details found in hostel admission");
-            }
 
-            const updatedFeesDetails = await Promise.all(feesDetails.map(async (feeDetail) => {
-                const feesTemplateId = Number(feeDetail.feesTemplateId);
+            if (feesDetails && feesDetails.length > 0) {
+                const updatedFeesDetails = await Promise.all(feesDetails.map(async (feeDetail) => {
+                    const feesTemplateId = Number(feeDetail.feesTemplateId);
+                    if (!feesTemplateId) {
+                        throw new Error("Fee template ID not found in fees details");
+                    }
+                    const feeTemplate = await feesTemplateModel.findOne({
+                        feesTemplateId: feesTemplateId,
+                    }).exec();
 
-                if (!feesTemplateId) {
-                    throw new Error("Fee template ID not found in fees details");
-                }
-                const feeTemplate = await feesTemplateModel.findOne({
-                    feesTemplateId: feesTemplateId,
-                }).exec();
+                    if (!feeTemplate) {
+                        throw new Error("Fee template not found");
+                    }
 
-                if (!feeTemplate) {
-                    throw new Error("Fee template not found");
-                }
+                    return {
+                        ...feeDetail,
+                        feeTemplate: feeTemplate.toObject()
+                    };
+                }));
 
                 return {
-                    ...feeDetail,
-                    feeTemplate: feeTemplate.toObject()
+                    status: "Success",
+                    data: {
+                        ...hostelAdmission.toObject(),
+                        feesDetails: updatedFeesDetails
+                    }
                 };
-            }));
-
-            return {
-                status: "Success",
-                data: {
-                    ...hostelAdmission.toObject(),
-                    feesDetails: updatedFeesDetails
-                }
-            };
+            } else {
+                return {
+                    status: "Success",
+                    data: hostelAdmission.toObject()
+                };
+            }
         } catch (error) {
             console.error("Error in getByHostelId:", error);
             return {
