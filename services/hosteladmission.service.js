@@ -775,29 +775,36 @@ class HostelAdmissionService extends BaseService {
             if (!hostelAdmission) {
                 throw new Error("Hostel admission not found");
             }
-
             const feesDetails = hostelAdmission.feesDetails;
             if (!feesDetails || feesDetails.length === 0) {
                 throw new Error("No fees details found in hostel admission");
             }
 
-            const feesTemplateId = Number(feesDetails[0].feesTemplateId);
-            if (!feesTemplateId) {
-                throw new Error("Fee template ID not found in fees details");
-            }
+            const updatedFeesDetails = await Promise.all(feesDetails.map(async (feeDetail) => {
+                const feesTemplateId = Number(feeDetail.feesTemplateId);
 
-            const feeTemplate = await feesTemplateModel.findOne({
-                feesTemplateId: feesTemplateId,
-            }).exec();
+                if (!feesTemplateId) {
+                    throw new Error("Fee template ID not found in fees details");
+                }
+                const feeTemplate = await feesTemplateModel.findOne({
+                    feesTemplateId: feesTemplateId,
+                }).exec();
 
-            if (!feeTemplate) {
-                throw new Error("Fee template not found");
-            }
+                if (!feeTemplate) {
+                    throw new Error("Fee template not found");
+                }
+
+                return {
+                    ...feeDetail,
+                    feeTemplate: feeTemplate.toObject()
+                };
+            }));
+
             return {
                 status: "Success",
                 data: {
-                    hostelAdmission: hostelAdmission,
-                    feeTemplate: feeTemplate
+                    ...hostelAdmission.toObject(),
+                    feesDetails: updatedFeesDetails
                 }
             };
         } catch (error) {
