@@ -115,15 +115,6 @@ router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     }
 });
 
-router.get("/groupId/:groupId/routeId/:routeId", async (req, res) => {
-    try {
-        const { groupId, routeId } = req.params
 
-        const trip = await service.getActiveTrip(groupId, routeId)
-        res.json(trip)
-    } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-})
 
 module.exports = router;

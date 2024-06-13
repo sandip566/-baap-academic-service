@@ -32,7 +32,7 @@ router.get("/all", async (req, res) => {
 
 router.post("/issue-book", async (req, res) => {
     try {
-        const { groupId, bookId, issuedDate, dueDate, userId,name,url } =   req.body;
+        const { groupId, bookId, dueDate, userId,name,url,issuedDate } =   req.body;
         const bookStatus=await service.checkBook(groupId,bookId)
         if (!bookStatus || bookStatus.length===0) {
             return res.status(400).json({
@@ -71,7 +71,7 @@ router.post("/issue-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             dueDate: dueDate,
-            issuedDate: issuedDate,
+            issuedDate:issuedDate,
             userId: userId,
             isReturn: false,
             name:name,

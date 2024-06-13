@@ -7,7 +7,7 @@ const religionModel = require("../schema/religion.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const hostelPaymentModel = require("../schema/hostelPayment.schema");
 const courseModel = require("../schema/courses.schema");
-const hostelPremises=require("../schema/hostelPremises.schema")
+const hostelPremises = require("../schema/hostelPremises.schema")
 const { aggregate } = require("../schema/feesPayment.schema");
 
 class HostelAdmissionService extends BaseService {
@@ -131,27 +131,27 @@ class HostelAdmissionService extends BaseService {
                 {
                     $lookup: {
                         from: "hostelpremises",
-                        localField: "hostelDetails.hostelId", 
+                        localField: "hostelDetails.hostelId",
                         foreignField: "hostelId",
-                        as: "hostelDetails.hostelId", 
+                        as: "hostelDetails.hostelId",
                     },
                 },
                 { $unwind: { path: "$hostelDetails.hostelId", preserveNullAndEmptyArrays: true } },
                 {
                     $lookup: {
                         from: "roooms",
-                        localField: "hostelDetails.roomId", 
+                        localField: "hostelDetails.roomId",
                         foreignField: "roomId",
-                        as: "hostelDetails.roomId", 
+                        as: "hostelDetails.roomId",
                     },
                 },
                 { $unwind: { path: "$hostelDetails.roomId", preserveNullAndEmptyArrays: true } },
                 {
                     $lookup: {
                         from: "beds",
-                        localField: "hostelDetails.bedId", 
+                        localField: "hostelDetails.bedId",
                         foreignField: "bedId",
-                        as: "hostelDetails.bedId", 
+                        as: "hostelDetails.bedId",
                     },
                 },
                 { $unwind: { path: "$hostelDetails.bedId", preserveNullAndEmptyArrays: true } },
@@ -159,12 +159,12 @@ class HostelAdmissionService extends BaseService {
                 { $skip: skip },
                 { $limit: perPage },
             ]).exec();
-            
+
 
             const totalItemsCount = await HostelAdmissionModel.countDocuments(
                 searchFilter
             );
- 
+
             const response = {
                 status: "Success",
                 data: {
@@ -308,11 +308,11 @@ class HostelAdmissionService extends BaseService {
         console.log(groupId);
         try {
             let pipeLine = await hostelPremises.aggregate([
-                { 
-                    $match: { groupId: Number(groupId) } 
+                {
+                    $match: { groupId: Number(groupId) }
                 },
-                { 
-                    $project: { _id: 0, hostelId: 1, hostelName: 1 } 
+                {
+                    $project: { _id: 0, hostelId: 1, hostelName: 1 }
                 },
                 {
                     $lookup: {
@@ -327,7 +327,7 @@ class HostelAdmissionService extends BaseService {
                         as: "hostelStudentCount"
                     }
                 },
-                { 
+                {
                     $unwind: {
                         path: "$hostelStudentCount",
                         preserveNullAndEmptyArrays: true
@@ -339,21 +339,21 @@ class HostelAdmissionService extends BaseService {
                         totalStudents: { $sum: { $ifNull: ["$hostelStudentCount.studentCount", 0] } }
                     }
                 },
-                { 
-                    $project: { 
-                        _id: 0, 
-                        hostelId: "$_id.hostelId", 
-                        hostelName: "$_id.hostelName", 
-                        totalStudents: 1 
+                {
+                    $project: {
+                        _id: 0,
+                        hostelId: "$_id.hostelId",
+                        hostelName: "$_id.hostelName",
+                        totalStudents: 1
                     }
                 },
-                { 
+                {
                     $sort: { hostelId: 1 }
                 }
             ]);
-            let response={
-                status:"success",
-                data:pipeLine
+            let response = {
+                status: "success",
+                data: pipeLine
             }
             return response;
         } catch (error) {
@@ -364,7 +364,7 @@ class HostelAdmissionService extends BaseService {
     async getIndividualStudentData(groupId, query) {
         try {
             const userId = Number(query.userId);
-    
+
             let data = await HostelAdmissionModel.aggregate([
                 {
                     $match: {
@@ -501,7 +501,7 @@ class HostelAdmissionService extends BaseService {
                     }
                 }
             ]);
-    
+
             const response = {
                 status: "Success",
                 data: {
@@ -509,15 +509,15 @@ class HostelAdmissionService extends BaseService {
                     totalItemsCount: data.length,
                 },
             };
-    
+
             return response;
         } catch (error) {
             console.error("Error:", error);
             throw error;
         }
     }
-    
-    
+
+
     async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
             const updateResult = await HostelAdmissionModel.findOneAndUpdate(
@@ -703,12 +703,12 @@ class HostelAdmissionService extends BaseService {
                     return { ...service._doc, ...additionalData };
                 })
             );
-           
+
             const feesPaymentData = await hostelPaymentModel.find({
                 groupId: groupId,
                 empId: query.empId,
                 hostelAdmissionId: query.hostelAdmissionId,
-              
+
             });
 
             // let response1;
@@ -743,9 +743,9 @@ class HostelAdmissionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.academicYear == query.academicYear &&
-                        data.hostelAdmissionId == query.hostelAdmissionId,
+                    data.empId === query.empId &&
+                    data.academicYear == query.academicYear &&
+                    data.hostelAdmissionId == query.hostelAdmissionId,
                     true
                 );
             });
@@ -765,16 +765,64 @@ class HostelAdmissionService extends BaseService {
             throw error;
         }
     }
+
     async getByHostelId(hostelAdmissionId) {
-        return this.execute(() => {
-            return HostelAdmissionModel.findOne({
-                hostelAdmissionId: hostelAdmissionId,
-            });
-        });
+        try {
+            const hostelAdmission = await HostelAdmissionModel.findOne({
+                hostelAdmissionId: Number(hostelAdmissionId),
+            }).exec();
+
+            if (!hostelAdmission) {
+                throw new Error("Hostel admission not found");
+            }
+
+            const feesDetails = hostelAdmission.feesDetails;
+
+            if (feesDetails && feesDetails.length > 0) {
+                const updatedFeesDetails = await Promise.all(feesDetails.map(async (feeDetail) => {
+                    const feesTemplateId = Number(feeDetail.feesTemplateId);
+                    if (!feesTemplateId) {
+                        throw new Error("Fee template ID not found in fees details");
+                    }
+                    const feeTemplate = await feesTemplateModel.findOne({
+                        feesTemplateId: feesTemplateId,
+                    }).exec();
+
+                    if (!feeTemplate) {
+                        throw new Error("Fee template not found");
+                    }
+
+                    return {
+                        ...feeDetail,
+                        feeTemplate: feeTemplate.toObject()
+                    };
+                }));
+
+                return {
+                    status: "Success",
+                    data: {
+                        ...hostelAdmission.toObject(),
+                        feesDetails: updatedFeesDetails
+                    }
+                };
+            } else {
+                return {
+                    status: "Success",
+                    data: hostelAdmission.toObject()
+                };
+            }
+        } catch (error) {
+            console.error("Error in getByHostelId:", error);
+            return {
+                status: "Error",
+                message: error.message,
+            };
+        }
     }
-    async getByAddmissionIdData(hostelAdmissionId,userId) {
+
+    async getByAddmissionIdData(hostelAdmissionId, userId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId,userId: userId });
+            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId, userId: userId });
         });
     }
     async updateUser(hostelAdmissionId, groupId, data) {
