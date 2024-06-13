@@ -103,9 +103,9 @@ class CommunicationService extends BaseService {
     async getLatestMessageFromEachChat() {
         try {
             const latestMessages = await this.model.aggregate([
-                {
-                    $sort: { timestamp: -1 }
-                },
+                // Sort messages by timestamp in descending order
+                { $sort: { timestamp: -1 } },
+                // Group by a unique sender-receiver pair
                 {
                     $group: {
                         _id: {
@@ -119,20 +119,27 @@ class CommunicationService extends BaseService {
                         },
                         latestMessage: { $first: "$$ROOT" }
                     }
-                }
+                },
+                // Unwind the group result to flatten the structure
+                { $replaceRoot: { newRoot: "$latestMessage" } }
             ]);
+            
+            // Map and format the messages
             const formattedMessages = latestMessages.map(chat => ({
-                ...chat.latestMessage,
-                formattedDateTime: this.formatDate(chat.latestMessage.timestamp)
+                ...chat,
+                formattedDateTime: this.formatDate(chat.timestamp)
             }));
-
+    
+            // Sort messages by timestamp in descending order for the final output
+            formattedMessages.sort((a, b) => b.timestamp - a.timestamp);
+    
             return new ServiceResponse({ data: formattedMessages });
         } catch (error) {
             console.error('Error while fetching latest messages from each chat:', error);
             throw new Error('Error while fetching latest messages from each chat');
         }
     }
-
+    
     async deleteChatById(chatId) {
         try {
             const deletedChat = await this.model.findByIdAndDelete(chatId);
