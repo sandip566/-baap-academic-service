@@ -8,7 +8,7 @@ class HostelAdmissionCancelService extends BaseService {
     }
     async getAllDataByGroupId(groupId, criteria, page, pageSize) {
         const matchStage = {
-            groupId:Number(groupId),
+            groupId: Number(groupId),
         };
         const totalItemsCount = await HostelAdmissionCancelModel.countDocuments(
             matchStage
@@ -23,6 +23,46 @@ class HostelAdmissionCancelService extends BaseService {
 
         const aggregationPipeline = [
             { $match: matchStage },
+            {
+                $lookup: {
+                    from: "hostelpayments",
+                    localField: "hostelPaymentId",
+                    foreignField: "hostelPaymentId",
+                    as: "paymentDetails"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$paymentDetails",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $lookup: {
+                    from: "hosteladmissions",
+                    localField: "hostelAdmissionId",
+                    foreignField: "hostelAdmissionId",
+                    as: "hostelDetails"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$hostelDetails",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    name: 1,
+                    status: 1,
+                    groupId: 1,
+                    hostelAdmissionId: 1,
+                    hostelPaymentId: 1,
+                    userId: 1,
+                    phoneNumber: "$hostelDetails.phoneNumber",
+                    remeningAmount: "$paymentDetails.remainingAmount"
+                }
+            },
             { $skip: skip },
             { $limit: pageSize },
         ];
@@ -45,7 +85,8 @@ class HostelAdmissionCancelService extends BaseService {
             throw new Error("Failed to fetch data. Please try again later.");
         }
     }
-    async updateAdmissionStatus( groupId,hostelAdmissionId ) {
+
+    async updateAdmissionStatus(groupId, hostelAdmissionId) {
         try {
             await HostelAdmissionCancelModel.updateOne(
                 { groupId: groupId, hostelAdmissionId: hostelAdmissionId },
@@ -53,7 +94,7 @@ class HostelAdmissionCancelService extends BaseService {
             );
 
             const updateResult = await HostelAdmissionCancelModel.updateOne(
-                { groupId: groupId ,hostelAdmissionId: hostelAdmissionId},
+                { groupId: groupId, hostelAdmissionId: hostelAdmissionId },
                 { $set: { admissionStatus: "Cancel" } }
             );
 
