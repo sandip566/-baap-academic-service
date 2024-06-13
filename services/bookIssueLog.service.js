@@ -238,6 +238,8 @@ class BookIssueLogService extends BaseService {
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
                         totalFine: totalFine,
+                        name:bookIssue.name,
+                        profile_url:bookIssue.url
                     };
                     return response;
                 });
