@@ -59,6 +59,7 @@ class HostelAdmissionCancelService extends BaseService {
                     hostelAdmissionId: 1,
                     hostelPaymentId: 1,
                     userId: 1,
+                    name:"$hostelDetails.name",
                     phoneNumber: "$hostelDetails.phoneNumber",
                     remeningAmount: "$paymentDetails.remainingAmount"
                 }
