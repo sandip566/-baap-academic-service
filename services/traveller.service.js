@@ -2,6 +2,7 @@ const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const BusRouteModel = require("../schema/busroutes.schema");
 const serviceResponse = require("@baapcompany/core-api/services/serviceResponse");
+const ActiveTripsModel = require("../schema/activetrips.schema")
 class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -120,47 +121,7 @@ class TravellerService extends BaseService {
         }
     }
 
-    async getActiveTrip(groupId, routeId) {
-        const query = {
-            groupId: Number(groupId),
-            routeId: Number(routeId)
-        };
-
-        const traveller = await TravellerModel.aggregate([
-            { $match: query },
-            {
-                $lookup: {
-                    from: 'activetrips',
-                    localField: 'routeId',
-                    foreignField: 'routeId',
-                    as: 'activeTrip'
-                }
-            },
-            { $unwind: '$activeTrip' },
-            { $match: { 'activeTrip.status': 'active' } },
-            {
-                $project: {
-                    groupId: '$activeTrip.groupId',
-                    tripId: '$activeTrip.tripId',
-                    status: '$activeTrip.status',
-                    startTime: '$activeTrip.startTime',
-                    endTime: '$activeTrip.endTime'
-                }
-            }
-        ]);
-
-        if (traveller.length === 0) {
-            return {
-                message: "Trip is not active for this route",
-                data: []
-            };
-        }
-
-        return {
-            message: "Active trip found",
-            data: traveller
-        };
-    }
+    
 
 }
 
