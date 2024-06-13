@@ -1,155 +1,79 @@
 const { query } = require("express");
 const booksModel = require("../schema/books.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-//const bookIssueLog = require("../schema/bookIssueLog.schema");
-const Student = require("../schema/studentAdmission.schema");
-const departmentModel = require("../schema/department.schema");
 const shelfModel = require("../schema/shelf.schema");
-const publisherModel = require("../schema/publisher.schema");
 const bookIssueLogService = require("../services/bookIssueLog.service");
 const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria, skip, limit) {
+    async getAllDataByGroupId(groupID, criteria) {
         try {
-            const searchFilter = {
-                groupId: groupId,
-            };
-            const departmentMap = await this.getDepartmentMap();
-            const shelfMap = await this.getShelfMap();
-            const publisherMap = await this.getPublisherMap();
-
+            const groupId = parseInt(groupID);
+            if (isNaN(groupId)) {
+                throw new Error("Invalid groupID");
+            }
+            const searchFilter = { groupId };
+            const aggregationPipeline = [
+                {
+                    $match: searchFilter
+                },
+                {
+                    $lookup: {
+                        from: "shelves",
+                        localField: "shelfId",
+                        foreignField: "shelfId",
+                        as: "shelf"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$shelf",
+                        preserveNullAndEmptyArrays: true
+                    }
+                }
+            ];
             if (criteria.search) {
-                const numericSearch = parseInt(criteria.search);
-                if (!isNaN(numericSearch)) {
-                    searchFilter.$or = [
-                        { ISBN: numericSearch },
-                        { shelfId: numericSearch },
-                        { price: numericSearch },
-                        { departmentId: numericSearch },
-                        { totalCount: numericSearch },
-                        { availableCount: numericSearch },
-                    ];
-                } else {
-                    const shelfId =
-                        shelfMap[criteria.search.trim().toLowerCase()];
-                    searchFilter.$or = [
-                        { shelfId: shelfId },
-                        {
-                            shelfName: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-
-                        {
-                            status: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                        { name: { $regex: new RegExp(criteria.search, "i") } },
-                        {
-                            author: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                    ];
-                }
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                aggregationPipeline.push({
+                    $match: {
+                        $or: [
+                            { "shelf.shelfName": searchRegex },
+                            { userId: { $eq: parseInt(criteria.search) } },
+                            { name: searchRegex },
+                            { ISBN: { $eq: parseInt(criteria.search) } },
+                            { author: searchRegex },
+                            { totalCopies: { $eq: parseInt(criteria.search) } },
+                            { availableCount: { $eq: parseInt(criteria.search) } }
+                        ]
+                    }
+                });
             }
 
-            if (criteria.departmentName) {
-                const departmentNameLowerCase =
-                    criteria.departmentName.toLowerCase();
-                const departmentId = departmentMap[departmentNameLowerCase];
-                if (departmentId) {
-                    searchFilter.departmentId = departmentId;
-                } else {
-                    return { searchFilter: {}, departmentMap: {} };
-                }
+            if (criteria.userId) {
+                aggregationPipeline.push({ $match: { userId: parseInt(criteria.userId) } });
             }
-
-            if (criteria.shelfName) {
-                const shelfnameLowercase = criteria.shelfName.toLowerCase();
-                const shelfId = shelfMap[shelfnameLowercase];
-                if (shelfId) {
-                    searchFilter.shelfId = shelfId;
-                } else {
-                    return { searchFilter: {}, shelfMap: {} };
-                }
-            }
-
-            if (criteria.publisherName) {
-                const publishernameLowercase =
-                    criteria.publisherName.toLowerCase();
-                const publisherId = publisherMap[publishernameLowercase];
-                if (publisherId) {
-                    searchFilter.publisherId = publisherId;
-                } else {
-                    return { searchFilter: {}, publisherMap: {} };
-                }
-            }
-            console.log(publisherMap);
-
-            return { searchFilter };
+            const pageNumber = parseInt(criteria.pageNumber) || 1;
+            const pageSize = parseInt(criteria.pageSize) || 10;
+            aggregationPipeline.push(
+                { $skip: (pageNumber - 1) * pageSize },
+                { $limit: pageSize }
+            );
+            const populatedBook = await booksModel.aggregate(aggregationPipeline);
+            const totalCount = await booksModel.countDocuments(searchFilter);
+            const count = await this.getBooksCount(groupId);
+            return {
+                status: "Success",
+                populatedBook,
+                count,
+                totalCount
+            };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
-            throw new Error("An error occurred while processing the request.");
+            throw new Error("An error occurred while processing the request. Please try again later.");
         }
     }
-
-    async getDepartmentMap() {
-        try {
-            const departments = await departmentModel.find();
-            const departmentMap = {};
-            departments.forEach((department) => {
-                if (department.departmentName) {
-                    const departmentName = department.departmentName
-                        .trim()
-                        .toLowerCase();
-                    departmentMap[departmentName] = department.departmentId;
-                }
-            });
-            return departmentMap;
-        } catch (error) {
-            console.error("Error fetching department map:", error);
-            throw new Error("An error occurred while fetching department map.");
-        }
-    }
-    async getShelfMap() {
-        try {
-            const shelves = await shelfModel.find();
-            const shelfMap = {};
-            shelves.forEach((shelf) => {
-                if (shelf.shelfName) {
-                    const shelfName = shelf.shelfName.trim().toLowerCase();
-                    shelfMap[shelfName] = shelf.shelfId;
-                }
-            });
-            return shelfMap;
-        } catch (error) {
-            console.error("Error fetching shelf map:", error);
-            throw new Error("An error occurred while fetching shelf map.");
-        }
-    }
-    async getPublisherMap() {
-        const publishers = await publisherModel.find();
-        const publisherMap = {};
-        publishers.forEach((publisher) => {
-            if (publisher.publisherName) {
-                const publisherName = publisher.publisherName
-                    .trim()
-                    .toLowerCase();
-                publisherMap[publisherName] = publisher.publisherId;
-            }
-        });
-        return publisherMap;
-    }
-    catch(error) {
-        console.error("Error fetching publisher map:", error);
-        throw new Error("An error occurred while fetching publisher map.");
-    }
-
     async deleteBookById(groupId, bookId) {
         try {
             const groupID = parseInt(groupId);
@@ -186,33 +110,38 @@ class BooksService extends BaseService {
     }
     async getBooksCount(groupId) {
         try {
-            const books = await booksModel.find({ groupId: groupId });
-            if (!books) {
-                console.log("No books found in the database.");
-                return 0;
-            }
+            const aggregationPipeline = [
+                {
+                    $match: { groupId: groupId }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        totalAvailableCount: { $sum: "$availableCount" },
+                        totalCount: { $sum: "$totalCopies" }
+                    }
+                }
+            ];
+            const result = await booksModel.aggregate(aggregationPipeline);
             let totalAvailableCount = 0;
             let totalCount = 0;
-            for (const book of books) {
-                totalAvailableCount += book.availableCount || 0;
-            }
-            for (const book of books) {
-                totalCount += book.totalCopies || 0;
+            if (result.length > 0) {
+                totalAvailableCount = result[0].totalAvailableCount || 0;
+                totalCount = result[0].totalCount || 0;
             }
             const count = await bookIssueLogService.getCount(groupId);
             const response = {
                 totalCount: totalCount,
                 totalAvailableCount: totalAvailableCount,
                 totalIssuedBooks: count.bookIssues,
-                totalReturnedBooks: count.returnedBooks,
+                totalReturnedBooks: count.returnedBooks
             };
             return response;
         } catch (error) {
-            console.error("Error in getTotalAvailableBooks:", error);
+            console.error("Error in getBooksCount:", error);
             throw error;
         }
     }
-
     async getBookDetails(groupId, criteria) {
         try {
             const searchFilter = {
@@ -253,13 +182,13 @@ class BooksService extends BaseService {
             });
             console.log(issueLogs);
             const data = issueLogs.map((issue) => ({
-                studentName:issue.name,
+                studentName: issue.name,
                 issueDate: issue.issuedDate,
                 bookIssueLogId: issue.bookIssueLogId,
                 userId: issue.userId,
                 addmissionId: issue.addmissionId,
                 isOverdue: issue.isOverdue,
-                url:issue.profile_img
+                url: issue.profile_img
             }));
             return {
                 data: "books",
@@ -276,7 +205,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) {}
+        } catch (error) { }
     }
 }
 module.exports = new BooksService(booksModel, "books");
