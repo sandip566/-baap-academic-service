@@ -65,7 +65,9 @@ class BooksService extends BaseService {
             const count = await this.getBooksCount(groupId);
             return {
                 status: "Success",
-                populatedBook,
+                data: {
+                    items:  populatedBook,
+                },
                 count,
                 totalCount
             };
