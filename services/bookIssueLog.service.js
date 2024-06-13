@@ -10,127 +10,6 @@ class BookIssueLogService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    // async getAllDataByGroupId(groupId, criteria, page, limit) {
-    //     try {
-    //         const searchFilter = { groupId };
-    //         const bookMap = await this.getBookMap();
-    //         const studentMap = await this.getStudentMap();
-
-    //         if (criteria.search) {
-    //             const numericSearch = parseInt(criteria.search);
-    //             if (!isNaN(numericSearch)) {
-    //                 searchFilter.$or = [
-    //                     { userId: numericSearch },
-    //                     { bookIssueLogId: numericSearch },
-    //                     {ISBN:numericSearch}
-    //                 ];
-    //             } else {
-    //                 const bookId =
-    //                     bookMap[criteria.search.trim().toLowerCase()];
-    //                 const admissionId =
-    //                     studentMap[criteria.search.trim().toLowerCase()];
-    //                 searchFilter.$or = [
-    //                     { bookId },
-    //                     { name: { $regex: new RegExp(criteria.search, "i") } },
-    //                     { admissionId },
-    //                     {
-    //                         firstName: {
-    //                             $regex: new RegExp(criteria.search, "i"),
-    //                         },
-    //                     },
-    //                 ];
-    //             }
-    //         }
-
-    //         if (criteria.isReturn !== undefined)
-    //             searchFilter.isReturn = criteria.isReturn;
-    //         if (criteria.isReserve !== undefined)
-    //             searchFilter.isReserve = criteria.isReserve;
-    //         if (criteria.status) searchFilter.status = criteria.status;
-    //         if (criteria.isOverdue !== undefined)
-    //             searchFilter.isOverdue = criteria.isOverdue;
-    //         if (criteria.userId) searchFilter.userId = criteria.userId;
-    //         const sortOrder = { createdAt: -1 };
-
-    //         const skip = (page - 1) * limit;
-
-    //         const bookIssueLogs = await bookIssueLogModel
-    //             .find(searchFilter)
-    //             .sort(sortOrder)
-    //             .skip(skip)
-    //             .limit(limit);
-
-    //         const populatedBooks = await Promise.all(
-    //             bookIssueLogs.map(async (log) => {
-    //                 const books = await Book.findOne({ bookId: log.bookId });
-    //                 const student = await studentAdmissionModel.findOne({
-    //                     addmissionId: log.addmissionId,
-    //                 });
-    //                 return { ...log._doc, books, student };
-    //             })
-    //         );
-
-    //         const filteredBooks =
-    //             criteria.search && isNaN(parseInt(criteria.search))
-    //                 ? populatedBooks.filter(
-    //                       (log) =>
-    //                           log.books &&
-    //                           log.books.name
-    //                               .toLowerCase()
-    //                               .includes(criteria.search.toLowerCase())
-    //                   )
-    //                 : populatedBooks;
-
-    //         const count = await this.getCount(groupId);
-    //         const totalCount = await bookIssueLogModel.countDocuments(
-    //             searchFilter
-    //         );
-
-    //         return {
-    //             populatedBookIssueLog: filteredBooks,
-    //             count,
-    //             totalCount,
-    //         };
-    //     } catch (error) {
-    //         console.error("Error in getAllDataByGroupId:", error);
-    //         throw new Error(
-    //             "An error occurred while processing the request. Please try again later."
-    //         );
-    //     }
-    // }
-
-    // async getBookMap() {
-    //     try {
-    //         const books = await Book.find();
-    //         const bookMap = {};
-    //         books.forEach((book) => {
-    //             if (book.name) {
-    //                 const name = book.name.trim().toLowerCase();
-    //                 bookMap[name] = book.bookId;
-    //             }
-    //         });
-    //         return bookMap;
-    //     } catch (error) {
-    //         console.error("Error fetching book map:", error);
-    //         throw new Error("An error occurred while fetching book map.");
-    //     }
-    // }
-    // async getStudentMap() {
-    //     try {
-    //         const students = await studentAdmissionModel.find();
-    //         const studentMap = {};
-    //         students.forEach((student) => {
-    //             if (student.firstName) {
-    //                 const firstName = student.firstName.trim().toLowerCase();
-    //                 studentMap[firstName] = student.addmissionId;
-    //             }
-    //         });
-    //         return studentMap;
-    //     } catch (error) {
-    //         console.error("Error fetching student map:", error);
-    //         throw new Error("An error occurred while fetching student map.");
-    //     }
-    // }
     async getAllDataByGroupId(groupID, criteria) {
         try {
             const groupId = parseInt(groupID);
@@ -161,8 +40,8 @@ class BookIssueLogService extends BaseService {
                         $or: [
                             { "books.name": searchRegex },
                             { "books.ISBN": { $eq: parseInt(criteria.search) } },
-                            {userId:{ $eq: parseInt(criteria.search) }},
-                            {name: searchRegex}
+                            { userId: { $eq: parseInt(criteria.search) } },
+                            { name: searchRegex }
                         ]
                     }
                 });
@@ -191,14 +70,14 @@ class BookIssueLogService extends BaseService {
             const populatedBookIssueLog = await bookIssueLogModel.aggregate(aggregationPipeline);
             const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
             const count = await this.getCount(groupId);
-                     const Count = await bookIssueLogModel.countDocuments(
-                         searchFilter
-                     );
-        
+            const Count = await bookIssueLogModel.countDocuments(
+                searchFilter
+            );
+
             return {
                 status: "Success",
                 populatedBookIssueLog,
-                count:count,
+                count: count,
                 totalCount
             };
         } catch (error) {
@@ -353,8 +232,8 @@ class BookIssueLogService extends BaseService {
                             __v: book.__v,
                         },
                         bookIssueLogId: bookIssue.bookIssueLogId,
-                        bookIssueDate:bookIssue.issuedDate,
-                        userId:bookIssue.userId,
+                        bookIssueDate: bookIssue.issuedDate,
+                        userId: bookIssue.userId,
                         bookName: book ? book.name : "Unknown Book",
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
@@ -494,8 +373,8 @@ class BookIssueLogService extends BaseService {
     }
     async reserveBook(groupID, bookID) {
         try {
-            const groupId=parseInt(groupID)
-            const bookId=parseInt(bookID)
+            const groupId = parseInt(groupID)
+            const bookId = parseInt(bookID)
             const book = await Book.find({ groupId: groupId, bookId: bookId });
             return book;
         } catch (error) {
@@ -515,9 +394,9 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-     
-    async checkReservation(groupId,userId,bookId){
-        try{
+
+    async checkReservation(groupId, userId, bookId) {
+        try {
             const existingReservation = await bookIssueLogModel.findOne({
                 groupId: groupId,
                 userId: userId,
@@ -525,7 +404,7 @@ class BookIssueLogService extends BaseService {
                 isReturn: false,
             });
             return existingReservation;
-        }catch (error) {
+        } catch (error) {
             throw error;
         }
     }
@@ -534,7 +413,7 @@ class BookIssueLogService extends BaseService {
         try {
             const groupIdInt = parseInt(groupId);
             const bookIdInt = parseInt(bookId);
-    
+
             const book = await Book.aggregate([
                 {
                     $match: {
@@ -543,50 +422,50 @@ class BookIssueLogService extends BaseService {
                     }
                 }
             ]);
-    
+
             return book;
         } catch (error) {
             throw error;
         }
     }
-    
 
-    async returnBook(groupId, bookId, userId, returnDate){
+
+    async returnBook(groupId, bookId, userId, returnDate) {
         if (!returnDate) {
             throw new Error("returnDate is required");
         }
-    
+
         const parsedReturnDate = new Date(returnDate);
         if (isNaN(parsedReturnDate)) {
             throw new Error("Invalid return date");
         }
-    
+
         const existingReservation = await bookIssueLogModel.findOne({
             groupId,
             bookId,
             userId,
             isReturn: false,
         });
-    
+
         if (!existingReservation) {
             throw new Error("The book is not currently issued to the specified group.");
         }
-    
+
         if (existingReservation.isOverdue === true) {
             throw new Error("First Paid Payment, Your Log is OverDue");
         }
-    
+
         const updatedReservation = await this.updateBookIssueLogById(
             groupId,
             existingReservation.bookIssueLogId,
             { isReturn: true, returnDate: parsedReturnDate }
         );
-    
+
         await Book.findOneAndUpdate(
             { bookId },
             { $inc: { availableCount: 1 } }
         );
-    
+
         return updatedReservation;
     };
 }

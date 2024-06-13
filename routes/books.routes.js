@@ -4,11 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/books.services");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
-const booksModel = require("../schema/books.schema");
 const shelfModel = require("../schema/shelf.schema");
-const deparmentModel = require("../schema/department.schema");
-const publisherModel = require("../schema/publisher.schema");
-const bookIssueLogModel = require("../schema/bookIssueLog.schema");
 const PurchaseModel = require("../schema/purchase.schema");
 router.post(
     "/",
@@ -17,37 +13,31 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-
         try {
             let purchaseData = await PurchaseModel.findOne({
                 groupId: req.body.groupId,
                 purchaseId: req.body.purchaseId,
             });
-
             if (!purchaseData) {
                 return res.status(400).json({
                     success: false,
                     error: "This book has not been purchased",
                 });
             }
-
             if (req.body.totalCopies !== undefined) {
                 req.body.availableCount = req.body.totalCopies;
             }
-
             const shelfId = req.body.shelfId;
             const shelf = await shelfModel.findOne({ shelfId });
 
             if (!shelf) {
                 return res.status(404).json({ error: "Shelf not found" });
             }
-
             if (shelf.availableCapacity <= 0) {
                 return res.status(400).json({
                     error: "This shelf is not available for storing books. Available capacity is zero.",
                 });
             }
-
             await shelfModel.findOneAndUpdate(
                 { shelfId: shelfId, availableCapacity: { $gt: 0 } },
                 { $inc: { availableCapacity: -1, currentInventory: 1 } },
@@ -90,85 +80,25 @@ router.put("/:id", async (req, res) => {
 });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-    try {
-        const groupId = req.params.groupId;
-        const criteria = {
-            name: req.query.name,
-            author: req.query.author,
-            totalCount: req.query.totalCount,
-            availableCount: req.query.availableCount,
-            search: req.query.search,
-            shelfId: req.query.shelfId,
-            departmentId: req.query.departmentId,
-            publisherId: req.query.publisherId,
-            price: req.query.price,
-            status: req.query.status,
-            shelfName: req.query.shelfName,
-            departmentName: req.query.departmentName,
-            publisherName: req.query.publisherName,
-        };
-
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 100;
-        const skip = (page - 1) * limit;
-        const departmentMap = await service.getDepartmentMap(groupId);
-        const shelfMap = await service.getShelfMap();
-        const publisherMap = await service.getPublisherMap();
-
-        const { searchFilter } = await service.getAllDataByGroupId(
-            groupId,
-            criteria,
-            skip,
-            limit,
-            departmentMap,
-            shelfMap,
-            publisherMap
-        );
-        const totalCount = await booksModel.countDocuments(searchFilter);
-        const books = await booksModel
-            .find(searchFilter)
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .exec();
-
-        const populatedBooks = await Promise.all(
-            books.map(async (book) => {
-                const shelf = await shelfModel.findOne({
-                    shelfId: book.shelfId,
-                });
-                const department = await deparmentModel.findOne({
-                    departmentId: book.departmentId,
-                });
-                const publisher = await publisherModel.findOne({
-                    publisherId: book.publisherId,
-                });
-
-                return {
-                    _id: book._id,
-                    bookId: book.bookId,
-                    book: {
-                        ...book._doc,
-                    },
-                    shelf,
-                    department,
-                    publisher,
-                };
-            })
-        );
-        const count = await service.getBooksCount(groupId);
-        res.json({
-            status: "Success",
-            data: {
-                items: populatedBooks,
-                totalCount: totalCount,
-                booksCount: count,
-            },
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
-    }
+    const groupId = req.params.groupId;
+    const criteria = {
+        name: req.query.name,
+        totalCount: req.query.totalCount,
+        availableCount: req.query.availableCount,
+        search: req.query.search,
+        shelfId: req.query.shelfId,
+        shelfName: req.query.shelfName,
+        ISBN: req.query.search
+    };
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
+    const serviceResponse = await service.getAllDataByGroupId(
+        groupId,
+        criteria,
+        page,
+        limit
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.delete("/groupId/:groupId/bookId/:bookId", async (req, res) => {
