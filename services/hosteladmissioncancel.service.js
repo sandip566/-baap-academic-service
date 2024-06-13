@@ -1,6 +1,7 @@
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const HostelAdmissionCancelModel = require("../schema/hosteladmissioncancel.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const hostelAdmissionModel=require("../schema/hosteladmission.schema")
 
 class HostelAdmissionCancelService extends BaseService {
     constructor(dbModel, entityName) {
@@ -97,7 +98,10 @@ class HostelAdmissionCancelService extends BaseService {
                 { groupId: groupId, hostelAdmissionId: hostelAdmissionId },
                 { $set: { admissionStatus: "Cancel" } }
             );
-
+            await hostelAdmissionModel.updateOne(
+                { groupId: groupId, hostelAdmissionId:Number(hostelAdmissionId) },
+                { $set: { admissionStatus: "Cancel" } }
+            );
             return updateResult;
         } catch (error) {
             console.error("Error updating admission status:", error);
