@@ -99,10 +99,18 @@ class CommunicationService extends BaseService {
             throw new Error('Error while fetching chats by sender and receiver ID');
         }
     }
-
-    async getLatestMessageFromEachChat() {
+    
+    async getLatestMessageFromEachChat(senderId) {
         try {
-            const latestMessages = await this.model.aggregate([
+            const pipeline = [
+                {
+                    $match: {
+                        $or: [
+                            { senderId:Number (senderId) },
+                            { receiverId: Number(senderId) }
+                        ]
+                    }
+                },
                 { $sort: { timestamp: -1 } },
                 {
                     $group: {
@@ -119,8 +127,10 @@ class CommunicationService extends BaseService {
                     }
                 },
                 { $replaceRoot: { newRoot: "$latestMessage" } }
-            ]);
-            
+            ];
+    
+            const latestMessages = await this.model.aggregate(pipeline);
+    
             const formattedMessages = latestMessages.map(chat => ({
                 ...chat,
                 formattedDateTime: this.formatDate(chat.timestamp)
@@ -134,6 +144,7 @@ class CommunicationService extends BaseService {
             throw new Error('Error while fetching latest messages from each chat');
         }
     }
+    
     
     async deleteChatById(chatId) {
         try {
