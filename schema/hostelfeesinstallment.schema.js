@@ -22,6 +22,11 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
             type: String,
             default: "pending",
         },
+
+        deleted:{
+            type:Boolean,
+            default:true
+        }
     },
     {strict:false, timestamps: true }
 );
