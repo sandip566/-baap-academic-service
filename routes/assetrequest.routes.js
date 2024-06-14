@@ -6,10 +6,10 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const assetModel = require("../schema/asset.schema");
 const AssetRequestModel = require("../schema/assetrequest.schema");
-
 const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
+
 router.post(
     "/",
     checkSchema(require("../dto/assetrequest.dto")),
@@ -19,6 +19,14 @@ router.post(
         }
         const requestId = +Date.now();
         req.body.requestId = requestId;
+
+        if (req.body.status === "Issued") {
+            const updateResponse = await service.updateAssetCount(req.body.assetId, req.body.quantity);
+            if (updateResponse !== "Asset count updated successfully") {
+                return { error: updateResponse };
+            }
+        }
+
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
