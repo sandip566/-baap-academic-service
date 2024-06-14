@@ -21,7 +21,7 @@ router.post(
 );
 router.get(
     "/AssetDashboard/groupId/:groupId",
-    // TokenService.checkPermission(["EMA1"]),
+    TokenService.checkPermission(["EMA1"]),
     async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
