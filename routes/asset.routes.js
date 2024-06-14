@@ -21,7 +21,7 @@ router.post(
 );
 router.get(
     "/AssetDashboard/groupId/:groupId",
-    TokenService.checkPermission(["EMA1"]),
+    // TokenService.checkPermission(["EMA1"]),
     async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
@@ -93,27 +93,24 @@ router.delete("/groupId/:groupId/assetId/:assetId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all/asset", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
