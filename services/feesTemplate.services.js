@@ -51,8 +51,8 @@ class Service extends BaseService {
         ];
 
         if (criteria.page && criteria.pageSize) {
-            const page = parseInt(criteria.page, 10);
-            const pageSize = parseInt(criteria.pageSize, 10);
+            const page = parseInt(criteria.page, 1);
+            const pageSize = parseInt(criteria.pageSize, 5);
             const skip = (page - 1) * pageSize;
 
             aggregationPipeline.push(
