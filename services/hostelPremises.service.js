@@ -63,12 +63,6 @@ async getAllDataByGroupId(groupID, criteria) {
     }
 }
 
-
-
-
-
-
-
     async getByHostelId(hostelId) {
         return this.execute(() => {
             return HostelModel.findOne({
