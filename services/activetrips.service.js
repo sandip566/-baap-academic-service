@@ -290,9 +290,26 @@ class ActiveTripsService extends BaseService {
                 }
             },
             {
+                $lookup: {
+                    from: 'busroutes',
+                    localField: 'routeId',
+                    foreignField: 'routeId',
+                    as: 'routeDetails'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$routeDetails',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
                 $project: {
                     groupId: 1,
                     tripId: 1,
+                    startTime: 1,
+                    'routeDetails.number': 1,
+                    'routeDetails.routeId': 1
                 }
             }
         ]);
@@ -305,7 +322,6 @@ class ActiveTripsService extends BaseService {
         }
 
         const tripData = this.getActiveTrip(query)
-        console.log("tripData",tripData);
 
         return {
             message: "Active trip found",
