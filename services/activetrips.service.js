@@ -245,6 +245,8 @@ class ActiveTripsService extends BaseService {
             nearestStop.distance = formattedDistance;
             nearestStop.arrivalTime = formattedArrivalTime;
         }
+        const stopId = nearestStop.stopId
+        const traveller = await TravellerModel.find({ groupId: Number(groupId), stopId: stopId })
 
         const onBoardTravellers = trip.onBoaredTraveller || [];
         const onBoardTravellersCount = onBoardTravellers.filter(traveller => traveller.inTime).length;
@@ -255,10 +257,75 @@ class ActiveTripsService extends BaseService {
                 driverId: driver,
                 careTakerId: caretaker,
                 routeId: route,
-                vehicleId: vehicle
+                vehicleId: vehicle,
+                nearestStopTravellers: traveller,
+                onBoardTravellersCount: onBoardTravellersCount,
+                nearestStop: nearestStop
             },
-            onBoardTravellersCount,
-            nearestStop
+        };
+    }
+
+    async getActiveTrips(groupId, userId) {
+        const query = {
+            groupId: Number(groupId),
+            userId: Number(userId)
+        };
+        const [traveller] = await TravellerModel.find(query).select('routeId').exec();
+
+        if (!traveller) {
+            return {
+                message: "No traveler found with the given criteria",
+                data: []
+            };
+        }
+
+        const routeId = traveller.routeId;
+
+        const activeTrip = await ActiveTripsModel.aggregate([
+            {
+                $match: {
+                    groupId: Number(groupId),
+                    routeId: routeId,
+                    status: 'active'
+                }
+            },
+            {
+                $lookup: {
+                    from: 'busroutes',
+                    localField: 'routeId',
+                    foreignField: 'routeId',
+                    as: 'routeDetails'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$routeDetails',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    groupId: 1,
+                    tripId: 1,
+                    startTime: 1,
+                    'routeDetails.number': 1,
+                    'routeDetails.routeId': 1
+                }
+            }
+        ]);
+
+        if (activeTrip.length === 0) {
+            return {
+                message: "No active trip found for this route",
+                data: []
+            };
+        }
+
+        const tripData = this.getActiveTrip(query)
+
+        return {
+            message: "Active trip found",
+            data: activeTrip
         };
     }
 
@@ -337,9 +404,9 @@ class ActiveTripsService extends BaseService {
                         ...activeTrip.toObject(),
                         onBoaredTraveller: onBoaredTravellers,
                         routeDetails: routeDetails,
-                        vehicleDetails:vehicleDetails,
-                        driverDetails:driverDetails,
-                        caretakerDetails:caretakerDetails
+                        vehicleDetails: vehicleDetails,
+                        driverDetails: driverDetails,
+                        caretakerDetails: caretakerDetails
                     },
                     nearestStop
                 }

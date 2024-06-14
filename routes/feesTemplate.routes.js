@@ -122,7 +122,7 @@ router.get(
         const criteria = {
             feesTemplateId: req.query.feesTemplateId,
             isShowInAccounting:req.query.isShowInAccounting,
-            type: req.query.type,
+            type: parseInt(req.query.type),
             isHostel:req.query.isHostel,
             pageNumber: parseInt(req.query.pageNumber) || 1,
             pageSize: parseInt(req.query.pageSize) || 5,

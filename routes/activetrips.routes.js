@@ -97,9 +97,9 @@ router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
         const tripId = req.params.tripId;
         const groupId = req.params.groupId;
         const newData = req.body;
-       
+
         const updateData = await service.updatedriverById(tripId, groupId, newData);
-       
+
         if (!updateData) {
             res.status(404).json({ error: "Data not found to update" });
         } else {
@@ -118,6 +118,7 @@ router.get("/groupId/:groupId/tripId/:tripId", async (req, res) => {
         const trip = await service.getActiveTrip(groupId, tripId, lat, long)
         res.json(trip)
     } catch (error) {
+        console.log("erroe masseg", error);
         res.status(500).json({ error: "Internal Server Error" });
     }
 })
@@ -136,20 +137,38 @@ router.get("/groupId/:groupId", async (req, res) => {
 
 router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
     try {
-        const { groupId, tripId } = req.params
-        const travellerId = req.query.travellerId
+        const tripId = req.params.tripId;
+        const groupId = req.params.groupId;
+        const newData = req.body;
 
-        const updateTraveller = await service.updateActiveTrip(groupId, tripId, travellerId)
-        res.json(updateTraveller)
+        const updateData = await service.updatedriverById(tripId, groupId, newData);
+
+        if (!updateData) {
+            res.status(404).json({ error: "Data not found to update" });
+        } else {
+            res.status(200).json(updateData);
+        }
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
 
 router.get("/trip/groupId/:groupId/:tripId", async (req, res) => {
     try {
         const { groupId, tripId } = req.params;
         const trip = await service.getTrip(groupId, tripId)
+        res.json(trip)
+    } catch (error) {
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+})
+
+router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const { groupId, userId } = req.params
+
+        const trip = await service.getActiveTrips(groupId, userId)
         res.json(trip)
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });

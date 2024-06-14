@@ -92,6 +92,8 @@ router.post("/data/save", async (req, res, next) => {
                             formDate: documentData.formDate || "",
                             documentUrl: documentData.documentUrl || "",
                             documntConfigurationId: documentId,
+                            documentCategoryId: documentData.documentCategoryId,
+                            documentId : documentData.documentId,
                             groupId: req.body.groupId,
                             userId: req.body.userId,
                             addmissionId: req.body.addmissionId,

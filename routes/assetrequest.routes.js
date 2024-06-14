@@ -120,9 +120,9 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         status: req.query.status,
         category: req.query.category,
         search: req.query.search,
-        managerUserId: req.query.managerUserId,
-        empId: req.query.empId,
-        userId: req.query.userId,
+        managerUserId: parseInt(req.query.managerUserId),
+        empId: parseInt(req.query.empId),
+        userId: parseInt(req.query.userId),
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
     };

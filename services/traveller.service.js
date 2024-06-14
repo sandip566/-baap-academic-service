@@ -2,16 +2,11 @@ const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const BusRouteModel = require("../schema/busroutes.schema");
 const serviceResponse = require("@baapcompany/core-api/services/serviceResponse");
+const ActiveTripsModel = require("../schema/activetrips.schema")
 class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-
-    // async getTravellerRouteId(groupId,routeId) {
-    //     return this.execute(() => {
-    //         return this.model.find({ groupId,routeId });
-    //     });
-    // }
 
     async getBytravellerId(groupId, travellerId) {
         let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
@@ -26,20 +21,20 @@ class TravellerService extends BaseService {
         let responseData = {
             status: "Success",
             data: {
-               
-                    ...traveller.toObject(),
-                    routeId: route.toObject()
-                
+
+                ...traveller.toObject(),
+                routeId: route.toObject()
+
             }
         };
 
         return responseData;
     }
 
-    async getTravellersByRouteId(groupId,routeId) {
+    async getTravellersByRouteId(groupId, routeId) {
         try {
-            const routeData = await this.model.find({ groupId:groupId, routeId: routeId });
-    
+            const routeData = await this.model.find({ groupId: groupId, routeId: routeId });
+
             if (routeData.length === 0) {
                 return null;
             }
@@ -125,6 +120,9 @@ class TravellerService extends BaseService {
             throw error;
         }
     }
+
+    
+
 }
 
 module.exports = new TravellerService(TravellerModel, 'traveller');

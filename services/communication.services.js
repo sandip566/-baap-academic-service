@@ -99,7 +99,53 @@ class CommunicationService extends BaseService {
             throw new Error('Error while fetching chats by sender and receiver ID');
         }
     }
-
+    
+    async getLatestMessageFromEachChat(senderId) {
+        try {
+            const pipeline = [
+                {
+                    $match: {
+                        $or: [
+                            { senderId:Number (senderId) },
+                            { receiverId: Number(senderId) }
+                        ]
+                    }
+                },
+                { $sort: { timestamp: -1 } },
+                {
+                    $group: {
+                        _id: {
+                            senderReceiverPair: {
+                                $cond: [
+                                    { $lt: ["$senderId", "$receiverId"] },
+                                    { senderId: "$senderId", receiverId: "$receiverId" },
+                                    { senderId: "$receiverId", receiverId: "$senderId" }
+                                ]
+                            }
+                        },
+                        latestMessage: { $first: "$$ROOT" }
+                    }
+                },
+                { $replaceRoot: { newRoot: "$latestMessage" } }
+            ];
+    
+            const latestMessages = await this.model.aggregate(pipeline);
+    
+            const formattedMessages = latestMessages.map(chat => ({
+                ...chat,
+                formattedDateTime: this.formatDate(chat.timestamp)
+            }));
+    
+            formattedMessages.sort((a, b) => b.timestamp - a.timestamp);
+    
+            return new ServiceResponse({ data: formattedMessages });
+        } catch (error) {
+            console.error('Error while fetching latest messages from each chat:', error);
+            throw new Error('Error while fetching latest messages from each chat');
+        }
+    }
+    
+    
     async deleteChatById(chatId) {
         try {
             const deletedChat = await this.model.findByIdAndDelete(chatId);

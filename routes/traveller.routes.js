@@ -47,7 +47,7 @@ router.get("/groupId/:groupId/travellerId/:travellerId", async (req, res, next) 
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getBytravellerId(req.params.groupId,req.params.travellerId);
+    const serviceResponse = await service.getBytravellerId(req.params.groupId, req.params.travellerId);
 
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -93,14 +93,6 @@ router.get("/getTravellersByRouteId/groupId/:groupId/routeId/:routeId", async (r
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-// router.get("getTravellerrouteId/groupId/:groupId/routeId/:routeId", async (req, res, next) => {
-//     if (ValidationHelper.requestValidationErrors(req, res)) {
-//         return;
-//     }
-//     const serviceResponse = await service.getTravellerrouteId(req.params.groupId,req.params.routeId);
-
-//     requestResponsehelper.sendResponse(res, serviceResponse);
-// });
 
 router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
@@ -122,5 +114,7 @@ router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+
 
 module.exports = router;
