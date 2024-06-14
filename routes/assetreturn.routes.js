@@ -48,7 +48,7 @@ router.post(
                 { new: true }
             );
 
-            const assetId = updatedAssetRequest.assetId;
+            const assetId = assetRequest.assetId;
 
             const updatedAsset = await AssetModel.findOneAndUpdate(
                 { assetId: assetId },
@@ -66,7 +66,6 @@ router.post(
         }
     }
 );
-
 
 router.get(
     "/all/getByGroupId/:groupId",
