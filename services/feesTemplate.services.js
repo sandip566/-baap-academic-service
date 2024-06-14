@@ -7,11 +7,6 @@ class Service extends BaseService {
         super(dbModel, entityName);
     }
 
-<<<<<<< HEAD
-    getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-=======
     async getAllDataByGroupId(groupId, criteria) {
         const matchStage = {
             $match: {
@@ -56,8 +51,8 @@ class Service extends BaseService {
         ];
 
         if (criteria.page && criteria.pageSize) {
-            const page = parseInt(criteria.page, 10);
-            const pageSize = parseInt(criteria.pageSize, 10);
+            const page = parseInt(criteria.page, 1);
+            const pageSize = parseInt(criteria.pageSize, 5);
             const skip = (page - 1) * pageSize;
 
             aggregationPipeline.push(
@@ -76,7 +71,6 @@ class Service extends BaseService {
                 items: results
             },
             totalItemsCount: totalResults,
->>>>>>> ebd11a5bb12b92a37c0ae81362c9f70d38979715
         };
     }
 

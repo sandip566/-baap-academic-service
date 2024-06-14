@@ -19,7 +19,6 @@ class AssetService extends BaseService {
             const query = {
                 groupId: Number(groupId),
             };
-    
             if (criteria.modelName) query.modelName = new RegExp(criteria.modelName, "i");
     
             const assets = await AssetModel.find(query);
@@ -31,7 +30,6 @@ class AssetService extends BaseService {
             ]);
     
             const totalIssued = issuedCount.length > 0 ? issuedCount[0].totalIssued : 0;
-    
             const totalCurrentValue = assets.reduce((acc, asset) => acc + asset.currentValue, 0);
             const totalAvailable = assets.reduce((acc, asset) => acc + asset.available, 0);
     

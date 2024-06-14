@@ -9,6 +9,7 @@ const AssetRequestModel = require("../schema/assetrequest.schema");
 const multer = require("multer");
 const upload = multer();
 const xlsx = require("xlsx");
+
 router.post(
     "/",
     checkSchema(require("../dto/assetrequest.dto")),
@@ -34,10 +35,8 @@ router.post(
                 return res.status(400).json({ error: updateResponse });
             }
         }
-
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
-
     }
 );
 
