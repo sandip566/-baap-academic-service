@@ -42,6 +42,15 @@ router.get("/getByAddmissionId/:addmissionId", async (req, res, next) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+router.get("/getByUserId/:userId", async (req, res, next) => {
+    if (ValidationHelper.requestValidationErrors(req, res)) {
+        return;
+    }
+    const serviceResponse = await service.getByUserId(
+        req.params.userId
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 router.get("/all", async (req, res) => {
     try {
         const serviceResponse = await service.getAllByCriteria({});

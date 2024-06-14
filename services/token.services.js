@@ -22,7 +22,7 @@ class TokenService {
     static hasAllowedAction(decodedToken, allowedActions) {
         const individualPermissions =
             TokenService.getIndividualPermissions(decodedToken);
-        console.log("individualPermissions", individualPermissions);
+       
 
         let decodedTokenData =
             decodedToken.role &&
@@ -32,8 +32,7 @@ class TokenService {
                     individualPermissions.includes(permission.trim())
                 );
             });
-        console.log("allow Actions", allowedActions);
-        console.log("decodedTokenData", decodedTokenData);
+     
 
         return decodedTokenData;
     }
@@ -84,7 +83,7 @@ class TokenService {
                 const decodedToken = await TokenService.decodeToken(
                     req.headers.authorization
                 );
-                console.log("decodedToken", decodedToken);
+              
                 const hasPermission = TokenService.isAdmin(decodedToken)
                     ? TokenService.hasAllowedAction(
                           decodedToken,
@@ -95,7 +94,7 @@ class TokenService {
                           allowedActions
                       ) && TokenService.checkQueryParams(req);
 
-                console.log("hasPermission", hasPermission);
+                // console.log("hasPermission", hasPermission);
                 if (hasPermission) {
                     next();
                 } else {
@@ -128,9 +127,9 @@ class TokenService {
 
     static async decodeToken(token) {
         try {
-            console.log("Token received:", token);
+           
             const decoded = jwt.verify(token, process.env.API_SECRET);
-            console.log("Decoded token:", decoded);
+          
             return decoded;
         } catch (error) {
             console.error("Token verification error:", error.message);
