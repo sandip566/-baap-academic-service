@@ -48,8 +48,7 @@ router.post(
                 { new: true }
             );
 
-            const assetId = updatedAssetRequest.assetId;
-
+            const assetId = assetRequest.assetId;
             const updatedAsset = await AssetModel.findOneAndUpdate(
                 { assetId: assetId },
                 { $inc: { available: returnQuantity } },
@@ -59,14 +58,12 @@ router.post(
             if (!updatedAsset) {
                 return res.status(400).json({ error: "Asset not found" });
             }
-
             requestResponsehelper.sendResponse(res, { ReturnedAsset, message: "Asset return created successfully" });
         } catch (error) {
             next(error);
         }
     }
 );
-
 
 router.get(
     "/all/getByGroupId/:groupId",
