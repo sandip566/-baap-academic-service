@@ -1,5 +1,6 @@
 const AssetModel = require("../schema/asset.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
+const AssetRequestModel = require("../schema/assetrequest.schema");
 
 class AssetService extends BaseService {
     constructor(dbModel, entityName) {
@@ -18,77 +19,36 @@ class AssetService extends BaseService {
             const query = {
                 groupId: Number(groupId),
             };
-
             if (criteria.modelName) query.modelName = new RegExp(criteria.modelName, "i");
-
-            const result = await AssetModel.aggregate([
-                { $match: query },
-                {
-                    $lookup: {
-                        from: "assetrequests",
-                        localField: "assetId",
-                        foreignField: "assetId",
-                        as: "assetrequests"
-                    }
-                },
-                {
-                    $unwind: {
-                        path: "$assetrequests",
-                        preserveNullAndEmptyArrays: true
-                    }
-                },
-                {
-                    $group: {
-                        _id: "$assetId",
-                        totalCurrentValue: { $first: "$currentValue" },
-                        totalAvailable: { $first: "$available" },
-                        totalReturnQuantity: {
-                            $sum: {
-                                $cond: [{ $eq: ["$assetrequests.status", "Return"] }, "$assetrequests.returnQuantity", 0]
-                            }
-                        },
-                        issuedCount: {
-                            $sum: {
-                                $cond: [{ $eq: ["$assetrequests.status", "Issued"] }, "$assetrequests.quantity", 0]
-                            }
-                        }
-                    }
-                },
-                {
-                    $addFields: {
-                        totalIssued: "$issuedCount",
-                        totalAvailableAfterIssued: {
-                            $subtract: [
-                                "$totalAvailable",
-                                { $subtract: ["$issuedCount", "$totalReturnQuantity"] }
-                            ]
-                        }
-                    }
-                },
-                {
-                    $group: {
-                        _id: null,
-                        totalCurrentValue: { $sum: "$totalCurrentValue" },
-                        totalAvailable: { $sum: "$totalAvailableAfterIssued" },
-                        totalReturnQuantity: { $sum: "$totalReturnQuantity" },
-                        totalIssued: { $sum: "$totalIssued" }
-                    }
-                }
-            ]).exec();
-
-            let response = {
+    
+            const assets = await AssetModel.find(query);
+            const assetIds = assets.map(asset => asset.assetId);
+    
+            const issuedCount = await AssetRequestModel.aggregate([
+                { $match: { assetId: { $in: assetIds }, status: "Issued" } },
+                { $group: { _id: null, totalIssued: { $sum: "$quantity" } } }
+            ]);
+    
+            const totalIssued = issuedCount.length > 0 ? issuedCount[0].totalIssued : 0;
+            const totalCurrentValue = assets.reduce((acc, asset) => acc + asset.currentValue, 0);
+            const totalAvailable = assets.reduce((acc, asset) => acc + asset.available, 0);
+    
+            const result = {
+                totalCurrentValue,
+                totalAvailable,
+                totalIssued
+            };
+    
+            return {
                 status: "Success",
                 data: result
             };
-
-            return response;
         } catch (error) {
             console.error("Error in getAssetDashboard:", error);
             throw error;
         }
-    }
-
-
+    }    
+    
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,

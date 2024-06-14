@@ -17,22 +17,22 @@ class BooksService extends BaseService {
             const searchFilter = { groupId };
             const aggregationPipeline = [
                 {
-                    $match: searchFilter
+                    $match: searchFilter,
                 },
                 {
                     $lookup: {
                         from: "shelves",
                         localField: "shelfId",
                         foreignField: "shelfId",
-                        as: "shelf"
-                    }
+                        as: "shelf",
+                    },
                 },
                 {
                     $unwind: {
                         path: "$shelf",
-                        preserveNullAndEmptyArrays: true
-                    }
-                }
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
             ];
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
@@ -45,14 +45,20 @@ class BooksService extends BaseService {
                             { ISBN: { $eq: parseInt(criteria.search) } },
                             { author: searchRegex },
                             { totalCopies: { $eq: parseInt(criteria.search) } },
-                            { availableCount: { $eq: parseInt(criteria.search) } }
-                        ]
-                    }
+                            {
+                                availableCount: {
+                                    $eq: parseInt(criteria.search),
+                                },
+                            },
+                        ],
+                    },
                 });
             }
 
             if (criteria.userId) {
-                aggregationPipeline.push({ $match: { userId: parseInt(criteria.userId) } });
+                aggregationPipeline.push({
+                    $match: { userId: parseInt(criteria.userId) },
+                });
             }
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
@@ -60,18 +66,24 @@ class BooksService extends BaseService {
                 { $skip: (pageNumber - 1) * pageSize },
                 { $limit: pageSize }
             );
-            const populatedBook = await booksModel.aggregate(aggregationPipeline);
+            const populatedBook = await booksModel.aggregate(
+                aggregationPipeline
+            );
             const totalCount = await booksModel.countDocuments(searchFilter);
             const count = await this.getBooksCount(groupId);
             return {
                 status: "Success",
-                populatedBook,
+                data: {
+                    items: populatedBook,
+                },
                 count,
-                totalCount
+                totalCount,
             };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
-            throw new Error("An error occurred while processing the request. Please try again later.");
+            throw new Error(
+                "An error occurred while processing the request. Please try again later."
+            );
         }
     }
     async deleteBookById(groupId, bookId) {
@@ -112,15 +124,15 @@ class BooksService extends BaseService {
         try {
             const aggregationPipeline = [
                 {
-                    $match: { groupId: groupId }
+                    $match: { groupId: groupId },
                 },
                 {
                     $group: {
                         _id: null,
                         totalAvailableCount: { $sum: "$availableCount" },
-                        totalCount: { $sum: "$totalCopies" }
-                    }
-                }
+                        totalCount: { $sum: "$totalCopies" },
+                    },
+                },
             ];
             const result = await booksModel.aggregate(aggregationPipeline);
             let totalAvailableCount = 0;
@@ -134,7 +146,7 @@ class BooksService extends BaseService {
                 totalCount: totalCount,
                 totalAvailableCount: totalAvailableCount,
                 totalIssuedBooks: count.bookIssues,
-                totalReturnedBooks: count.returnedBooks
+                totalReturnedBooks: count.returnedBooks,
             };
             return response;
         } catch (error) {
@@ -159,7 +171,6 @@ class BooksService extends BaseService {
                             },
                         },
                     ];
-
                 }
             }
             const books = await booksModel.find(searchFilter);
@@ -188,7 +199,7 @@ class BooksService extends BaseService {
                 userId: issue.userId,
                 addmissionId: issue.addmissionId,
                 isOverdue: issue.isOverdue,
-                url: issue.profile_img
+                url: issue.profile_img,
             }));
             return {
                 data: "books",
@@ -205,7 +216,7 @@ class BooksService extends BaseService {
             const book = await booksModel.findOne({ bookId: bookId });
 
             return book.shelfId;
-        } catch (error) { }
+        } catch (error) {}
     }
 }
 module.exports = new BooksService(booksModel, "books");

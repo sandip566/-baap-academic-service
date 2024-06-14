@@ -41,15 +41,17 @@ router.get('/all-chats/:senderId/:receiverId', async (req, res) => {
     }
 });
 
-router.get('/latest-from-each-chat', async (req, res) => {
+router.get('/latest-from-each-chat/:senderId', async (req, res) => {
     try {
-        const latestChats = await service.getLatestMessageFromEachChat();
+        const { senderId } = req.params;
+        const latestChats = await service.getLatestMessageFromEachChat(senderId);
         res.json(latestChats);
     } catch (error) {
         console.error('Error in /latest-from-each-chat:', error);
         res.status(500).json({ error: error.message });
     }
 });
+
 
 router.delete('/delete-chat/:chatId', async (req, res) => {
     try {
