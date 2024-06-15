@@ -16,22 +16,22 @@ class BookIssueLogService extends BaseService {
             const searchFilter = { groupId };
             const aggregationPipeline = [
                 {
-                    $match: searchFilter
+                    $match: searchFilter,
                 },
                 {
                     $lookup: {
                         from: "books",
                         localField: "bookId",
                         foreignField: "bookId",
-                        as: "books"
-                    }
+                        as: "books",
+                    },
                 },
                 {
                     $unwind: {
                         path: "$books",
-                        preserveNullAndEmptyArrays: true
-                    }
-                }
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
             ];
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
@@ -39,31 +39,45 @@ class BookIssueLogService extends BaseService {
                     $match: {
                         $or: [
                             { "books.name": searchRegex },
-                            { "books.ISBN": { $eq: parseInt(criteria.search) } },
+                            {
+                                "books.ISBN": {
+                                    $eq: parseInt(criteria.search),
+                                },
+                            },
                             { userId: { $eq: parseInt(criteria.search) } },
-                            { name: searchRegex }
-                        ]
-                    }
+                            { name: searchRegex },
+                        ],
+                    },
                 });
             }
 
             if (criteria.isReturn !== undefined) {
-                aggregationPipeline.push({ $match: { isReturn: criteria.isReturn === 'true' } });
+                aggregationPipeline.push({
+                    $match: { isReturn: criteria.isReturn === "true" },
+                });
             }
             if (criteria.isReserve !== undefined) {
-                aggregationPipeline.push({ $match: { isReserve: criteria.isReserve === 'true' } });
+                aggregationPipeline.push({
+                    $match: { isReserve: criteria.isReserve === "true" },
+                });
             }
             if (criteria.status) {
-                aggregationPipeline.push({ $match: { status: criteria.status } });
+                aggregationPipeline.push({
+                    $match: { status: criteria.status },
+                });
             }
             if (criteria.isOverdue !== undefined) {
-                aggregationPipeline.push({ $match: { isOverdue: criteria.isOverdue === 'true' } });
+                aggregationPipeline.push({
+                    $match: { isOverdue: criteria.isOverdue === "true" },
+                });
             }
             if (criteria.userId) {
-                aggregationPipeline.push({ $match: { userId: parseInt(criteria.userId) } });
+                aggregationPipeline.push({
+                    $match: { userId: parseInt(criteria.userId) },
+                });
             }
             aggregationPipeline.push({
-                $sort: { _id: -1 }
+                $sort: { _id: -1 },
             });
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
@@ -71,22 +85,22 @@ class BookIssueLogService extends BaseService {
                 { $skip: (pageNumber - 1) * pageSize },
                 { $limit: pageSize }
             );
-            const populatedBookIssueLog = await bookIssueLogModel.aggregate(aggregationPipeline);
-            const totalCount = await bookIssueLogModel.countDocuments(searchFilter);
-            const count = await this.getCount(groupId);
-            const Count = await bookIssueLogModel.countDocuments(
-                searchFilter
+            const populatedBookIssueLog = await bookIssueLogModel.aggregate(
+                aggregationPipeline
             );
-
+            const totalCount = await populatedBookIssueLog.length;
+            const count = await this.getCount(groupId);
             return {
                 status: "Success",
                 populatedBookIssueLog,
                 count: count,
-                totalCount
+                totalCount,
             };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
-            throw new Error("An error occurred while processing the request. Please try again later.");
+            throw new Error(
+                "An error occurred while processing the request. Please try again later."
+            );
         }
     }
 
@@ -242,8 +256,8 @@ class BookIssueLogService extends BaseService {
                         ISBN: book ? book.ISBN : 0,
                         daysOverdue: diffDays,
                         totalFine: totalFine,
-                        name:bookIssue.name,
-                        profile_url:bookIssue.url
+                        name: bookIssue.name,
+                        profile_url: bookIssue.url,
                     };
                     return response;
                 });
@@ -385,17 +399,17 @@ class BookIssueLogService extends BaseService {
                 {
                     $match: {
                         groupId: groupId,
-                        bookId: bookId
-                    }
+                        bookId: bookId,
+                    },
                 },
-            ])
-            
+            ]);
+
             return book;
         } catch (error) {
             throw error;
         }
     }
-    
+
     async checkBookAvailability(groupId, bookId) {
         try {
             const book = await Book.findOne({
@@ -432,9 +446,9 @@ class BookIssueLogService extends BaseService {
                 {
                     $match: {
                         groupId: groupIdInt,
-                        bookId: bookIdInt
-                    }
-                }
+                        bookId: bookIdInt,
+                    },
+                },
             ]);
 
             return book;
@@ -442,7 +456,6 @@ class BookIssueLogService extends BaseService {
             throw error;
         }
     }
-
 
     async returnBook(groupId, bookId, userId, returnDate) {
         if (!returnDate) {
@@ -462,7 +475,9 @@ class BookIssueLogService extends BaseService {
         });
 
         if (!existingReservation) {
-            throw new Error("The book is not currently issued to the specified group.");
+            throw new Error(
+                "The book is not currently issued to the specified group."
+            );
         }
 
         if (existingReservation.isOverdue === true) {
@@ -481,7 +496,7 @@ class BookIssueLogService extends BaseService {
         );
 
         return updatedReservation;
-    };
+    }
 }
 
 module.exports = new BookIssueLogService(bookIssueLogModel, "bookIssueLog");
