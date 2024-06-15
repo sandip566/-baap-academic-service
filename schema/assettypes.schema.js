@@ -1,21 +1,20 @@
 const mongoose = require("mongoose");
 
 const AssetTypesSchema = new mongoose.Schema(
-    {
-        groupId: {
-            type: Number,
-            required: false
-          },
-          assetTypeId: {
-            type: Number,
-            required: false
-          },
-        name: {
-            type: String,
-            required: true,
-        }
+  {
+    groupId: {
+      type: Number,
+      required: false
     },
-    {strict:false, timestamps: true }
+    assetTypeId: {
+      type: Number,
+      required: false
+    },
+    name: {
+      type: String,
+      required: true,
+    }
+  }, { strict: false, timestamps: true }
 );
 
 const AssetTypesModel = mongoose.model("assettypes", AssetTypesSchema);

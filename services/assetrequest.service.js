@@ -26,7 +26,7 @@ class AssetRequestService extends BaseService {
     async getAllDataByGroupId(groupId, criteria) {
         const pageNumber = criteria.pageNumber;
         const pageSize = criteria.pageSize;
-    
+
         const query = {
             groupId: Number(groupId),
         };
@@ -36,6 +36,7 @@ class AssetRequestService extends BaseService {
                 query.$or = [
                     { userName: { $regex: criteria.search, $options: "i" } },
                     { status: { $regex: criteria.search, $options: "i" } },
+                    { name: { $regex: criteria.search, $options: "i" } },
                     { empId: numericSearch },
                     { userId: numericSearch },
                 ];
@@ -43,21 +44,19 @@ class AssetRequestService extends BaseService {
                 query.$or = [
                     { userName: { $regex: criteria.search, $options: "i" } },
                     { status: { $regex: criteria.search, $options: "i" } },
+                    { name: { $regex: criteria.search, $options: "i" } },
                 ];
             }
         }
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        if (criteria.userName)
-            query.userName = new RegExp(criteria.userName, "i");
+        if (criteria.userName) query.userName = new RegExp(criteria.userName, "i");
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
         if (criteria.type) query.type = new RegExp(criteria.type, "i");
-        if (criteria.category)
-            query.category = new RegExp(criteria.category, "i");
+        if (criteria.category) query.category = new RegExp(criteria.category, "i");
         if (criteria.empId) query.empId = criteria.empId;
-        if (criteria.managerUserId)
-            query.managerUserId = criteria.managerUserId;
+        if (criteria.managerUserId) query.managerUserId = criteria.managerUserId;
         if (criteria.userId) query.userId = criteria.userId;
-    
+
         const totalItemsCount = await AssetRequestModel.countDocuments(query);
         const assetRequest = await AssetRequestModel.aggregate([
             { $match: query },
@@ -65,7 +64,7 @@ class AssetRequestService extends BaseService {
             { $skip: (pageNumber - 1) * pageSize },
             { $limit: pageSize }
         ]);
-    
+
         return {
             status: "Success",
             data: {
@@ -74,7 +73,7 @@ class AssetRequestService extends BaseService {
             },
         };
     }
-    
+
     async deleteByDataId(requestId, groupId) {
         try {
             const deleteData = await AssetRequestModel.findOneAndDelete({
@@ -108,7 +107,10 @@ class AssetRequestService extends BaseService {
                 }
             }
 
-            assetRequest.status = newData.status;
+            Object.keys(newData).forEach(key => {
+                assetRequest[key] = newData[key];
+            });
+
             await assetRequest.save();
             return assetRequest;
         } catch (error) {
@@ -168,6 +170,7 @@ class AssetRequestService extends BaseService {
             });
         }
     }
+
     async getClearanceData(groupId, userId) {
         try {
             let assetData = await AssetRequestModel.find({
@@ -221,6 +224,7 @@ class AssetRequestService extends BaseService {
             });
         });
     }
+
     async getAssetsDetailsByRequestId(requestId) {
         return this.execute(() => {
             return AssetRequestModel.find({
@@ -228,7 +232,6 @@ class AssetRequestService extends BaseService {
             });
         });
     }
-
 
     async bulkUploadAssetRequest(data) {
         try {

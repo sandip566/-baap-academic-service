@@ -5,6 +5,7 @@ class AssetReturnService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     async getByAssetTypeId(returnAssetId) {
         return this.execute(() => {
             return AssetReturnModel.findOne({
@@ -12,6 +13,7 @@ class AssetReturnService extends BaseService {
             });
         });
     }
+
     async getAllDataByGroupId(
         groupId,
         query,
@@ -23,23 +25,6 @@ class AssetReturnService extends BaseService {
             const searchFilter = {
                 groupId: Number(groupId),
             };
-
-            if (query.search) {
-                const numericSearch = parseInt(query.search);
-                if (!isNaN(numericSearch)) {
-                    searchFilter.$or = [
-                        { userName: { $regex: query.search, $options: "i" } },
-                        { name: { $regex: query.search, $options: "i" } },
-                        { requestId: numericSearch },
-                        { returnAssetId: numericSearch },
-                    ];
-                } else {
-                    searchFilter.$or = [
-                        { userName: { $regex: query.search, $options: "i" } },
-                        { name: { $regex: query.search, $options: "i" } },
-                    ];
-                }
-            }
 
             if (query.requestId) {
                 searchFilter.requestId = query.requestId;
@@ -58,7 +43,6 @@ class AssetReturnService extends BaseService {
 
             const pipeline = [
                 { $match: searchFilter },
-                { $unwind: "$requestId" },
                 {
                     $lookup: {
                         from: "assetrequests",
@@ -75,33 +59,51 @@ class AssetReturnService extends BaseService {
                 {
                     $unset: "assetRequestData",
                 },
-                { $skip: skip },
-                { $limit: perPage },
-                { $sort: { _id: -1 } },
             ];
 
-            const servicesWithData = await AssetReturnModel.aggregate(
-                pipeline
-            ).exec();
-            servicesWithData.sort((a, b) => {
-                const dateA = new Date(a.createdAt);
-                const dateB = new Date(b.createdAt);
-                return reverseOrder ? dateB - dateA : dateA - dateB;
-            });
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                const searchConditions = [
+                    { "requestId.userName": { $regex: query.search, $options: "i" } },
+                    { "requestId.name": { $regex: query.search, $options: "i" } },
+                    { "return.name": { $regex: query.search, $options: "i" } },
+                ];
+                if (!isNaN(numericSearch)) {
+                    searchConditions.push(
+                        { requestId: numericSearch },
+                        { returnAssetId: numericSearch }
+                    );
+                }
 
-            const totalItemsCount = await AssetReturnModel.aggregate([
+                pipeline.push({
+                    $match: {
+                        $or: searchConditions
+                    }
+                });
+            }
+
+            pipeline.push(
+                { $sort: { createdAt: reverseOrder ? -1 : 1 } },
+                { $skip: skip },
+                { $limit: perPage }
+            );
+
+            const servicesWithData = await AssetReturnModel.aggregate(pipeline).exec();
+
+            const totalItemsCountResult = await AssetReturnModel.aggregate([
                 { $match: searchFilter },
-
                 {
                     $count: "totalItemsCount",
                 },
             ]).exec();
 
+            const totalItemsCount = totalItemsCountResult[0]?.totalItemsCount || 0;
+
             const response = {
                 status: "Success",
                 data: {
                     items: servicesWithData,
-                    totalItemsCount: totalItemsCount[0]?.totalItemsCount,
+                    totalItemsCount: totalItemsCount,
                 },
             };
             return response;
@@ -110,6 +112,7 @@ class AssetReturnService extends BaseService {
             throw error;
         }
     }
+
     async updateByAssetId(returnAssetId, groupId, newData) {
         try {
             const updatedData = await AssetReturnModel.findOneAndUpdate(
