@@ -48,6 +48,13 @@ router.post(
                 { new: true }
             );
 
+            if (updatedAssetRequest.quantity === 0) {
+                await AssetRequestModel.updateOne(
+                    { requestId: req.body.requestId, groupId: req.body.groupId },
+                    { $set: { status: "Returned" } }
+                );
+            }
+
             const assetId = assetRequest.assetId;
             const updatedAsset = await AssetModel.findOneAndUpdate(
                 { assetId: assetId },
