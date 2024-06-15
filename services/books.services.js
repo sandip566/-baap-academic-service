@@ -8,7 +8,88 @@ class BooksService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupID, criteria) {
+    // async getAllDataByGroupId(groupID, criteria) {
+    //     try {
+    //         const groupId = parseInt(groupID);
+    //         if (isNaN(groupId)) {
+    //             throw new Error("Invalid groupID");
+    //         }
+    //         const searchFilter = { groupId };
+    //         const aggregationPipeline = [
+    //             {
+    //                 $match: searchFilter,
+    //             },
+    //             {
+    //                 $lookup: {
+    //                     from: "shelves",
+    //                     localField: "shelfId",
+    //                     foreignField: "shelfId",
+    //                     as: "shelf",
+    //                 },
+    //             },
+    //             {
+    //                 $unwind: {
+    //                     path: "$shelf",
+    //                     preserveNullAndEmptyArrays: true,
+    //                 },
+    //             },
+    //         ];
+    //         if (criteria.search) {
+    //             const searchRegex = new RegExp(criteria.search.trim(), "i");
+    //             aggregationPipeline.push({
+    //                 $match: {
+    //                     $or: [
+    //                         { "shelf.shelfName": searchRegex },
+    //                         { userId: { $eq: parseInt(criteria.search) } },
+    //                         { name: searchRegex },
+    //                         { ISBN: { $eq: parseInt(criteria.search) } },
+    //                         { author: searchRegex },
+    //                         { totalCopies: { $eq: parseInt(criteria.search) } },
+    //                         {
+    //                             availableCount: {
+    //                                 $eq: parseInt(criteria.search),
+    //                             },
+    //                         },
+    //                     ],
+    //                 },
+    //             });
+    //         }
+
+    //         if (criteria.userId) {
+    //             aggregationPipeline.push({
+    //                 $match: { userId: parseInt(criteria.userId) },
+    //             });
+    //         }
+    //         const pageNumber = parseInt(criteria.pageNumber) || 1;
+    //         const pageSize = parseInt(criteria.pageSize) || 10;
+    //         aggregationPipeline.push(
+    //             { $skip: (pageNumber - 1) * pageSize },
+    //             { $limit: pageSize }
+    //         );
+    //         const populatedBook = await booksModel.aggregate(
+    //             aggregationPipeline
+    //         );
+    //         const totalCount = await booksModel.countDocuments(searchFilter);
+    //         const count = await this.getBooksCount(groupId);
+    //         return {
+    //             status: "Success",
+    //             data: {
+    //                 items: populatedBook,
+    //             },
+    //             count,
+    //             totalCount,
+    //         };
+    //     } catch (error) {
+    //         console.error("Error in getAllDataByGroupId:", error);
+    //         throw new Error(
+    //             "An error occurred while processing the request. Please try again later."
+    //         );
+    //     }
+    // }
+
+
+
+    async getAllDataByGroupId(groupID, criteria, pageNumber, pageSize) {
         try {
             const groupId = parseInt(groupID);
             if (isNaN(groupId)) {
@@ -16,9 +97,7 @@ class BooksService extends BaseService {
             }
             const searchFilter = { groupId };
             const aggregationPipeline = [
-                {
-                    $match: searchFilter,
-                },
+                { $match: searchFilter },
                 {
                     $lookup: {
                         from: "shelves",
@@ -32,8 +111,9 @@ class BooksService extends BaseService {
                         path: "$shelf",
                         preserveNullAndEmptyArrays: true,
                     },
-                },
+                }
             ];
+    
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 aggregationPipeline.push({
@@ -45,32 +125,31 @@ class BooksService extends BaseService {
                             { ISBN: { $eq: parseInt(criteria.search) } },
                             { author: searchRegex },
                             { totalCopies: { $eq: parseInt(criteria.search) } },
-                            {
-                                availableCount: {
-                                    $eq: parseInt(criteria.search),
-                                },
-                            },
+                            { availableCount: { $eq: parseInt(criteria.search) } },
                         ],
                     },
                 });
             }
-
+    
             if (criteria.userId) {
                 aggregationPipeline.push({
                     $match: { userId: parseInt(criteria.userId) },
                 });
             }
-            const pageNumber = parseInt(criteria.pageNumber) || 1;
-            const pageSize = parseInt(criteria.pageSize) || 10;
+    
+            aggregationPipeline.push({
+                $sort: { _id: -1 }
+            });
+    
             aggregationPipeline.push(
                 { $skip: (pageNumber - 1) * pageSize },
                 { $limit: pageSize }
             );
-            const populatedBook = await booksModel.aggregate(
-                aggregationPipeline
-            );
+    
+            const populatedBook = await booksModel.aggregate(aggregationPipeline);
             const totalCount = await booksModel.countDocuments(searchFilter);
             const count = await this.getBooksCount(groupId);
+    
             return {
                 status: "Success",
                 data: {
@@ -86,6 +165,13 @@ class BooksService extends BaseService {
             );
         }
     }
+    
+
+
+
+
+
+
     async deleteBookById(groupId, bookId) {
         try {
             const groupID = parseInt(groupId);
