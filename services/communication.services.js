@@ -129,20 +129,17 @@ class CommunicationService extends BaseService {
                 { $replaceRoot: { newRoot: "$latestMessage" } }
             ];
     
-            const latestMessages = await this.model.aggregate(pipeline);
-    
-            const formattedMessages = latestMessages.map(chat => {
-                const isReceiver = chat.receiverId === Number(senderId);
-    
+            const latestMessages = await this.model.aggregate(pipeline);  
+            const formattedMessages = latestMessages.map(chat => { 
+                const isSender = chat.senderId === Number(senderId);
+                
                 return {
                     ...chat,
                     formattedDateTime: this.formatDate(chat.timestamp),
-                    senderName: isReceiver ? chat.senderName : chat.receiverName 
+                    displayName: isSender ? chat.receiver: chat.sender
                 };
             });
-    
             formattedMessages.sort((a, b) => b.timestamp - a.timestamp);
-    
             return new ServiceResponse({ data: formattedMessages });
         } catch (error) {
             console.error('Error while fetching latest messages from each chat:', error);
