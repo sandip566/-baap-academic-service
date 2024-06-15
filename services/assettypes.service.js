@@ -5,6 +5,7 @@ class AssetTypesService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     async getByAssetTypeId(assetTypeId) {
         return this.execute(() => {
             return AssetTypesModel.findOne({
@@ -12,6 +13,7 @@ class AssetTypesService extends BaseService {
             });
         });
     }
+
     async getAllDataByGroupId(groupId, criteria) {
         const pageNumber = criteria.pageNumber;
         const pageSize = criteria.pageSize;
@@ -55,7 +57,6 @@ class AssetTypesService extends BaseService {
             throw error;
         }
     }
-
 }
 
 module.exports = new AssetTypesService(AssetTypesModel, "assettypes");

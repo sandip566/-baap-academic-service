@@ -6,9 +6,9 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        assetId:{
+        assetId: {
             type: Number,
-            required: false  
+            required: false
         },
         requestId: {
             type: Number,
@@ -22,7 +22,7 @@ const AssetRequestSchema = new mongoose.Schema(
             type: Number,
             required: false
         },
-        managerUserId:{
+        managerUserId: {
             type: Number,
             required: false
         },
@@ -30,7 +30,7 @@ const AssetRequestSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        userName:{
+        userName: {
             type: String,
             required: false,
         },
@@ -46,6 +46,14 @@ const AssetRequestSchema = new mongoose.Schema(
             type: String,
             required: false
         },
+        waingOn: {
+            name: String,
+            date: String
+        },
+        waingOnIssued: {
+            name: String,
+            date: String
+        }
     }, { strict: false, timestamps: true }
 );
 const AssetRequestModel = mongoose.model("assetrequest", AssetRequestSchema);
