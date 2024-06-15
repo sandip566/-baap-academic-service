@@ -82,11 +82,12 @@ router.get("/getrouteId/:routeId", async (req, res, next) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/getRoutesByuserId/:userId", async (req, res, next) => {
+router.get("/getRoutesByuserId/groupId/:groupId/userId/:userId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
     const serviceResponse = await service.getRouteByuserId(
+        req.params.groupId,
         req.params.userId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
