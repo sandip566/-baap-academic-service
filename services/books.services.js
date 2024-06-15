@@ -16,9 +16,7 @@ class BooksService extends BaseService {
             }
             const searchFilter = { groupId };
             const aggregationPipeline = [
-                {
-                    $match: searchFilter,
-                },
+                { $match: searchFilter },
                 {
                     $lookup: {
                         from: "shelves",
@@ -32,8 +30,9 @@ class BooksService extends BaseService {
                         path: "$shelf",
                         preserveNullAndEmptyArrays: true,
                     },
-                },
+                }
             ];
+    
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 aggregationPipeline.push({
@@ -45,16 +44,12 @@ class BooksService extends BaseService {
                             { ISBN: { $eq: parseInt(criteria.search) } },
                             { author: searchRegex },
                             { totalCopies: { $eq: parseInt(criteria.search) } },
-                            {
-                                availableCount: {
-                                    $eq: parseInt(criteria.search),
-                                },
-                            },
+                            { availableCount: { $eq: parseInt(criteria.search) } },
                         ],
                     },
                 });
             }
-
+     
             if (criteria.userId) {
                 aggregationPipeline.push({
                     $match: { userId: parseInt(criteria.userId) },
@@ -62,15 +57,19 @@ class BooksService extends BaseService {
             }
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
+            aggregationPipeline.push({
+                $sort: { _id: -1 }
+            });
+     
             aggregationPipeline.push(
                 { $skip: (pageNumber - 1) * pageSize },
                 { $limit: pageSize }
             );
-            const populatedBook = await booksModel.aggregate(
-                aggregationPipeline
-            );
+    
+            const populatedBook = await booksModel.aggregate(aggregationPipeline);
             const totalCount = await booksModel.countDocuments(searchFilter);
             const count = await this.getBooksCount(groupId);
+    
             return {
                 status: "Success",
                 data: {
@@ -86,6 +85,13 @@ class BooksService extends BaseService {
             );
         }
     }
+    
+
+
+
+
+
+
     async deleteBookById(groupId, bookId) {
         try {
             const groupID = parseInt(groupId);

@@ -58,8 +58,7 @@ const AssetSchema = new mongoose.Schema(
       type: String,
       required: false
     }
-  },
-  { strict: false, timestamps: true }
+  }, { strict: false, timestamps: true }
 );
 
 const AssetModel = mongoose.model("asset", AssetSchema);

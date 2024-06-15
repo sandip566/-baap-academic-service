@@ -108,8 +108,6 @@ router.get("/all/assetRequest", async (req, res) => {
 //   requestResponsehelper.sendResponse(res, serviceResponse);
 // });
 
-
-
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
@@ -182,12 +180,14 @@ router.get("/get-assets-details-of-user/:userId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getDataByRequestId/:requestId", async (req, res) => {
     const serviceResponse = await service.getAssetsDetailsByRequestId(
         req.params.requestId
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
+
 router.get("/getClearanceData/groupId/:groupId/userId/:userId", async (req, res) => {
     const { groupId, userId } = req.params;
     try {
@@ -198,7 +198,6 @@ router.get("/getClearanceData/groupId/:groupId/userId/:userId", async (req, res)
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
-
 
 router.post(
     "/bulkUploadAssetRequest",
@@ -241,7 +240,6 @@ router.post(
         });
     }
 );
-
 
 function createAssetRequestDataObject(headers, row) {
     const data = {};

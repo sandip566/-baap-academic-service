@@ -46,6 +46,7 @@ class BookIssueLogService extends BaseService {
                     }
                 });
             }
+
             if (criteria.isReturn !== undefined) {
                 aggregationPipeline.push({ $match: { isReturn: criteria.isReturn === 'true' } });
             }
@@ -61,6 +62,9 @@ class BookIssueLogService extends BaseService {
             if (criteria.userId) {
                 aggregationPipeline.push({ $match: { userId: parseInt(criteria.userId) } });
             }
+            aggregationPipeline.push({
+                $sort: { _id: -1 }
+            });
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
             aggregationPipeline.push(
