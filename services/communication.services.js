@@ -106,7 +106,7 @@ class CommunicationService extends BaseService {
                 {
                     $match: {
                         $or: [
-                            { senderId:Number (senderId) },
+                            { senderId: Number(senderId) },
                             { receiverId: Number(senderId) }
                         ]
                     }
@@ -131,10 +131,15 @@ class CommunicationService extends BaseService {
     
             const latestMessages = await this.model.aggregate(pipeline);
     
-            const formattedMessages = latestMessages.map(chat => ({
-                ...chat,
-                formattedDateTime: this.formatDate(chat.timestamp)
-            }));
+            const formattedMessages = latestMessages.map(chat => {
+                const isReceiver = chat.receiverId === Number(senderId);
+    
+                return {
+                    ...chat,
+                    formattedDateTime: this.formatDate(chat.timestamp),
+                    senderName: isReceiver ? chat.senderName : chat.receiverName 
+                };
+            });
     
             formattedMessages.sort((a, b) => b.timestamp - a.timestamp);
     
@@ -144,7 +149,6 @@ class CommunicationService extends BaseService {
             throw new Error('Error while fetching latest messages from each chat');
         }
     }
-    
     
     async deleteChatById(chatId) {
         try {
