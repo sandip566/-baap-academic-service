@@ -31,7 +31,7 @@ class BedRoomsService extends BaseService {
                     { $match: query },
                     {
                         $lookup: {
-                            from: "hostels",
+                            from: "hostelpremises",
                             let: { hostelId: "$hostelId" },
                             pipeline: [
                                 { $match: { $expr: { $eq: ["$hostelId", "$$hostelId"] } } }
