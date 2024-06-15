@@ -1,90 +1,90 @@
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const HostelAdmissionCancelModel = require("../schema/hosteladmissioncancel.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const hostelAdmissionModel=require("../schema/hosteladmission.schema")
+const hostelAdmissionModel = require("../schema/hosteladmission.schema")
 
 class HostelAdmissionCancelService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria, page, pageSize) {
-        const matchStage = {
-            groupId: Number(groupId),
-        };
-        const totalItemsCount = await HostelAdmissionCancelModel.countDocuments(
-            matchStage
-        );
-        if (criteria.name) {
-            matchStage["name"] = { $regex: new RegExp(criteria.name, "i") };
-        }
-        if (criteria.status) {
-            matchStage["status"] = { $regex: new RegExp(criteria.status, "i") };
-        }
-        const skip = (page - 1) * pageSize;
 
-        const aggregationPipeline = [
-            { $match: matchStage },
-            {
-                $lookup: {
-                    from: "hostelpayments",
-                    localField: "hostelPaymentId",
-                    foreignField: "hostelPaymentId",
-                    as: "paymentDetails"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$paymentDetails",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $lookup: {
-                    from: "hosteladmissions",
-                    localField: "hostelAdmissionId",
-                    foreignField: "hostelAdmissionId",
-                    as: "hostelDetails"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$hostelDetails",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $project: {
-                    name: 1,
-                    status: 1,
-                    groupId: 1,
-                    hostelAdmissionId: 1,
-                    hostelPaymentId: 1,
-                    userId: 1,
-                    name:"$hostelDetails.name",
-                    phoneNumber: "$hostelDetails.phoneNumber",
-                    remeningAmount: "$paymentDetails.remainingAmount"
-                }
-            },
-            { $skip: skip },
-            { $limit: pageSize },
-        ];
-
+    async getAllDataByGroupId(groupID, criteria) {
         try {
-            const responseData = await HostelAdmissionCancelModel.aggregate(
-                aggregationPipeline
-            );
+            const groupId = parseInt(groupID);
+            if (isNaN(groupId)) {
+                throw new Error("Invalid groupID");
+            }
+            const searchFilter = { groupId };
+            const aggregationPipeline = [
+                { $match: searchFilter },
+                {
+                    $lookup: {
+                        from: "hostelpayments",
+                        localField: "hostelPaymentId",
+                        foreignField: "hostelPaymentId",
+                        as: "paymentDetails"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$paymentDetails",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $lookup: {
+                        from: "hosteladmissions",
+                        localField: "hostelAdmissionId",
+                        foreignField: "hostelAdmissionId",
+                        as: "hostelDetails"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$hostelDetails",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
 
+            ];
+            if (criteria.search) {
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                aggregationPipeline.push({
+                    $match: {
+                        $or: [
+                            { "hostelDetails.firstName": searchRegex },
+                            { userId: { $eq: parseInt(criteria.search) } },
+                            { "hostelDetails.phoneNumber": { $eq: parseInt(criteria.search) } },
+                        ],
+                    },
+                });
+            }
+            if (criteria.userId) {
+                aggregationPipeline.push({
+                    $match: { userId: parseInt(criteria.userId) },
+                });
+            }
+            const pageNumber = parseInt(criteria.pageNumber) || 1;
+            const pageSize = parseInt(criteria.pageSize) || 10;
+            aggregationPipeline.push(
+                { $skip: (pageNumber - 1) * pageSize },
+                { $limit: pageSize }
+            );
+            const responseData = await HostelAdmissionCancelModel.aggregate(aggregationPipeline);
+            const totalCount = await HostelAdmissionCancelModel.countDocuments(searchFilter);
             const response = {
                 data: {
                     items: responseData,
-                    totalItemsCount: totalItemsCount,
+                    totalItemsCount: totalCount,
                 },
             };
 
             return response;
         } catch (error) {
-            console.error("Error fetching data:", error);
-            throw new Error("Failed to fetch data. Please try again later.");
+            console.error("Error in getAllDataByGroupId:", error);
+            throw new Error(
+                "An error occurred while processing the request. Please try again later."
+            );
         }
     }
 
@@ -100,7 +100,7 @@ class HostelAdmissionCancelService extends BaseService {
                 { $set: { admissionStatus: "Cancel" } }
             );
             await hostelAdmissionModel.updateOne(
-                { groupId: groupId, hostelAdmissionId:Number(hostelAdmissionId) },
+                { groupId: groupId, hostelAdmissionId: Number(hostelAdmissionId) },
                 { $set: { admissionStatus: "Cancel" } }
             );
             return updateResult;
