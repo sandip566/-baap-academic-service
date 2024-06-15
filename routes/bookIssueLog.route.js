@@ -71,7 +71,7 @@ router.post("/issue-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             dueDate: dueDate,
-            issuedDate:issuedDate,
+            issuedDate:new Date(),
             userId: userId,
             isReturn: false,
             name:name,
@@ -270,43 +270,8 @@ router.post("/reserve-book", async (req, res) => {
             ISBN,
             bookName,
         } = req.body;
- 
-        const studentAdmission = await StudentsAdmissionModel.findOne({
-            groupId: groupId,
-            userId: userId,
-        });
- 
-        if (!studentAdmission) {
-            return res.status(400).json({
-                success: false,
-                error: "Admission ID not found.",
-            });
-        }
- 
-        if (studentAdmission.admissionStatus === "Cancel") {
-            return res.status(400).json({
-                success: false,
-                error: "The admission ID has been canceled.",
-            });
-        }
- 
-        if (studentAdmission.admissionStatus === "Draft") {
-            return res.status(400).json({
-                success: false,
-                error: "The admission ID has a status of 'Draft'.",
-            });
-        }
- 
-        if (studentAdmission.admissionStatus !== "Confirm") {
-            return res.status(400).json({
-                success: false,
-                error: "The admission ID does not have a confirmed status.",
-            });
-        }
- 
         const serviceResponse = await service.reserveBook(groupId, bookId);
-        console.log(serviceResponse);
-        if (!serviceResponse) {
+        if (!serviceResponse || serviceResponse.length===0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for reserving",
@@ -325,10 +290,8 @@ router.post("/reserve-book", async (req, res) => {
             });
         }
  
-        const bookUpdate = await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
-            { $inc: { availableCount: -totalCopies } },
-            { new: true }
+        const bookUpdate = await Book.find(
+            { bookId: bookId, totalCopies: { $gt: 0 } }
         );
  
         if (!bookUpdate) {
