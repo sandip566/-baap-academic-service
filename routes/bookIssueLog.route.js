@@ -79,10 +79,11 @@ router.post("/issue-book", async (req, res) => {
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
+            { bookId: bookId, availableCount: { $gt: 0 } }, 
             { $inc: { availableCount: -1 } },
-            { new: true }
+            { new: true, runValidators: true }
         );
+        
         res.status(201).json({
             success: true,
             reservation: createdReservation,

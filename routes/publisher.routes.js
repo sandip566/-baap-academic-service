@@ -31,28 +31,26 @@ router.get("/all", async (req, res) => {
 });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
-   
-        const groupId = req.params.groupId;
-        const criteria = {
-            publisherName: req.query.publisherName,
-            publisherId: req.query.publisherId,
-            phoneNumber: req.query.phoneNumber,
-            search: req.query.search,
-            address: req.query.address,
-            website: req.query.website,
-        };
+    const groupId = req.params.groupId;
+    const criteria = {
+        publisherName: req.query.publisherName,
+        publisherId: req.query.publisherId,
+        phoneNumber: req.query.phoneNumber,
+        search: req.query.search,
+        address: req.query.address,
+        website: req.query.website,
+    };
 
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 100;
-      
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 100;
 
-        const serviceResponse = await service.getAllDataByGroupId(
-            groupId,
-            criteria,
-            page,
-            limit
-        );
-        requestResponsehelper.sendResponse(res, serviceResponse);
+    const serviceResponse = await service.getAllDataByGroupId(
+        groupId,
+        criteria,
+        page,
+        limit
+    );
+    requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.delete(
     "/groupId/:groupId/publisherId/:publisherId",
