@@ -152,6 +152,11 @@ class StudentsAdmmisionService extends BaseService {
             return this.model.findOne({ addmissionId: addmissionId });
         });
     }
+    async getByUserId(userId) {
+        return this.execute(() => {
+            return this.model.findOne({ userId: userId });
+        });
+    }
 
     async getByAddmissionId(addmissionId) {
         try {

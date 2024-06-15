@@ -20,13 +20,21 @@ router.post(
         const requestId = +Date.now();
         req.body.requestId = requestId;
 
-        if (req.body.status === "Issued") {
-            const updateResponse = await service.updateAssetCount(req.body.assetId, req.body.quantity);
-            if (updateResponse !== "Asset count updated successfully") {
-                return { error: updateResponse };
-            }
+        const asset = await assetModel.findOne({ assetId: req.body.assetId });
+        if (!asset) {
+            return res.status(400).json({ error: "Asset not found" });
         }
 
+        if (req.body.status === "Issued") {
+            if (asset.available < req.body.quantity) {
+                return res.status(400).json({ error: "Insufficient asset available for issuance" });
+            }
+
+            const updateResponse = await service.updateAssetCount(req.body.assetId, req.body.quantity);
+            if (updateResponse !== "Asset count updated successfully") {
+                return res.status(400).json({ error: updateResponse });
+            }
+        }
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }

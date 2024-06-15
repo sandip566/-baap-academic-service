@@ -379,15 +379,23 @@ class BookIssueLogService extends BaseService {
     }
     async reserveBook(groupID, bookID) {
         try {
-            const groupId = parseInt(groupID)
-            const bookId = parseInt(bookID)
-            const book = await Book.find({ groupId: groupId, bookId: bookId });
+            const groupId = parseInt(groupID);
+            const bookId = parseInt(bookID);
+            const book = await Book.aggregate([
+                {
+                    $match: {
+                        groupId: groupId,
+                        bookId: bookId
+                    }
+                },
+            ])
+            
             return book;
         } catch (error) {
             throw error;
         }
     }
-
+    
     async checkBookAvailability(groupId, bookId) {
         try {
             const book = await Book.findOne({

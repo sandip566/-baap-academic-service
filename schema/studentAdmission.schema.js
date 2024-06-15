@@ -32,7 +32,7 @@ const studentsAdmissionSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        studentId: {
+        userId: {
             type: Number,
             required: false,
         },

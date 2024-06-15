@@ -1,0 +1,132 @@
+[
+    {
+        "$match": {
+            "groupId": 1709987550657
+        }
+    },
+    {
+        "$lookup": {
+            "from": "studentsadmissions",
+            "let": { "courseId": "$courseId" },
+            "pipeline": [
+                { "$unwind": "$courseDetails" },
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                { "$eq": ["$groupId", 1709987550657] },
+                                { "$eq": ["$academicYear", "1710409489619"] },
+                                { "$eq": ["$admissionStatus", "Confirm"] },
+                                { "$eq": ["$courseDetails.course_id", "$$courseId"] }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "as": "studentCounts"
+        }
+    },
+    {
+        "$unwind": "$studentCounts"
+    },
+    {
+        "$lookup": {
+            "from": "feespayments",
+            "let": { "addmissionId": "$studentCounts.addmissionId" },
+            "pipeline": [
+                {
+                    "$match": {
+                        "$expr": {
+                            "$and": [
+                                { "$eq": ["$addmissionId", "$$addmissionId"] },
+                                { "$eq": ["$groupId", 1709987550657] },
+                                { "$eq": ["$academicYear", "1710409489619"] },
+                                { "$eq": ["$isShowInAccounting", true] }
+                            ]
+                        }
+                    }
+                }
+            ],
+            "as": "fees"
+        }
+    },
+    {
+        "$addFields": {
+            "totalPaidAmount": {
+                "$sum": {
+                    "$map": {
+                        "input": "$fees",
+                        "as": "fee",
+                        "in": {
+                            "$toInt": "$$fee.paidAmount"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "$unwind": "$fees"
+    },
+    {
+        "$sort": {
+            "fees.createdAt": -1
+        }
+    },
+    {
+        "$group": {
+            "_id": {
+                "courseId": "$courseId",
+                "addmissionId": "$fees.addmissionId"
+            },
+            "lastFee": { "$first": "$fees" },
+            "totalPaidAmount": { "$first": "$totalPaidAmount" },
+          
+        }
+    },
+    {
+        "$lookup": {
+            "from": "courses",
+            "localField": "_id.courseId",
+            "foreignField": "courseId",
+            "as": "course"
+        }
+    },
+    {
+        "$unwind": "$course"
+    },
+    {
+        "$group": {
+            "_id": "$_id.courseId",
+            "courseName": { "$first": "$course.CourseName" },
+            "totalPaidAmount": { "$sum": "$totalPaidAmount" },
+            "totalRemainingAmount": {
+                "$sum": { "$toDouble": "$lastFee.remainingAmount" }
+            },
+            "courseFee": {
+                "$sum": { "$toDouble": "$lastFee.courseFee" }
+            },
+            "noOfStudents": { "$sum": 1 }
+          
+        }
+    },
+  {
+        "$addFields": {
+            "TotalCourseFee": {
+                "$multiply": ["$courseFee", "$noOfStudents"]
+            }
+        }
+    },
+    {
+        "$project": {
+            "_id": 0,
+            "courseId": "$_id",
+            "courseName": 1,
+            "totalPaidAmount": 1,
+            "totalRemainingAmount": 1,
+            "courseFee": 1,
+            "noOfStudents": 1,
+          "TotalCourseFee":1
+        }
+    }
+]
