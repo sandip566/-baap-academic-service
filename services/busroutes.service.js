@@ -62,9 +62,9 @@ class BusRoutesService extends BaseService {
         });
     }
 
-    async getRouteByuserId(userId) {
+    async getRouteByuserId(groupId,userId) {
         try {
-            const routeData = await this.model.find({ userId: userId });
+            const routeData = await this.model.find({ groupId: groupId ,userId: userId });
     
             if (!routeData) {
                 return null;
