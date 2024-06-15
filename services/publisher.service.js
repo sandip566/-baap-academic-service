@@ -52,14 +52,16 @@ class publisherService extends BaseService {
             const sortOrder = { createdAt: -1 };
 
             const skip = (page - 1) * limit;
-
+            const totalCount = await publisherModel.countDocuments(
+                searchFilter
+            );
             const data = await publisherModel
                 .find(searchFilter)
                 .sort(sortOrder)
                 .skip(skip)
                 .limit(limit);
 
-            return { data };
+            return { data, totalCount };
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
             throw new Error("An error occurred while processing the request.");
