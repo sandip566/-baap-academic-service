@@ -71,7 +71,7 @@ router.post("/issue-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             dueDate: dueDate,
-            issuedDate:issuedDate,
+            issuedDate:new Date(),
             userId: userId,
             isReturn: false,
             name:name,
@@ -304,8 +304,7 @@ router.post("/reserve-book", async (req, res) => {
 
         // If student admission data does not exist, continue to reserve the book
         const serviceResponse = await service.reserveBook(groupId, bookId);
-        console.log(serviceResponse);
-        if (!serviceResponse) {
+        if (!serviceResponse || serviceResponse.length===0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for reserving",
