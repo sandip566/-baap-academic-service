@@ -10,22 +10,23 @@ class BedService extends BaseService {
             groupId: Number(groupId),
         };
         if (criteria.status) query.status = criteria.status;
-        if (criteria.numberOfBed) query.numberOfBed = criteria.numberOfBed;
+        if (criteria.numberOfBed)
+            query.numberOfBed = parseInt(criteria.numberOfBed);
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        const totalItemsCount = await BedModel.countDocuments(query)
+        const totalItemsCount = await BedModel.countDocuments(query);
         const bed = await BedModel.aggregate([
             { $match: query },
-            { $sort: { createdAt: -1 } }
-        ])
-
+            { $sort: { createdAt: -1 } },
+        ]);
         return {
             status: "Success",
             data: {
                 items: bed,
                 totalItemsCount,
             },
-        }
+        };
     }
+
     async deleteByDataId(groupId, bedId) {
         try {
             const deleteData = await BedModel.deleteOne({
@@ -59,4 +60,4 @@ class BedService extends BaseService {
     }
 }
 
-module.exports = new BedService(BedModel, 'bed');
+module.exports = new BedService(BedModel, "bed");
