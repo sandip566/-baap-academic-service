@@ -80,8 +80,8 @@ router.get("/:id", async (req, res) => {
 router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
     try {
         const groupId = req.params.groupId;
-        const page = parseInt(req.query.pageNumber) || 1;
-        const perPage = parseInt(req.query.pageSize) || 10;
+        // const page = parseInt(req.query.pageNumber) || 1;
+        // const perPage = parseInt(req.query.pageSize) || 10;
         const criteria = {
             roomId: req.query.roomId,
             hostelId: req.query.hostelId,
@@ -89,13 +89,18 @@ router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
             name: req.query.name,
             hostelId: req.query.hostelId,
             status: req.query.status,
+            roomType:req.query.roomType,
+            bedCount:req.query.bedCount,
+            search:req.query.search,
+            page:req.query.page,
+            limit:req.query.limit
             
         };
         const serviceResponse = await service.getAllRoomDataByGroupId(
             groupId,
             criteria,
-            page,
-            perPage
+            // page,
+            // perPage
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
