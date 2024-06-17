@@ -10,8 +10,7 @@ const bookIssueLogSchema = new mongoose.Schema(
             required: true,
         },
         issuedDate:{
-            type:Date,
-            default:Date.now()
+            type:Date
         },
         labmembershipNumber: {
             type: Number,

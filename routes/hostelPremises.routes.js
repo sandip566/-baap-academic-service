@@ -64,6 +64,7 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         hostelId: req.query.hostelId,
+        search:req.query.search,
         pageNumber: parseInt(req.query.pageNumber) || 1,
         pageSize: parseInt(req.query.pageSize) || 10,
     };

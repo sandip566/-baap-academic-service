@@ -88,15 +88,14 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         search: req.query.search,
         shelfId: req.query.shelfId,
         shelfName: req.query.shelfName,
-        ISBN: req.query.search
+        ISBN: req.query.search,
+        pageNumber:req.query.pageNumber ,
+        pageSize:req.query.pageSize 
     };
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100;
+
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
         criteria,
-        page,
-        limit
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });

@@ -54,7 +54,8 @@ router.get(
         const groupId = req.params.groupId;
         const criteria = {
             name: req.query.name,
-            status: req.query.status
+            status: req.query.status,
+            search: req.query.search
         };
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
@@ -68,14 +69,14 @@ router.get(
     }
 );
 router.put('/updateStatus/groupId/:groupId/admissionId/:addmissionId/', async (req, res) => {
-    const { groupId,addmissionId } = req.params;
+    const { groupId, addmissionId } = req.params;
     try {
-      const result = await service.updateAdmissionStatus( groupId,addmissionId );
-      res.json({ success: true, message: 'Admission status updated successfully', result });
+        const result = await service.updateAdmissionStatus(groupId, addmissionId);
+        res.json({ success: true, message: 'Admission status updated successfully', result });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Failed to update admission status', error: error.message });
+        res.status(500).json({ success: false, message: 'Failed to update admission status', error: error.message });
     }
-  });
+});
 router.get("/all/hostelAdmissionCancel", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 

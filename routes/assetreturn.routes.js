@@ -48,6 +48,13 @@ router.post(
                 { new: true }
             );
 
+            if (updatedAssetRequest.quantity === 0) {
+                await AssetRequestModel.updateOne(
+                    { requestId: req.body.requestId, groupId: req.body.groupId },
+                    { $set: { status: "Returned" } }
+                );
+            }
+
             const assetId = assetRequest.assetId;
             const updatedAsset = await AssetModel.findOneAndUpdate(
                 { assetId: assetId },
@@ -72,7 +79,7 @@ router.get(
         try {
             const groupId = req.params.groupId;
             const page = parseInt(req.query.page) || 1;
-            const perPage = parseInt(req.query.limit) || 10
+            const perPage = parseInt(req.query.limit) || 10;
             const criteria = {
                 // phoneNumber: req.query.phoneNumber,
                 name: req.query.name,

@@ -6,6 +6,7 @@ class AssetService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     async getByAssetTypeId(assetId) {
         return this.execute(() => {
             return AssetReturnModel.findOne({
@@ -20,25 +21,25 @@ class AssetService extends BaseService {
                 groupId: Number(groupId),
             };
             if (criteria.modelName) query.modelName = new RegExp(criteria.modelName, "i");
-    
+
             const assets = await AssetModel.find(query);
             const assetIds = assets.map(asset => asset.assetId);
-    
+
             const issuedCount = await AssetRequestModel.aggregate([
                 { $match: { assetId: { $in: assetIds }, status: "Issued" } },
                 { $group: { _id: null, totalIssued: { $sum: "$quantity" } } }
             ]);
-    
+
             const totalIssued = issuedCount.length > 0 ? issuedCount[0].totalIssued : 0;
             const totalCurrentValue = assets.reduce((acc, asset) => acc + asset.currentValue, 0);
             const totalAvailable = assets.reduce((acc, asset) => acc + asset.available, 0);
-    
+
             const result = {
                 totalCurrentValue,
                 totalAvailable,
                 totalIssued
             };
-    
+
             return {
                 status: "Success",
                 data: result
@@ -47,8 +48,8 @@ class AssetService extends BaseService {
             console.error("Error in getAssetDashboard:", error);
             throw error;
         }
-    }    
-    
+    }
+
     getAllDataByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
@@ -71,7 +72,6 @@ class AssetService extends BaseService {
             throw error;
         }
     }
-
 
     async deleteByAssetId(assetId, groupId) {
         try {

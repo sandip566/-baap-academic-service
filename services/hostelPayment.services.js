@@ -276,6 +276,7 @@ class hostelPaymentService extends BaseService {
                         remainingAmount: data.hostelPaymentData?.remainingAmount,
                         status: data.overdue ? "overdue" : data.status,
                         __seed: seed + index,
+                        hostelPaymentId: data?.hostelPaymentData?.hostelPaymentId,
                     }))
                     .sort((a, b) => a.__seed - b.__seed)
                     .slice(skip, skip + limit);

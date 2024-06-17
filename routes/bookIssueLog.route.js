@@ -71,7 +71,7 @@ router.post("/issue-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             dueDate: dueDate,
-            issuedDate:issuedDate,
+            issuedDate:new Date(),
             userId: userId,
             isReturn: false,
             name:name,
@@ -79,10 +79,11 @@ router.post("/issue-book", async (req, res) => {
         };
         const createdReservation = await service.create(newReservation);
         await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
+            { bookId: bookId, availableCount: { $gt: 0 } }, 
             { $inc: { availableCount: -1 } },
-            { new: true }
+            { new: true, runValidators: true }
         );
+        
         res.status(201).json({
             success: true,
             reservation: createdReservation,
@@ -270,49 +271,48 @@ router.post("/reserve-book", async (req, res) => {
             ISBN,
             bookName,
         } = req.body;
- 
+
+        // Find student admission based on groupId and userId
         const studentAdmission = await StudentsAdmissionModel.findOne({
             groupId: groupId,
             userId: userId,
         });
- 
-        if (!studentAdmission) {
-            return res.status(400).json({
-                success: false,
-                error: "Admission ID not found.",
-            });
+
+        // Check if student admission data exists
+        if (studentAdmission) {
+            // Perform status checks only if studentAdmission exists
+            if (studentAdmission.admissionStatus === "Cancel") {
+                return res.status(400).json({
+                    success: false,
+                    error: "The admission ID has been canceled.",
+                });
+            }
+
+            if (studentAdmission.admissionStatus === "Draft") {
+                return res.status(400).json({
+                    success: false,
+                    error: "The admission ID has a status of 'Draft'.",
+                });
+            }
+
+            if (studentAdmission.admissionStatus !== "Confirm") {
+                return res.status(400).json({
+                    success: false,
+                    error: "The admission ID does not have a confirmed status.",
+                });
+            }
         }
- 
-        if (studentAdmission.admissionStatus === "Cancel") {
-            return res.status(400).json({
-                success: false,
-                error: "The admission ID has been canceled.",
-            });
-        }
- 
-        if (studentAdmission.admissionStatus === "Draft") {
-            return res.status(400).json({
-                success: false,
-                error: "The admission ID has a status of 'Draft'.",
-            });
-        }
- 
-        if (studentAdmission.admissionStatus !== "Confirm") {
-            return res.status(400).json({
-                success: false,
-                error: "The admission ID does not have a confirmed status.",
-            });
-        }
- 
+
+        // If student admission data does not exist, continue to reserve the book
         const serviceResponse = await service.reserveBook(groupId, bookId);
-        console.log(serviceResponse);
-        if (!serviceResponse) {
+        if (!serviceResponse || serviceResponse.length===0) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available for reserving",
             });
         }
- 
+
+        // Check if the book is already reserved by the user
         const existingReservation = await bookIssueLogModel.findOne({
             bookId: bookId,
             userId: userId,
@@ -324,34 +324,39 @@ router.post("/reserve-book", async (req, res) => {
                 error: "You have already reserved this book",
             });
         }
- 
+
+        // Decrease availableCount of the book by totalCopies
         const bookUpdate = await Book.findOneAndUpdate(
             { bookId: bookId, availableCount: { $gt: 0 } },
             { $inc: { availableCount: -totalCopies } },
             { new: true }
         );
- 
+
         if (!bookUpdate) {
             return res.status(400).json({
                 success: false,
                 error: "The book is not available or insufficient copies available.",
             });
         }
- 
-        if (bookUpdate.availableCount == 0) {
+
+        // Update book status if no available copies left
+        if (bookUpdate.availableCount === 0) {
             await Book.findOneAndUpdate(
                 { bookId: bookId },
                 { status: "NotAvailable" }
             );
         }
- 
+
+        // Generate unique bookIssueLogId for the reservation
         const bookIssueLogId = +Date.now();
+
+        // Create new reservation object
         const newReservation = {
             groupId: groupId,
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
-            reserveDate: new Date(),
+            reserveDate: new Date(), // Assuming reserveDate is current date/time
             isReserve: true,
             totalCopies: totalCopies,
             ISBN: ISBN,
@@ -359,11 +364,15 @@ router.post("/reserve-book", async (req, res) => {
             userId: userId,
             status: "Reserved",
         };
+
+        // Save the reservation to database using service
         const createdReservation = await service.create(newReservation);
+
+        // Fetch configuration for reservation day limit
         const config = await ConfigurationModel.findOne({ groupId: groupId });
         const reservationDayLimit = config.LibraryReservationDayLimit; // Assuming value is in days
-        console.log(reservationDayLimit);
-        // // Schedule a task to remove reservation after 3 days
+
+        // Schedule a task to remove reservation after reservationDayLimit days
         setTimeout(async () => {
             const removedReservation = await bookIssueLogModel.findOneAndUpdate(
                 {
@@ -382,21 +391,17 @@ router.post("/reserve-book", async (req, res) => {
                     { bookId: bookId },
                     { $inc: { availableCount: removedReservation.totalCopies } }
                 );
-                if (
-                    book.status === "notAvailable" &&
-                    book.availableCount === 0
-                ) {
+                if (book.status === "NotAvailable" && book.availableCount === 0) {
                     await Book.findOneAndUpdate(
                         { groupId: groupId },
                         { bookId: bookId },
-                        { status: "available" }
+                        { status: "Available" }
                     );
                 }
             }
- 
-            console.log("removedReservation", removedReservation);
         }, reservationDayLimit * 24 * 60 * 60 * 1000);
- 
+
+        // Respond with success and reservation details
         res.status(201).json({
             success: true,
             reservation: createdReservation,
@@ -406,5 +411,6 @@ router.post("/reserve-book", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
 
 module.exports = router;

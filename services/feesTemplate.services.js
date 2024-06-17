@@ -50,9 +50,9 @@ class Service extends BaseService {
             }
         ];
 
-        if (criteria.page && criteria.pageSize) {
-            const page = parseInt(criteria.page, 1);
-            const pageSize = parseInt(criteria.pageSize, 5);
+        if (criteria.pageNumber && criteria.pageSize) {
+            const page = criteria.pageNumber;
+            const pageSize = criteria.pageSize;
             const skip = (page - 1) * pageSize;
 
             aggregationPipeline.push(
@@ -63,14 +63,13 @@ class Service extends BaseService {
 
         const results = await feesTemplateModel.aggregate(aggregationPipeline).exec();
         const totalResults = await feesTemplateModel.countDocuments(matchStage.$match).exec();
-        const totalPages = Math.ceil(totalResults / criteria.pageSize);
 
         return {
             status: "Success",
             data: {
-                items: results
-            },
-            totalItemsCount: totalResults,
+                items: results,
+                totalItemsCount: totalResults,
+            }
         };
     }
 

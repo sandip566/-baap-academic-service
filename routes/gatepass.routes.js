@@ -14,6 +14,7 @@ router.post(
             return;
         }
         const existingGatepass = await GatepassModel.findOne({
+            groupId: req.body.groupId,
             userId: req.body.userId,
             status: 'Active'
         });
