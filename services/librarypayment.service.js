@@ -42,12 +42,17 @@ class LibraryPaymentService extends BaseService {
                 {
                     $lookup: {
                         from: "studentsadmissions",
-                        localField: "addmissionId",
-                        foreignField: "addmissionId",
-                        as: "addmissionId",
+                        localField: "userId",
+                        foreignField: "userId",
+                        as: "userId",
                     },
                 },
-                { $unwind: "$addmissionId" },
+                {
+                    $unwind: {
+                        path: "$userDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 { $sort: { createdAt: -1 } },
                 { $skip: skip },
                 { $limit: pageSize },

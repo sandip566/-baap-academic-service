@@ -12,15 +12,16 @@ class AdmissionCancelService extends BaseService {
         const matchStage = {
             groupId:Number(groupId),
         };
-        const totalItemsCount = await AdmissionCancelModel.countDocuments(
-            matchStage
-        );
+       
         if (criteria.name) {
             matchStage["name"] = { $regex: new RegExp(criteria.name, "i") };
         }
         if (criteria.status) {
             matchStage["status"] = { $regex: new RegExp(criteria.status, "i") };
         }
+        const totalItemsCount = await AdmissionCancelModel.countDocuments(
+            matchStage
+        );
         const skip = (page - 1) * pageSize;
 
         const aggregationPipeline = [

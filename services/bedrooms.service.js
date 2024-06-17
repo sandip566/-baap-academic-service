@@ -51,9 +51,9 @@ class BedRoomsService extends BaseService {
                         }
                     },
                     { $unwind: { path: "$roomId", preserveNullAndEmptyArrays: true } },
+                    ...(reverseOrder ? [{ $sort: { createdAt: -1 } }] : []),
                     { $skip: skip },
                     { $limit: perPage },
-                    ...(reverseOrder ? [{ $sort: { createdAt: -1 } }] : []),
                 ]).exec(),
                 BedRoomsModel.countDocuments(query),
             ]);
@@ -73,6 +73,7 @@ class BedRoomsService extends BaseService {
             };
         }
     }
+    
     
     
     async updateByBedRoomId(bedRoomId, groupId, newData) {
