@@ -49,7 +49,7 @@ router.get("/:id", async (req, res) => {
 });
 router.get(
     "/all/getByGroupId/:groupId",
-    //TokenService.checkPermission(["EMA1"]),
+    TokenService.checkPermission(["EMA1"]),
     async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
