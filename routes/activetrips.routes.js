@@ -14,6 +14,13 @@ router.post(
         }
         const tripId = +Date.now();
         req.body.tripId = tripId
+        const { groupId, routeId, driverId, careTakerId } = req.body
+
+        const checkActive = await service.checkActiveTrip(groupId, routeId, driverId, careTakerId)
+        if (checkActive) {
+            res.status(500).send({ messege: "already trip is active for route" })
+        }
+
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
