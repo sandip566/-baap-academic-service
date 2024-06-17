@@ -56,10 +56,10 @@ router.get(
             name: req.query.name,
             status: req.query.status,
             search: req.query.search,
-            page:req.query.page ,
-            limit:req.query.limit 
+            page: req.query.page,
+            limit: req.query.limit
         };
-     
+
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria,
