@@ -44,9 +44,9 @@ class HostelAdmissionCancelService extends BaseService {
                         path: "$hostelDetails",
                         preserveNullAndEmptyArrays: true
                     }
-                },
-
+                }
             ];
+            
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 aggregationPipeline.push({
@@ -68,17 +68,41 @@ class HostelAdmissionCancelService extends BaseService {
             const limit = parseInt(criteria.limit) || 10;
             aggregationPipeline.push(
                 { $skip: (page - 1) * limit },
-                { $limit: page }
+                { $limit: limit }
             );
+    
             const responseData = await HostelAdmissionCancelModel.aggregate(aggregationPipeline);
-            const totalCount = await HostelAdmissionCancelModel.countDocuments(searchFilter);
+            const countPipeline = [
+                { $match: searchFilter }
+            ];
+            
+            if (criteria.search) {
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                countPipeline.push({
+                    $match: {
+                        $or: [
+                            { "hostelDetails.firstName": searchRegex },
+                            { userId: { $eq: parseInt(criteria.search) } },
+                            { "hostelDetails.phoneNumber": { $eq: parseInt(criteria.search) } },
+                        ],
+                    },
+                });
+            }
+            if (criteria.userId) {
+                countPipeline.push({
+                    $match: { userId: parseInt(criteria.userId) },
+                });
+            }
+            
+            const totalCount = await HostelAdmissionCancelModel.countDocuments(countPipeline);
+    
             const response = {
                 data: {
                     items: responseData,
                     totalItemsCount: totalCount,
                 },
             };
-
+    
             return response;
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
@@ -87,6 +111,7 @@ class HostelAdmissionCancelService extends BaseService {
             );
         }
     }
+    
 
     async updateAdmissionStatus(groupId, hostelAdmissionId) {
         try {
