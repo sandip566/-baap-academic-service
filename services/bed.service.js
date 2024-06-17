@@ -48,6 +48,8 @@ class BedService extends BaseService {
                     
                 ];
             }
+            const page = parseInt(criteria.page) || 1;
+            const limit = parseInt(criteria.limit) || 10;
     
             const aggregationPipeline = [
                 { $match: searchFilter },
@@ -55,7 +57,9 @@ class BedService extends BaseService {
                     $facet: {
                         totalItemsCount: [{ $count: "count" }],
                         items: [
-                            { $sort: { createdAt: -1 } }
+                            { $sort: { createdAt: -1 } },
+                            { $skip: (page - 1) * limit },
+                            { $limit: limit }
                         ]
                     }
                 },
@@ -66,6 +70,7 @@ class BedService extends BaseService {
                     }
                 }
             ];
+            
     
             const result = await BedModel.aggregate(aggregationPipeline);
     
@@ -81,6 +86,83 @@ class BedService extends BaseService {
             throw new Error("An error occurred while processing the request. Please try again later.");
         }
     }
+
+
+    // async  getAllDataByGroupId(groupID, criteria) {
+    //     try {
+    //         const groupId = parseInt(groupID);
+    //         if (isNaN(groupId)) {
+    //             throw new Error("Invalid groupID");
+    //         }
+    
+    //         const searchFilter = { groupId };
+    
+    //         if (criteria.search) {
+    //             const searchRegex = new RegExp(criteria.search.trim(), "i");
+    //             searchFilter.$or = [
+    //                 { bedId: { $eq: parseInt(criteria.search) } },
+    //                 { status: searchRegex },
+    //                 { description: searchRegex },
+    //                 { numberOfBed: { $eq: parseInt(criteria.search) } },
+    //             ];
+    //         }
+    
+    //         const aggregationPipeline = [
+    //             { $match: searchFilter },
+    //             {
+    //                 $facet: {
+    //                     totalItemsCount: [{ $count: "count" }],
+    //                     items: [
+    //                         { $sort: { createdAt: -1 } }
+    //                     ]
+    //                 }
+    //             },
+    //             {
+    //                 $project: {
+    //                     items: 1,
+    //                     totalItemsCount: { $arrayElemAt: ["$totalItemsCount.count", 0] }
+    //                 }
+    //             },
+    //             { $skip: 0 }, // Placeholder $skip stage
+    //             { $limit: 10 } // Placeholder $limit stage
+    //         ];
+    
+    //         const page = parseInt(criteria.page) || 1;
+    //         const limit = parseInt(criteria.limit) || 10;
+    
+    //         // Dynamically set $skip and $limit based on page and limit values
+    //         if (page > 1) {
+    //             aggregationPipeline.push({ $skip: (page - 1) * limit });
+    //         }
+    //         aggregationPipeline.push({ $limit: limit });
+    
+    //         const result = await BedModel.aggregate(aggregationPipeline);
+    
+    //         if (result.length === 0 || !result[0].hasOwnProperty('items')) {
+    //             return {
+    //                 status: "Success",
+    //                 data: {
+    //                     items: [],
+    //                     totalItemsCount: 0,
+    //                 },
+    //             };
+    //         }
+    
+    //         return {
+    //             status: "Success",
+    //             data: {
+    //                 items: result[0].items,
+    //                 totalItemsCount: result[0].totalItemsCount || 0,
+    //             },
+    //         };
+    //     } catch (error) {
+    //         console.error("Error in getAllDataByGroupId:", error);
+    //         throw new Error("An error occurred while processing the request. Please try again later.");
+    //     }
+    // }
+    
+
+
 
     async deleteByDataId(groupId, bedId) {
         try {
