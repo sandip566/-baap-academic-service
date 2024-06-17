@@ -1,7 +1,7 @@
 const ServiceResponse = require("@baapcompany/core-api/services/serviceResponse");
 const HostelAdmissionCancelModel = require("../schema/hosteladmissioncancel.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
-const hostelAdmissionModel = require("../schema/hosteladmission.schema")
+const hostelAdmissionModel = require("../schema/hosteladmission.schema");
 
 class HostelAdmissionCancelService extends BaseService {
     constructor(dbModel, entityName) {
@@ -22,31 +22,31 @@ class HostelAdmissionCancelService extends BaseService {
                         from: "hostelpayments",
                         localField: "hostelPaymentId",
                         foreignField: "hostelPaymentId",
-                        as: "paymentDetails"
-                    }
+                        as: "paymentDetails",
+                    },
                 },
                 {
                     $unwind: {
                         path: "$paymentDetails",
-                        preserveNullAndEmptyArrays: true
-                    }
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $lookup: {
                         from: "hosteladmissions",
                         localField: "hostelAdmissionId",
                         foreignField: "hostelAdmissionId",
-                        as: "hostelDetails"
-                    }
+                        as: "hostelDetails",
+                    },
                 },
                 {
                     $unwind: {
                         path: "$hostelDetails",
-                        preserveNullAndEmptyArrays: true
-                    }
-                }
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
             ];
-            
+
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 aggregationPipeline.push({
@@ -54,7 +54,11 @@ class HostelAdmissionCancelService extends BaseService {
                         $or: [
                             { "hostelDetails.firstName": searchRegex },
                             { userId: { $eq: parseInt(criteria.search) } },
-                            { "hostelDetails.phoneNumber": { $eq: parseInt(criteria.search) } },
+                            {
+                                "hostelDetails.phoneNumber": {
+                                    $eq: parseInt(criteria.search),
+                                },
+                            },
                         ],
                     },
                 });
@@ -66,16 +70,16 @@ class HostelAdmissionCancelService extends BaseService {
             }
             const page = parseInt(criteria.page) || 1;
             const limit = parseInt(criteria.limit) || 10;
-            aggregationPipeline.push(
-                { $skip: (page - 1) * limit },
-                { $limit: limit }
+
+            const skip = (page - 1) * limit;
+
+            aggregationPipeline.push({ $skip: skip }, { $limit: limit });
+
+            const responseData = await HostelAdmissionCancelModel.aggregate(
+                aggregationPipeline
             );
-    
-            const responseData = await HostelAdmissionCancelModel.aggregate(aggregationPipeline);
-            const countPipeline = [
-                { $match: searchFilter }
-            ];
-            
+            const countPipeline = [{ $match: searchFilter }];
+
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 countPipeline.push({
@@ -83,7 +87,11 @@ class HostelAdmissionCancelService extends BaseService {
                         $or: [
                             { "hostelDetails.firstName": searchRegex },
                             { userId: { $eq: parseInt(criteria.search) } },
-                            { "hostelDetails.phoneNumber": { $eq: parseInt(criteria.search) } },
+                            {
+                                "hostelDetails.phoneNumber": {
+                                    $eq: parseInt(criteria.search),
+                                },
+                            },
                         ],
                     },
                 });
@@ -93,16 +101,18 @@ class HostelAdmissionCancelService extends BaseService {
                     $match: { userId: parseInt(criteria.userId) },
                 });
             }
-            
-            const totalCount = await HostelAdmissionCancelModel.countDocuments(countPipeline);
-    
+
+            const totalCount = await HostelAdmissionCancelModel.countDocuments(
+                countPipeline
+            );
+
             const response = {
                 data: {
                     items: responseData,
                     totalItemsCount: totalCount,
                 },
             };
-    
+
             return response;
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
@@ -111,7 +121,6 @@ class HostelAdmissionCancelService extends BaseService {
             );
         }
     }
-    
 
     async updateAdmissionStatus(groupId, hostelAdmissionId) {
         try {
@@ -125,7 +134,10 @@ class HostelAdmissionCancelService extends BaseService {
                 { $set: { admissionStatus: "Cancel" } }
             );
             await hostelAdmissionModel.updateOne(
-                { groupId: groupId, hostelAdmissionId: Number(hostelAdmissionId) },
+                {
+                    groupId: groupId,
+                    hostelAdmissionId: Number(hostelAdmissionId),
+                },
                 { $set: { admissionStatus: "Cancel" } }
             );
             return updateResult;
@@ -145,4 +157,7 @@ class HostelAdmissionCancelService extends BaseService {
     }
 }
 
-module.exports = new HostelAdmissionCancelService(HostelAdmissionCancelModel, 'hosteladmissioncancel');
+module.exports = new HostelAdmissionCancelService(
+    HostelAdmissionCancelModel,
+    "hosteladmissioncancel"
+);
