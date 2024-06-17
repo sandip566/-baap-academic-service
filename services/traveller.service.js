@@ -2,7 +2,8 @@ const TravellerModel = require("../schema/traveller.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const BusRouteModel = require("../schema/busroutes.schema");
 const serviceResponse = require("@baapcompany/core-api/services/serviceResponse");
-const ActiveTripsModel = require("../schema/activetrips.schema")
+const ActiveTripsModel = require("../schema/activetrips.schema");
+const { route } = require("../routes/books.routes");
 class TravellerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
@@ -121,7 +122,113 @@ class TravellerService extends BaseService {
         }
     }
 
+  
+    async  parseCustomDate(dateString) {
+        const parts = dateString.split('/');
+        if (parts.length !== 3) return null;
+        const [day, month, year] = parts.map(part => parseInt(part, 10));
+        if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
+        return new Date(year, month - 1, day);
+    }
     
+async calculateTotalFees(groupId, travellerId) {
+    try {
+        const result = await TravellerModel.aggregate([
+            {
+                $match: {
+                    groupId: groupId,
+                    travellerId: travellerId
+                }
+            },
+            {
+                $lookup: {
+                    from: "busroutes", 
+                    let: { groupId: "$groupId", routeId: "$routeId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$groupId", "$$groupId"] },
+                                        { $eq: ["$routeId", "$$routeId"] }
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            $project: {
+                                feesFreq: 1
+                            }
+                        }
+                    ],
+                    as: "routeData"
+                }
+            },
+            {
+                $unwind: "$routeData"
+            },
+            {
+                $addFields: {
+                    startDateParsed: { $dateFromString: { dateString: "$startDate", format: "%d/%m/%Y" } },
+                    endDateParsed: { $dateFromString: { dateString: "$endDate", format: "%d/%m/%Y" } }
+                }
+            },
+            {
+                $addFields: {
+                    fee: {
+                        $switch: {
+                            branches: [
+                                { case: { $eq: ["$routeData.feesFreq", "Monthly"] }, then: { $divide: ["$totalFees", 30] } },
+                                { case: { $eq: ["$routeData.feesFreq", "Yearly"] }, then: { $divide: ["$totalFees", 360] } },
+                                { case: { $eq: ["$routeData.feesFreq", "Half Yearly"] }, then: { $divide: ["$totalFees", 180] } },
+                                { case: { $eq: ["$routeData.feesFreq", "Quarterly"] }, then: { $divide: ["$totalFees", 120] } }
+                            ],
+                            default: "$totalFees" 
+                        }
+                    },
+
+                    durationInDays: {
+                        $add: [
+                            {
+                                $divide: [
+                                    { $subtract: ["$endDateParsed", "$startDateParsed"] },
+                                    1000 * 60 * 60 * 24
+                                ]
+                            },
+                            1
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    totalFee: { $multiply: ["$fee", "$durationInDays"] }
+                }
+            },
+            {
+                $project: {
+                    traveller:"$$ROOT",
+                    feesFreq: "$routeData.feesFreq",
+                    stopFee: "$totalFees",
+                    startDate: "$startDate",
+                    endDate: "$endDate",
+                    days: "$durationInDays",
+                    oneDayFee: "$fee",
+                    totalFee: "$totalFee"
+                }
+            }
+        ]);
+
+        if (result.length === 0) {
+            return { error: "Traveller not found" };
+        }
+
+        return result[0];
+    } catch (error) {
+        console.error("Error in calculateTotalFees:", error);
+        throw error;
+    }
+}
 
 }
 

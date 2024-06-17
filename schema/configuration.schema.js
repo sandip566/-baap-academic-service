@@ -2,15 +2,14 @@ const mongoose = require("mongoose");
 
 const configurationSchema = new mongoose.Schema(
     {
-        groupId:{
-            type:Number,
-            require:true
+        groupId: {
+            type: Number,
+            require: true
         },
-        configurationId:{
-            type:Number
+        configurationId: {
+            type: Number
         }
-    },
-    { timestamps: true ,strict:false}
+    }, { timestamps: true, strict: false }
 );
 
 const ConfigurationModel = mongoose.model("configuration", configurationSchema);

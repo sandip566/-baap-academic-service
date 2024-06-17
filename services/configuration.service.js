@@ -1,7 +1,7 @@
-const ConfigrationModel = require("../schema/configuration.schema");
+const ConfigurationModel = require("../schema/configuration.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
-class ConfigrationService extends BaseService {
+class ConfigurationService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
@@ -10,32 +10,32 @@ class ConfigrationService extends BaseService {
         const query = {
             groupId: groupId,
         };
-        if (criteria.configrationId)
-            query.configrationId = criteria.configrationId;
+        if (criteria.configurationId)
+            query.configurationId = criteria.configurationId;
         return this.preparePaginationAndReturnData(query, criteria);
     }
 
-    async deleteConfigrationById(configrationId, groupId) {
+    async deleteConfigurationById(configurationId, groupId) {
         try {
-            return await ConfigrationModel.deleteOne(configrationId, groupId);
+            const deletedData = await ConfigurationModel.deleteOne({ configurationId: configurationId, groupId: groupId });
+            return deletedData;
         } catch (error) {
             throw error;
         }
     }
 
-    async updateConfigrationById(configrationId, groupId, newData) {
+    async updateConfigurationById(configurationId, groupId, newData) {
         try {
-            const updateConfigrationData =
-                await ConfigrationModel.findOneAndUpdate(
-                    { configrationId: configrationId, groupId: groupId },
-                    newData,
-                    { new: true }
-                );
-            return updateConfigrationData;
+            const updateConfigurationData = await ConfigurationModel.findOneAndUpdate(
+                { configurationId: configurationId, groupId: groupId },
+                newData,
+                { new: true }
+            );
+            return updateConfigurationData;
         } catch (error) {
             throw error;
         }
     }
 }
 
-module.exports = new ConfigrationService(ConfigrationModel, "configuration");
+module.exports = new ConfigurationService(ConfigurationModel, "configuration");

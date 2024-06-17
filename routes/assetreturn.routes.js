@@ -20,7 +20,7 @@ router.post(
             const returnAssetId = +Date.now();
             const returnQuantity = Number(req.body.returnQuantity);
 
-            if (isNaN(returnQuantity)) {
+            if (isNaN(returnQuantity) || returnQuantity <= 0) {
                 return res.status(400).json({ error: "Invalid returnQuantity" });
             }
 
