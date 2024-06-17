@@ -458,6 +458,7 @@ class BookIssueLogService extends BaseService {
     }
 
     async returnBook(groupId, bookId, userId, returnDate) {
+        console.log((userId),(groupId),(bookId))
         if (!returnDate) {
             throw new Error("returnDate is required");
         }
@@ -468,12 +469,12 @@ class BookIssueLogService extends BaseService {
         }
 
         const existingReservation = await bookIssueLogModel.findOne({
-            groupId,
-            bookId,
-            userId,
+            groupId:groupId,
+            bookId:bookId,
+            userId:userId,
             isReturn: false,
         });
-
+        console.log(existingReservation)
         if (!existingReservation) {
             throw new Error(
                 "The book is not currently issued to the specified group."
