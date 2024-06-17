@@ -115,4 +115,9 @@ router.get("/all/asset", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.get("/getByAssetId/:id", async (req, res) => {
+    const serviceResponse = await service.getByDataId(req.params.id);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 module.exports = router;
