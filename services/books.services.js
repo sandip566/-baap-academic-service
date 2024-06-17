@@ -59,6 +59,11 @@ class BooksService extends BaseService {
                     $match: { userId: parseInt(criteria.userId) },
                 });
             }
+            if(criteria.shelfId){
+                aggregationPipeline.push({
+                    $match:{shelfId:parseInt(criteria.shelfId)}
+                })
+            }
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
             aggregationPipeline.push({
