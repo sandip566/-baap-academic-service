@@ -7,10 +7,10 @@ class AssetService extends BaseService {
         super(dbModel, entityName);
     }
 
-    async getByAssetTypeId(assetId) {
+    async getByDataId(assetId) {
         return this.execute(() => {
-            return AssetReturnModel.findOne({
-                returnAssetId: returnAssetId,
+            return AssetModel.findOne({
+                assetId: assetId,
             });
         });
     }

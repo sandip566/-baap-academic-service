@@ -6,40 +6,31 @@ class Service extends BaseService {
         super(dbModel, entityName);
     }
 
-    async getAllRoomDataByGroupId(
-        groupId,
-        criteria,
-        page,
-        limit,
-        reverseOrder = true
-    ) {
-        const query = {
-            groupId: Number(groupId),
-        };
-
-        if (criteria.roomId) query.roomId = Number(criteria.roomId);
-        if (criteria.floorNo) query.floorNo = Number(criteria.floorNo);
-        if (criteria.hostelId) query.hostelId = Number(criteria.hostelId);
-        if (criteria.status) query.status = new RegExp(criteria.status, "i");
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        const currentPage = page;
-        const perPage = limit;
-        const skip = (currentPage - 1) * perPage;
-
-        let data = await roomModel
-            .aggregate([
-                { $match: query },
+    async  getAllRoomDataByGroupId(groupID, criteria, page = 1, limit = 10, reverseOrder = true) {
+        try {
+            const groupId = parseInt(groupID);
+            if (isNaN(groupId)) {
+                throw new Error("Invalid groupID");
+            }
+    
+            const searchFilter = { groupId };
+            // const currentPage = parseInt(page) || 1;
+            // const perPage = parseInt(limit) || 10;
+            // const skip = (currentPage - 1) * perPage;
+    
+            const aggregationPipeline = [
+                { $match: searchFilter },
                 {
                     $lookup: {
                         from: "hostelpremises",
                         localField: "hostelId",
                         foreignField: "hostelId",
-                        as: "hostelId",
+                        as: "hostel",
                     },
                 },
                 {
                     $unwind: {
-                        path: "$hostelId",
+                        path: "$hostel",
                         preserveNullAndEmptyArrays: true,
                     },
                 },
@@ -48,32 +39,71 @@ class Service extends BaseService {
                         from: "rooms",
                         localField: "roomId",
                         foreignField: "roomId",
-                        as: "roomId",
+                        as: "room",
                     },
                 },
                 {
                     $unwind: {
-                        path: "$roomId",
+                        path: "$room",
                         preserveNullAndEmptyArrays: true,
                     },
                 },
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
-                { $skip: skip },
-                { $limit: perPage },
-            ])
-            .exec();
+                // { $skip: skip },
+                // { $limit: perPage },
+            ];
+    
+            if (criteria.search) {
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                aggregationPipeline.push({
+                    $match: {
+                        $or: [
+                            { roomId: { $eq: parseInt(criteria.search) } },
+                            { numberOfBed: { $eq: parseInt(criteria.search) } },
+                            { "room.roomType": searchRegex },
+                            { bedCount: { $eq: parseInt(criteria.search) } },
+                            { name: searchRegex },
+                            { "room.status": searchRegex },
+                            { hostelId: { $eq: parseInt(criteria.search) } },
+                            { floorNo: { $eq: parseInt(criteria.search) } },
+                        ],
+                    },
+                });
+            }
+            const page = parseInt(criteria.page) || 1;
+            const limit = parseInt(criteria.limit) || 10;
+            
+            aggregationPipeline.push(
+                { $skip: (page - 1) * limit },
+                { $limit: limit }
+            );
 
-        const totalItemsCount = await roomModel.countDocuments(query);
-
-        const response = {
-            status: "Success",
-            data: {
-                items: data,
-                totalItemsCount: totalItemsCount,
-            },
-        };
-        return response;
+            const data = await roomModel.aggregate(aggregationPipeline);
+            const totalItemsCount = await roomModel.countDocuments(searchFilter);
+    
+            const response = {
+                status: "Success",
+                data: {
+                    items: data,
+                    totalItemsCount: totalItemsCount,
+                },
+            };
+    
+            return response;
+        } catch (error) {
+            console.error("Error in getAllRoomDataByGroupId:", error);
+            throw new Error("An error occurred while processing the request. Please try again later.");
+        }
     }
+    
+
+
+
+
+
+
+
+
 
     async deleteRoomById(roomId, groupId) {
         try {
