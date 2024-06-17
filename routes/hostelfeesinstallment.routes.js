@@ -66,4 +66,17 @@ router.get("/getHostelFeesInstallment/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.delete("/:id/user/:userId", async (req, res) => {
+    const { id, userId } = req.params;
+    const serviceResponse = await service.markAsDeletedByUser(id, userId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+    
+});
+
+router.get("/user/:userId", async (req, res) => {
+    const { userId } = req.params;
+    const serviceResponse = await service.getNonDeletedForUser(userId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
 module.exports = router;

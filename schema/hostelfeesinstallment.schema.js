@@ -10,11 +10,11 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        hostelInstallmentId:{
+        hostelInstallmentId: {
             type: Number,
             required: true,
         },
-        hostelAdmissionId:{
+        hostelAdmissionId: {
             type: Number,
             required: false,
         },
@@ -22,13 +22,24 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
             type: String,
             default: "pending",
         },
-
-        deleted:{
-            type:Boolean,
-            default:true
-        }
+        deleted: {
+            type: Boolean,
+            default: true,
+        },
+        deletedByUsers: [
+            {
+                userId: {
+                    type: String,
+                    required: true,
+                },
+                deletedAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
     },
-    {strict:false, timestamps: true }
+    { strict: false, timestamps: true }
 );
 
 const HostelFeesInstallmentModel = mongoose.model("hostelfeesinstallment", HostelFeesInstallmentSchema);

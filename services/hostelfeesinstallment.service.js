@@ -160,6 +160,33 @@ class HostelFeesInstallmentService extends BaseService {
             });
         }
     }
+
+    async markAsDeletedByUser(id, userId) {
+        try {
+            const result = await HostelFeesInstallmentModel.findByIdAndUpdate(
+                id,
+                { $addToSet: { deletedByUsers: { userId: userId } } },
+                { new: true }
+            );
+            return new ServiceResponse({ data: result });
+        } catch (error) {
+            return new ServiceResponse({ isError: true, message: error.message });
+        }
+    }
+
+    async getNonDeletedForUser(userId) {
+        try {
+            const result = await HostelFeesInstallmentModel.find({
+                'deletedByUsers.userId': { $ne: userId }
+            });
+            return new ServiceResponse({ data: result });
+        } catch (error) {
+            return new ServiceResponse({ isError: true, message: error.message });
+        }
+    }
+
+
+
 }
 
 module.exports = new HostelFeesInstallmentService(HostelFeesInstallmentModel, 'hostelfeesinstallment');
