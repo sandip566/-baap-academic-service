@@ -55,15 +55,14 @@ router.get(
         const criteria = {
             name: req.query.name,
             status: req.query.status,
-            search: req.query.search
+            search: req.query.search,
+            page:req.query.page ,
+            limit:req.query.limit 
         };
-        const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+     
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
             criteria,
-            page,
-            limit
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     }

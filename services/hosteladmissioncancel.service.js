@@ -64,11 +64,11 @@ class HostelAdmissionCancelService extends BaseService {
                     $match: { userId: parseInt(criteria.userId) },
                 });
             }
-            const pageNumber = parseInt(criteria.pageNumber) || 1;
-            const pageSize = parseInt(criteria.pageSize) || 10;
+            const page = parseInt(criteria.page) || 1;
+            const limit = parseInt(criteria.limit) || 10;
             aggregationPipeline.push(
-                { $skip: (pageNumber - 1) * pageSize },
-                { $limit: pageSize }
+                { $skip: (page - 1) * limit },
+                { $limit: page }
             );
             const responseData = await HostelAdmissionCancelModel.aggregate(aggregationPipeline);
             const totalCount = await HostelAdmissionCancelModel.countDocuments(searchFilter);
