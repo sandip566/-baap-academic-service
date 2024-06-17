@@ -35,7 +35,7 @@ router.post(
                 { $set: { isOverdue: false, overdueStatus: "Paid" } },
                 { new: true }
             );
-            requestResponseHelper.sendResponse(res, serviceResponse);
+            requestResponsehelper.sendResponse(res, serviceResponse);
         } catch (error) {
             next(error);
         }
