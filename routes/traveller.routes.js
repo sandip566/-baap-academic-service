@@ -119,7 +119,7 @@ router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
 });
 
 
-router.get("/passenger-fees/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
+router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
         const groupId = parseInt(req.params.groupId);
         const travellerId = parseInt(req.params.travellerId);
