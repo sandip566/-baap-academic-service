@@ -270,6 +270,8 @@ router.post("/reserve-book", async (req, res) => {
             totalCopies,
             ISBN,
             bookName,
+            name,
+            url
         } = req.body;
 
         // Find student admission based on groupId and userId
@@ -363,6 +365,8 @@ router.post("/reserve-book", async (req, res) => {
             bookName: bookName,
             userId: userId,
             status: "Reserved",
+            name:name,
+            url:url
         };
 
         // Save the reservation to database using service
