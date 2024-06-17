@@ -122,15 +122,7 @@ class TravellerService extends BaseService {
         }
     }
 
-    async parseCustomDate(dateString) {
-        const parts = dateString.split('/');
-        if (parts.length !== 3) return null;
-        const [day, month, year] = parts.map(part => parseInt(part, 10));
-        if (isNaN(year) || isNaN(month) || isNaN(day)) return null;
-        return new Date(year, month - 1, day);
-    }
-    
-    
+  
     async  parseCustomDate(dateString) {
         const parts = dateString.split('/');
         if (parts.length !== 3) return null;
