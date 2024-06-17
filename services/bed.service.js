@@ -5,26 +5,81 @@ class BedService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
-    async getAllDataByGroupId(groupId, criteria) {
-        const query = {
-            groupId: Number(groupId),
-        };
-        if (criteria.status) query.status = criteria.status;
-        if (criteria.numberOfBed)
-            query.numberOfBed = parseInt(criteria.numberOfBed);
-        if (criteria.name) query.name = new RegExp(criteria.name, "i");
-        const totalItemsCount = await BedModel.countDocuments(query);
-        const bed = await BedModel.aggregate([
-            { $match: query },
-            { $sort: { createdAt: -1 } },
-        ]);
-        return {
-            status: "Success",
-            data: {
-                items: bed,
-                totalItemsCount,
-            },
-        };
+    // async getAllDataByGroupId(groupId, criteria) {
+    //     const query = {
+    //         groupId: Number(groupId),
+    //     };
+    //     if (criteria.status) query.status = criteria.status;
+    //     if (criteria.numberOfBed)
+    //         query.numberOfBed = parseInt(criteria.numberOfBed);
+    //     if (criteria.name) query.name = new RegExp(criteria.name, "i");
+    //     const totalItemsCount = await BedModel.countDocuments(query);
+    //     const bed = await BedModel.aggregate([
+    //         { $match: query },
+    //         { $sort: { createdAt: -1 } },
+    //     ]);
+    //     return {
+    //         status: "Success",
+    //         data: {
+    //             items: bed,
+    //             totalItemsCount,
+    //         },
+    //     };
+    // }
+
+
+
+    async getAllDataByGroupId(groupID, criteria) {
+        try {
+            const groupId = parseInt(groupID);
+            if (isNaN(groupId)) {
+                throw new Error("Invalid groupID");
+            }
+    
+            const searchFilter = { groupId };
+    
+            if (criteria.search) {
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                searchFilter.$or = [
+                    { bedId: { $eq: parseInt(criteria.search) } },
+                    { status: searchRegex },
+                    { description: searchRegex },
+                    { numberOfBed: { $eq: parseInt(criteria.search) } },
+                    
+                ];
+            }
+    
+            const aggregationPipeline = [
+                { $match: searchFilter },
+                {
+                    $facet: {
+                        totalItemsCount: [{ $count: "count" }],
+                        items: [
+                            { $sort: { createdAt: -1 } }
+                        ]
+                    }
+                },
+                {
+                    $project: {
+                        items: 1,
+                        totalItemsCount: { $arrayElemAt: ["$totalItemsCount.count", 0] }
+                    }
+                }
+            ];
+    
+            const result = await BedModel.aggregate(aggregationPipeline);
+    
+            return {
+                status: "Success",
+                data: {
+                    items: result[0].items,
+                    totalItemsCount: result[0].totalItemsCount || 0,
+                },
+            };
+        } catch (error) {
+            console.error("Error in getAllDataByGroupId:", error);
+            throw new Error("An error occurred while processing the request. Please try again later.");
+        }
     }
 
     async deleteByDataId(groupId, bedId) {

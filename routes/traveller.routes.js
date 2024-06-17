@@ -4,6 +4,9 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/traveller.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const { route } = require("./books.routes");
+const TravellerModel = require("../schema/traveller.schema");
+const BusRouteModel=require("../schema/busroutes.schema")
 
 router.post(
     "/",
@@ -31,11 +34,11 @@ router.put("/:id", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.get("/:id", async (req, res) => {
-    const serviceResponse = await service.getById(req.params.id);
+// router.get("/:id", async (req, res) => {
+//     const serviceResponse = await service.getById(req.params.id);
 
-    requestResponsehelper.sendResponse(res, serviceResponse);
-});
+//     requestResponsehelper.sendResponse(res, serviceResponse);
+// });
 
 router.get("/all/traveller", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
@@ -116,5 +119,21 @@ router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
 });
 
 
+router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const travellerId = parseInt(req.params.travellerId);
+       
+        if (isNaN(travellerId)) {
+            return res.status(400).json({ error: "Invalid travellerId" });
+        }
+        const totalFees = await service.calculateTotalFees(groupId,travellerId);
+        console.log(`Total fees: ${totalFees}`);
+        res.status(200).json({ totalFees });
+    } catch (error) {
+        console.error("Error in /passenger-fees/groupId/:groupId/:travellerId:", error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 
 module.exports = router;
