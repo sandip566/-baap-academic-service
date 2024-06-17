@@ -26,11 +26,11 @@ class AssetRequestService extends BaseService {
     async getAllDataByGroupId(groupId, criteria) {
         const pageNumber = criteria.pageNumber || 1;
         const pageSize = criteria.pageSize || 10;
-    
+
         const query = {
             groupId: Number(groupId),
         };
-    
+
         if (criteria.search) {
             const numericSearch = parseInt(criteria.search);
             if (!isNaN(numericSearch)) {
@@ -49,7 +49,7 @@ class AssetRequestService extends BaseService {
                 ];
             }
         }
-        
+
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         if (criteria.userName) query.userName = new RegExp(criteria.userName, "i");
         if (criteria.status) query.status = new RegExp(criteria.status, "i");
@@ -58,9 +58,9 @@ class AssetRequestService extends BaseService {
         if (criteria.empId) query.empId = criteria.empId;
         if (criteria.managerUserId) query.managerUserId = criteria.managerUserId;
         if (criteria.userId) query.userId = criteria.userId;
-    
+
         const totalItemsCount = await AssetRequestModel.countDocuments(query);
-    
+
         const assetRequest = await AssetRequestModel.aggregate([
             { $match: query },
             { $sort: { createdAt: -1 } },
@@ -81,7 +81,7 @@ class AssetRequestService extends BaseService {
                 }
             }
         ]);
-    
+
         return {
             status: "Success",
             data: {
@@ -125,7 +125,7 @@ class AssetRequestService extends BaseService {
             }
 
             Object.keys(newData).forEach(key => {
-                assetRequest[key] = newData[key];
+                assetRequest.set(key, newData[key]);
             });
 
             await assetRequest.save();
