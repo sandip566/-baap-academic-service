@@ -12,8 +12,8 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const configrationId=Date.now()
-        req.body.configrationId=configrationId;
+        const configurationId = Date.now()
+        req.body.configurationId = configurationId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -21,35 +21,28 @@ router.post(
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.put("/:id", async (req, res) => {
     const serviceResponse = await service.updateById(req.params.id, req.body);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
 router.get("/all/configration", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
-
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-
-
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
-        configrationId: req.query.configrationId,
+        configurationId: req.query.configurationId,
     };
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
@@ -58,13 +51,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
-router.delete("/groupId/:groupId/configrationId/:configrationId", async (req, res) => {
+router.delete("/groupId/:groupId/configurationId/:configurationId", async (req, res) => {
     try {
-        const configrationId = req.params.configrationId
+        const configurationId = req.params.configurationId
         const groupId = req.params.groupId
-        const Data = await service.deleteConfigrationById({ configrationId: configrationId, groupId: groupId });
+        const Data = await service.deleteConfigurationById(configurationId, groupId);
         if (!Data) {
-            res.status(404).json({ error: 'configration data not found to delete' });
+            res.status(404).json({ error: 'configuration data not found to delete' });
         } else {
             res.status(201).json(Data);
         }
@@ -74,12 +67,12 @@ router.delete("/groupId/:groupId/configrationId/:configrationId", async (req, re
     }
 });
 
-router.put("/groupId/:groupId/configrationId/:configrationId", async (req, res) => {
+router.put("/groupId/:groupId/configurationId/:configurationId", async (req, res) => {
     try {
-        const configrationId = req.params.configrationId;
+        const configurationId = req.params.configurationId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updateConfigrationById(configrationId, groupId, newData);
+        const updateData = await service.updateConfigurationById(configurationId, groupId, newData);
         if (!updateData) {
             res.status(404).json({ error: 'data not found to update' });
         } else {
