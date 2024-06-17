@@ -24,6 +24,9 @@ class LibraryPaymentService extends BaseService {
                             username: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
+                            name: {
+                                $regex: new RegExp(criteria.search, "i"),
+                            },
                         },
                        
                     ];

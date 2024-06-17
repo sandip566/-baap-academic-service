@@ -10,6 +10,18 @@ class ActiveTripsService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async checkActiveTrip(groupId, routeId, driverId, careTakerId) {
+        const trip = await ActiveTripsModel.findOne(
+            {
+                groupId: groupId,
+                routeId: routeId,
+                driverId: driverId,
+                careTakerId: careTakerId
+            }
+        )
+        return trip
+    }
+
     async getBytripId(tripId) {
         return this.execute(() => {
             return this.model.findOne({ tripId: tripId });
@@ -117,7 +129,7 @@ class ActiveTripsService extends BaseService {
     async updatedriverById(tripId, groupId, newData) {
         try {
             const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
-    
+
             if (!existingTrip) {
                 const newTrip = new ActiveTripsModel({
                     tripId: tripId,
@@ -127,14 +139,14 @@ class ActiveTripsService extends BaseService {
                 return await newTrip.save();
             } else {
                 for (const key in newData) {
-                    if (key !== 'onBoaredTraveller') { 
+                    if (key !== 'onBoaredTraveller') {
                         existingTrip[key] = newData[key];
                     }
                 }
 
                 const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
                 const updatedTravellers = newData.onBoaredTraveller || [];
-    
+
                 updatedTravellers.forEach(newTraveller => {
                     const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
                     if (index !== -1) {
@@ -152,7 +164,7 @@ class ActiveTripsService extends BaseService {
             throw error;
         }
     }
-    
+
 
     async getActiveTrip(groupId, tripId, lat, long) {
         let query = { groupId: Number(groupId), tripId: Number(tripId) };
