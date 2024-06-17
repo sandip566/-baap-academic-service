@@ -106,7 +106,7 @@ class CommunicationService extends BaseService {
                 {
                     $match: {
                         $or: [
-                            { senderId:Number (senderId) },
+                            { senderId: Number(senderId) },
                             { receiverId: Number(senderId) }
                         ]
                     }
@@ -129,22 +129,23 @@ class CommunicationService extends BaseService {
                 { $replaceRoot: { newRoot: "$latestMessage" } }
             ];
     
-            const latestMessages = await this.model.aggregate(pipeline);
-    
-            const formattedMessages = latestMessages.map(chat => ({
-                ...chat,
-                formattedDateTime: this.formatDate(chat.timestamp)
-            }));
-    
+            const latestMessages = await this.model.aggregate(pipeline);  
+            const formattedMessages = latestMessages.map(chat => { 
+                const isSender = chat.senderId === Number(senderId);
+                
+                return {
+                    ...chat,
+                    formattedDateTime: this.formatDate(chat.timestamp),
+                    displayName: isSender ? chat.receiver: chat.sender
+                };
+            });
             formattedMessages.sort((a, b) => b.timestamp - a.timestamp);
-    
             return new ServiceResponse({ data: formattedMessages });
         } catch (error) {
             console.error('Error while fetching latest messages from each chat:', error);
             throw new Error('Error while fetching latest messages from each chat');
         }
     }
-    
     
     async deleteChatById(chatId) {
         try {
