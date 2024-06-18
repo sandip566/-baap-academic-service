@@ -32,7 +32,10 @@ router.post(
             const serviceResponse = await service.create(req.body);
             await BookIssueLog.findOneAndUpdate(
                 { bookIssueLogId: bookIssueLogId },
-                { $set: { isOverdue: false, overdueStatus: "Paid" } },
+                {
+                    $unset: { isOverdue: "" },
+                    $set: { overdueStatus: "Paid" },
+                },
                 { new: true }
             );
             requestResponsehelper.sendResponse(res, serviceResponse);
