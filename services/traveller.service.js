@@ -121,9 +121,7 @@ class TravellerService extends BaseService {
             throw error;
         }
     }
-
-  
-    async  calculateTotalFees(groupId, travellerId) {
+    async calculateTotalFees(groupId, travellerId) {
         try {
             const result = await TravellerModel.aggregate([
                 {
@@ -147,11 +145,6 @@ class TravellerService extends BaseService {
                                     }
                                 }
                             },
-                            {
-                                $project: {
-                                    feesFreq: 1
-                                }
-                            }
                         ],
                         as: "routeData"
                     }
@@ -178,7 +171,7 @@ class TravellerService extends BaseService {
                                 default: "$totalFees"
                             }
                         },
-    
+
                         durationInDays: {
                             $add: [
                                 {
@@ -214,7 +207,22 @@ class TravellerService extends BaseService {
                         addresses: 1,
                         emergencyContact: 1,
                         __v: 1,
-                       // routeData: 1,
+                        routeData: {
+                            feesFreq: "$routeData.feesFreq",
+                            name: "$routeData.name",
+                            start: "$routeData.start",
+                            end: "$routeData.end",
+                            driverId: "$routeData.driverId",
+                            careTakerId: "$routeData.careTakerId",
+                            vehicleId: "$routeData.vehicleId",
+                            number: "$routeData.number",
+                            currentLocation: "$routeData.currentLocation",
+                            stopDetails: "$routeData.stopDetails",
+                            shift: "$routeData.shift",
+                            createdAt: "$routeData.createdAt",
+                            updatedAt: "$routeData.updatedAt",
+                            __v: "$routeData.__v"
+                        },
                         feesFreq: "$routeData.feesFreq",
                         stopFee: "$totalFees",
                         days: "$durationInDays",
@@ -223,12 +231,11 @@ class TravellerService extends BaseService {
                     }
                 }
             ]);
-    
+
             if (result.length === 0) {
                 return { error: "Traveller not found" };
             }
-    
-            
+
             return {
                 traveller: result[0]
             };
@@ -237,7 +244,9 @@ class TravellerService extends BaseService {
             throw error;
         }
     }
-    
+
+
+
 
 }
 
