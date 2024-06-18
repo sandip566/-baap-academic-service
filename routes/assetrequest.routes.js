@@ -24,6 +24,9 @@ router.post(
         if (!asset) {
             return res.status(400).json({ error: "Asset not found" });
         }
+        if (req.body.quantity <= 0) {
+            return res.status(400).json({ error: "0 is not valid quantity for asset" });
+        }
 
         if (req.body.status === "Issued") {
             if (asset.available < req.body.quantity) {

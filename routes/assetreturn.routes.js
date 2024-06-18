@@ -33,7 +33,7 @@ router.post(
                 return res.status(400).json({ error: "Asset request not found" });
             }
 
-            if (returnQuantity > assetRequest.quantity) {
+            if (returnQuantity > assetRequest.quantity || returnQuantity === 0) {
                 return res.status(400).json({ error: "You don't have enough assets for return" });
             }
 
