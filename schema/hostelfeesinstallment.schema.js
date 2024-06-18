@@ -10,11 +10,12 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        hostelInstallmentId:{
+        hostelInstallmentId: {
             type: Number,
             required: true,
+            unique: true
         },
-        hostelAdmissionId:{
+        hostelAdmissionId: {
             type: Number,
             required: false,
         },
@@ -22,9 +23,38 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
             type: String,
             default: "pending",
         },
+
+
+        isActive: {
+            type: Boolean,
+            default: true
+        },
+        deletedByUsers: [
+            {
+                userId: {
+                    type: String,
+                    required: true,
+                },
+                deletedAt: {
+                    type: Date,
+                    default: Date.now,
+                },
+            },
+        ],
     },
-    {strict:false, timestamps: true }
+    { strict: false, timestamps: true }
 );
+
+HostelFeesInstallmentSchema.virtual('statusFlag').get(function () {
+    return this.deleted ? 'inactive' : 'active';
+});
+
+HostelFeesInstallmentSchema.set('toJSON', {
+    virtuals: true
+});
+HostelFeesInstallmentSchema.set('toObject', {
+    virtuals: true
+});
 
 const HostelFeesInstallmentModel = mongoose.model("hostelfeesinstallment", HostelFeesInstallmentSchema);
 module.exports = HostelFeesInstallmentModel;

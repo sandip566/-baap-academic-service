@@ -6,6 +6,7 @@ class HostelFeesInstallmentService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
     async getAllHostelFeesInstallmentByGroupId(groupId, criteria) {
         const query = {
             groupId: groupId,
@@ -20,12 +21,12 @@ class HostelFeesInstallmentService extends BaseService {
             query.installmentNo = criteria.installmentNo;
         return this.preparePaginationAndReturnData(query, criteria);
     }
+
     async getByInstallmentId(hostelInstallmentId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
+            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId }).lean();
         });
     }
- 
 
     async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
         try {
@@ -33,12 +34,13 @@ class HostelFeesInstallmentService extends BaseService {
                 { hostelInstallmentId: hostelInstallmentId },
                 { feesDetails: newFeesDetails, ...newData },
                 { new: true }
-            );
+            ).lean();
             return updateResult;
         } catch (error) {
             throw error;
         }
     }
+
     async getPendingInstallmentByAdmissionId(hostelAdmissionId) {
         try {
             const pipeline = [
@@ -80,7 +82,7 @@ class HostelFeesInstallmentService extends BaseService {
             ];
 
             console.log("Pipeline:", JSON.stringify(pipeline));
-            const result = await HostelFeesInstallmentModel.aggregate(pipeline);
+            const result = await HostelFeesInstallmentModel.aggregate(pipeline).exec();
 
             console.log("Result:", result);
 
@@ -90,6 +92,7 @@ class HostelFeesInstallmentService extends BaseService {
             throw error;
         }
     }
+
     async updateInstallmentAmount(hostelInstallmentId, newAmount, newStatus) {
         console.log(hostelInstallmentId, newAmount);
         try {
@@ -97,10 +100,8 @@ class HostelFeesInstallmentService extends BaseService {
                 { "feesDetails.installment.installmentNo": hostelInstallmentId },
                 {
                     $set: {
-                        "feesDetails.$[outer].installment.$[inner].amount":
-                            newAmount,
-                        "feesDetails.$[outer].installment.$[inner].status":
-                            newStatus,
+                        "feesDetails.$[outer].installment.$[inner].amount": newAmount,
+                        "feesDetails.$[outer].installment.$[inner].status": newStatus,
                     },
                 },
                 {
@@ -111,12 +112,9 @@ class HostelFeesInstallmentService extends BaseService {
                     multi: true,
                     new: true,
                 }
-            );
+            ).lean();
 
-            console.log(
-                "Installment amount updated successfully:",
-                updateResult
-            );
+            console.log("Installment amount updated successfully:", updateResult);
 
             const feesDetail = updateResult.feesDetails.find((detail) =>
                 detail.installment.some(
@@ -130,12 +128,12 @@ class HostelFeesInstallmentService extends BaseService {
                 await HostelFeesInstallmentModel.findOneAndUpdate(
                     { "feesDetails._id": feesDetail._id },
                     { $set: { "feesDetails.$.status": "paid" } }
-                );
+                ).lean();
             } else {
                 await HostelFeesInstallmentModel.findOneAndUpdate(
                     { "feesDetails._id": feesDetail._id },
                     { $set: { "feesDetails.$.status": "pending" } }
-                );
+                ).lean();
             }
         } catch (error) {
             console.error("Error updating installment amount:", error);
@@ -145,10 +143,9 @@ class HostelFeesInstallmentService extends BaseService {
         try {
             const resp = await HostelFeesInstallmentModel.findOneAndUpdate(
                 { hostelAdmissionId: hostelAdmissionId, groupId: groupId },
-
                 data,
                 { upsert: true, new: true }
-            );
+            ).lean();
 
             return new ServiceResponse({
                 data: resp,
@@ -160,6 +157,66 @@ class HostelFeesInstallmentService extends BaseService {
             });
         }
     }
+
+    async markAsDeletedByUser(id, userId) {
+        try {
+            const result = await HostelFeesInstallmentModel.findByIdAndUpdate(
+                id,
+                { $addToSet: { deletedByUsers: { userId: userId } }, $set: { deleted: true } },
+                { new: true }
+            ).lean();
+            return new ServiceResponse({ data: result });
+        } catch (error) {
+            return new ServiceResponse({ isError: true, message: error.message });
+        }
+    }
+
+    async getNonDeletedForUser(userId) {
+        try {
+            const result = await HostelFeesInstallmentModel.find({
+                'deletedByUsers.userId': { $ne: userId },
+                deleted: false
+            }).lean();
+            return new ServiceResponse({ data: result });
+        } catch (error) {
+            return new ServiceResponse({ isError: true, message: error.message });
+        }
+    }
+
+    async updateStatusFlagByInstallmentId(hostelInstallmentId, isActive) {
+        try {
+            const updateResult = await HostelFeesInstallmentModel.findOneAndUpdate(
+                { hostelInstallmentId: hostelInstallmentId },
+                { deleted: !isActive },
+                { new: true }
+            ).lean();
+            return new ServiceResponse({ data: updateResult });
+        } catch (error) {
+            return new ServiceResponse({ isError: true, message: error.message });
+        }
+    }
+
+    async getAllByCriteria(criteria) {
+        const query = {
+            isActive: criteria.isActive !== undefined ? criteria.isActive : true 
+        };
+
+        if (criteria.groupId) query.groupId = criteria.groupId;
+        if (criteria.hostelInstallmentId) query.hostelInstallmentId = criteria.hostelInstallmentId;
+        if (criteria.hostelAdmissionId) query.hostelAdmissionId = criteria.hostelAdmissionId;
+        if (criteria.status) query.status = new RegExp(criteria.status, "i");
+
+
+        criteria.pageSize = criteria.pageSize || 10;
+
+        return this.preparePaginationAndReturnData(query, criteria);
+    }
+
+
+
+
+
 }
 
 module.exports = new HostelFeesInstallmentService(HostelFeesInstallmentModel, 'hostelfeesinstallment');
+
