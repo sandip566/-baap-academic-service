@@ -101,11 +101,23 @@ class BooksService extends BaseService {
         try {
             const groupID = parseInt(groupId);
             const bookID = parseInt(bookId);
-            const isIssuedBook = await bookIssueLogModel.find({
-                groupId: groupID,
-                bookId: bookID,
-            });
-            if (isIssuedBook.length === 0) {
+                const isIssuedOrReserved = await bookIssueLogModel.aggregate([
+                {
+                    $match: {
+                        $or: [
+                            { groupId: groupID },
+                            { bookId: bookID }
+                        ]
+                    }
+                },
+                {
+                    $group: {
+                        _id: null,
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+            if (isIssuedOrReserved.length === 0 || isIssuedOrReserved[0].count === 0) {
                 const result = await booksModel.deleteOne({
                     groupId: groupID,
                     bookId: bookID,
@@ -118,6 +130,7 @@ class BooksService extends BaseService {
             throw error;
         }
     }
+    
 
     async updateBookById(bookId, groupId, newData) {
         try {
