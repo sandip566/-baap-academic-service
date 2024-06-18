@@ -328,10 +328,8 @@ router.post("/reserve-book", async (req, res) => {
         }
 
         // Decrease availableCount of the book by totalCopies
-        const bookUpdate = await Book.findOneAndUpdate(
-            { bookId: bookId, availableCount: { $gt: 0 } },
-            { $inc: { availableCount: -totalCopies } },
-            { new: true }
+        const bookUpdate = await Book.findOne(
+            { bookId: bookId, totalCopies: { $gt: 0 } } 
         );
 
         if (!bookUpdate) {
