@@ -13,55 +13,70 @@ class BedRoomsService extends BaseService {
         });
     }
     async getAllDataByGroupId(groupId, criteria, page, limit, reverseOrder = true) {
-        const query = {
+        const searchFilter = {
             groupId: Number(groupId),
         };
-        if (criteria.bedRoomId) query.bedRoomId = criteria.bedRoomId;
-        if (criteria.hostelId) query.hostelId = criteria.hostelId;
-        if (criteria.roomId) query.roomId = criteria.roomId;
-        if (criteria.status) query.status = new RegExp(criteria.status, "i");
+        if (criteria.bedRoomId) searchFilter.bedRoomId = criteria.bedRoomId;
+        if (criteria.hostelId) searchFilter.hostelId = criteria.hostelId;
+        if (criteria.roomId) searchFilter.roomId = criteria.roomId;
+        if (criteria.status) searchFilter.status = new RegExp(criteria.status, "i");
     
         const currentPage = page || 1;
         const perPage = limit || 10;
         const skip = (currentPage - 1) * perPage;
     
         try {
-            const [data, totalItemsCount] = await Promise.all([
-                BedRoomsModel.aggregate([
-                    { $match: query },
-                    {
-                        $lookup: {
-                            from: "hostelpremises",
-                            let: { hostelId: "$hostelId" },
-                            pipeline: [
-                                { $match: { $expr: { $eq: ["$hostelId", "$$hostelId"] } } }
-                            ],
-                            as: "hostelId"
-                        }
+            const aggregationPipeline = [
+                { $match: searchFilter },
+                {
+                    $lookup: {
+                        from: "hostelpremises",
+                        let: { hostelId: "$hostelId" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$hostelId", "$$hostelId"] } } }
+                        ],
+                        as: "hostelId"
+                    }
+                },
+                { $unwind: { path: "$hostelId", preserveNullAndEmptyArrays: true } },
+                {
+                    $lookup: {
+                        from: "rooms",
+                        let: { roomId: "$roomId" },
+                        pipeline: [
+                            { $match: { $expr: { $eq: ["$roomId", "$$roomId"] } } }
+                        ],
+                        as: "roomId"
+                    }
+                },
+                { $unwind: { path: "$roomId", preserveNullAndEmptyArrays: true } },
+                ...(reverseOrder ? [{ $sort: { createdAt: -1 } }] : []),
+                { $skip: skip },
+                { $limit: perPage },
+            ];
+    
+            if (criteria.search) {
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                aggregationPipeline.push({
+                    $match: {
+                        $or: [
+                            { bedRoomId: { $eq: parseInt(criteria.search) } },
+                            { name: searchRegex },
+                            { "roomId.hostelId": { $eq: parseInt(criteria.search) } },
+                            { "roomId.status": searchRegex },
+                            { "roomId.roomId": { $eq: parseInt(criteria.search) } },
+                        ],
                     },
-                    { $unwind: { path: "$hostelId", preserveNullAndEmptyArrays: true } },
-                    {
-                        $lookup: {
-                            from: "rooms",
-                            let: { roomId: "$roomId" },
-                            pipeline: [
-                                { $match: { $expr: { $eq: ["$roomId", "$$roomId"] } } }
-                            ],
-                            as: "roomId"
-                        }
-                    },
-                    { $unwind: { path: "$roomId", preserveNullAndEmptyArrays: true } },
-                    { $skip: skip },
-                    { $limit: perPage },
-                    ...(reverseOrder ? [{ $sort: { createdAt: -1 } }] : []),
-                ]).exec(),
-                BedRoomsModel.countDocuments(query),
-            ]);
+                });
+            }
+    
+            const data = await BedRoomsModel.aggregate(aggregationPipeline);
+            const totalItemsCount = await BedRoomsModel.countDocuments(searchFilter);
     
             const response = {
                 status: "Success",
                 data: {
-                    items: data || [], // Ensure an empty array if no data found
+                    items: data || [],
                     totalItemsCount: totalItemsCount || 0,
                 },
             };
@@ -74,6 +89,15 @@ class BedRoomsService extends BaseService {
         }
     }
     
+    
+
+    
+    
+    
+
+
+
+
     
     async updateByBedRoomId(bedRoomId, groupId, newData) {
         try {

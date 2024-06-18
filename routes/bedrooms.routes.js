@@ -72,7 +72,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         name: req.query.name,
         hostelId: req.query.hostelId,
         status: req.query.status,
-        roomId:req.query.roomId
+        roomId:req.query.roomId,
+        search:req.query.search
        
     };
     const serviceResponse = await service.getAllDataByGroupId(
