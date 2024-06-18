@@ -126,45 +126,33 @@ class ActiveTripsService extends BaseService {
         }
     }
 
-    async updatedriverById(tripId, groupId, newData) {
+    async updateActiveTrip(groupId, tripId, newData) {
         try {
-            const existingTrip = await ActiveTripsModel.findOne({ tripId: tripId, groupId: groupId });
+            const query = { groupId: Number(groupId), tripId: Number(tripId) };
+            const { status, onBoaredTraveller } = newData;
+            const updateFields = {};
 
-            if (!existingTrip) {
-                const newTrip = new ActiveTripsModel({
-                    tripId: tripId,
-                    groupId: groupId,
-                    ...newData
-                });
-                return await newTrip.save();
-            } else {
-                for (const key in newData) {
-                    if (key !== 'onBoaredTraveller') {
-                        existingTrip[key] = newData[key];
-                    }
-                }
-
-                const existingOnBoardTravellers = existingTrip.onBoaredTraveller || [];
-                const updatedTravellers = newData.onBoaredTraveller || [];
-
-                updatedTravellers.forEach(newTraveller => {
-                    const index = existingOnBoardTravellers.findIndex(existingTraveller => existingTraveller.travellerId === newTraveller.travellerId);
-                    if (index !== -1) {
-                        existingOnBoardTravellers[index] = newTraveller;
-                    } else {
-                        existingOnBoardTravellers.push(newTraveller);
-                    }
-                });
-                existingTrip.onBoaredTraveller = existingOnBoardTravellers;
-
-                const updatedTrip = await existingTrip.save();
-                return updatedTrip;
+            if (status) {
+                updateFields.status = status;
             }
+
+            if (onBoaredTraveller && Array.isArray(onBoaredTraveller)) {
+                updateFields.$push = { onBoaredTraveller: { $each: onBoaredTraveller } };
+            }
+
+            if (Object.keys(updateFields).length === 0) {
+                throw new Error('No valid fields to update');
+            }
+
+            const options = { new: true, runValidators: true, upsert: true }; 
+            const updatedTrip = await ActiveTripsModel.findOneAndUpdate(query, updateFields, options);
+
+            return updatedTrip;
         } catch (error) {
+            console.error('Error updating driver by ID:', error);
             throw error;
         }
     }
-
 
     async getActiveTrip(groupId, tripId, lat, long) {
         let query = { groupId: Number(groupId), tripId: Number(tripId) };
@@ -349,25 +337,6 @@ class ActiveTripsService extends BaseService {
         };
     }
 
-    async updateActiveTrip(groupId, tripId, travellerId, updateData) {
-        const query = {
-            groupId: Number(groupId),
-            tripId: Number(tripId)
-        }
-
-        if (travellerId) {
-            query['onBoaredTraveller.travellerId'] = Number(travellerId)
-        }
-
-        const updateTraveller = await ActiveTripsModel.findOneAndUpdate(
-            query,
-            updateData,
-            { new: true }
-        )
-
-        return updateTraveller
-    }
-
     async getActiveTripByStatus(groupId, status) {
         let query = { groupId: Number(groupId) }
 
@@ -435,7 +404,6 @@ class ActiveTripsService extends BaseService {
             throw new Error("Error in getTrip function: " + error.message);
         }
     }
-
 
     async findNearestBusStop(groupId, routeId, currentLocation) {
         try {
