@@ -81,14 +81,20 @@ class BookIssueLogService extends BaseService {
             });
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
-            aggregationPipeline.push(
-                { $skip: (pageNumber - 1) * pageSize },
-                { $limit: pageSize }
-            );
+            aggregationPipeline.push({
+                $facet: {
+                    data: [
+                        { $skip: (pageNumber - 1) * pageSize },
+                        { $limit: pageSize },
+                    ],
+                    totalCount: [{ $count: "count1" }],
+                },
+            });
             const populatedBookIssueLog = await bookIssueLogModel.aggregate(
                 aggregationPipeline
             );
-            const totalCount = await populatedBookIssueLog.length;
+            const totalCount =
+                populatedBookIssueLog[0].totalCount[0]?.count1 || 0;
             const count = await this.getCount(groupId);
             return {
                 status: "Success",
@@ -458,7 +464,7 @@ class BookIssueLogService extends BaseService {
     }
 
     async returnBook(groupId, bookId, userId, returnDate) {
-        console.log((userId),(groupId),(bookId))
+        console.log(userId, groupId, bookId);
         if (!returnDate) {
             throw new Error("returnDate is required");
         }
@@ -469,12 +475,12 @@ class BookIssueLogService extends BaseService {
         }
 
         const existingReservation = await bookIssueLogModel.findOne({
-            groupId:groupId,
-            bookId:bookId,
-            userId:userId,
+            groupId: groupId,
+            bookId: bookId,
+            userId: userId,
             isReturn: false,
         });
-        console.log(existingReservation)
+        console.log(existingReservation);
         if (!existingReservation) {
             throw new Error(
                 "The book is not currently issued to the specified group."

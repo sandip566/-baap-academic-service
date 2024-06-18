@@ -11,28 +11,23 @@ class LibraryPaymentService extends BaseService {
             const query = {
                 groupId: Number(groupId),
             };
+            const aggregationPipeline = [
+                {
+                    $match: query,
+                },
+            ];
             if (criteria.search) {
-                const numericSearch = parseInt(criteria.search);
-                if (!isNaN(numericSearch)) {
-                    query.$or = [
-                        { paidAmount: numericSearch }
-                    ];
-                }
-                 else {
-                    query.$or = [
-                        {
-                            username: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                            name: {
-                                $regex: new RegExp(criteria.search, "i"),
-                            },
-                        },
-                       
-                    ];
-                }
-             }
-
+                const searchRegex = new RegExp(criteria.search.trim(), "i");
+                aggregationPipeline.push({
+                    $match: {
+                        $or: [
+                            { name: searchRegex },
+                            { userId: { $eq: parseInt(criteria.search) } },
+                            { username: searchRegex },
+                        ],
+                    },
+                });
+            }
             if (criteria.libraryPaymentId)
                 query.libraryPaymentId = criteria.libraryPaymentId;
             if (criteria.empId) query.empId = criteria.empId;
@@ -40,27 +35,14 @@ class LibraryPaymentService extends BaseService {
             const pageSize = limit || 10;
             const currentPage = page || 1;
             const skip = (currentPage - 1) * pageSize;
-            const pipeLine = await LibraryPaymentModel.aggregate([
-                { $match: query },
-                {
-                    $lookup: {
-                        from: "studentsadmissions",
-                        localField: "userId",
-                        foreignField: "userId",
-                        as: "userId",
-                    },
-                },
-                {
-                    $unwind: {
-                        path: "$userDetails",
-                        preserveNullAndEmptyArrays: true,
-                    },
-                },
+            aggregationPipeline.push(
                 { $sort: { createdAt: -1 } },
                 { $skip: skip },
-                { $limit: pageSize },
-            ]).exec();
-
+                { $limit: pageSize }
+            );
+            const pipeLine = await LibraryPaymentModel.aggregate(
+                aggregationPipeline
+            );
             const totalDocuments = await LibraryPaymentModel.countDocuments(
                 query
             );
@@ -73,7 +55,6 @@ class LibraryPaymentService extends BaseService {
                 pageSize: pageSize,
                 currentPage: currentPage,
             };
-
             return response;
         } catch (error) {
             console.error("Error in getAllDataByGroupId:", error);
