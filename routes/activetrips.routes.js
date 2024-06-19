@@ -101,11 +101,11 @@ router.delete("/groupId/:groupId/tripId/:tripId", async (req, res) => {
 
 router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
     try {
-        const tripId = req.params.tripId;
         const groupId = req.params.groupId;
+        const tripId = req.params.tripId;
         const newData = req.body;
 
-        const updateData = await service.updatedriverById(tripId, groupId, newData);
+        const updateData = await service.updateActiveTrip(groupId, tripId, newData);
 
         if (!updateData) {
             res.status(404).json({ error: "Data not found to update" });
@@ -140,26 +140,6 @@ router.get("/groupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 })
-
-
-router.put("/groupId/:groupId/tripId/:tripId", async (req, res) => {
-    try {
-        const tripId = req.params.tripId;
-        const groupId = req.params.groupId;
-        const newData = req.body;
-
-        const updateData = await service.updatedriverById(tripId, groupId, newData);
-
-        if (!updateData) {
-            res.status(404).json({ error: "Data not found to update" });
-        } else {
-            res.status(200).json(updateData);
-        }
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
-});
 
 router.get("/trip/groupId/:groupId/:tripId", async (req, res) => {
     try {
