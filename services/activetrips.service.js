@@ -16,7 +16,8 @@ class ActiveTripsService extends BaseService {
                 groupId: groupId,
                 routeId: routeId,
                 driverId: driverId,
-                careTakerId: careTakerId
+                careTakerId: careTakerId,
+                status: 'active'
             }
         )
         return trip

@@ -153,6 +153,7 @@ router.put("/:id", async (req, res) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
+    
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
@@ -356,7 +357,7 @@ router.post("/reserve-book", async (req, res) => {
             bookId: bookId,
             bookIssueLogId: bookIssueLogId,
             addmissionId: addmissionId,
-            reserveDate: new Date(), // Assuming reserveDate is current date/time
+            reserveDate: new Date(), 
             isReserve: true,
             totalCopies: totalCopies,
             ISBN: ISBN,
@@ -367,14 +368,14 @@ router.post("/reserve-book", async (req, res) => {
             url:url
         };
 
-        // Save the reservation to database using service
+       
         const createdReservation = await service.create(newReservation);
 
-        // Fetch configuration for reservation day limit
+        
         const config = await ConfigurationModel.findOne({ groupId: groupId });
-        const reservationDayLimit = config.LibraryReservationDayLimit; // Assuming value is in days
+        const reservationDayLimit = config.LibraryReservationDayLimit; 
 
-        // Schedule a task to remove reservation after reservationDayLimit days
+       
         setTimeout(async () => {
             const removedReservation = await bookIssueLogModel.findOneAndUpdate(
                 {
