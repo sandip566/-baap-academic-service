@@ -178,101 +178,135 @@ class BookIssueLogService extends BaseService {
         try {
             const currDate = new Date();
             const finePerDay = 5;
-            let query = {
+            let matchStage = {
                 groupId: Number(groupId),
                 isReturn: false,
             };
 
             if (userId) {
-                query.userId = Number(userId);
+                matchStage.userId = Number(userId);
             }
 
             if (bookIssueLogId) {
-                query.bookIssueLogId = Number(bookIssueLogId);
+                matchStage.bookIssueLogId = Number(bookIssueLogId);
             }
 
-            const bookIssues = await bookIssueLogModel.find(query);
-            const bookIds = bookIssues.map((issue) => issue.bookId);
-            const books = await Book.find({ bookId: { $in: bookIds } });
-
-            await Promise.all(
-                bookIssues.map(async (bookIssue) => {
-                    const dueDate = new Date(bookIssue.dueDate);
-                    const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
-
-                    if (diffDays >= 0) {
-                        const totalFine = diffDays * finePerDay;
-                        await bookIssueLogModel.updateOne(
-                            { _id: bookIssue._id },
-                            { $set: { isOverdue: true, totalFine: totalFine } }
-                        );
-                    }
-                })
-            );
-console.log(bookIssues);
-            const bookIssuesWithOverdue = bookIssues
-                .filter((bookIssue) => {
-                    const dueDate = new Date(bookIssue.dueDate);
-                    const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
-                    return diffDays >= 0;
-                })
-                .map((bookIssue) => {
-                    const dueDate = new Date(bookIssue.dueDate);
-                    const diffTime = currDate - dueDate;
-                    const diffDays = Math.ceil(
-                        diffTime / (1000 * 60 * 60 * 24)
-                    );
-                    const book = books.find(
-                        (book) => book.bookId == bookIssue.bookId
-                        
-                    );
-                    const totalFine = diffDays * finePerDay;
-                    console.log(book);
-                    let response = {
-                        _id: bookIssue._id,
-                        bookId: bookIssue.bookId,
-                        book: {
-                            _id: book?._id,
-                            bookId: book?.bookId,
-                            name: book?.name,
-                            purchaseId: book?.purchaseId,
-                            groupId: book?.groupId,
-                            author: book?.author,
-                            ISBN: book?.ISBN,
-                            totalCopies: book?.totalCopies,
-                            availableCount: book?.availableCount,
-                            shelfId: book?.shelfId,
-                            status: book?.status,
-                            vendorId: book?.vendorId,
-                            rackName: book?.rackName,
-                            rackNumber: book?.rackNumber,
-                            book_img: book?.book_img,
-                            createdAt: book?.createdAt,
-                            updatedAt: book?.updatedAt,
-                            __v: book?.__v,
+            const aggregationPipeline = [
+                {
+                    $match: matchStage,
+                },
+                {
+                    $lookup: {
+                        from: "books",
+                        localField: "bookId",
+                        foreignField: "bookId",
+                        as: "bookDetails",
+                    },
+                },
+                {
+                    $unwind: {
+                        path: "$bookDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
+                {
+                    $addFields: {
+                        dueDate: { $toDate: "$dueDate" },
+                        diffDays: {
+                            $ceil: {
+                                $divide: [
+                                    { $subtract: [currDate, "$dueDate"] },
+                                    1000 * 60 * 60 * 24,
+                                ],
+                            },
                         },
-                        bookIssueLogId: bookIssue.bookIssueLogId,
-                        bookIssueDate: bookIssue.issuedDate,
-                        userId: bookIssue.userId,
-                        bookName: book ? book.name : "Unknown Book",
-                        ISBN: book ? book.ISBN : 0,
-                        daysOverdue: diffDays,
-                        totalFine: totalFine,
-                        name: bookIssue.name,
-                        profile_url: bookIssue.url,
-                    };
-                    return response;
-                });
+                        totalFine: {
+                            $multiply: [
+                                {
+                                    $ceil: {
+                                        $divide: [
+                                            {
+                                                $subtract: [
+                                                    currDate,
+                                                    "$dueDate",
+                                                ],
+                                            },
+                                            1000 * 60 * 60 * 24,
+                                        ],
+                                    },
+                                },
+                                finePerDay,
+                            ],
+                        },
+                    },
+                },
+                {
+                    $match: {
+                        diffDays: { $gte: 0 },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 1,
+                        bookId: 1,
+                        bookIssueLogId: 1,
+                        issuedDate: 1,
+                        userId: 1,
+                        dueDate: 1,
+                        diffDays: 1,
+                        totalFine: 1,
+                        isOverdue: 1,
+                        name: 1,
+                        url: 1,
+                        book: {
+                            _id: "$bookDetails._id",
+                            bookId: "$bookDetails.bookId",
+                            name: "$bookDetails.name",
+                            purchaseId: "$bookDetails.purchaseId",
+                            groupId: "$bookDetails.groupId",
+                            author: "$bookDetails.author",
+                            ISBN: "$bookDetails.ISBN",
+                            totalCopies: "$bookDetails.totalCopies",
+                            availableCount: "$bookDetails.availableCount",
+                            shelfId: "$bookDetails.shelfId",
+                            status: "$bookDetails.status",
+                            vendorId: "$bookDetails.vendorId",
+                            rackName: "$bookDetails.rackName",
+                            rackNumber: "$bookDetails.rackNumber",
+                            book_img: "$bookDetails.book_img",
+                            createdAt: "$bookDetails.createdAt",
+                            updatedAt: "$bookDetails.updatedAt",
+                            __v: "$bookDetails.__v",
+                        },
+                    },
+                },
+            ];
+
+            const bookIssuesWithOverdue = await bookIssueLogModel.aggregate(
+                aggregationPipeline
+            );
+
+            // Update isOverdue and totalFine fields for overdue books
+            const updatePromises = bookIssuesWithOverdue.map(
+                async (bookIssue) => {
+                    await bookIssueLogModel.updateOne(
+                        { _id: bookIssue._id },
+                        {
+                            $set: {
+                                isOverdue: true,
+                                totalFine: bookIssue.totalFine,
+                            },
+                        }
+                    );
+                }
+            );
+            await Promise.all(updatePromises);
+
             return {
                 data: bookIssuesWithOverdue,
             };
         } catch (error) {
+            console.error("Error in fetchBookIssuesWithOverdue:", error);
             throw error;
         }
     }
