@@ -24,7 +24,7 @@ class HostelFeesInstallmentService extends BaseService {
 
     async getByInstallmentId(hostelInstallmentId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId }).lean();
+            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId })
         });
     }
 

@@ -212,7 +212,7 @@ class BookIssueLogService extends BaseService {
                     }
                 })
             );
-
+console.log(bookIssues);
             const bookIssuesWithOverdue = bookIssues
                 .filter((bookIssue) => {
                     const dueDate = new Date(bookIssue.dueDate);
@@ -229,31 +229,33 @@ class BookIssueLogService extends BaseService {
                         diffTime / (1000 * 60 * 60 * 24)
                     );
                     const book = books.find(
-                        (book) => book.bookId === bookIssue.bookId
+                        (book) => book.bookId == bookIssue.bookId
+                        
                     );
                     const totalFine = diffDays * finePerDay;
+                    console.log(book);
                     let response = {
                         _id: bookIssue._id,
                         bookId: bookIssue.bookId,
                         book: {
-                            _id: book._id,
-                            bookId: book.bookId,
-                            name: book.name,
-                            purchaseId: book.purchaseId,
-                            groupId: book.groupId,
-                            author: book.author,
-                            ISBN: book.ISBN,
-                            totalCopies: book.totalCopies,
-                            availableCount: book.availableCount,
-                            shelfId: book.shelfId,
-                            status: book.status,
-                            vendorId: book.vendorId,
-                            rackName: book.rackName,
-                            rackNumber: book.rackNumber,
-                            book_img: book.book_img,
-                            createdAt: book.createdAt,
-                            updatedAt: book.updatedAt,
-                            __v: book.__v,
+                            _id: book?._id,
+                            bookId: book?.bookId,
+                            name: book?.name,
+                            purchaseId: book?.purchaseId,
+                            groupId: book?.groupId,
+                            author: book?.author,
+                            ISBN: book?.ISBN,
+                            totalCopies: book?.totalCopies,
+                            availableCount: book?.availableCount,
+                            shelfId: book?.shelfId,
+                            status: book?.status,
+                            vendorId: book?.vendorId,
+                            rackName: book?.rackName,
+                            rackNumber: book?.rackNumber,
+                            book_img: book?.book_img,
+                            createdAt: book?.createdAt,
+                            updatedAt: book?.updatedAt,
+                            __v: book?.__v,
                         },
                         bookIssueLogId: bookIssue.bookIssueLogId,
                         bookIssueDate: bookIssue.issuedDate,

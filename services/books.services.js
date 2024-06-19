@@ -218,6 +218,8 @@ class BooksService extends BaseService {
             console.log(issueLogs);
             const data = issueLogs.map((issue) => ({
                 studentName: issue.name,
+                bookId: issue.bookId,
+                bookName: issue.bookName,
                 issueDate: issue.issuedDate,
                 bookIssueLogId: issue.bookIssueLogId,
                 userId: issue.userId,

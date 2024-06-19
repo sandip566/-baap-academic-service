@@ -7,8 +7,10 @@ const religionModel = require("../schema/religion.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const hostelPaymentModel = require("../schema/hostelPayment.schema");
 const courseModel = require("../schema/courses.schema");
-const hostelPremises = require("../schema/hostelPremises.schema")
+const bedModel = require("../schema/bed.schema");
+const hostelPremises = require("../schema/hostelPremises.schema");
 const { aggregate } = require("../schema/feesPayment.schema");
+const roomModel = require("../schema/rooms.schema");
 
 class HostelAdmissionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -91,7 +93,12 @@ class HostelAdmissionService extends BaseService {
 
             const data = await HostelAdmissionModel.aggregate([
                 { $match: searchFilter },
-                { $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true } },
+                {
+                    $unwind: {
+                        path: "$feesDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 {
                     $lookup: {
                         from: "feestemplates",
@@ -100,7 +107,12 @@ class HostelAdmissionService extends BaseService {
                         as: "feesTemplateDetails",
                     },
                 },
-                { $unwind: { path: "$feesTemplateDetails", preserveNullAndEmptyArrays: true } },
+                {
+                    $unwind: {
+                        path: "$feesTemplateDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 {
                     $group: {
                         _id: "$_id",
@@ -111,7 +123,8 @@ class HostelAdmissionService extends BaseService {
                                 installment: "$feesDetails.installment",
                                 feesDetailsId: "$feesDetails.feesDetailsId",
                                 status: "$feesDetails.status",
-                                hostelFeesDetailsId: "$feesDetails.hostelFeesDetailsId",
+                                hostelFeesDetailsId:
+                                    "$feesDetails.hostelFeesDetailsId",
                                 feesTemplateDetails: "$feesTemplateDetails",
                             },
                         },
@@ -127,7 +140,12 @@ class HostelAdmissionService extends BaseService {
                         },
                     },
                 },
-                { $unwind: { path: "$hostelDetails", preserveNullAndEmptyArrays: true } },
+                {
+                    $unwind: {
+                        path: "$hostelDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 {
                     $lookup: {
                         from: "hostelpremises",
@@ -136,7 +154,12 @@ class HostelAdmissionService extends BaseService {
                         as: "hostelDetails.hostelId",
                     },
                 },
-                { $unwind: { path: "$hostelDetails.hostelId", preserveNullAndEmptyArrays: true } },
+                {
+                    $unwind: {
+                        path: "$hostelDetails.hostelId",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 {
                     $lookup: {
                         from: "roooms",
@@ -145,7 +168,12 @@ class HostelAdmissionService extends BaseService {
                         as: "hostelDetails.roomId",
                     },
                 },
-                { $unwind: { path: "$hostelDetails.roomId", preserveNullAndEmptyArrays: true } },
+                {
+                    $unwind: {
+                        path: "$hostelDetails.roomId",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 {
                     $lookup: {
                         from: "beds",
@@ -154,12 +182,16 @@ class HostelAdmissionService extends BaseService {
                         as: "hostelDetails.bedId",
                     },
                 },
-                { $unwind: { path: "$hostelDetails.bedId", preserveNullAndEmptyArrays: true } },
+                {
+                    $unwind: {
+                        path: "$hostelDetails.bedId",
+                        preserveNullAndEmptyArrays: true,
+                    },
+                },
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
                 { $skip: skip },
                 { $limit: perPage },
             ]).exec();
-
 
             const totalItemsCount = await HostelAdmissionModel.countDocuments(
                 searchFilter
@@ -309,10 +341,10 @@ class HostelAdmissionService extends BaseService {
         try {
             let pipeLine = await hostelPremises.aggregate([
                 {
-                    $match: { groupId: Number(groupId) }
+                    $match: { groupId: Number(groupId) },
                 },
                 {
-                    $project: { _id: 0, hostelId: 1, hostelName: 1 }
+                    $project: { _id: 0, hostelId: 1, hostelName: 1 },
                 },
                 {
                     $lookup: {
@@ -321,40 +353,64 @@ class HostelAdmissionService extends BaseService {
                         pipeline: [
                             // { $match: { academicYear: academicYear } },
                             { $unwind: "$hostelDetails" },
-                            { $match: { $expr: { $eq: ["$hostelDetails.hostelId", "$$hostelId"] } } },
-                            { $group: { _id: "$hostelDetails.hostelId", studentCount: { $sum: 1 } } }
+                            {
+                                $match: {
+                                    $expr: {
+                                        $eq: [
+                                            "$hostelDetails.hostelId",
+                                            "$$hostelId",
+                                        ],
+                                    },
+                                },
+                            },
+                            {
+                                $group: {
+                                    _id: "$hostelDetails.hostelId",
+                                    studentCount: { $sum: 1 },
+                                },
+                            },
                         ],
-                        as: "hostelStudentCount"
-                    }
+                        as: "hostelStudentCount",
+                    },
                 },
                 {
                     $unwind: {
                         path: "$hostelStudentCount",
-                        preserveNullAndEmptyArrays: true
-                    }
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $group: {
-                        _id: { hostelId: "$hostelId", hostelName: "$hostelName" },
-                        totalStudents: { $sum: { $ifNull: ["$hostelStudentCount.studentCount", 0] } }
-                    }
+                        _id: {
+                            hostelId: "$hostelId",
+                            hostelName: "$hostelName",
+                        },
+                        totalStudents: {
+                            $sum: {
+                                $ifNull: [
+                                    "$hostelStudentCount.studentCount",
+                                    0,
+                                ],
+                            },
+                        },
+                    },
                 },
                 {
                     $project: {
                         _id: 0,
                         hostelId: "$_id.hostelId",
                         hostelName: "$_id.hostelName",
-                        totalStudents: 1
-                    }
+                        totalStudents: 1,
+                    },
                 },
                 {
-                    $sort: { hostelId: 1 }
-                }
+                    $sort: { hostelId: 1 },
+                },
             ]);
             let response = {
                 status: "success",
-                data: pipeLine
-            }
+                data: pipeLine,
+            };
             return response;
         } catch (error) {
             console.error(error);
@@ -369,58 +425,76 @@ class HostelAdmissionService extends BaseService {
                 {
                     $match: {
                         groupId: Number(groupId),
-                        userId: userId
-                    }
+                        userId: userId,
+                    },
                 },
                 {
-                    $unwind: { path: "$feesDetails", preserveNullAndEmptyArrays: true }
+                    $unwind: {
+                        path: "$feesDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $lookup: {
                         from: "feestemplates",
                         localField: "feesDetails.feesTemplateId",
                         foreignField: "feesTemplateId",
-                        as: "feesDetails.feesTemplateId"
-                    }
+                        as: "feesDetails.feesTemplateId",
+                    },
                 },
                 {
-                    $unwind: { path: "$feesDetails.feesTemplateId", preserveNullAndEmptyArrays: true }
+                    $unwind: {
+                        path: "$feesDetails.feesTemplateId",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
-                    $unwind: { path: "$hostelDetails", preserveNullAndEmptyArrays: true }
+                    $unwind: {
+                        path: "$hostelDetails",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $lookup: {
                         from: "hostels",
                         localField: "hostelDetails.hostelId",
                         foreignField: "hostelId",
-                        as: "hostelDetails.hostelId"
-                    }
+                        as: "hostelDetails.hostelId",
+                    },
                 },
                 {
-                    $unwind: { path: "$hostelDetails.hostelId", preserveNullAndEmptyArrays: true }
+                    $unwind: {
+                        path: "$hostelDetails.hostelId",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $lookup: {
                         from: "beds",
                         localField: "hostelDetails.bedId",
                         foreignField: "bedId",
-                        as: "hostelDetails.bedId"
-                    }
+                        as: "hostelDetails.bedId",
+                    },
                 },
                 {
-                    $unwind: { path: "$hostelDetails.bedId", preserveNullAndEmptyArrays: true }
+                    $unwind: {
+                        path: "$hostelDetails.bedId",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $lookup: {
                         from: "rooms",
                         localField: "hostelDetails.roomId",
                         foreignField: "roomId",
-                        as: "hostelDetails.roomId"
-                    }
+                        as: "hostelDetails.roomId",
+                    },
                 },
                 {
-                    $unwind: { path: "$hostelDetails.roomId", preserveNullAndEmptyArrays: true }
+                    $unwind: {
+                        path: "$hostelDetails.roomId",
+                        preserveNullAndEmptyArrays: true,
+                    },
                 },
                 {
                     $group: {
@@ -452,30 +526,38 @@ class HostelAdmissionService extends BaseService {
                         hostelDetails: { $push: "$hostelDetails" },
                         feesDetails: { $push: "$feesDetails" },
                         installmentId: { $first: "$installmentId" },
-                        status: { $first: "$status" }
-                    }
+                        status: { $first: "$status" },
+                    },
                 },
                 {
                     $lookup: {
                         from: "hostelpayments",
-                        let: { hostelAdmissionId: "$hostelAdmissionId", userId: "$userId" },
+                        let: {
+                            hostelAdmissionId: "$hostelAdmissionId",
+                            userId: "$userId",
+                        },
                         pipeline: [
                             {
                                 $match: {
                                     $expr: {
                                         $and: [
-                                            { $eq: ["$hostelAdmissionId", "$$hostelAdmissionId"] },
+                                            {
+                                                $eq: [
+                                                    "$hostelAdmissionId",
+                                                    "$$hostelAdmissionId",
+                                                ],
+                                            },
                                             { $eq: ["$userId", "$$userId"] },
-                                        ]
-                                    }
-                                }
+                                        ],
+                                    },
+                                },
                             },
                             {
-                                $sort: { createdAt: -1 } // Sorting by createdAt to get the latest record
-                            }
+                                $sort: { createdAt: -1 }, // Sorting by createdAt to get the latest record
+                            },
                         ],
-                        as: "feespayments"
-                    }
+                        as: "feespayments",
+                    },
                 },
                 {
                     $addFields: {
@@ -485,21 +567,28 @@ class HostelAdmissionService extends BaseService {
                                     $map: {
                                         input: "$feespayments",
                                         as: "payment",
-                                        in: { $toDouble: "$$payment.paidAmount" }
-                                    }
-                                }
-                            }
+                                        in: {
+                                            $toDouble: "$$payment.paidAmount",
+                                        },
+                                    },
+                                },
+                            },
                         },
                         lastRemainingAmount: {
                             $toInt: {
                                 $ifNull: [
-                                    { $arrayElemAt: ["$feespayments.remainingAmount", -1] },
-                                    0
-                                ]
-                            }
-                        }
-                    }
-                }
+                                    {
+                                        $arrayElemAt: [
+                                            "$feespayments.remainingAmount",
+                                            -1,
+                                        ],
+                                    },
+                                    0,
+                                ],
+                            },
+                        },
+                    },
+                },
             ]);
 
             const response = {
@@ -517,8 +606,11 @@ class HostelAdmissionService extends BaseService {
         }
     }
 
-
-    async updateFeesInstallmentById(hostelInstallmentId, newFeesDetails, newData) {
+    async updateFeesInstallmentById(
+        hostelInstallmentId,
+        newFeesDetails,
+        newData
+    ) {
         try {
             const updateResult = await HostelAdmissionModel.findOneAndUpdate(
                 { hostelInstallmentId: hostelInstallmentId },
@@ -584,7 +676,9 @@ class HostelAdmissionService extends BaseService {
     }
     async getByInstallmentId(hostelInstallmentId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelInstallmentId: hostelInstallmentId });
+            return this.model.findOne({
+                hostelInstallmentId: hostelInstallmentId,
+            });
         });
     }
     async getfeesPayment(groupId, query) {
@@ -660,6 +754,56 @@ class HostelAdmissionService extends BaseService {
                             );
                         }
                     }
+                    if (
+                        service.hostelDetails &&
+                        service.hostelDetails.length > 0
+                    ) {
+                        const courseDetailsWithAdditionalData =
+                            await Promise.all(
+                                service.hostelDetails.map(
+                                    async (courseDetail) => {
+                                        let courseAdditionalData = {};
+                                        let roomId;
+                                        let bedId;
+                                        let hostelId;
+                                        if (courseDetail?.roomId) {
+                                            roomId = await roomModel.findOne({
+                                                roomId: courseDetail.roomId,
+                                            });
+
+                                            courseAdditionalData.roomId =
+                                                roomId;
+                                        }
+
+                                        if (courseDetail?.bedId) {
+                                            bedId = await bedModel.findOne({
+                                                bedId: courseDetail.bedId,
+                                            });
+                                            courseAdditionalData.bedId = bedId;
+                                        }
+                                        if (courseDetail?.hostelId) {
+                                            hostelId =
+                                                await hostelPremises.findOne({
+                                                    hostelId:
+                                                        courseDetail.hostelId,
+                                                });
+
+                                            courseAdditionalData.hostelId =
+                                                hostelId;
+                                        }
+                                        return {
+                                            ...courseDetail,
+                                            hostelId,
+                                            roomId,
+                                            bedId,
+                                        };
+                                    }
+                                )
+                            );
+
+                        additionalData.hostelDetails =
+                            courseDetailsWithAdditionalData;
+                    }
                     // Process fees details
                     if (service.feesDetails && service.feesDetails.length > 0) {
                         const feesDetailsWithAdditionalData = await Promise.all(
@@ -708,7 +852,6 @@ class HostelAdmissionService extends BaseService {
                 groupId: groupId,
                 empId: query.empId,
                 hostelAdmissionId: query.hostelAdmissionId,
-
             });
 
             // let response1;
@@ -743,9 +886,9 @@ class HostelAdmissionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                    data.empId === query.empId &&
-                    data.academicYear == query.academicYear &&
-                    data.hostelAdmissionId == query.hostelAdmissionId,
+                        data.empId === query.empId &&
+                        data.academicYear == query.academicYear &&
+                        data.hostelAdmissionId == query.hostelAdmissionId,
                     true
                 );
             });
@@ -779,36 +922,42 @@ class HostelAdmissionService extends BaseService {
             const feesDetails = hostelAdmission.feesDetails;
 
             if (feesDetails && feesDetails.length > 0) {
-                const updatedFeesDetails = await Promise.all(feesDetails.map(async (feeDetail) => {
-                    const feesTemplateId = Number(feeDetail.feesTemplateId);
-                    if (!feesTemplateId) {
-                        throw new Error("Fee template ID not found in fees details");
-                    }
-                    const feeTemplate = await feesTemplateModel.findOne({
-                        feesTemplateId: feesTemplateId,
-                    }).exec();
+                const updatedFeesDetails = await Promise.all(
+                    feesDetails.map(async (feeDetail) => {
+                        const feesTemplateId = Number(feeDetail.feesTemplateId);
+                        if (!feesTemplateId) {
+                            throw new Error(
+                                "Fee template ID not found in fees details"
+                            );
+                        }
+                        const feeTemplate = await feesTemplateModel
+                            .findOne({
+                                feesTemplateId: feesTemplateId,
+                            })
+                            .exec();
 
-                    if (!feeTemplate) {
-                        throw new Error("Fee template not found");
-                    }
+                        if (!feeTemplate) {
+                            throw new Error("Fee template not found");
+                        }
 
-                    return {
-                        ...feeDetail,
-                        feeTemplate: feeTemplate.toObject()
-                    };
-                }));
+                        return {
+                            ...feeDetail,
+                            feeTemplate: feeTemplate.toObject(),
+                        };
+                    })
+                );
 
                 return {
                     status: "Success",
                     data: {
                         ...hostelAdmission.toObject(),
-                        feesDetails: updatedFeesDetails
-                    }
+                        feesDetails: updatedFeesDetails,
+                    },
                 };
             } else {
                 return {
                     status: "Success",
-                    data: hostelAdmission.toObject()
+                    data: hostelAdmission.toObject(),
                 };
             }
         } catch (error) {
@@ -822,11 +971,13 @@ class HostelAdmissionService extends BaseService {
 
     async getByAddmissionIdData(hostelAdmissionId, userId) {
         return this.execute(() => {
-            return this.model.findOne({ hostelAdmissionId: hostelAdmissionId, userId: userId });
+            return this.model.findOne({
+                hostelAdmissionId: hostelAdmissionId,
+                userId: userId,
+            });
         });
     }
     async updateUser(hostelAdmissionId, groupId, data) {
-
         try {
             const resp = await HostelAdmissionModel.findOneAndUpdate(
                 { hostelAdmissionId: hostelAdmissionId, groupId: groupId },
@@ -911,17 +1062,16 @@ class HostelAdmissionService extends BaseService {
     }
     async deleteByStudentsAddmisionId(hostelAdmissionId, groupId) {
         try {
-            const studentDeletionResult = await HostelAdmissionModel.deleteOne(
-                {
-                    hostelAdmissionId: hostelAdmissionId,
-                    groupId: groupId,
-                }
-            );
-
-            const feesDeletionResult = await HostelFeesInstallmentModel.deleteMany({
+            const studentDeletionResult = await HostelAdmissionModel.deleteOne({
                 hostelAdmissionId: hostelAdmissionId,
                 groupId: groupId,
             });
+
+            const feesDeletionResult =
+                await HostelFeesInstallmentModel.deleteMany({
+                    hostelAdmissionId: hostelAdmissionId,
+                    groupId: groupId,
+                });
             return {
                 studentDeletionResult: studentDeletionResult,
                 feesDeletionResult: feesDeletionResult,
