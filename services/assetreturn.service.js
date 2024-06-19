@@ -81,6 +81,16 @@ class AssetReturnService extends BaseService {
                     }
                 });
             }
+            if (query.name) {
+                const searchConditions = [
+                    { "requestId.name": query.name },
+                ];
+                pipeline.push({
+                    $match: {
+                        $or: searchConditions
+                    }
+                });
+            }
 
             pipeline.push(
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
