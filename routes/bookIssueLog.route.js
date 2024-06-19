@@ -162,14 +162,12 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         isReserve: req.query.isReserve,
         isReturn: req.query.isReturn,
         studentName: req.query.studentName,
+        pageNumber:req.query.pageNumber,
+        pageSize:req.query.pageSize
     };
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 100;
     const serviceResponse = await service.getAllDataByGroupId(
         groupId,
-        criteria,
-        page,
-        limit
+        criteria
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
@@ -268,8 +266,6 @@ router.post("/reserve-book", async (req, res) => {
             reserveDate,
             userId,
             totalCopies,
-            ISBN,
-            bookName,
             name,
             url
         } = req.body;
@@ -359,14 +355,12 @@ router.post("/reserve-book", async (req, res) => {
             reserveDate: new Date(), // Assuming reserveDate is current date/time
             isReserve: true,
             totalCopies: totalCopies,
-            ISBN: ISBN,
-            bookName: bookName,
             userId: userId,
             status: "Reserved",
             name:name,
             url:url
         };
-
+        console.log(newReservation)
         // Save the reservation to database using service
         const createdReservation = await service.create(newReservation);
 
