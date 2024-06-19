@@ -13,7 +13,7 @@ const HostelFeesInstallmentSchema = new mongoose.Schema(
         hostelInstallmentId: {
             type: Number,
             required: true,
-            unique: true
+           
         },
         hostelAdmissionId: {
             type: Number,

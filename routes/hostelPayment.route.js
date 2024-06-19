@@ -527,7 +527,7 @@ router.post(
 );
 router.get(
     "/getHostelStatastics/:groupId",
-    // TokenService.checkPermission(["EFCL1"]),
+    TokenService.checkPermission(["EFCL1"]),
     async (req, res, next) => {
         const groupId = req.params.groupId;
         const criteria = {

@@ -45,7 +45,7 @@ class hostelPaymentService extends BaseService {
                 if (criteria.currentDate) {
                     feesMatchStage["hostelPaymentData.currentDate"] = criteria.currentDate;
                 }
-
+            
                 let date = new Date();
                 const year = date.getFullYear();
                 const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -83,6 +83,22 @@ class hostelPaymentService extends BaseService {
                 if (criteria.bedId) {
                     matchStage["hostelDetails.bedId"] = Number(criteria.bedId);
                 }
+                 // Add search criteria to matchStage
+            if (criteria.search) {
+                const numericSearch = parseInt(criteria.search);
+                matchStage.$or = [];
+                if (!isNaN(numericSearch)) {
+                    matchStage.$or.push(
+                        { phoneNumber: numericSearch },
+                        { hostelAdmissionId: numericSearch }
+                    );
+                }
+                matchStage.$or.push(
+                    { firstName: { $regex: criteria.search, $options: "i" } },
+                    { lastName: { $regex: criteria.search, $options: "i" } }
+                );
+            }
+
 
                 let admissionData = await HostelAdmissionModel.aggregate([
                     { $match: matchStage },
@@ -267,10 +283,11 @@ class hostelPaymentService extends BaseService {
                         numberOfRooms: data?.hostelPaymentData?.numberOfRooms,
                         numberOfBed: data?.hostelPaymentData?.numberOfBed,
                         empId: data?.empId,
+                        hostelFee:data?.hostelPaymentData?.hostelFee,
                         feesPaymentId: data?.hostelPaymentData?.feesPaymentId,
                         installments: data?.feesDetailsInstallmentLength,
                         groupId: data?.groupId,
-                        installmentId: data?.installmentId,
+                        hostelInstallmentId: data?.hostelInstallmentId,
                         paidAmount: data.hostelPaymentData?.totalPaidAmount,
                         phoneNumber: data.phoneNumber,
                         remainingAmount: data.hostelPaymentData?.remainingAmount,

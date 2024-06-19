@@ -25,7 +25,7 @@ router.post(
             return res.status(400).json({ error: "Asset not found" });
         }
         if (req.body.quantity <= 0) {
-            return res.status(400).json({ error: "0 is not valid quantity for asset" });
+            return res.status(400).json({ error: "Please Enter valid quantity" });
         }
 
         if (req.body.status === "Issued") {
@@ -91,25 +91,6 @@ router.get("/all/assetRequest", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
-// router.get("/all/getByGroupId/:groupId", async (req, res) => {
-//   const groupId = req.params.groupId;
-//   const criteria = {
-//     name: req.query.name,
-//     type: req.query.type,
-//     status: req.query.status,
-//     category: req.query.category,
-//     empId: req.query.empId,
-//     userId: req.query.userId,
-//     pageNumber: parseInt(req.query.pageNumber) || 1,
-//     pageSize: parseInt(req.query.pageSize) || 10,
-//   };
-//   const serviceResponse = await service.getAllDataByGroupId(
-//     groupId,
-//     criteria
-//   );
-//   requestResponsehelper.sendResponse(res, serviceResponse);
-// });
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
@@ -216,7 +197,6 @@ router.post(
         const jsonData = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
         const headers = jsonData[0];
-
         const uploadedData = [];
 
         for (let i = 1; i < jsonData.length; i++) {
@@ -235,8 +215,6 @@ router.post(
                 uploadedData.push(result);
             }
         }
-        console.log(uploadedData);
-
         res.status(200).json({
             message: "File uploaded and processed successfully.",
             uploadedData: uploadedData,
@@ -249,7 +227,6 @@ function createAssetRequestDataObject(headers, row) {
     for (let i = 0; i < headers.length; i++) {
         const header = headers[i];
         const value = row[i];
-
         if (header === "groupId" && !isNaN(value) && value !== undefined) {
             data[header] = Number(value);
         } else if (header === "name" && value !== undefined) {

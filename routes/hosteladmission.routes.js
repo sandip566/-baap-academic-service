@@ -197,7 +197,7 @@ router.get("/all/hostelAdmission", async (req, res) => {
 });
 router.get(
     "/all/getByGroupId/:groupId",
-    // TokenService.checkPermission(["EAC1"]),
+    TokenService.checkPermission(["EAC1"]),
     async (req, res) => {
         try {
             const groupId = req.params.groupId;
