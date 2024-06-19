@@ -178,9 +178,10 @@ class BookIssueLogService extends BaseService {
         try {
             const currDate = new Date();
             const finePerDay = 5;
-            let matchStage = {
+            const matchStage = {
                 groupId: Number(groupId),
                 isReturn: false,
+                overdueStatus: { $ne: "Paid" },
             };
 
             if (userId) {
