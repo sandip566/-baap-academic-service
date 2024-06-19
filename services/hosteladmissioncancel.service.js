@@ -54,6 +54,7 @@ class HostelAdmissionCancelService extends BaseService {
                     $match: {
                         $or: [
                             { "hostelDetails.firstName": searchRegex },
+                            { "hostelDetails.lastName": searchRegex },
                             { userId: { $eq: parseInt(criteria.search) } },
                             {
                                 "hostelDetails.phoneNumber": {

@@ -101,10 +101,10 @@ class BooksService extends BaseService {
         try {
             const groupID = parseInt(groupId);
             const bookID = parseInt(bookId);
-                const isIssuedOrReserved = await bookIssueLogModel.aggregate([
+            const isIssuedOrReserved = await bookIssueLogModel.aggregate([
                 {
                     $match: {
-                        $or: [
+                        $and: [
                             { groupId: groupID },
                             { bookId: bookID }
                         ]
@@ -218,6 +218,8 @@ class BooksService extends BaseService {
             console.log(issueLogs);
             const data = issueLogs.map((issue) => ({
                 studentName: issue.name,
+                bookId: issue.bookId,
+                bookName: issue.bookName,
                 issueDate: issue.issuedDate,
                 bookIssueLogId: issue.bookIssueLogId,
                 userId: issue.userId,
