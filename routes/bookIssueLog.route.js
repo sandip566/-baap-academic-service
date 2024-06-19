@@ -169,6 +169,7 @@ router.put("/:id", async (req, res) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
+    
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
