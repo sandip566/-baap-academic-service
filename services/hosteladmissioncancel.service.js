@@ -45,6 +45,7 @@ class HostelAdmissionCancelService extends BaseService {
                         preserveNullAndEmptyArrays: true,
                     },
                 },
+                { $sort: { createdAt: -1 } },
             ];
 
             if (criteria.search) {
@@ -68,6 +69,7 @@ class HostelAdmissionCancelService extends BaseService {
                     $match: { userId: parseInt(criteria.userId) },
                 });
             }
+
             const page = parseInt(criteria.page) || 1;
             const limit = parseInt(criteria.limit) || 10;
 
@@ -78,32 +80,8 @@ class HostelAdmissionCancelService extends BaseService {
             const responseData = await HostelAdmissionCancelModel.aggregate(
                 aggregationPipeline
             );
-            const countPipeline = [{ $match: searchFilter }];
-
-            if (criteria.search) {
-                const searchRegex = new RegExp(criteria.search.trim(), "i");
-                countPipeline.push({
-                    $match: {
-                        $or: [
-                            { "hostelDetails.firstName": searchRegex },
-                            { userId: { $eq: parseInt(criteria.search) } },
-                            {
-                                "hostelDetails.phoneNumber": {
-                                    $eq: parseInt(criteria.search),
-                                },
-                            },
-                        ],
-                    },
-                });
-            }
-            if (criteria.userId) {
-                countPipeline.push({
-                    $match: { userId: parseInt(criteria.userId) },
-                });
-            }
-
             const totalCount = await HostelAdmissionCancelModel.countDocuments(
-                countPipeline
+                searchFilter
             );
 
             const response = {
