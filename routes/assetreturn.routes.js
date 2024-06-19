@@ -81,7 +81,6 @@ router.get(
             const page = parseInt(req.query.page) || 1;
             const perPage = parseInt(req.query.limit) || 10;
             const criteria = {
-                // phoneNumber: req.query.phoneNumber,
                 name: req.query.name,
                 status: req.query.status,
                 search: req.query.search,

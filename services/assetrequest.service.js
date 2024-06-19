@@ -10,19 +10,6 @@ class AssetRequestService extends BaseService {
         super(dbModel, entityName);
     }
 
-    // async getAllDataByGroupId(groupId, criteria) {
-    //     const query = {
-    //         groupId: groupId,
-    //     };
-    //     if (criteria.name) query.name = new RegExp(criteria.name, "i");
-    //     if (criteria.status) query.status = new RegExp(criteria.status, "i");
-    //     if (criteria.type) query.type = new RegExp(criteria.type, "i");
-    //     if (criteria.category) query.category = new RegExp(criteria.category, "i");
-    //     if (criteria.empId) query.empId = criteria.empId;
-    //     if (criteria.userId) query.userId = criteria.userId;
-    //     return this.preparePaginationAndReturnData(query, criteria);
-    // }
-
     async getAllDataByGroupId(groupId, criteria) {
         const pageNumber = criteria.pageNumber || 1;
         const pageSize = criteria.pageSize || 10;
@@ -270,7 +257,6 @@ class AssetRequestService extends BaseService {
                 managerId: managerId,
                 type: type,
                 status: status
-
             });
             const document = new AssetRequestModel(data);
             const assetRequest = await document.save();
