@@ -145,7 +145,7 @@ class ActiveTripsService extends BaseService {
                 throw new Error('No valid fields to update');
             }
 
-            const options = { new: true, runValidators: true, upsert: true }; 
+            const options = { new: true, runValidators: true, upsert: true };
             const updatedTrip = await ActiveTripsModel.findOneAndUpdate(query, updateFields, options);
 
             return updatedTrip;
@@ -345,7 +345,40 @@ class ActiveTripsService extends BaseService {
             query.status = status
         }
 
-        const activeTrips = await ActiveTripsModel.find(query)
+        const aggregateQuery = [
+            {
+                $match: query
+            },
+            {
+                $lookup: {
+                    from: 'busroutes',
+                    localField: 'routeId',
+                    foreignField: 'routeId',
+                    as: 'routeDetails'
+                }
+            },
+            {
+                $unwind: {
+                    path: '$routeDetails',
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $addFields: {
+                    routeId: {
+                        name: "$routeDetails.name",
+                        routeId: "$routeDetails.routeId"
+                    }
+                }
+            },
+            {
+                $project: {
+                    routeDetails: 0
+                }
+            }
+        ]
+
+        const activeTrips = await ActiveTripsModel.aggregate(aggregateQuery)
         return {
             data: {
                 items: activeTrips
