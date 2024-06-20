@@ -23,7 +23,7 @@ class AssetRequestService extends BaseService {
             if (!isNaN(numericSearch)) {
                 query.$or = [
                     { userName: { $regex: criteria.search, $options: "i" } },
-                    { status: { $regex: criteria.search, $options: "i" } },
+                    { status: criteria.search },
                     { name: { $regex: criteria.search, $options: "i" } },
                     { empId: numericSearch },
                     { userId: numericSearch },
@@ -31,7 +31,7 @@ class AssetRequestService extends BaseService {
             } else {
                 query.$or = [
                     { userName: { $regex: criteria.search, $options: "i" } },
-                    { status: { $regex: criteria.search, $options: "i" } },
+                    { status: criteria.search },
                     { name: { $regex: criteria.search, $options: "i" } },
                 ];
             }
@@ -39,7 +39,7 @@ class AssetRequestService extends BaseService {
 
         if (criteria.name) query.name = new RegExp(criteria.name, "i");
         if (criteria.userName) query.userName = new RegExp(criteria.userName, "i");
-        if (criteria.status) query.status = new RegExp(criteria.status, "i");
+        if (criteria.status) query.status = criteria.status;
         if (criteria.type) query.type = new RegExp(criteria.type, "i");
         if (criteria.category) query.category = new RegExp(criteria.category, "i");
         if (criteria.empId) query.empId = criteria.empId;
