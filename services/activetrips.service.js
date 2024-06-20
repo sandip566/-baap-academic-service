@@ -116,6 +116,7 @@ class ActiveTripsService extends BaseService {
             throw error;
         }
     }
+
     async deleteTripHistroyById(tripId, groupId) {
         try {
             return await ActiveTripsModel.deleteOne(
@@ -137,20 +138,41 @@ class ActiveTripsService extends BaseService {
                 updateFields.status = status;
             }
 
-            if (onBoaredTraveller && Array.isArray(onBoaredTraveller)) {
-                updateFields.$push = { onBoaredTraveller: { $each: onBoaredTraveller } };
+            if (onBoaredTraveller && Array.isArray(onBoaredTraveller) && onBoaredTraveller.length > 0) {
+                for (const traveller of onBoaredTraveller) {
+                    const updateResult = await ActiveTripsModel.updateOne(
+                        {
+                            groupId: Number(groupId),
+                            tripId: Number(tripId),
+                            'onBoaredTraveller.travellerId': traveller.travellerId
+                        },
+                        {
+                            $set: {
+                                'onBoaredTraveller.$.inTime': traveller.inTime,
+                                'onBoaredTraveller.$.location': traveller.location,
+                                'onBoaredTraveller.$.outTime': traveller.outTime
+                            }
+                        }
+                    );
+
+                    if (updateResult.matchedCount === 0) {
+                        updateFields.$push = updateFields.$push || { onBoaredTraveller: { $each: [] } };
+                        updateFields.$push.onBoaredTraveller.$each.push(traveller);
+                    }
+                }
             }
 
-            if (Object.keys(updateFields).length === 0) {
-                throw new Error('No valid fields to update');
+            if (Object.keys(updateFields).length > 0) {
+                const options = { new: true, runValidators: true };
+                const updatedTrip = await ActiveTripsModel.findOneAndUpdate(query, updateFields, options);
+                return updatedTrip;
+            } else {
+                const updatedTrip = await ActiveTripsModel.findOne(query);
+                return updatedTrip;
             }
 
-            const options = { new: true, runValidators: true, upsert: true };
-            const updatedTrip = await ActiveTripsModel.findOneAndUpdate(query, updateFields, options);
-
-            return updatedTrip;
         } catch (error) {
-            console.error('Error updating driver by ID:', error);
+            console.error('Error updating active trip:', error);
             throw error;
         }
     }
