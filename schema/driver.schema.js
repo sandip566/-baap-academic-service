@@ -36,7 +36,7 @@ const DriverSchema = new mongoose.Schema(
         },
         endDate: {
             type: String,
-            required: true
+            required: false
         }
     },
     { timestamps: true, strict: false }
