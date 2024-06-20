@@ -148,6 +148,7 @@ class BookIssueLogService extends BaseService {
                 groupId: groupId,
                 userId: userId,
                 isOverdue: true,
+                overdueStatus: { $ne: "Paid" },
             });
             return existingReservation;
         } catch (error) {
