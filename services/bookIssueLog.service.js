@@ -148,6 +148,7 @@ class BookIssueLogService extends BaseService {
                 groupId: groupId,
                 userId: userId,
                 isOverdue: true,
+                overdueStatus: { $ne: "Paid" },
             });
             return existingReservation;
         } catch (error) {
@@ -178,9 +179,10 @@ class BookIssueLogService extends BaseService {
         try {
             const currDate = new Date();
             const finePerDay = 5;
-            let matchStage = {
+            const matchStage = {
                 groupId: Number(groupId),
                 isReturn: false,
+                overdueStatus: { $ne: "Paid" },
             };
 
             if (userId) {
@@ -253,11 +255,13 @@ class BookIssueLogService extends BaseService {
                         issuedDate: 1,
                         userId: 1,
                         dueDate: 1,
-                        diffDays: 1,
+                        daysOverdue: 1,
                         totalFine: 1,
                         isOverdue: 1,
                         name: 1,
                         url: 1,
+                        bookName:"$bookDetails.name",
+                        ISBN:"$bookDetails.ISBN",
                         book: {
                             _id: "$bookDetails._id",
                             bookId: "$bookDetails.bookId",

@@ -36,15 +36,13 @@ const bookIssueLogSchema = new mongoose.Schema(
         
         status:{
             type:String,
-            enum:["Reserved","Returned","Issued","Overdue"],
-            require:true
+            enum:["Reserved","Returned","Issued","Overdue"]
         },
         isReturn:{
             type:Boolean
         },
         isReserve:{
-            type:Boolean,
-            required:true
+            type:Boolean
         },
         isOverdue:{
             type:Boolean,
