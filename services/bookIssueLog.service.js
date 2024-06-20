@@ -214,28 +214,55 @@ class BookIssueLogService extends BaseService {
                 {
                     $addFields: {
                         dueDate: { $toDate: "$dueDate" },
-                        diffDays: {
-                            $ceil: {
-                                $divide: [
-                                    { $subtract: [currDate, "$dueDate"] },
-                                    1000 * 60 * 60 * 24,
-                                ],
+                        // Convert dueDate and currDate to UTC to avoid timezone issues
+                        daysOverdue: {
+                            $let: {
+                                vars: {
+                                    currDateUTC: {
+                                        $dateFromParts: {
+                                            year: { $year: currDate },
+                                            month: { $month: currDate },
+                                            day: { $dayOfMonth: currDate },
+                                        },
+                                    },
+                                    dueDateUTC: {
+                                        $dateFromParts: {
+                                            year: { $year: "$dueDate" },
+                                            month: { $month: "$dueDate" },
+                                            day: { $dayOfMonth: "$dueDate" },
+                                        },
+                                    },
+                                },
+                                in: {
+                                    $divide: [
+                                        {
+                                            $subtract: [
+                                                "$$currDateUTC",
+                                                "$$dueDateUTC",
+                                            ],
+                                        },
+                                        1000 * 60 * 60 * 24,
+                                    ],
+                                },
                             },
                         },
                         totalFine: {
                             $multiply: [
                                 {
-                                    $ceil: {
-                                        $divide: [
-                                            {
-                                                $subtract: [
-                                                    currDate,
-                                                    "$dueDate",
-                                                ],
-                                            },
-                                            1000 * 60 * 60 * 24,
-                                        ],
-                                    },
+                                    $max: [
+                                        0,
+                                        {
+                                            $divide: [
+                                                {
+                                                    $subtract: [
+                                                        currDate,
+                                                        "$dueDate",
+                                                    ],
+                                                },
+                                                1000 * 60 * 60 * 24,
+                                            ],
+                                        },
+                                    ],
                                 },
                                 finePerDay,
                             ],
@@ -244,7 +271,7 @@ class BookIssueLogService extends BaseService {
                 },
                 {
                     $match: {
-                        diffDays: { $gte: 0 },
+                        daysOverdue: { $gte: 1 },
                     },
                 },
                 {
@@ -260,8 +287,8 @@ class BookIssueLogService extends BaseService {
                         isOverdue: 1,
                         name: 1,
                         url: 1,
-                        bookName:"$bookDetails.name",
-                        ISBN:"$bookDetails.ISBN",
+                        bookName: "$bookDetails.name",
+                        ISBN: "$bookDetails.ISBN",
                         book: {
                             _id: "$bookDetails._id",
                             bookId: "$bookDetails.bookId",
