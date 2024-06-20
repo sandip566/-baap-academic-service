@@ -9,8 +9,6 @@ class Service extends BaseService {
     async getAllRoomDataByGroupId(
         groupID,
         criteria,
-        page = 1,
-        limit = 10,
         reverseOrder = true
     ) {
         try {
@@ -20,10 +18,6 @@ class Service extends BaseService {
             }
 
             const searchFilter = { groupId };
-            // const currentPage = parseInt(page) || 1;
-            // const perPage = parseInt(limit) || 10;
-            // const skip = (currentPage - 1) * perPage;
-
             const aggregationPipeline = [
                 { $match: searchFilter },
                 {
@@ -55,8 +49,6 @@ class Service extends BaseService {
                     },
                 },
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
-                // { $skip: skip },
-                // { $limit: perPage },
             ];
 
             if (criteria.search) {
@@ -78,8 +70,10 @@ class Service extends BaseService {
             }
             const page = parseInt(criteria.page) || 1;
             const limit = parseInt(criteria.limit) || 10;
-            const skip = (page - 1) * limit;
-            aggregationPipeline.push({ $skip: skip }, { $limit: limit });
+            aggregationPipeline.push(
+                { $skip: (page - 1) * limit },
+                { $limit: limit }
+            );
 
             const data = await roomModel.aggregate(aggregationPipeline);
             const totalItemsCount = await roomModel.countDocuments(
