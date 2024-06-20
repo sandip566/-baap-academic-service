@@ -319,7 +319,21 @@ class feesPaymentService extends BaseService {
                         criteria.division
                     );
                 }
-
+                if (criteria.search) {
+                    const numericSearch = parseInt(criteria.search);
+                    matchStage.$or = [];
+                    if (!isNaN(numericSearch)) {
+                        matchStage.$or.push(
+                            { phoneNumber: numericSearch },
+                            { hostelAdmissionId: numericSearch }
+                        );
+                    }
+                    matchStage.$or.push(
+                        { firstName: { $regex: criteria.search, $options: "i" } },
+                        { lastName: { $regex: criteria.search, $options: "i" } }
+                    );
+                }
+    
                 let admissionData = await StudentsAdmissionModel.aggregate([
                     { $match: matchStage },
                     {
