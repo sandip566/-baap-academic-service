@@ -360,63 +360,84 @@ class ActiveTripsService extends BaseService {
         };
     }
 
-    async getActiveTripByStatus(groupId, status) {
-        let query = { groupId: Number(groupId) }
-
-        if (status) {
-            query.status = status
-        }
-
-        const aggregateQuery = [
-            {
-                $match: query
-            },
-            {
-                $lookup: {
-                    from: 'busroutes',
-                    localField: 'routeId',
-                    foreignField: 'routeId',
-                    as: 'routeDetails'
-                }
-            },
-            {
-                $unwind: {
-                    path: '$routeDetails',
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $addFields: {
-                    routeId: {
-                        name: "$routeDetails.name",
-                        routeId: "$routeDetails.routeId"
+    async getActiveTripByStatus(groupId, status, page = 1, limit = 10) {
+        try {
+            let query = { groupId: Number(groupId) };
+    
+            if (status) {
+                query.status = status;
+            }
+    
+            const aggregateQuery = [
+                {
+                    $match: query
+                },
+                {
+                    $lookup: {
+                        from: 'busroutes',
+                        localField: 'routeId',
+                        foreignField: 'routeId',
+                        as: 'routeDetails'
                     }
+                },
+                {
+                    $unwind: {
+                        path: '$routeDetails',
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                {
+                    $addFields: {
+                        routeId: {
+                            name: "$routeDetails.name",
+                            routeId: "$routeDetails.routeId"
+                        }
+                    }
+                },
+                {
+                    $project: {
+                        routeDetails: 0
+                    }
+                },
+                {
+                    $skip: (page - 1) * limit
+                },
+                {
+                    $limit: limit
                 }
-            },
-            {
-                $project: {
-                    routeDetails: 0
+            ];
+    
+            const activeTrips = await ActiveTripsModel.aggregate(aggregateQuery);
+    
+            const totalCount = await ActiveTripsModel.countDocuments(query);
+    
+            return {
+                data: {
+                    items: activeTrips,
+                    totalPages: Math.ceil(totalCount / limit),
+                    currentPage: page
                 }
-            }
-        ]
-
-        const activeTrips = await ActiveTripsModel.aggregate(aggregateQuery)
-        return {
-            data: {
-                items: activeTrips
-            }
+            };
+        } catch (error) {
+            throw new Error("Error in getActiveTripByStatus function: " + error.message);
         }
     }
+    
+    
 
     async getTrip(groupId, tripId) {
         try {
             let query = { groupId: Number(groupId), tripId: tripId };
             const activeTrip = await ActiveTripsModel.findOne(query);
-
+    
             if (!activeTrip) {
                 throw new Error('No active trip found.');
             }
 
+            if (!activeTrip.currentLocation || activeTrip.currentLocation.length === 0) {
+                throw new Error('No current location data available.');
+            }
+    
             const onBoaredTravellers = await Promise.all(
                 activeTrip.onBoaredTraveller.map(async (traveller) => {
                     const travellerDetails = await TravellerModel.findOne({ groupId: groupId, travellerId: traveller.travellerId });
@@ -429,20 +450,25 @@ class ActiveTripsService extends BaseService {
                     };
                 })
             );
-
+    
             const lastLocation = activeTrip.currentLocation[activeTrip.currentLocation.length - 1];
+    
+            if (!lastLocation || !lastLocation.lat || !lastLocation.long) {
+                throw new Error('Invalid or missing location data.');
+            }
+    
             const currentLocationData = {
                 latitude: parseFloat(lastLocation.lat),
                 longitude: parseFloat(lastLocation.long)
-            };
-
+            }
+    
             const nearestStop = await this.findNearestBusStop(groupId, activeTrip.routeId, currentLocationData);
-
+    
             const routeDetails = await BusRouteModel.findOne({ routeId: activeTrip.routeId });
             const vehicleDetails = await VehicleModel.findOne({ vehicleId: activeTrip.vehicleId });
             const driverDetails = await DriverModel.findOne({ driverId: activeTrip.driverId });
             const caretakerDetails = await CareTakerModel.findOne({ careTakerId: activeTrip.careTakerId });
-
+    
             return {
                 data: {
                     activeTrip: {
@@ -457,9 +483,12 @@ class ActiveTripsService extends BaseService {
                 }
             };
         } catch (error) {
-            throw new Error("Error in getTrip function: " + error.message);
+            throw new Error("Error in getTrip : " + error.message);
         }
     }
+    
+    
+    
 
     async findNearestBusStop(groupId, routeId, currentLocation) {
         try {

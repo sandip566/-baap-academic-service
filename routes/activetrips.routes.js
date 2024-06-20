@@ -133,13 +133,17 @@ router.get("/groupId/:groupId/tripId/:tripId", async (req, res) => {
 router.get("/groupId/:groupId", async (req, res) => {
     try {
         const { groupId } = req.params;
-        const { status } = req.query
-        const trip = await service.getActiveTripByStatus(groupId, status)
-        res.json(trip)
+        const { status, page, limit } = req.query;
+        const pageNumber = parseInt(page, 10) || 1;
+        const pageSize = parseInt(limit, 10) || 10;
+        const trip = await service.getActiveTripByStatus(groupId, status, pageNumber, pageSize);
+
+        res.json(trip);
     } catch (error) {
         res.status(500).json({ error: "Internal Server Error" });
     }
-})
+});
+
 
 router.get("/trip/groupId/:groupId/:tripId", async (req, res) => {
     try {
@@ -147,7 +151,7 @@ router.get("/trip/groupId/:groupId/:tripId", async (req, res) => {
         const trip = await service.getTrip(groupId, tripId)
         res.json(trip)
     } catch (error) {
-        res.status(500).json({ error: "Internal Server Error" });
+        res.status(500).json({ error:error.message });
     }
 })
 
