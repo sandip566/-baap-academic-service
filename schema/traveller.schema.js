@@ -53,7 +53,7 @@ const TravellerSchema = new mongoose.Schema(
         }
 
     },
-    { strict: false, timestamps: false }
+    { strict: false, timestamps: true }
 );
 
 const TravellerModel = mongoose.model("traveller", TravellerSchema);
