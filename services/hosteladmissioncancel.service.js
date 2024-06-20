@@ -73,10 +73,10 @@ class HostelAdmissionCancelService extends BaseService {
 
             const page = parseInt(criteria.page) || 1;
             const limit = parseInt(criteria.limit) || 10;
-
-            const skip = (page - 1) * limit;
-
-            aggregationPipeline.push({ $skip: skip }, { $limit: limit });
+            aggregationPipeline.push(
+                { $skip: (page - 1) * limit },
+                { $limit: limit }
+            );
 
             const responseData = await HostelAdmissionCancelModel.aggregate(
                 aggregationPipeline
