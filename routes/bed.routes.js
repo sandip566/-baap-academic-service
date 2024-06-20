@@ -45,17 +45,17 @@ router.get("/all/bed", async (req, res) => {
 });
 router.get(
     "/all/getByGroupId/:groupId",
-    //TokenService.checkPermission(["EMA1"]),
+    TokenService.checkPermission(["EMA1"]),
     async (req, res) => {
         const groupId = req.params.groupId;
         const criteria = {
             name: req.query.name,
             status: req.query.status,
             numberOfBed: req.query.numberOfBed,
-            description:req.query.description,
-            search:req.query.search,
-            page:req.query.page,
-            limit:req.query.limit
+            description: req.query.description,
+            search: req.query.search,
+            page: req.query.page,
+            limit: req.query.limit,
         };
         const serviceResponse = await service.getAllDataByGroupId(
             groupId,
@@ -63,7 +63,6 @@ router.get(
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
-    
 );
 router.delete(
     "/groupId/:groupId/bedId/:bedId",
@@ -92,11 +91,7 @@ router.put(
             const bedId = req.params.bedId;
             const groupId = req.params.groupId;
             const newData = req.body;
-            const Data = await service.updateDataById(
-                bedId,
-                groupId,
-                newData
-            );
+            const Data = await service.updateDataById(bedId, groupId, newData);
             if (!Data) {
                 res.status(404).json({ warning: "Data not found to update" });
             } else {
@@ -108,11 +103,8 @@ router.put(
         }
     }
 );
-router.get(
-    "/getBedId/:bedId",
-    async (req, res) => {
-        const serviceResponse = await service.getByBedId(req.params.bedId);
-        requestResponsehelper.sendResponse(res, serviceResponse);
-    }
-);
+router.get("/getBedId/:bedId", async (req, res) => {
+    const serviceResponse = await service.getByBedId(req.params.bedId);
+    requestResponsehelper.sendResponse(res, serviceResponse);
+});
 module.exports = router;
