@@ -88,7 +88,7 @@ router.get(
 router.get("/all", TokenService.checkPermission(["EMT1"]), async (req, res) => {
     const pagination = {
         pageNumber: req.query.pageNumber || 1,
-        pageSize: req.query.pageNumber,
+        pageSize: req.query.pageSize,
     };
     const { pageNumber, ...query } = req.query;
     const serviceResponse = await service.getAllByCriteria(query, pagination);

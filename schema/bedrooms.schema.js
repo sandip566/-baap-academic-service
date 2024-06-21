@@ -10,7 +10,7 @@ const BedRoomsSchema = new mongoose.Schema(
             type: String,
             required: false,
         },
-        roomId:{
+        roomId: {
             type: Number,
         },
         bedRoomId: {
@@ -36,7 +36,7 @@ const BedRoomsSchema = new mongoose.Schema(
             },
         ],
     },
-    {strict:false, timestamps: true }
+    { strict: false, timestamps: true }
 );
 
 const BedRoomsModel = mongoose.model("bedrooms", BedRoomsSchema);
