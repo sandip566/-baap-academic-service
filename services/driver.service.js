@@ -85,6 +85,69 @@ class driverervice extends BaseService {
         }
     }
 
+    async getActiveTripByUserId(groupId, userId) {
+        const query = {
+            groupId: Number(groupId),
+            userId: Number(userId)
+        };
+
+        const aggregateQuery = [
+            { $match: query },
+            {
+                $lookup: {
+                    from: 'activetrips',
+                    let: { driverId: "$driverId", groupId: "$groupId" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$groupId", "$$groupId"] },
+                                        { $eq: ["$driverId", "$$driverId"] },
+                                        { $eq: ["$status", "active"] }
+                                    ]
+                                }
+                            }
+                        }
+                    ],
+                    as: 'activeTrip'
+                }
+            },
+            { $unwind: { path: "$activeTrip", preserveNullAndEmptyArrays: true } },
+            {
+                $addFields: {
+                    isActive: { $cond: { if: { $gt: [{ $type: "$activeTrip" }, "missing"] }, then: true, else: false } }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    groupId: 1,
+                    userId: 1,
+                    driverId: 1,
+                    isActive: 1,
+                    status: "$activeTrip.status",
+                    startTime: "$activeTrip.startTime",
+                    tripId: "$activeTrip.tripId",
+                    onBoaredTraveller: "$activeTrip.onBoaredTraveller"
+                }
+            }
+        ];
+
+        const result = await driverModel.aggregate(aggregateQuery);
+
+        if (result.length === 0 || !result[0].isActive) {
+            return {
+                message: "No active trip found for this route",
+                data: []
+            };
+        }
+
+        const response = result[0];
+        delete response.isActive;
+
+        return response;
+    }
 
 }
 module.exports = new driverervice(driverModel, "driver");
