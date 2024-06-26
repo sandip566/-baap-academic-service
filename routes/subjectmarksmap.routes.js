@@ -49,11 +49,15 @@ router.get("/getAllByGroupId/groupId/:groupId", async (req, res) => {
     const criteria = {
         subjectMarksMapId: req.query.subjectMarksMapId,
     };
-    const serviceResponse = await service.getAllByGroupId(
-        groupId,
-        criteria
-    );
-    requestResponsehelper.sendResponse(res, serviceResponse);
+    try {
+        const serviceResponse = await service.getAllByGroupId(groupId, criteria);
+        requestResponsehelper.sendResponse(res, serviceResponse);
+    } catch (error) {
+        requestResponsehelper.sendResponse(res, {
+            status: "Error",
+            message: error.message
+        });
+    }
 });
 
 router.delete(
