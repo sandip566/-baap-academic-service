@@ -164,7 +164,6 @@ class BookIssueLogService extends BaseService {
                 addmissionId: addmissionId,
                 isReturn: false,
             });
-            console.log(count + "count");
             if (count >= 3) {
                 return false;
             } else {
@@ -344,7 +343,6 @@ class BookIssueLogService extends BaseService {
 
     async getIssueBooks(userId) {
         try {
-            console.log(userId);
             const bookIssues = await bookIssueLogModel.countDocuments({
                 isReturn: false,
                 userId: userId,
@@ -445,7 +443,6 @@ class BookIssueLogService extends BaseService {
                 userId: userId,
                 isReturn: false,
             });
-            console.log(issuedBooks);
             const bookIds = issuedBooks.map((bookIssue) => bookIssue.bookId);
             const bookDetailsArray = await Promise.all(
                 bookIds.map(async (bookId) => {
@@ -531,7 +528,6 @@ class BookIssueLogService extends BaseService {
     }
 
     async returnBook(groupId, bookId, userId, returnDate) {
-        console.log(userId, groupId, bookId);
         if (!returnDate) {
             throw new Error("returnDate is required");
         }
@@ -547,14 +543,16 @@ class BookIssueLogService extends BaseService {
             userId: userId,
             isReturn: false,
         });
-        console.log(existingReservation);
         if (!existingReservation) {
             throw new Error(
                 "The book is not currently issued to the specified group."
             );
         }
 
-        if (existingReservation.isOverdue === true) {
+        if (
+            existingReservation.isOverdue === true &&
+            existingReservation.overdueStatus !== "Paid"
+        ) {
             throw new Error("First Paid Payment, Your Log is OverDue");
         }
 
