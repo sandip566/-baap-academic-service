@@ -1,4 +1,4 @@
-const AttachmentNameModel = require("../schema/attachmentname.schema");
+const AttachmentNameModel = require("../schema/attachmentName.schema");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
 class AttachmentNameService extends BaseService {
