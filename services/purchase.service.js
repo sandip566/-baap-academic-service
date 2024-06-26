@@ -31,7 +31,6 @@ class PurchaseService extends BaseService {
             const searchFilter = {
                 groupId: groupId,
             };
-
             if (criteria.search) {
                 const numericSearch = parseInt(criteria.search);
                 if (!isNaN(numericSearch)) {
@@ -45,7 +44,7 @@ class PurchaseService extends BaseService {
                 } else {
                     searchFilter.$or = [
                         {
-                            book: {
+                            name: {
                                 $regex: new RegExp(criteria.search, "i"),
                             },
                         },
@@ -62,6 +61,9 @@ class PurchaseService extends BaseService {
                     ];
                 }
             }
+
+         
+
             if (criteria.quantity) {
                 searchFilter.quantity = criteria.quantity;
             }

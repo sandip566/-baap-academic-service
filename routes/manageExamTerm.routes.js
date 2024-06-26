@@ -7,17 +7,26 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 
 router.post(
     "/",
-    checkSchema(require("../dto/manageExamTerm.dto")),
+    checkSchema(require("../dto/manageGradePattern.dto")),
     async (req, res, next) => {
-        if (ValidationHelper.requestValidationErrors(req, res)) {
-            return;
+        const { groupId, classId } = req.body;
+        try {
+            const existingRecord = await service.findPriority(groupId, classId);
+            if (existingRecord) {
+                return res.status(400).json({
+                    status: "Error",
+                    message: "Priority  Already Exists."
+                });
+            }
+            const manageExamTermId = +Date.now();
+            req.body.manageExamTermId = manageExamTermId;
+            const serviceResponse = await service.create(req.body);
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            next(error);
         }
-        const manageExamTermId=+Date.now();
-        req.body.manageExamTermId=manageExamTermId
-        const serviceResponse = await service.create(req.body);
-        requestResponsehelper.sendResponse(res, serviceResponse);
-    }
-);
+    })
+
 router.get("/all/manageExamTerm", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 
