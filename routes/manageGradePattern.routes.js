@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { checkSchema } = require("express-validator");
-const service=require("../services/manageGradePattern.service")
+const service = require("../services/manageGradePattern.service")
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 
@@ -9,9 +9,9 @@ router.post(
     "/",
     checkSchema(require("../dto/manageGradePattern.dto")),
     async (req, res, next) => {
-        const {groupId, name } = req.body;
+        const { groupId, name } = req.body;
         try {
-            const existingRecord = await service.findByName(groupId,name);
+            const existingRecord = await service.findByName(groupId, name);
             if (existingRecord) {
                 return res.status(400).json({
                     status: "Error",
@@ -37,8 +37,8 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
         remark: req.query.remark,
         floorValue: req.query.floorValue,
         grade: req.query.grade,
-        pageNumber:req.query.pageNumber ,
-        pageSize:req.query.pageSize 
+        pageNumber: req.query.pageNumber,
+        pageSize: req.query.pageSize
     };
 
     const serviceResponse = await service.getAllDataByGroupId(
@@ -47,17 +47,13 @@ router.get("/all/getByGroupId/:groupId", async (req, res) => {
     );
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
-
 router.delete(
     "/groupId/:groupId/gradePatternId/:gradePatternId",
     async (req, res) => {
         try {
-            const gradePatternId = req.params.gradePatternId;
+            const gradePatternIds = req.params.gradePatternId.split(',');
             const groupId = req.params.groupId;
-            const ManageGradePatternData = await service.deleteManageGradePatternById({
-                gradePatternId: gradePatternId,
-                groupId: groupId,
-            });
+            const ManageGradePatternData = await service.deleteManageGradePatternById(gradePatternIds, groupId);
             if (!ManageGradePatternData) {
                 res.status(404).json({
                     error: "ManageGradePattern data not found to delete",
@@ -71,6 +67,7 @@ router.delete(
         }
     }
 );
+
 router.put("/groupId/:groupId/gradePatternId/:gradePatternId", async (req, res) => {
     try {
         const gradePatternId = req.params.gradePatternId;

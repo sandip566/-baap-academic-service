@@ -82,11 +82,12 @@ class ManageGradePatternService extends BaseService {
         }
     }
 
-
-
-    async deleteManageGradePatternById(gradePatternId, groupId) {
+    async deleteManageGradePatternById(gradePatternIds, groupId) {
         try {
-            return await ManageGradePatternModel.deleteOne(gradePatternId, groupId);
+            return await ManageGradePatternModel.deleteMany({
+                groupId: groupId,
+                gradePatternId: { $in: gradePatternIds },
+            });
         } catch (error) {
             throw error;
         }
