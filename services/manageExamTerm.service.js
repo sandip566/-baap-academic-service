@@ -5,6 +5,20 @@ class ManageExamTermService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    async findPriority(groupId, classId) {
+        try {
+            const result = await ManageExamTermModel.aggregate([
+                { $match: { groupId: groupId, classId: classId } },
+                { $limit: 1 }
+            ]);
+
+            return result.length > 0 ? result[0] : null;
+        } catch (error) {
+            console.error("Error in findByName:", error);
+            throw error;
+        }
+    }
+     
     async getAllDataByGroupId(groupID, criteria) {
         try {
             const groupId = parseInt(groupID);
