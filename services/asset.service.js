@@ -61,6 +61,7 @@ class AssetService extends BaseService {
         if (criteria.location) query.location = criteria.location;
         if (criteria.status) query.status = criteria.status;
         if (criteria.assetType) query.assetType = criteria.assetType;
+        query.sort = { createdAt: -1 };
         return this.preparePaginationAndReturnData(query, criteria);
     }
 

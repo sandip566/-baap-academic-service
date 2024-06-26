@@ -86,7 +86,15 @@ router.put("/groupId/:groupId/driverId/:driverId", async (req, res) => {
     }
 });
 
+router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const { groupId, userId } = req.params
 
-
+        const data = await service.getActiveTripByUserId(groupId, userId)
+        res.json(data)
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+})
 
 module.exports = router;
