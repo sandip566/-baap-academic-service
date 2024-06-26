@@ -1,5 +1,8 @@
 const SubjectMarksMapModel = require("../schema/subjectmarksmap.schema");
 const SubjectModel = require("../schema/subjects.schema");
+const TermTypeModel = require("../schema/termType.schema");
+const SemesterModel = require("../schema/semester.schema");
+const ClassModel = require("../schema/classes.schema")
 const BaseService = require("@baapcompany/core-api/services/base.service");
 
 class SubjectMarksMapService extends BaseService {
@@ -8,11 +11,47 @@ class SubjectMarksMapService extends BaseService {
     }
 
     async getAllByGroupId(groupId, criteria) {
-        const query = {
-            groupId: groupId,
-        };
-        if (criteria.subjectMarksMapId) query.subjectMarksMapId = criteria.subjectMarksMapId;
-        return this.preparePaginationAndReturnData(query, criteria);
+        try {
+            const query = {
+                groupId: groupId,
+            };
+
+            if (criteria.subjectMarksMapId) {
+                query.subjectMarksMapId = criteria.subjectMarksMapId;
+            }
+
+            const subjectMarksMaps = await SubjectMarksMapModel.find(query);
+
+            const promises = subjectMarksMaps.map(async (subjectMarksMap) => {
+                const { termTypeId, classId, semesterId } = subjectMarksMap;
+
+                const termTypeQuery = termTypeId ? { termTypeId: Number(termTypeId) } : null;
+                const classQuery = classId ? { classId: Number(classId) } : null;
+                const semesterQuery = semesterId ? { semesterId: Number(semesterId) } : null;
+
+                const [termType, classData, semester] = await Promise.all([
+                    termTypeQuery ? TermTypeModel.findOne(termTypeQuery) : null,
+                    classQuery ? ClassModel.findOne(classQuery) : null,
+                    semesterQuery ? SemesterModel.findOne(semesterQuery) : null
+                ]);
+
+                return {
+                    ...subjectMarksMap.toJSON(),
+                    termType: termType ? termType.toJSON() : null,
+                    class: classData ? classData.toJSON() : null,
+                    semester: semester ? semester.toJSON() : null
+                };
+            });
+
+            const result = await Promise.all(promises);
+            return {
+                status: "Success",
+                data: result
+            };
+        } catch (error) {
+            console.error("Error in getAllByGroupId:", error);
+            throw new Error("Error fetching data");
+        }
     }
 
     async deleteByDataId(subjectMarksMapId, groupId) {
@@ -48,7 +87,7 @@ class SubjectMarksMapService extends BaseService {
     }
 
     async getAllSubject(groupId, criteria) {
-        try {   
+        try {
             const classId = criteria.classId;
             const semesterId = criteria.semesterId;
             const subjects = await SubjectModel.find({
