@@ -18,6 +18,7 @@ router.post(
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 router.get("/all/manageExamTerm", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 

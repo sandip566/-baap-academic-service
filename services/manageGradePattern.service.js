@@ -29,26 +29,25 @@ class ManageGradePatternService extends BaseService {
             const aggregationPipeline = [
                 { $match: searchFilter },
             ];
-
+            const combinedFilter = [];
             if (criteria.search) {
-                aggregationPipeline.push({
-                    $match: {
+                const searchCriteria = criteria.search.split(",");
+                combinedFilter.push({
+                    $or: searchCriteria.map(term => ({
                         $or: [
-                            { gradePatternId: { $eq: parseInt(criteria.search) } },
-                            {
-                                academicYearId: {
-                                    $eq: parseInt(criteria.search),
-                                },
-                            },
-                        ],
-                    },
+                            { gradePatternId: { $eq: parseInt(term) } },
+                            { academicYearId: { $eq: parseInt(term) } },
+                        ]
+                    }))
                 });
             }
 
             if (criteria.gradePatternId) {
-                aggregationPipeline.push({
-                    $match: { gradePatternId: parseInt(criteria.gradePatternId) },
-                });
+                combinedFilter.push({ gradePatternId: parseInt(criteria.gradePatternId) });
+            }
+
+            if (combinedFilter.length > 0) {
+                aggregationPipeline.push({ $match: { $and: combinedFilter } });
             }
             const pageNumber = parseInt(criteria.pageNumber) || 1;
             const pageSize = parseInt(criteria.pageSize) || 10;
@@ -65,14 +64,14 @@ class ManageGradePatternService extends BaseService {
                 aggregationPipeline
             );
             const totalCount = await ManageGradePatternModel.countDocuments(searchFilter);
-            
+
 
             return {
                 status: "Success",
                 data: {
                     items: manageGradePatternData,
                 },
-            
+
                 totalCount,
             };
         } catch (error) {
