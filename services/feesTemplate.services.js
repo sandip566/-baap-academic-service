@@ -24,7 +24,7 @@ class Service extends BaseService {
             matchStage.$match.type = criteria.type;
         }
         if (criteria.isShowInAccounting) {
-            matchStage.$match.isShowInAccounting = criteria.isShowInAccounting;
+            matchStage.$match.isShowInAccounting = JSON.parse(criteria.isShowInAccounting);
         }
 
         const aggregationPipeline = [
