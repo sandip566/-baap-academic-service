@@ -68,11 +68,10 @@ class AssetService extends BaseService {
         const aggregateQuery = [
             { $match: query },
             { $skip: skip },
-            { $limit: limit },
-            { $sort: { createdAt: -1 } }
+            { $limit: limit }
         ];
 
-        const asset = await AssetModel.aggregate(aggregateQuery);
+        const asset = await AssetModel.aggregate(aggregateQuery).sort({ createdAt: -1 });
         const totalCount = await AssetModel.countDocuments(query);
 
         return {
