@@ -6,6 +6,10 @@ const MarkEntrySchema = new mongoose.Schema(
             type: Number,
             required:true
         },
+        markEntryId:{
+            type: Number,
+            required:false
+        }
     },
     {strict:false, timestamps: true }
 );

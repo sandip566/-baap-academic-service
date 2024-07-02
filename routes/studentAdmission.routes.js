@@ -46,9 +46,7 @@ router.get("/getByUserId/:userId", async (req, res, next) => {
     if (ValidationHelper.requestValidationErrors(req, res)) {
         return;
     }
-    const serviceResponse = await service.getByUserId(
-        req.params.userId
-    );
+    const serviceResponse = await service.getByUserId(req.params.userId);
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 router.get("/all", async (req, res) => {
@@ -102,7 +100,7 @@ router.post("/data/save", async (req, res, next) => {
                             documentUrl: documentData.documentUrl || "",
                             documntConfigurationId: documentId,
                             documentCategoryId: documentData.documentCategoryId,
-                            documentId : documentData.documentId,
+                            documentId: documentData.documentId,
                             groupId: req.body.groupId,
                             userId: req.body.userId,
                             addmissionId: req.body.addmissionId,
@@ -296,12 +294,46 @@ router.get(
                 admissionStatus: req.query.admissionStatus,
                 status: req.query.status,
                 roleId: req.query.roleId,
+                classId: req.query.classId,
                 search: req.query.search,
                 CourseName: req.query.CourseName,
                 className: req.query.className,
             };
 
             const serviceResponse = await service.getAllDataByGroupId(
+                groupId,
+                criteria,
+                page,
+                perPage
+            );
+
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error(error);
+            res.status(500).json({ error: "Internal Server Error" });
+        }
+    }
+);
+
+router.get(
+    "/getMarkEntry/:groupId",
+    TokenService.checkPermission(["EAC1"]),
+    async (req, res) => {
+        try {
+            const groupId = req.params.groupId;
+            const page = parseInt(req.query.page) || 1;
+            const perPage = parseInt(req.query.limit) || 10;
+            const criteria = {
+                academicYear: req.query.academicYear,
+                phoneNumber: req.query.phoneNumber,
+                admissionStatus: req.query.admissionStatus,
+                status: req.query.status,
+                subjectId: req.query.subjectId,
+                search: req.query.search,
+                classId: req.query.classId,
+            };
+
+            const serviceResponse = await service.getMarkEntry(
                 groupId,
                 criteria,
                 page,
@@ -411,7 +443,10 @@ router.get("/getFeesStructure/:groupId", async (req, res) => {
             empId: req.query.empId,
         };
 
-        const serviceResponse = await service.getIndividualStudentData(groupId, criteria);
+        const serviceResponse = await service.getIndividualStudentData(
+            groupId,
+            criteria
+        );
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
         console.error(error);

@@ -471,7 +471,12 @@ class StudentsAdmmisionService extends BaseService {
             const searchFilter = {
                 groupId: groupId,
             };
-
+            if (query.classId) {
+                searchFilter["courseDetails.class_id"] = Number(query.classId);
+                // searchFilter["courseDetails.subjects.subjectId"] = Number(
+                //     query.subjectId
+                // );
+            }
             if (query.search) {
                 const numericSearch = parseInt(query.search);
                 if (!isNaN(numericSearch)) {
@@ -480,7 +485,7 @@ class StudentsAdmmisionService extends BaseService {
                         { lastName: { $regex: query.search, $options: "i" } },
                         { phoneNumber: numericSearch },
                         { addmissionId: numericSearch },
-                        { userId: numericSearch }
+                        { userId: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
@@ -674,6 +679,184 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
+
+    async getMarkEntry(groupId, query, page, perPage) {
+        try {
+            const searchFilter = {
+                groupId: Number(groupId),
+                admissionStatus: "Confirm",
+            };
+            if (query.classId && query.subjectId) {
+                searchFilter["courseDetails.class_id"] = Number(query.classId);
+                searchFilter["courseDetails.subjects.subjectId"] = Number(
+                    query.subjectId
+                );
+            }
+
+            if (query.search) {
+                const numericSearch = parseInt(query.search);
+                if (!isNaN(numericSearch)) {
+                    searchFilter.$or = [
+                        { name: { $regex: query.search, $options: "i" } },
+                        { lastName: { $regex: query.search, $options: "i" } },
+                        { phoneNumber: numericSearch },
+                        { addmissionId: numericSearch },
+                        { userId: numericSearch },
+                    ];
+                } else {
+                    searchFilter.$or = [
+                        { name: { $regex: query.search, $options: "i" } },
+                        { lastName: { $regex: query.search, $options: "i" } },
+                    ];
+                }
+            }
+
+            if (query.phoneNumber) {
+                searchFilter.phoneNumber = query.phoneNumber;
+            }
+
+            if (query.academicYear) {
+                searchFilter.academicYear = query.academicYear;
+            }
+            if (query.admissionStatus) {
+                searchFilter.admissionStatus = {
+                    $regex: query.admissionStatus,
+                    $options: "i",
+                };
+            }
+
+            if (query.status) {
+                searchFilter.status = {
+                    $regex: query.status,
+                    $options: "i",
+                };
+            }
+
+            if (query.CourseName) {
+                const courseIds = await courseModel
+                    .find({
+                        CourseName: { $regex: query.CourseName, $options: "i" },
+                    })
+                    .select("courseId");
+                if (courseIds && courseIds.length > 0) {
+                    searchFilter["courseDetails.course_id"] = {
+                        $in: courseIds.map((course) => course.courseId),
+                    };
+                } else {
+                    return { message: "No data found with the courseName" };
+                }
+            }
+
+            if (query.className) {
+                const classIds = await ClassModel.find({
+                    name: { $regex: query.className, $options: "i" },
+                }).select("classId");
+                if (classIds && classIds.length > 0) {
+                    searchFilter["courseDetails.class_id"] = {
+                        $in: classIds.map((cls) => cls.classId),
+                    };
+                } else {
+                    return { message: "No data found with the class name" };
+                }
+            }
+
+            const skip = (page - 1) * perPage;
+            const limit = perPage;
+
+            const markEntry = await studentAdmissionModel
+                .aggregate([
+                    {
+                        $match: searchFilter,
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$courseDetails.subjects",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $match: {
+                            "courseDetails.class_id": Number(query.classId),
+                            "courseDetails.subjects.subjectId": Number(
+                                query.subjectId
+                            ),
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: null,
+                            docs: { $push: "$$ROOT" },
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$docs",
+                            includeArrayIndex: "serialNo",
+                        },
+                    },
+                    {
+                        $replaceRoot: {
+                            newRoot: {
+                                $mergeObjects: [
+                                    "$docs",
+                                    { serialNo: { $add: ["$serialNo", 1] } },
+                                ],
+                            },
+                        },
+                    },
+                    {
+                        $project: {
+                            serialNo: 1,
+                            _id: 1,
+                            groupId: 1,
+                            addmissionId: 1,
+                            academicYear: 1,
+                            userId: 1,
+                            name: 1,
+                            admissionStatus: 1,
+                            status: 1,
+                            email: 1,
+                            phoneNumber: 1,
+                            "courseDetails.department_id": 1,
+                            "courseDetails.course_id": 1,
+                            "courseDetails.class_id": 1,
+                            "courseDetails.division_id": 1,
+                            "courseDetails.subjects": 1,
+                        },
+                    },
+                    {
+                        $skip: skip,
+                    },
+                    {
+                        $limit: limit,
+                    },
+                ])
+                .exec();
+
+            const totalItemsCount = await studentAdmissionModel.countDocuments(
+                searchFilter
+            );
+
+            const response = {
+                status: "Success",
+                data: {
+                    items: markEntry,
+                    totalItemsCount: totalItemsCount,
+                },
+            };
+            return response;
+        } catch (error) {
+            console.error("Error:", error);
+            throw error;
+        }
+    }
+
     async getDonationDataByGroupId(
         groupId,
         query,

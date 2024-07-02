@@ -12,8 +12,37 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
-        const serviceResponse = await service.create(req.body);
-        requestResponsehelper.sendResponse(res, serviceResponse);
+
+        const markEntryId = +Date.now();
+        req.body.markEntryId = markEntryId;
+
+        if (req.body.subjectWiseRequests && Array.isArray(req.body.subjectWiseRequests)) {
+            req.body.subjectWiseRequests = req.body.subjectWiseRequests.map((request) => {
+                return {
+                    ...request,
+                    subjectWiseRequestsId: +Date.now() + Math.floor(Math.random() * 10000),
+                };
+            });
+
+            const anyMarkedEntry = req.body.subjectWiseRequests.some(
+                (request) => request.isMarkedEntry
+            );
+
+            if (!anyMarkedEntry) {
+                return res.status(400).json({
+                    success: false,
+                    message: "Please Select Student",
+                });
+            }
+        }
+
+        try {
+            const serviceResponse = await service.create(req.body);
+            requestResponsehelper.sendResponse(res, serviceResponse);
+        } catch (error) {
+            console.error("Error:", error);
+            next(error);
+        }
     }
 );
 
