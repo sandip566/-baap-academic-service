@@ -5,6 +5,16 @@ class vehicleervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+    
+    async findByVehicleNo(groupId, vehicalNo) {
+        try {
+            const vehicle = await vehicleModel.findOne({ groupId, vehicalNo });
+            return vehicle;
+        } catch (error) {
+            console.error("Error finding vehicle by vehicleNo:", error);
+            throw new Error("Error finding vehicle by vehicleNo: " + error.message);
+        }
+    }
 
     async getByvehicleId(vehicleId) {
         return this.execute(() => {
