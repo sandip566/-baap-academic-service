@@ -17,6 +17,7 @@ const FeesPaymentModel = require("../schema/feesPayment.schema");
 const CategoriesModel = require("../schema/categories.schema");
 const AcademicYearModel = require("../schema/academicyear.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
+const studentModel = require("../schema/student.schema");
 
 class StudentsAdmmisionService extends BaseService {
     constructor(dbModel, entityName) {
@@ -2178,6 +2179,65 @@ class StudentsAdmmisionService extends BaseService {
             }
         } catch (error) {
             console.log(error);
+            throw error;
+        }
+    }
+    
+    async assignExaminationNo(groupId, criteria, newData) {
+        const groupIdNum = Number(groupId);
+        const classIdNum = Number(criteria.classId);
+        const divisionIdNum = Number(criteria.divisionId);
+        let startingExamNo = newData.startingExamNo;
+        let sortCriteria = newData.orderBy || "admissionStatus";
+        const findQuery = {
+            groupId: groupIdNum,
+            courseDetails: {
+                $elemMatch: {
+                    class_id: { $eq: classIdNum },
+                    division_id: { $eq: divisionIdNum },
+                },
+            },
+            admissionStatus: "Confirm",
+        };
+
+        try {
+            const exs = [
+                { $match: { ...findQuery, examRollNumber: startingExamNo } },
+                { $sort: { [sortCriteria]: sortCriteria === "name" ? 1 : -1 } },
+            ];
+            const sortedDocs = await StudentsAdmissionModel.aggregate(
+                exs
+            ).exec();
+            if (sortedDocs.length > 0) {
+                return {
+                    message: `Starting exam number  ${startingExamNo}  is already assigned for this criteria. Please choose a different starting number.`,
+                };
+            }
+            const pipeline = [
+                { $match: findQuery },
+                { $sort: { [sortCriteria]: sortCriteria === "name" ? 1 : -1 } }, // Sort by name ascending, admissionStatus descending
+                { $project: { _id: 1 } },
+            ];
+            const filteredDocuments = await StudentsAdmissionModel.aggregate(
+                pipeline
+            ).exec();
+            if (filteredDocuments.length === 0) {
+                return { message: "No documents found to update." };
+            }
+            const bulkOps = filteredDocuments.map((doc, index) => ({
+                updateOne: {
+                    filter: { _id: doc._id },
+                    update: { $set: { examRollNumber: startingExamNo + index } },
+                },
+            }));
+            const result = await StudentsAdmissionModel.bulkWrite(bulkOps);
+
+            return {
+                message: "Examination numbers assigned successfully.",
+                result,
+            };
+        } catch (error) {
+            console.error("Error during aggregation and update:", error);
             throw error;
         }
     }

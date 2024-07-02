@@ -588,4 +588,27 @@ router.put("/groupId/:groupId/userId/:userId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.put("/assign-examRollNo/groupId/:groupId", async (req, res) => {
+    try {
+        const groupId = parseInt(req.params.groupId);
+        const criteria={
+            classId:req.query.classId,
+            divisionId:req.query.divisionId
+        }
+        const newData = req.body;
+        const updatedData = await service.assignExaminationNo(
+            groupId,
+            criteria,
+            newData
+        );
+        if (!updatedData) {
+            res.status(404).json({ error: " not found to update" });
+        } else {
+            res.status(201).json(updatedData);
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Internal Server Error" });
+    }
+});
 module.exports = router;

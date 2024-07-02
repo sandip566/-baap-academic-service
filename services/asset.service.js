@@ -50,9 +50,9 @@ class AssetService extends BaseService {
         }
     }
 
-    getAllDataByGroupId(groupId, criteria) {
+    async getAllDataByGroupId(groupId, criteria) {
         const query = {
-            groupId: groupId,
+            groupId: Number(groupId),
         };
         if (criteria.assetId) query.assetId = criteria.assetId;
         if (criteria.assetName) query.assetName = new RegExp(criteria.assetName, "i");
@@ -61,7 +61,26 @@ class AssetService extends BaseService {
         if (criteria.location) query.location = criteria.location;
         if (criteria.status) query.status = criteria.status;
         if (criteria.assetType) query.assetType = criteria.assetType;
-        return this.preparePaginationAndReturnData(query, criteria);
+
+        const skip = (criteria.pageNumber - 1) * criteria.pageSize;
+        const limit = criteria.pageSize;
+
+        const aggregateQuery = [
+            { $match: query },
+            { $skip: skip },
+            { $limit: limit }
+        ];
+
+        const asset = await AssetModel.aggregate(aggregateQuery).sort({ createdAt: -1 });
+        const totalCount = await AssetModel.countDocuments(query);
+
+        return {
+            status: "Success",
+            data: {
+                items: asset,
+                totalItemsCount: totalCount
+            },
+        };
     }
 
     async updateByAssetId(assetId, groupId, newData) {
