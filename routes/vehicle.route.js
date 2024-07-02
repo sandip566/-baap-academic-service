@@ -74,13 +74,16 @@ router.put("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
         const vehicleId = req.params.vehicleId;
         const groupId = req.params.groupId;
         const newData = req.body;
-        const updateData = await service.updatevehicleById(
-            vehicleId,
-            groupId,
-            newData
-        );
+
+        const existingVehicle = await service.findVehicleByNo(newData.vehicalNo);
+        if (existingVehicle) {
+            res.status(409).json({ error: "Vehicle number already exists" });
+
+            return;
+        }
+        const updateData = await service.updateVehicleById(vehicleId, groupId, newData);
         if (!updateData) {
-            res.status(404).json({ error: "data not found to update" });
+            res.status(404).json({ error: "Data not found to update" });
         } else {
             res.status(200).json(updateData);
         }
