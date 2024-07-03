@@ -89,19 +89,29 @@ class vehicleervice extends BaseService {
         }
     }
 
-    async updatevehicleById(vehicleId, groupId, newData) {
+    async  findVehicleByNo(vehicalNo) {
         try {
-            const updatedVisitor = await vehicleModel.findOneAndUpdate(
-                { vehicleId: vehicleId, groupId: groupId },
-                newData,
-                { new: true }
-            );
-            return updatedVisitor;
+            const vehicle = await vehicleModel.findOne({ vehicalNo: vehicalNo });
+            return vehicle;
         } catch (error) {
             throw error;
         }
     }
+    
 
-
+    
+    async  updateVehicleById(vehicleId, groupId, newData) {
+        try {
+            const updatedVehicle = await vehicleModel.findOneAndUpdate(
+                { vehicleId: vehicleId, groupId: groupId },
+                newData,
+                { new: true }
+            );
+            return updatedVehicle;
+        } catch (error) {
+            throw error;
+        }
+    }
+    
 }
 module.exports = new vehicleervice(vehicleModel, "vehicle");
