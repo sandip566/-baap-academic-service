@@ -19,7 +19,7 @@ const vehicle = new mongoose.Schema(
         },
         shiftId: {
             type: Number,
-            required: true
+            required: false
         },
         vehicalNo: {
             type: String,
