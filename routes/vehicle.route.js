@@ -12,13 +12,18 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const { vehicalNo, groupId } = req.body;
+        const existingVehicle = await service.findByVehicleNo(groupId, vehicalNo);
+        if (existingVehicle) {
+            return res.status(400).json({ error: "This vehicleNo is already exists" });
+        }
+
         const vehicleId = +Date.now();
-        req.body.vehicleId = vehicleId
+        req.body.vehicleId = vehicleId;
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
-
 router.get("/all/vehicle", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 
