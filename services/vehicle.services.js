@@ -89,9 +89,9 @@ class vehicleervice extends BaseService {
         }
     }
 
-    async  findVehicleByNo(vehicalNo) {
+    async  findVehicleByNo(groupId,vehicalNo) {
         try {
-            const vehicle = await vehicleModel.findOne({ vehicalNo: vehicalNo });
+            const vehicle = await vehicleModel.findOne({ groupId:groupId,vehicalNo: vehicalNo });
             return vehicle;
         } catch (error) {
             throw error;

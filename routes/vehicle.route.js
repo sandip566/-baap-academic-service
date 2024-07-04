@@ -75,7 +75,7 @@ router.put("/groupId/:groupId/vehicleId/:vehicleId", async (req, res) => {
         const groupId = req.params.groupId;
         const newData = req.body;
 
-        const existingVehicle = await service.findVehicleByNo(newData.vehicalNo);
+        const existingVehicle = await service.findVehicleByNo(newData.groupId,newData.vehicalNo);
         if (existingVehicle) {
             res.status(409).json({ error: "Vehicle number already exists" });
 
