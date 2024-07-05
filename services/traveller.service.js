@@ -245,8 +245,51 @@ class TravellerService extends BaseService {
         }
     }
 
+    async calculetRemainingFees(groupId, userId, paidFees) {
+        try {
+            const query = {
+                groupId: Number(groupId),
+                userId: Number(userId)
+            };
+            const paidFee = Number(paidFees);
 
+            if (isNaN(query.groupId) || isNaN(query.userId) || isNaN(paidFee)) {
+                throw new Error("Invalid input data. GroupId, userId, or paidFees are not valid numbers.");
+            }
 
+            const traveller = await TravellerModel.findOne(query).sort({ createdAt: -1 });
+
+            if (!traveller) {
+                throw new Error("Traveller not found for provided groupId and userId.");
+            }
+
+            if (traveller.totalFees === undefined) {
+                throw new Error("Total fees not found for the traveller.");
+            }
+
+            const remainingFees = traveller.totalFees - paidFee;
+
+            const updatedTraveller = await TravellerModel.findOneAndUpdate(
+                query,
+                { $set: { totalFees: remainingFees } },
+                { new: true }
+            );
+
+            if (!updatedTraveller) {
+                throw new Error("Failed to update traveller's total fees.");
+            }
+
+            return {
+                status: "Success",
+                remainingFees: remainingFees
+            };
+        } catch (error) {
+            return {
+                status: "Error",
+                message: error.message
+            };
+        }
+    }
 
 }
 
