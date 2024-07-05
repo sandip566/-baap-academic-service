@@ -119,6 +119,12 @@ router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
         const routeId = req.params.routeId;
         const groupId = req.params.groupId;
         const newData = req.body;
+        const existingNumber = await service.findVehicleByNo(newData.groupId,newData.number);
+        if (existingNumber) {
+            res.status(409).json({ error: " number already exists" });
+
+            return;
+        }
         const updateroute = await service.updateRoute(
             routeId,
             groupId,
