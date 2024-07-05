@@ -178,12 +178,12 @@ router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (re
     }
 });
 
-router.get("/remainingFees/groupId/:groupId/userId/:userId", async (req, res) => {
+router.put("/remainingFees/groupId/:groupId/userId/:userId", async (req, res) => {
     try {
         const { groupId, userId } = req.params
-        const paidFees = req.body.paidFees
+        const updateData = req.body
 
-        const fees = await service.calculetRemainingFees(groupId, userId, paidFees)
+        const fees = await service.calculetRemainingFees(groupId, userId, updateData)
         res.json(fees)
     } catch (error) {
         console.log(error);
