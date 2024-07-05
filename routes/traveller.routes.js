@@ -6,7 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { route } = require("./books.routes");
 const TravellerModel = require("../schema/traveller.schema");
-const BusRouteModel=require("../schema/busroutes.schema")
+const BusRouteModel = require("../schema/busroutes.schema")
 
 router.post(
     "/",
@@ -17,6 +17,48 @@ router.post(
         }
         const travellerId = +Date.now();
         req.body.travellerId = travellerId
+
+        let startDate = req.body.startDate
+        let endDate = req.body.endDate
+
+        const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
+        const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
+
+        const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24)) + 1;
+
+        const route = await BusRouteModel.findOne(
+            {
+                groupId: req.body.groupId,
+                routeId: req.body.routeId
+            }
+        )
+        const feesFreq = route.feesFreq
+        if (!feesFreq) {
+            res.send("FeesFreq is not found")
+        }
+
+        const totalFeess = req.body.totalFees
+
+        let fee;
+        switch (feesFreq) {
+            case "Monthly":
+                fee = totalFeess / 30;
+                break;
+            case "Yearly":
+                fee = totalFeess / 360;
+                break;
+            case "Half Yearly":
+                fee = totalFeess / 180;
+                break;
+            case "Quarterly":
+                fee = totalFeess / 120;
+                break;
+            default:
+                fee = totalFeess;
+        }
+        const totalFees = fee * durationInDays
+        req.body.totalFees = totalFees
+
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
@@ -123,11 +165,11 @@ router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (re
     try {
         const groupId = parseInt(req.params.groupId);
         const travellerId = parseInt(req.params.travellerId);
-       
+
         if (isNaN(travellerId)) {
             return res.status(400).json({ error: "Invalid travellerId" });
         }
-        const totalFees = await service.calculateTotalFees(groupId,travellerId);
+        const totalFees = await service.calculateTotalFees(groupId, travellerId);
         console.log(`Total fees: ${totalFees}`);
         res.status(200).json({ totalFees });
     } catch (error) {
@@ -135,5 +177,18 @@ router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (re
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.get("/remainingFees/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const { groupId, userId } = req.params
+        const paidFees = req.body.paidFees
+
+        const fees = await service.calculetRemainingFees(groupId, userId, paidFees)
+        res.json(fees)
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ error: error.massage })
+    }
+})
 
 module.exports = router;
