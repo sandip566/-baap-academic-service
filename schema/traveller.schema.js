@@ -50,8 +50,11 @@ const TravellerSchema = new mongoose.Schema(
         endDate: {
             type: String,
             required: false
+        },
+        paidFees:{
+            type:Array,
+            required:false
         }
-
     },
     { strict: false, timestamps: true }
 );

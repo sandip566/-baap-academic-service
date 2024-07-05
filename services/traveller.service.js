@@ -245,14 +245,14 @@ class TravellerService extends BaseService {
         }
     }
 
-    async calculetRemainingFees(groupId, userId, paidFees) {
+    async calculetRemainingFees(groupId, userId, updateData) {
         try {
             const query = {
                 groupId: Number(groupId),
                 userId: Number(userId)
             };
-            const paidFee = Number(paidFees);
-
+            const paidFee = updateData.paidFees;
+            const description = updateData.description
             if (isNaN(query.groupId) || isNaN(query.userId) || isNaN(paidFee)) {
                 throw new Error("Invalid input data. GroupId, userId, or paidFees are not valid numbers.");
             }
@@ -267,11 +267,15 @@ class TravellerService extends BaseService {
                 throw new Error("Total fees not found for the traveller.");
             }
 
+            if (traveller.totalFees < paidFee) {
+                throw new Error("Don't Accsept Extra Pyament");
+            }
+
             const remainingFees = traveller.totalFees - paidFee;
 
             const updatedTraveller = await TravellerModel.findOneAndUpdate(
                 query,
-                { $set: { totalFees: remainingFees } },
+                { $set: { paidFees: { paidFee, description }, totalFees: remainingFees } },
                 { new: true }
             );
 
