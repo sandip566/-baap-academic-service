@@ -58,7 +58,7 @@ router.post(
         }
         const totalFees = fee * durationInDays
         req.body.totalFees = totalFees
-
+        req.body.remainingFees = totalFees
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
