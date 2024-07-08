@@ -9,6 +9,46 @@ class TravellerService extends BaseService {
         super(dbModel, entityName);
     }
 
+    async calculateFees(groupId, routeId, startDate, endDate, totalFees) {
+        const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
+        const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
+
+        const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24)) + 1;
+
+        const route = await BusRouteModel.findOne(
+            {
+                groupId: Number(groupId),
+                routeId: Number(routeId)
+            }
+        )
+        const feesFreq = route.feesFreq
+        if (!feesFreq) {
+            res.send("FeesFreq is not found")
+        }
+
+        let fee;
+        switch (feesFreq) {
+            case "Monthly":
+                fee = totalFees / 30;
+                break;
+            case "Yearly":
+                fee = totalFees / 360;
+                break;
+            case "Half Yearly":
+                fee = totalFees / 180;
+                break;
+            case "Quarterly":
+                fee = totalFees / 120;
+                break;
+            default:
+                fee = totalFees;
+        }
+        const totalFee = fee * durationInDays
+        return {
+            totalFee: Math.round(totalFee)
+        }
+    }
+
     async getBytravellerId(groupId, travellerId) {
         let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
         const routeId = traveller.routeId
@@ -267,7 +307,7 @@ class TravellerService extends BaseService {
 
             const paidFee = updateData.paidFees;
             const description = updateData.description;
-            const date = updateData.date
+            const date = updateData.date;
 
             if (isNaN(query.groupId) || isNaN(query.userId) || isNaN(paidFee)) {
                 throw new Error("Invalid input data. GroupId, userId, or paidFees are not valid numbers.");
@@ -283,7 +323,7 @@ class TravellerService extends BaseService {
                 throw new Error("Total fees not found for the traveller.");
             }
 
-            if (traveller.totalFees < paidFee) {
+            if (traveller.remainingFees < paidFee) {
                 throw new Error("Don't accept extra payment.");
             }
 
@@ -294,21 +334,19 @@ class TravellerService extends BaseService {
                 remainingFees = traveller.totalFees - paidFee;
             }
 
+            const totalPaidAmount = traveller.paidFees.reduce((acc, fee) => acc + fee.paidFee, 0) + paidFee;
+
             const update = {
                 $set: { remainingFees: remainingFees },
-                $push: { paidFees: { paidFee, description, date } }
+                $push: { paidFees: { paidFee, description, date } },
+                $set: { paidAmount: totalPaidAmount }
             };
 
-            const updatedTraveller = await TravellerModel.findOneAndUpdate(query, update, { new: true });
-
-            if (!updatedTraveller) {
-                throw new Error("Failed to update traveller's total fees.");
-            }
-
+            await TravellerModel.findOneAndUpdate(query, update);
 
             return {
                 status: "Success",
-                remainingFees: remainingFees
+                remainingFees: Math.round(remainingFees)
             };
         } catch (error) {
             return {
