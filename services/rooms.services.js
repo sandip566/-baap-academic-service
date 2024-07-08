@@ -6,17 +6,13 @@ class Service extends BaseService {
         super(dbModel, entityName);
     }
 
-    async getAllRoomDataByGroupId(
-        groupID,
-        criteria,
-        reverseOrder = true
-    ) {
+    async getAllRoomDataByGroupId(groupID, criteria, reverseOrder = true) {
         try {
             const groupId = parseInt(groupID);
             if (isNaN(groupId)) {
                 throw new Error("Invalid groupID");
             }
-
+    
             const searchFilter = { groupId };
             const aggregationPipeline = [
                 { $match: searchFilter },
@@ -50,7 +46,7 @@ class Service extends BaseService {
                 },
                 { $sort: { createdAt: reverseOrder ? -1 : 1 } },
             ];
-
+    
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 aggregationPipeline.push({
@@ -68,18 +64,23 @@ class Service extends BaseService {
                     },
                 });
             }
+
+            if (criteria.floorNo) {
+                aggregationPipeline.push({
+                    $match: { floorNo: parseInt(criteria.floorNo) }
+                });
+            }
+
             const page = parseInt(criteria.page) || 1;
             const limit = parseInt(criteria.limit) || 10;
             aggregationPipeline.push(
                 { $skip: (page - 1) * limit },
                 { $limit: limit }
             );
-
+    
             const data = await roomModel.aggregate(aggregationPipeline);
-            const totalItemsCount = await roomModel.countDocuments(
-                searchFilter
-            );
-
+            const totalItemsCount = await roomModel.countDocuments(searchFilter);
+    
             const response = {
                 status: "Success",
                 data: {
@@ -87,7 +88,7 @@ class Service extends BaseService {
                     totalItemsCount: totalItemsCount,
                 },
             };
-
+    
             return response;
         } catch (error) {
             console.error("Error in getAllRoomDataByGroupId:", error);
@@ -96,7 +97,7 @@ class Service extends BaseService {
             );
         }
     }
-
+    
     async deleteRoomById(roomId, groupId) {
         try {
             return await roomModel.deleteOne({
