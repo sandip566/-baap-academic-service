@@ -183,7 +183,7 @@ router.put("/remainingFees/groupId/:groupId/userId/:userId", async (req, res) =>
         const { groupId, userId } = req.params
         const updateData = req.body
 
-        const fees = await service.calculetRemainingFees(groupId, userId, updateData)
+        const fees = await service.calculateRemainingFees(groupId, userId, updateData)
         res.json(fees)
     } catch (error) {
         console.log(error);

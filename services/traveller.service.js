@@ -73,6 +73,16 @@ class TravellerService extends BaseService {
                 searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
+            const totalFeesSumResult = await TravellerModel.find(searchFilter).sort({ createdAt: -1 });
+
+            const totalFeesSum = totalFeesSumResult
+                .map(item => item.totalFees)
+                .reduce((acc, curr) => acc + (curr || 0), 0);
+
+            const totalRemainingSum = totalFeesSumResult
+                .map(item => item.remainingFees)
+                .reduce((acc, curr) => acc + (curr || 0), 0);
+
             const count = await TravellerModel.countDocuments(searchFilter);
             const totalPages = Math.ceil(count / limit);
             const skip = (page - 1) * limit;
@@ -80,6 +90,7 @@ class TravellerService extends BaseService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
+
             const response = {
                 status: "Success",
                 data: {
@@ -87,7 +98,9 @@ class TravellerService extends BaseService {
                     totalItemsCount: count,
                     page,
                     limit,
-                    totalPages
+                    totalPages,
+                    totalFeesSum: Math.round(totalFeesSum),
+                    totalRemainingSum: Math.round(totalRemainingSum)
                 },
             };
 
@@ -245,14 +258,17 @@ class TravellerService extends BaseService {
         }
     }
 
-    async calculetRemainingFees(groupId, userId, updateData) {
+    async calculateRemainingFees(groupId, userId, updateData) {
         try {
             const query = {
                 groupId: Number(groupId),
                 userId: Number(userId)
             };
+
             const paidFee = updateData.paidFees;
-            const description = updateData.description
+            const description = updateData.description;
+            const date = updateData.date
+
             if (isNaN(query.groupId) || isNaN(query.userId) || isNaN(paidFee)) {
                 throw new Error("Invalid input data. GroupId, userId, or paidFees are not valid numbers.");
             }
@@ -268,20 +284,27 @@ class TravellerService extends BaseService {
             }
 
             if (traveller.totalFees < paidFee) {
-                throw new Error("Don't Accsept Extra Pyament");
+                throw new Error("Don't accept extra payment.");
             }
 
-            const remainingFees = traveller.totalFees - paidFee;
+            let remainingFees;
+            if (traveller.remainingFees !== undefined) {
+                remainingFees = traveller.remainingFees - paidFee;
+            } else {
+                remainingFees = traveller.totalFees - paidFee;
+            }
 
-            const updatedTraveller = await TravellerModel.findOneAndUpdate(
-                query,
-                { $set: { paidFees: { paidFee, description }, totalFees: remainingFees } },
-                { new: true }
-            );
+            const update = {
+                $set: { remainingFees: remainingFees },
+                $push: { paidFees: { paidFee, description, date } }
+            };
+
+            const updatedTraveller = await TravellerModel.findOneAndUpdate(query, update, { new: true });
 
             if (!updatedTraveller) {
                 throw new Error("Failed to update traveller's total fees.");
             }
+
 
             return {
                 status: "Success",
