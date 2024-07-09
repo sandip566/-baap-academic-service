@@ -12,7 +12,7 @@ class Service extends BaseService {
             if (isNaN(groupId)) {
                 throw new Error("Invalid groupID");
             }
-
+    
             const searchFilter = { groupId };
             const aggregationPipeline = [
                 { $match: searchFilter },
@@ -46,7 +46,7 @@ class Service extends BaseService {
                 },
                 { $sort: { createdAt: -1 } },
             ];
-
+    
             if (criteria.search) {
                 const searchRegex = new RegExp(criteria.search.trim(), "i");
                 aggregationPipeline.push({
@@ -64,7 +64,6 @@ class Service extends BaseService {
                     },
                 });
             }
-
             const page = parseInt(criteria.page) || 1;
             const limit = parseInt(criteria.limit) || 10;
             const skip = ((page - 1) * limit) + 1;
@@ -81,7 +80,7 @@ class Service extends BaseService {
                 { $skip: skip },
                 { $limit: limit }
             );
-
+    
             const data = await roomModel.aggregate(aggregationPipeline);
 
             const response = {
@@ -93,7 +92,7 @@ class Service extends BaseService {
                     totalPages: Math.ceil(totalItemsCount / limit),
                 },
             };
-
+    
             return response;
         } catch (error) {
             console.error("Error in getAllRoomDataByGroupId:", error);
@@ -102,7 +101,7 @@ class Service extends BaseService {
             );
         }
     }
-
+    
     async deleteRoomById(roomId, groupId) {
         try {
             return await roomModel.deleteOne({
