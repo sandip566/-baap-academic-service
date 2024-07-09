@@ -86,7 +86,14 @@ class BusRoutesService extends BaseService {
             throw error;
         }
     }
-
+    async  findVehicleByNo(groupId,number) {
+        try {
+            const vehicle = await BusRoutesModel.findOne({ groupId:groupId,number:number  });
+            return vehicle;
+        } catch (error) {
+            throw error;
+        }
+    }
     async updateRoute(routeId, groupId, newData) {
         try {
             const updateRoute = await BusRoutesModel.findOneAndUpdate(
