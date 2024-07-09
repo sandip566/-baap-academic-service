@@ -18,51 +18,20 @@ router.post(
         const travellerId = +Date.now();
         req.body.travellerId = travellerId
 
-        let startDate = req.body.startDate
-        let endDate = req.body.endDate
-
-        const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
-        const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
-
-        const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24)) + 1;
-
-        const route = await BusRouteModel.findOne(
-            {
-                groupId: req.body.groupId,
-                routeId: req.body.routeId
-            }
-        )
-        const feesFreq = route.feesFreq
-        if (!feesFreq) {
-            res.send("FeesFreq is not found")
-        }
-
-        const totalFeess = req.body.totalFees
-
-        let fee;
-        switch (feesFreq) {
-            case "Monthly":
-                fee = totalFeess / 30;
-                break;
-            case "Yearly":
-                fee = totalFeess / 360;
-                break;
-            case "Half Yearly":
-                fee = totalFeess / 180;
-                break;
-            case "Quarterly":
-                fee = totalFeess / 120;
-                break;
-            default:
-                fee = totalFeess;
-        }
-        const totalFees = fee * durationInDays
-        req.body.totalFees = totalFees
-
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
+router.post("/calculetFees", async (req, res) => {
+    try {
+        const { groupId, routeId, startDate, endDate, totalFees } = req.body
+        const fees = await service. calculateFees(groupId, routeId, startDate, endDate, totalFees)
+        res.json(fees)
+    } catch (error) {
+        res.status(500).send({ error: error.message })
+    }
+})
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -160,7 +129,6 @@ router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     }
 });
 
-
 router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
         const groupId = parseInt(req.params.groupId);
@@ -183,7 +151,7 @@ router.put("/remainingFees/groupId/:groupId/userId/:userId", async (req, res) =>
         const { groupId, userId } = req.params
         const updateData = req.body
 
-        const fees = await service.calculetRemainingFees(groupId, userId, updateData)
+        const fees = await service.calculateRemainingFees(groupId, userId, updateData)
         res.json(fees)
     } catch (error) {
         console.log(error);
