@@ -294,12 +294,13 @@ class ActiveTripsService extends BaseService {
         };
     }
 
-    async getActiveTrips(groupId, userId) {
+    async getActiveTripsWithTravelerData(groupId, userId) {
         const query = {
             groupId: Number(groupId),
             userId: Number(userId)
         };
-        const [traveller] = await TravellerModel.find(query).select('routeId').exec();
+
+        const [traveller] = await TravellerModel.find(query).select('routeId travellerId').exec();
 
         if (!traveller) {
             return {
@@ -309,6 +310,7 @@ class ActiveTripsService extends BaseService {
         }
 
         const routeId = traveller.routeId;
+        const travellerId = traveller.travellerId;
 
         const activeTrip = await ActiveTripsModel.aggregate([
             {
@@ -350,22 +352,25 @@ class ActiveTripsService extends BaseService {
             };
         }
 
-        const tripData = this.getActiveTrip(query)
+        const result = activeTrip.map(trip => ({
+            ...trip,
+            travellerId
+        }));
 
         return {
             message: "Active trip found",
-            data: activeTrip
+            data: result
         };
     }
 
     async getActiveTripByStatus(groupId, status, page = 1, limit = 10) {
         try {
             let query = { groupId: Number(groupId) };
-    
+
             if (status) {
                 query.status = status;
             }
-    
+
             const aggregateQuery = [
                 {
                     $match: query
@@ -404,11 +409,11 @@ class ActiveTripsService extends BaseService {
                     $limit: limit
                 }
             ];
-    
+
             const activeTrips = await ActiveTripsModel.aggregate(aggregateQuery);
-    
+
             const totalCount = await ActiveTripsModel.countDocuments(query);
-    
+
             return {
                 data: {
                     items: activeTrips,
@@ -420,14 +425,12 @@ class ActiveTripsService extends BaseService {
             throw new Error("Error in getActiveTripByStatus function: " + error.message);
         }
     }
-    
-    
 
-    async getTrip(groupId, tripId) {
+    async getTrip(groupId, tripId, travellerId) {
         try {
             let query = { groupId: Number(groupId), tripId: tripId };
             const activeTrip = await ActiveTripsModel.findOne(query);
-    
+
             if (!activeTrip) {
                 throw new Error('No active trip found.');
             }
@@ -435,9 +438,17 @@ class ActiveTripsService extends BaseService {
             if (!activeTrip.currentLocation || activeTrip.currentLocation.length === 0) {
                 throw new Error('No current location data available.');
             }
-    
+
+            let filteredTravellers = activeTrip.onBoaredTraveller;
+            if (travellerId) {
+                filteredTravellers = activeTrip.onBoaredTraveller.filter(traveller => traveller.travellerId == travellerId);
+                if (filteredTravellers.length === 0) {
+                    throw new Error(`No traveller found with travellerId: ${travellerId}`);
+                }
+            }
+
             const onBoaredTravellers = await Promise.all(
-                activeTrip.onBoaredTraveller.map(async (traveller) => {
+                filteredTravellers.map(async (traveller) => {
                     const travellerDetails = await TravellerModel.findOne({ groupId: groupId, travellerId: traveller.travellerId });
                     if (!travellerDetails) {
                         throw new Error(`No traveller found with travellerId: ${traveller.travellerId}`);
@@ -448,25 +459,25 @@ class ActiveTripsService extends BaseService {
                     };
                 })
             );
-    
+
             const lastLocation = activeTrip.currentLocation[activeTrip.currentLocation.length - 1];
-    
+
             if (!lastLocation || !lastLocation.lat || !lastLocation.long) {
                 throw new Error('Invalid or missing location data.');
             }
-    
+
             const currentLocationData = {
                 latitude: parseFloat(lastLocation.lat),
                 longitude: parseFloat(lastLocation.long)
             }
-    
+
             const nearestStop = await this.findNearestBusStop(groupId, activeTrip.routeId, currentLocationData);
-    
+
             const routeDetails = await BusRouteModel.findOne({ routeId: activeTrip.routeId });
             const vehicleDetails = await VehicleModel.findOne({ vehicleId: activeTrip.vehicleId });
             const driverDetails = await DriverModel.findOne({ driverId: activeTrip.driverId });
             const caretakerDetails = await CareTakerModel.findOne({ careTakerId: activeTrip.careTakerId });
-    
+
             return {
                 data: {
                     activeTrip: {
@@ -484,9 +495,6 @@ class ActiveTripsService extends BaseService {
             throw new Error("Error in getTrip : " + error.message);
         }
     }
-    
-    
-    
 
     async findNearestBusStop(groupId, routeId, currentLocation) {
         try {
