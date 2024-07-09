@@ -51,9 +51,13 @@ const TravellerSchema = new mongoose.Schema(
             type: String,
             required: false
         },
-        paidFees:{
-            type:Array,
-            required:false
+        paidFees: {
+            type: Array,
+            required: false
+        },
+        remainingFees: {
+            type: Number,
+            required: true
         }
     },
     { strict: false, timestamps: true }

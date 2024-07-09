@@ -13,7 +13,7 @@ class TravellerService extends BaseService {
         const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
         const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
 
-        const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24)) + 1;
+        const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24));
 
         const route = await BusRouteModel.findOne(
             {
@@ -26,23 +26,29 @@ class TravellerService extends BaseService {
             res.send("FeesFreq is not found")
         }
 
+        const daysInCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        const daysInCurrentYear = (new Date(new Date().getFullYear(), 11, 31) - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24);
+        const daysInCurrentQuarter = Math.floor((new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3 + 3, 0) - new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3, 1)) / (1000 * 60 * 60 * 24)) + 1;
+        const daysInCurrentHalfYear = Math.floor((new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 6) * 6 + 6, 0) - new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 6) * 6, 1)) / (1000 * 60 * 60 * 24)) + 1;
+
         let fee;
         switch (feesFreq) {
             case "Monthly":
-                fee = totalFees / 30;
+                fee = totalFees / daysInCurrentMonth;
                 break;
             case "Yearly":
-                fee = totalFees / 360;
+                fee = totalFees / daysInCurrentYear;
                 break;
             case "Half Yearly":
-                fee = totalFees / 180;
+                fee = totalFees / daysInCurrentHalfYear;
                 break;
             case "Quarterly":
-                fee = totalFees / 120;
+                fee = totalFees / daysInCurrentQuarter;
                 break;
             default:
                 fee = totalFees;
         }
+
         const totalFee = fee * durationInDays
         return {
             totalFee: Math.round(totalFee)
@@ -327,19 +333,12 @@ class TravellerService extends BaseService {
                 throw new Error("Don't accept extra payment.");
             }
 
-            let remainingFees;
-            if (traveller.remainingFees !== undefined) {
-                remainingFees = traveller.remainingFees - paidFee;
-            } else {
-                remainingFees = traveller.totalFees - paidFee;
-            }
-
             const totalPaidAmount = traveller.paidFees.reduce((acc, fee) => acc + fee.paidFee, 0) + paidFee;
+            const remainingFees = traveller.remainingFees - paidFee
 
             const update = {
-                $set: { remainingFees: remainingFees },
+                $set: { remainingFees: remainingFees, paidAmount: totalPaidAmount },
                 $push: { paidFees: { paidFee, description, date } },
-                $set: { paidAmount: totalPaidAmount }
             };
 
             await TravellerModel.findOneAndUpdate(query, update);
