@@ -13,6 +13,11 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const { groupId, number } = req.body;
+        const existingRoute = await service.findByRouteNo(groupId, number);
+        if (existingRoute) {
+            return res.status(400).json({ error: "This number is already exists" });
+        }
         const routeId = +Date.now();
         req.body.routeId = routeId;
         if (!req.body.stopDetails || req.body.stopDetails.length === 0) {
