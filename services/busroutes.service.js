@@ -62,10 +62,10 @@ class BusRoutesService extends BaseService {
         });
     }
 
-    async getRouteByuserId(groupId,userId) {
+    async getRouteByuserId(groupId, userId) {
         try {
-            const routeData = await this.model.find({ groupId: groupId ,userId: userId });
-    
+            const routeData = await this.model.find({ groupId: groupId, userId: userId });
+
             if (!routeData) {
                 return null;
             }
@@ -77,7 +77,7 @@ class BusRoutesService extends BaseService {
             throw error;
         }
     }
-    
+
 
     async deleteRoute(routeId, groupId) {
         try {
@@ -86,22 +86,28 @@ class BusRoutesService extends BaseService {
             throw error;
         }
     }
-    async  findVehicleByNo(groupId,number) {
+
+    async findRouteByNoExcludeCurrent(groupId, number, routeId) {
         try {
-            const vehicle = await BusRoutesModel.findOne({ groupId:groupId,number:number  });
-            return vehicle;
+            const route = await BusRoutesModel.findOne({
+                groupId: groupId,
+                number: number,
+                routeId: { $ne: routeId } 
+            });
+            return route;
         } catch (error) {
             throw error;
         }
     }
-    async updateRoute(routeId, groupId, newData) {
+
+    async updateRouteById(groupId, routeId, newData) {
         try {
-            const updateRoute = await BusRoutesModel.findOneAndUpdate(
-                { routeId: routeId, groupId: groupId },
+            const updatedRoute = await BusRoutesModel.findOneAndUpdate(
+                { groupId: groupId, routeId: routeId },
                 newData,
                 { new: true }
             );
-            return updateRoute;
+            return updatedRoute;
         } catch (error) {
             throw error;
         }

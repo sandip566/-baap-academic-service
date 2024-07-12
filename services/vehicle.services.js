@@ -89,18 +89,20 @@ class vehicleervice extends BaseService {
         }
     }
 
-    async  findVehicleByNo(groupId,vehicalNo) {
+    async findVehicleByNoExcludeCurrent(groupId, vehicalNo, vehicleId) {
         try {
-            const vehicle = await vehicleModel.findOne({ groupId:groupId,vehicalNo: vehicalNo });
+            const vehicle = await vehicleModel.findOne({
+                groupId: groupId,
+                vehicalNo: vehicalNo,
+                vehicleId: { $ne: vehicleId }  
+            });
             return vehicle;
         } catch (error) {
             throw error;
         }
     }
     
-
-    
-    async  updateVehicleById(vehicleId, groupId, newData) {
+    async updateVehicleById(vehicleId, groupId, newData) {
         try {
             const updatedVehicle = await vehicleModel.findOneAndUpdate(
                 { vehicleId: vehicleId, groupId: groupId },
@@ -112,6 +114,7 @@ class vehicleervice extends BaseService {
             throw error;
         }
     }
+    
     
 }
 module.exports = new vehicleervice(vehicleModel, "vehicle");
