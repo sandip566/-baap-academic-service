@@ -116,33 +116,24 @@ router.delete("/groupId/:groupId/routeId/:routeId", async (req, res) => {
 
 router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
-        const routeId = req.params.routeId;
         const groupId = req.params.groupId;
+        const routeId = req.params.routeId;
         const newData = req.body;
-        const existingNumber = await service.findVehicleByNo(newData.groupId,newData.number);
-        if (existingNumber) {
-            res.status(409).json({ error: " number already exists" });
 
-            return;
+        const existingRoute = await service.findRouteByNoExcludeCurrent(groupId, newData.number, routeId);
+        if (existingRoute) {
+            return res.status(409).json({ error: "Route number already exists" });
         }
-        const updateroute = await service.updateRoute(
-            routeId,
-            groupId,
-            newData
-        );
-        if (!updateroute) {
-            res.status(404).json({
-                error: " data not found to update",
-            });
+
+        const updateData = await service.updateRouteById(groupId, routeId, newData);
+        if (!updateData) {
+            return res.status(404).json({ error: "Data not found to update" });
         } else {
-            res.status(200).json({
-                updateroute,
-                message: "data update successfully",
-            });
+            return res.status(200).json(updateData);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
 
