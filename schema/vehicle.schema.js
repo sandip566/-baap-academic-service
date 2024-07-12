@@ -17,12 +17,8 @@ const vehicle = new mongoose.Schema(
             type: Number,
             required: true
         },
-        shiftId: {
-            type: Number,
-            required: false
-        },
         vehicalNo: {
-            type: String,
+            type: Number,
             required: false
         },
         Diesel: {

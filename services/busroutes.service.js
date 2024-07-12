@@ -6,6 +6,16 @@ class BusRoutesService extends BaseService {
         super(dbModel, entityName);
     }
 
+    async findByRouteNo(groupId, number) {
+        try {
+            const route = await BusRoutesModel.findOne({ groupId, number });
+            return route;
+        } catch (error) {
+            console.error("Error finding route by number:", error);
+            throw new Error("Error finding route by numbre: " + error.message);
+        }
+    }
+
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
