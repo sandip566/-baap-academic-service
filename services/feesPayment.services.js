@@ -561,6 +561,330 @@ class feesPaymentService extends BaseService {
             }
         });
     }
+    async getAllStudentFeesData(groupId, criteria, page, limit) {
+        return this.execute(async () => {
+            try {
+                const skip = (page - 1) * limit;
+                const query = {
+                    groupId: groupId,
+                };
+
+                let courseData = await courseModel.find({ groupId: groupId });
+                let courseID;
+                let courseFee;
+                let paginationAdmissionData = await StudentsAdmissionModel.find(
+                    {
+                        groupId: groupId,
+                        academicYear: criteria.academicYear,
+                        admissionStatus: "Confirm",
+                    }
+                );
+                let matchStage = {
+                    groupId: Number(groupId),
+                    // academicYear: criteria.academicYear,
+                    admissionStatus: "Confirm",
+                };
+                let feesMatchStage = {
+                    "feesPaymentData.groupId": Number(groupId),
+                    "feesPaymentData.academicYear": criteria.academicYear,
+                    // "feesPaymentData.isShowInAccounting": true,
+                };
+
+                if (criteria.currentDate) {
+                    feesMatchStage["feesPaymentData.currentDate"] =
+                        criteria.currentDate;
+                }
+
+                let date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+                const day = String(date.getDate()).padStart(2, "0");
+                let currentDate = `${year}/${month}/${day}`;
+
+                if (criteria.month) {
+                    feesMatchStage["feesPaymentData.currentDate"] = {
+                        $regex: `/${criteria.month}/`,
+                        $options: "i",
+                    };
+                }
+
+                if (criteria.startDate && criteria.endDate) {
+                    feesMatchStage["feesPaymentData.currentDate"] = {
+                        $gte: criteria.startDate,
+                        $lte: criteria.endDate,
+                    };
+                }
+                if (criteria.feesTemplateId) {
+                    matchStage["feesDetails.feesTemplateId"] = Number(
+                        criteria.feesTemplateId
+                    );
+                }
+                if (criteria.location) {
+                    matchStage["location"] = criteria.location;
+                }
+                if (criteria.department) {
+                    matchStage["courseDetails.department_id"] = Number(
+                        criteria.department
+                    );
+                }
+                if (criteria.course) {
+                    matchStage["courseDetails.course_id"] = Number(
+                        criteria.course
+                    );
+                }
+                if (criteria.class) {
+                    matchStage["courseDetails.class_id"] = Number(
+                        criteria.class
+                    );
+                }
+
+                if (criteria.division) {
+                    matchStage["courseDetails.division_id"] = Number(
+                        criteria.division
+                    );
+                }
+                if (criteria.search) {
+                    const numericSearch = parseInt(criteria.search);
+                    matchStage.$or = [];
+                    if (!isNaN(numericSearch)) {
+                        matchStage.$or.push(
+                            { phoneNumber: numericSearch },
+                            { hostelAdmissionId: numericSearch }
+                        );
+                    }
+                    matchStage.$or.push(
+                        { firstName: { $regex: criteria.search, $options: "i" } },
+                        { lastName: { $regex: criteria.search, $options: "i" } }
+                    );
+                }
+    
+                let admissionData = await StudentsAdmissionModel.aggregate([
+                    { $match: matchStage },
+                    {
+                        $addFields: {
+                            overdue: {
+                                $anyElementTrue: {
+                                    $map: {
+                                        input: "$feesDetails",
+                                        as: "feeDetail",
+                                        in: {
+                                            $anyElementTrue: {
+                                                $map: {
+                                                    input: "$$feeDetail.installment",
+                                                    as: "inst",
+                                                    in: {
+                                                        $cond: [
+                                                            {
+                                                                $and: [
+                                                                    {
+                                                                        $eq: [
+                                                                            "$$inst.status",
+                                                                            "pending",
+                                                                        ],
+                                                                    },
+                                                                    {
+                                                                        $lt: [
+                                                                            {
+                                                                                $dateFromString:
+                                                                                    {
+                                                                                        dateString:
+                                                                                            "$$inst.date",
+                                                                                        format: "%Y-%m-%d",
+                                                                                    },
+                                                                            },
+                                                                            {
+                                                                                $toDate:
+                                                                                    currentDate,
+                                                                            },
+                                                                        ],
+                                                                    },
+                                                                ],
+                                                            },
+                                                            true,
+                                                            false,
+                                                        ],
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $project: {
+                            addmissionId: 1,
+                            academicYear: 1,
+                            admissionStatus: 1,
+                            caste: 1,
+                            empId: 1,
+                            groupId: 1,
+                            location: 1,
+                            phoneNumber: 1,
+                            religion: 1,
+                            roleId: 1,
+                            userId: 1,
+                            installmentId: 1,
+                            status: 1,
+                            name: 1,
+                            feesDetails: 1,
+                            overdue: 1,
+                        },
+                    },
+                    {
+                        $addFields: {
+                            feesDetailsInstallmentLength: {
+                                $size: {
+                                    $arrayElemAt: [
+                                        "$feesDetails.installment",
+                                        0,
+                                    ],
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "feespayments",
+                            localField: "addmissionId",
+                            foreignField: "addmissionId",
+                            as: "feesPaymentData",
+                        },
+                    },
+                    { $match: feesMatchStage },
+                    {
+                        $addFields: {
+                            "feesPaymentData.totalPaidAmount": {
+                                $sum: {
+                                    $map: {
+                                        input: "$feesPaymentData",
+                                        as: "payment",
+                                        in: {
+                                            $toDouble: "$$payment.paidAmount",
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $addFields: {
+                            feesPaymentData: {
+                                $arrayElemAt: ["$feesPaymentData", -1],
+                            },
+                        },
+                    },
+                    {
+                        $match: {
+                            "feesPaymentData.groupId": Number(groupId),
+                            "feesPaymentData.academicYear":
+                                criteria.academicYear,
+                            // "feesPaymentData.isShowInAccounting": true,
+                        },
+                    },
+                    {
+                        $addFields: {
+                            "feesPaymentData.installment": {
+                                $map: {
+                                    input: "$feesPaymentData.installment",
+                                    as: "item",
+                                    in: {
+                                        $mergeObjects: [
+                                            "$$item",
+                                            {
+                                                overdue: {
+                                                    $cond: [
+                                                        {
+                                                            $and: [
+                                                                {
+                                                                    $eq: [
+                                                                        "$$item.status",
+                                                                        "pending",
+                                                                    ],
+                                                                },
+                                                                {
+                                                                    $lt: [
+                                                                        {
+                                                                            $dateFromString:
+                                                                                {
+                                                                                    dateString:
+                                                                                        "$$item.date",
+                                                                                    format: "%Y-%m-%d",
+                                                                                },
+                                                                        },
+                                                                        currentDate,
+                                                                    ],
+                                                                },
+                                                            ],
+                                                        },
+                                                        true,
+                                                        false,
+                                                    ],
+                                                },
+                                            },
+                                        ],
+                                    },
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $addFields: {
+                            isDue: {
+                                $anyElementTrue:
+                                    "$feesPaymentData.installment.overdue",
+                            },
+                        },
+                    },
+
+                    // { $skip: skip },
+                    // { $limit: limit },
+                ]);
+
+                const seed = (page - 1) * limit;
+                const servicesWithData = await admissionData
+                    .map((data, index) => ({
+                        candidateName: data?.name,
+                        addmissionId: data?.addmissionId,
+                        academicYear: data?.academicYear,
+                        className: data?.feesPaymentData?.className,
+                        courseFees: data?.feesPaymentData?.courseFee,
+                        courseName: data?.feesPaymentData?.courseName,
+                        empId: data?.empId,
+                        feesPaymentId: data?.feesPaymentData?.feesPaymentId,
+                        installments: data?.feesDetailsInstallmentLength,
+                        groupId: data?.groupId,
+                        installmentId: data?.installmentId,
+                        paidAmount: data.feesPaymentData?.totalPaidAmount,
+                        phoneNumber: data.phoneNumber,
+                        remainingAmount: data.feesPaymentData?.remainingAmount,
+                        status: data.overdue ? "overdue" : data.status,
+                        __seed: seed + index,
+                    }))
+                    .sort((a, b) => a.__seed - b.__seed)
+                    .slice(skip, skip + limit);
+
+                const totalFees = servicesWithData.reduce(
+                    (total, service) => total + service.courseFees,
+                    0
+                );
+                const totalItemsCount = servicesWithData.length;
+
+                const response = {
+                    status: "Success",
+                    servicesWithData: [servicesWithData],
+                    totalFees: totalFees,
+                    totalItemsCount: admissionData.length,
+                };
+                // console.log(admissionData);
+                return response;
+            } catch (error) {
+                console.error("Error occurred:", error);
+                throw error;
+            }
+        });
+    }
     async getFeesStatWithDonationData(groupId, criteria, page, limit) {
         return this.execute(async () => {
             try {
@@ -1507,7 +1831,271 @@ class feesPaymentService extends BaseService {
             }
         });
     }
+    async getAllFeesCount(groupId, criteria, page, limit) {
+        return this.execute(async () => {
+            try {
+                let matchStage = {
+                    groupId: Number(groupId),
+                    academicYear: criteria.academicYear,
+                    admissionStatus: "Confirm",
+                };
 
+                let feesMatchStage = {
+                    groupId: Number(groupId),
+                    academicYear: criteria.academicYear,
+                    // isShowInAccounting: true,
+                };
+
+                if (criteria.currentDate) {
+                    feesMatchStage["currentDate"] = criteria.currentDate;
+                }
+
+                let date = new Date();
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, "0"); // Months are zero-based
+                const day = String(date.getDate()).padStart(2, "0");
+                let currentDate = `${year}/${month}/${day}`;
+
+                if (criteria.month) {
+                    feesMatchStage["currentDate"] = {
+                        $regex: `/${criteria.month}/`,
+                        $options: "i",
+                    };
+                }
+
+                if (criteria.startDate && criteria.endDate) {
+                    feesMatchStage["currentDate"] = {
+                        $gte: criteria.startDate,
+                        $lte: criteria.endDate,
+                    };
+                }
+
+                if (criteria.feesTemplateId) {
+                    matchStage["feesDetails.feesTemplateId"] = Number(
+                        criteria.feesTemplateId
+                    );
+                }
+                if (criteria.location) {
+                    matchStage["location"] = criteria.location;
+                }
+                if (criteria.department) {
+                    matchStage["courseDetails.department_id"] = Number(
+                        criteria.department
+                    );
+                }
+                if (criteria.course) {
+                    matchStage["courseDetails.course_id"] = Number(
+                        criteria.course
+                    );
+                }
+                if (criteria.class) {
+                    matchStage["courseDetails.class_id"] = Number(
+                        criteria.class
+                    );
+                }
+                if (criteria.division) {
+                    matchStage["courseDetails.division_id"] = Number(
+                        criteria.division
+                    );
+                }
+
+                // Building the aggregation pipeline
+                const pipeline = [
+                    {
+                        $match: matchStage,
+                    },
+                    {
+                        $unwind: "$courseDetails",
+                    },
+                    {
+                        $lookup: {
+                            from: "courses",
+                            localField: "courseDetails.course_id",
+                            foreignField: "courseId",
+                            as: "courseData",
+                        },
+                    },
+                    {
+                        $unwind: "$courseData",
+                    },
+                    {
+                        $group: {
+                            _id: "$courseData.courseId",
+                            courseName: { $first: "$courseData.CourseName" },
+                            studentCount: { $sum: 1 },
+                            admissionIds: { $push: "$addmissionId" },
+                        },
+                    },
+                    {
+                        $lookup: {
+                            from: "feespayments",
+                            let: { admissionIds: "$admissionIds" },
+                            pipeline: [
+                                {
+                                    $match: {
+                                        $expr: {
+                                            $and: [
+                                                {
+                                                    $in: [
+                                                        "$addmissionId",
+                                                        "$$admissionIds",
+                                                    ],
+                                                },
+                                                {
+                                                    $eq: [
+                                                        "$groupId",
+                                                        feesMatchStage.groupId,
+                                                    ],
+                                                },
+                                                {
+                                                    $eq: [
+                                                        "$academicYear",
+                                                        feesMatchStage.academicYear,
+                                                    ],
+                                                },
+                                                {
+                                                    $eq: [
+                                                        "$isShowInAccounting",
+                                                        feesMatchStage.isShowInAccounting,
+                                                    ],
+                                                },
+                                                ...(criteria.currentDate
+                                                    ? [
+                                                          {
+                                                              $eq: [
+                                                                  "$currentDate",
+                                                                  feesMatchStage.currentDate,
+                                                              ],
+                                                          },
+                                                      ]
+                                                    : []),
+                                                ...(criteria.month
+                                                    ? [
+                                                          {
+                                                              $regexMatch: {
+                                                                  input: "$currentDate",
+                                                                  regex: `/${criteria.month}/`,
+                                                                  options: "i",
+                                                              },
+                                                          },
+                                                      ]
+                                                    : []),
+                                                ...(criteria.startDate &&
+                                                criteria.endDate
+                                                    ? [
+                                                          {
+                                                              $gte: [
+                                                                  "$currentDate",
+                                                                  criteria.startDate,
+                                                              ],
+                                                          },
+                                                          {
+                                                              $lte: [
+                                                                  "$currentDate",
+                                                                  criteria.endDate,
+                                                              ],
+                                                          },
+                                                      ]
+                                                    : []),
+                                            ],
+                                        },
+                                    },
+                                },
+                                {
+                                    $sort: { createdAt: -1 },
+                                },
+                                {
+                                    $group: {
+                                        _id: "$addmissionId",
+                                        lastFee: { $first: "$$ROOT" },
+                                        totalPaidAmount: {
+                                            $sum: { $toDouble: "$paidAmount" },
+                                        },
+                                    },
+                                },
+                            ],
+                            as: "feesPaymentData",
+                        },
+                    },
+                    {
+                        $unwind: {
+                            path: "$feesPaymentData",
+                            preserveNullAndEmptyArrays: true,
+                        },
+                    },
+                    {
+                        $group: {
+                            _id: "$_id",
+                            name: { $first: "$courseName" },
+                            noOfStudents: { $first: "$studentCount" },
+                            totalPaidAmount: {
+                                $sum: "$feesPaymentData.totalPaidAmount",
+                            },
+                            totalRemainingAmount: {
+                                $sum: {
+                                    $toDouble:
+                                        "$feesPaymentData.lastFee.remainingAmount",
+                                },
+                            },
+                            courseFee: {
+                                $sum: {
+                                    $toDouble:
+                                        "$feesPaymentData.lastFee.courseFee",
+                                },
+                            },
+                        },
+                    },
+                    {
+                        $addFields: {
+                            TotalCourseFee: {
+                                $multiply: ["$courseFee", "$noOfStudents"],
+                            },
+                        },
+                    },
+                    {
+                        $project: {
+                            _id: 0,
+                            courseId: "$_id",
+                            name: 1,
+                            noOfStudents: 1,
+                            totalPaidAmount: 1,
+                            totalRemainingAmount: 1,
+                            courseFee: 1,
+                            TotalCourseFee: 1,
+                        },
+                    },
+                ];
+                let result = await StudentsAdmissionModel.aggregate(
+                    pipeline
+                ).exec();
+                let admissionData = await StudentsAdmissionModel.find({
+                    groupId: groupId,
+                    academicYear: criteria.academicYear,
+                    admissionStatus: "Confirm",
+                });
+                let totalPaidAmount = 0;
+                let totalRemainingAmount = 0;
+                let totalCourseFee = 0;
+                let totalCourseFee1 = 0;
+                result.forEach((course) => {
+                    totalPaidAmount += course.totalPaidAmount || 0;
+                    totalRemainingAmount += course.totalRemainingAmount || 0;
+                });
+
+                let response = {
+                    coursePayments: result,
+                    totalItemsCount: admissionData.length,
+                    totalFees: totalPaidAmount + totalRemainingAmount || 0,
+                    totalPaidFees: totalPaidAmount,
+                    totalPendingFees: totalRemainingAmount,
+                };
+                return response;
+            } catch (error) {
+                console.error("Error occurred:", error);
+                throw error;
+            }
+        });
+    }
     //     async getFeesTotalCount(groupId, criteria, page, limit) {
     //         return this.execute(async () => {
     //             try {
