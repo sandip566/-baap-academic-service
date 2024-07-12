@@ -32,13 +32,12 @@ class vehicleervice extends BaseService {
                 if (!isNaN(numericSearch)) {
                     searchFilter.$or = [
                         { ownerName: { $regex: search, $options: "i" } },
-                        { vehicalNo: { $regex: search, $options: "i" } },
+                        { vehicalNo: numericSearch },
                         { phoneNumber: numericSearch },
                     ];
                 } else {
                     searchFilter.$or = [
                         { ownerName: { $regex: search, $options: "i" } },
-                        { vehicalNo: { $regex: ".*" + search + ".*", $options: "i" } },
                     ];
                 }
             }
