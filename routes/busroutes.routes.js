@@ -13,6 +13,11 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const { groupId, number } = req.body;
+        const existingRoute = await service.findByRouteNo(groupId, number);
+        if (existingRoute) {
+            return res.status(400).json({ error: "This number is already exists" });
+        }
         const routeId = +Date.now();
         req.body.routeId = routeId;
         if (!req.body.stopDetails || req.body.stopDetails.length === 0) {
@@ -116,27 +121,24 @@ router.delete("/groupId/:groupId/routeId/:routeId", async (req, res) => {
 
 router.put("/groupId/:groupId/routeId/:routeId", async (req, res) => {
     try {
-        const routeId = req.params.routeId;
         const groupId = req.params.groupId;
+        const routeId = req.params.routeId;
         const newData = req.body;
-        const updateroute = await service.updateRoute(
-            routeId,
-            groupId,
-            newData
-        );
-        if (!updateroute) {
-            res.status(404).json({
-                error: " data not found to update",
-            });
+
+        const existingRoute = await service.findRouteByNoExcludeCurrent(groupId, newData.number, routeId);
+        if (existingRoute) {
+            return res.status(409).json({ error: "Route number already exists" });
+        }
+
+        const updateData = await service.updateRouteById(groupId, routeId, newData);
+        if (!updateData) {
+            return res.status(404).json({ error: "Data not found to update" });
         } else {
-            res.status(200).json({
-                updateroute,
-                message: "data update successfully",
-            });
+            return res.status(200).json(updateData);
         }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ error: "Internal Server Error" });
     }
 });
 

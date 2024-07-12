@@ -6,6 +6,16 @@ class BusRoutesService extends BaseService {
         super(dbModel, entityName);
     }
 
+    async findByRouteNo(groupId, number) {
+        try {
+            const route = await BusRoutesModel.findOne({ groupId, number });
+            return route;
+        } catch (error) {
+            console.error("Error finding route by number:", error);
+            throw new Error("Error finding route by numbre: " + error.message);
+        }
+    }
+
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
@@ -62,10 +72,10 @@ class BusRoutesService extends BaseService {
         });
     }
 
-    async getRouteByuserId(groupId,userId) {
+    async getRouteByuserId(groupId, userId) {
         try {
-            const routeData = await this.model.find({ groupId: groupId ,userId: userId });
-    
+            const routeData = await this.model.find({ groupId: groupId, userId: userId });
+
             if (!routeData) {
                 return null;
             }
@@ -77,7 +87,7 @@ class BusRoutesService extends BaseService {
             throw error;
         }
     }
-    
+
 
     async deleteRoute(routeId, groupId) {
         try {
@@ -87,14 +97,27 @@ class BusRoutesService extends BaseService {
         }
     }
 
-    async updateRoute(routeId, groupId, newData) {
+    async findRouteByNoExcludeCurrent(groupId, number, routeId) {
         try {
-            const updateRoute = await BusRoutesModel.findOneAndUpdate(
-                { routeId: routeId, groupId: groupId },
+            const route = await BusRoutesModel.findOne({
+                groupId: groupId,
+                number: number,
+                routeId: { $ne: routeId } 
+            });
+            return route;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    async updateRouteById(groupId, routeId, newData) {
+        try {
+            const updatedRoute = await BusRoutesModel.findOneAndUpdate(
+                { groupId: groupId, routeId: routeId },
                 newData,
                 { new: true }
             );
-            return updateRoute;
+            return updatedRoute;
         } catch (error) {
             throw error;
         }

@@ -6,7 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const { route } = require("./books.routes");
 const TravellerModel = require("../schema/traveller.schema");
-const BusRouteModel=require("../schema/busroutes.schema")
+const BusRouteModel = require("../schema/busroutes.schema")
 
 router.post(
     "/",
@@ -17,10 +17,21 @@ router.post(
         }
         const travellerId = +Date.now();
         req.body.travellerId = travellerId
+
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
+router.post("/calculetFees", async (req, res) => {
+    try {
+        const { groupId, routeId, startDate, endDate, totalFees } = req.body
+        const fees = await service. calculateFees(groupId, routeId, startDate, endDate, totalFees)
+        res.json(fees)
+    } catch (error) {
+        res.status(500).send({ error: error.message })
+    }
+})
 
 router.delete("/:id", async (req, res) => {
     const serviceResponse = await service.deleteById(req.params.id);
@@ -118,16 +129,15 @@ router.put("/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     }
 });
 
-
 router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (req, res) => {
     try {
         const groupId = parseInt(req.params.groupId);
         const travellerId = parseInt(req.params.travellerId);
-       
+
         if (isNaN(travellerId)) {
             return res.status(400).json({ error: "Invalid travellerId" });
         }
-        const totalFees = await service.calculateTotalFees(groupId,travellerId);
+        const totalFees = await service.calculateTotalFees(groupId, travellerId);
         console.log(`Total fees: ${totalFees}`);
         res.status(200).json({ totalFees });
     } catch (error) {
@@ -135,5 +145,18 @@ router.get("/passengerFees/groupId/:groupId/travellerId/:travellerId", async (re
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.put("/remainingFees/groupId/:groupId/userId/:userId", async (req, res) => {
+    try {
+        const { groupId, userId } = req.params
+        const updateData = req.body
+
+        const fees = await service.calculateRemainingFees(groupId, userId, updateData)
+        res.json(fees)
+    } catch (error) {
+        console.log(error);
+        res.status(500).send({ error: error.massage })
+    }
+})
 
 module.exports = router;

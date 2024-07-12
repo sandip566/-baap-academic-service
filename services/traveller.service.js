@@ -9,6 +9,52 @@ class TravellerService extends BaseService {
         super(dbModel, entityName);
     }
 
+    async calculateFees(groupId, routeId, startDate, endDate, totalFees) {
+        const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
+        const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
+
+        const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24));
+
+        const route = await BusRouteModel.findOne(
+            {
+                groupId: Number(groupId),
+                routeId: Number(routeId)
+            }
+        )
+        const feesFreq = route.feesFreq
+        if (!feesFreq) {
+            res.send("FeesFreq is not found")
+        }
+
+        const daysInCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+        const daysInCurrentYear = (new Date(new Date().getFullYear(), 11, 31) - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24);
+        const daysInCurrentQuarter = Math.floor((new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3 + 3, 0) - new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3, 1)) / (1000 * 60 * 60 * 24)) + 1;
+        const daysInCurrentHalfYear = Math.floor((new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 6) * 6 + 6, 0) - new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 6) * 6, 1)) / (1000 * 60 * 60 * 24)) + 1;
+
+        let fee;
+        switch (feesFreq) {
+            case "Monthly":
+                fee = totalFees / daysInCurrentMonth;
+                break;
+            case "Yearly":
+                fee = totalFees / daysInCurrentYear;
+                break;
+            case "Half Yearly":
+                fee = totalFees / daysInCurrentHalfYear;
+                break;
+            case "Quarterly":
+                fee = totalFees / daysInCurrentQuarter;
+                break;
+            default:
+                fee = totalFees;
+        }
+
+        const totalFee = fee * durationInDays
+        return {
+            totalFee: Math.round(totalFee)
+        }
+    }
+
     async getBytravellerId(groupId, travellerId) {
         let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
         const routeId = traveller.routeId
@@ -73,6 +119,16 @@ class TravellerService extends BaseService {
                 searchFilter.phoneNumber = { $regex: phoneNumber, $options: "i" };
             }
 
+            const totalFeesSumResult = await TravellerModel.find(searchFilter).sort({ createdAt: -1 });
+
+            const totalFeesSum = totalFeesSumResult
+                .map(item => item.totalFees)
+                .reduce((acc, curr) => acc + (curr || 0), 0);
+
+            const totalRemainingSum = totalFeesSumResult
+                .map(item => item.remainingFees)
+                .reduce((acc, curr) => acc + (curr || 0), 0);
+
             const count = await TravellerModel.countDocuments(searchFilter);
             const totalPages = Math.ceil(count / limit);
             const skip = (page - 1) * limit;
@@ -80,6 +136,7 @@ class TravellerService extends BaseService {
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(limit);
+
             const response = {
                 status: "Success",
                 data: {
@@ -87,7 +144,9 @@ class TravellerService extends BaseService {
                     totalItemsCount: count,
                     page,
                     limit,
-                    totalPages
+                    totalPages,
+                    totalFeesSum: Math.round(totalFeesSum),
+                    totalRemainingSum: Math.round(totalRemainingSum)
                 },
             };
 
@@ -245,8 +304,56 @@ class TravellerService extends BaseService {
         }
     }
 
+    async calculateRemainingFees(groupId, userId, updateData) {
+        try {
+            const query = {
+                groupId: Number(groupId),
+                userId: Number(userId)
+            };
 
+            const paidFee = updateData.paidFees;
+            const description = updateData.description;
+            const date = updateData.date;
 
+            if (isNaN(query.groupId) || isNaN(query.userId) || isNaN(paidFee)) {
+                throw new Error("Invalid input data. GroupId, userId, or paidFees are not valid numbers.");
+            }
+
+            const traveller = await TravellerModel.findOne(query).sort({ createdAt: -1 });
+
+            if (!traveller) {
+                throw new Error("Traveller not found for provided groupId and userId.");
+            }
+
+            if (traveller.totalFees === undefined) {
+                throw new Error("Total fees not found for the traveller.");
+            }
+
+            if (traveller.remainingFees < paidFee) {
+                throw new Error("Don't accept extra payment.");
+            }
+
+            const totalPaidAmount = traveller.paidFees.reduce((acc, fee) => acc + fee.paidFee, 0) + paidFee;
+            const remainingFees = traveller.remainingFees - paidFee
+
+            const update = {
+                $set: { remainingFees: remainingFees, paidAmount: totalPaidAmount },
+                $push: { paidFees: { paidFee, description, date } },
+            };
+
+            await TravellerModel.findOneAndUpdate(query, update);
+
+            return {
+                status: "Success",
+                remainingFees: Math.round(remainingFees)
+            };
+        } catch (error) {
+            return {
+                status: "Error",
+                message: error.message
+            };
+        }
+    }
 
 }
 
