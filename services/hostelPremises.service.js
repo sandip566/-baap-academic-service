@@ -1,6 +1,8 @@
 const HostelModel = require("../schema/hostelPremises.schema.js");
 const BaseService = require("@baapcompany/core-api/services/base.service");
 const studentAddmissionModel = require("../schema/studentAdmission.schema.js");
+const hostelAddmissionModel=require("../schema/hosteladmission.schema.js")
+const roomModel=require("../schema/rooms.schema.js")
 
 class HostelService extends BaseService {
     constructor(dbModel, entityName) {
@@ -91,7 +93,22 @@ class HostelService extends BaseService {
 
     async deleteByDataId(hostelId, groupId) {
         try {
-            const deleteData = await HostelModel.deleteOne({
+            const classRecord = await hostelAddmissionModel.findOne({
+                "hostelDetails.hostelId": hostelId,
+                admissionStatus:"Confirm",
+                groupId: groupId,
+            });
+            if (classRecord ) {
+                return null;
+            }
+            const deleteData = await HostelModel.findOneAndDelete({
+                hostelId: hostelId,
+                groupId: groupId,
+            });
+            if (!deleteData) {
+                return { success: false, message: "Hostel not found." };
+            }
+            const deletedRooms = await roomModel.deleteMany({
                 hostelId: hostelId,
                 groupId: groupId,
             });

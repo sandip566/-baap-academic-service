@@ -1953,12 +1953,12 @@ class feesPaymentService extends BaseService {
                                                         feesMatchStage.academicYear,
                                                     ],
                                                 },
-                                                {
-                                                    $eq: [
-                                                        "$isShowInAccounting",
-                                                        feesMatchStage.isShowInAccounting,
-                                                    ],
-                                                },
+                                                // {
+                                                //     $eq: [
+                                                //         "$isShowInAccounting",
+                                                //         feesMatchStage.isShowInAccounting,
+                                                //     ],
+                                                // },
                                                 ...(criteria.currentDate
                                                     ? [
                                                           {

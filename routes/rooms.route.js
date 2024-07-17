@@ -5,6 +5,7 @@ const service = require("../services/rooms.services");
 const RoomsModel = require("../schema/rooms.schema");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const roomModel = require("../schema/rooms.schema");
 
 router.post(
     "/",
@@ -87,16 +88,15 @@ router.get("/getAllRoom/groupId/:groupId", async (req, res) => {
             name: req.query.name,
             hostelId: req.query.hostelId,
             status: req.query.status,
-            roomType:req.query.roomType,
-            bedCount:req.query.bedCount,
-            search:req.query.search,
-            page:req.query.page ,
-            limit:req.query.limit
-            
+            roomType: req.query.roomType,
+            bedCount: req.query.bedCount,
+            search: req.query.search,
+            page: req.query.page,
+            limit: req.query.limit,
         };
         const serviceResponse = await service.getAllRoomDataByGroupId(
             groupId,
-            criteria,
+            criteria
         );
         requestResponsehelper.sendResponse(res, serviceResponse);
     } catch (error) {
@@ -120,7 +120,47 @@ router.delete("/groupId/:groupId/roomId/:roomId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const roomId = req.body.rooms;
 
+        if (!Array.isArray(roomId) || roomId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty roomId array",
+            });
+        }
+
+        const numericIds = roomId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${roomId}`);
+            }
+            return num;
+        });
+
+        const result = await roomModel.deleteMany({
+            groupId: groupId,
+            roomId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 router.put("/groupId/:groupId/roomId/:roomId", async (req, res) => {
     try {
         const roomId = req.params.roomId;
