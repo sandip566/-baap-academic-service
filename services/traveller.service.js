@@ -12,25 +12,26 @@ class TravellerService extends BaseService {
     async calculateFees(groupId, routeId, startDate, endDate, totalFees) {
         const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
         const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
-
+    
+        endDateParsed.setDate(endDateParsed.getDate() + 1);
+    
         const durationInDays = Math.ceil((endDateParsed - startDateParsed) / (1000 * 60 * 60 * 24));
-
-        const route = await BusRouteModel.findOne(
-            {
-                groupId: Number(groupId),
-                routeId: Number(routeId)
-            }
-        )
-        const feesFreq = route.feesFreq
+    
+        const route = await BusRouteModel.findOne({
+            groupId: Number(groupId),
+            routeId: Number(routeId)
+        });
+    
+        const feesFreq = route.feesFreq;
         if (!feesFreq) {
-            res.send("FeesFreq is not found")
+            throw new Error("FeesFreq is not found");
         }
-
+    
         const daysInCurrentMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
         const daysInCurrentYear = (new Date(new Date().getFullYear(), 11, 31) - new Date(new Date().getFullYear(), 0, 0)) / (1000 * 60 * 60 * 24);
         const daysInCurrentQuarter = Math.floor((new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3 + 3, 0) - new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 3) * 3, 1)) / (1000 * 60 * 60 * 24)) + 1;
         const daysInCurrentHalfYear = Math.floor((new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 6) * 6 + 6, 0) - new Date(new Date().getFullYear(), Math.floor(new Date().getMonth() / 6) * 6, 1)) / (1000 * 60 * 60 * 24)) + 1;
-
+    
         let fee;
         switch (feesFreq) {
             case "Monthly":
@@ -48,12 +49,13 @@ class TravellerService extends BaseService {
             default:
                 fee = totalFees;
         }
-
-        const totalFee = fee * durationInDays
+    
+        const totalFee = fee * durationInDays;
         return {
             totalFee: Math.round(totalFee)
-        }
+        };
     }
+    
 
     async getBytravellerId(groupId, travellerId) {
         let traveller = await TravellerModel.findOne({ groupId: groupId, travellerId: travellerId })
