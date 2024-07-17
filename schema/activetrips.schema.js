@@ -27,7 +27,7 @@ const ActiveTripsSchema = new mongoose.Schema(
         },
         careTakerId: {
             type: Number,
-            required: true
+            required: false
         },
         currentLocation: {
             type: Array,
