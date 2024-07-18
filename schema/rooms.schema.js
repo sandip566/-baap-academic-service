@@ -6,7 +6,7 @@ const room = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        
+
         roomId: {
             type: Number,
             required: false,
@@ -30,11 +30,11 @@ const room = new mongoose.Schema(
             type: Number,
             required: true,
         },
-        status:{
-          type: String,
-          required: false,
-          default: "available"
-        }
+        status: {
+            type: String,
+            required: false,
+            default: "available",
+        },
     },
     { strict: false, timestamps: true }
 );
