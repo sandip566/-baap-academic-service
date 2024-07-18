@@ -111,4 +111,46 @@ router.put("/groupId/:groupId/gatepassId/:gatepassId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const gatepassId = req.body.gatepass;
+
+        if (!Array.isArray(gatepassId) || gatepassId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty gatepassId array",
+            });
+        }
+
+        const numericIds = gatepassId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${gatepassId}`);
+            }
+            return num;
+        });
+
+        const result = await GatepassModel.deleteMany({
+            groupId: groupId,
+            gatepassId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

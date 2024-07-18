@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/documentcategory.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const DocumentCategoryModel = require("../schema/documentcategory.schema");
 
 router.post(
     "/",
@@ -89,6 +90,48 @@ router.put("/groupId/:groupId/documentCategoryId/:documentCategoryId", async (re
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const documentCategoryId = req.body.documentCategory;
+
+        if (!Array.isArray(documentCategoryId) || documentCategoryId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty documentCategoryId array",
+            });
+        }
+
+        const numericIds = documentCategoryId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${documentCategoryId}`);
+            }
+            return num;
+        });
+
+        const result = await DocumentCategoryModel.deleteMany({
+            groupId: groupId,
+            documentCategoryId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

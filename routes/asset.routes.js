@@ -5,6 +5,7 @@ const service = require("../services/asset.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const assetModel=require("../schema/asset.schema")
 
 router.post(
     "/",
@@ -118,6 +119,48 @@ router.get("/all/asset", async (req, res) => {
 router.get("/getByAssetId/:id", async (req, res) => {
     const serviceResponse = await service.getByDataId(req.params.id);
     requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const assetId = req.body.asset;
+
+        if (!Array.isArray(assetId) || assetId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty assetId array",
+            });
+        }
+
+        const numericIds = assetId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${assetId}`);
+            }
+            return num;
+        });
+
+        const result = await assetModel.deleteMany({
+            groupId: groupId,
+            assetId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 module.exports = router;

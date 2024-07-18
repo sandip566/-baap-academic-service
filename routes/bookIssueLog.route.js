@@ -141,7 +141,7 @@ router.post("/return-book", async (req, res) => {
 
         if (
             error.message ===
-                "The book is not currently issued to the specified group." ||
+            "The book is not currently issued to the specified group." ||
             error.message === "First Paid Payment, Your Log is OverDue"
         ) {
             return res.status(409).json({
@@ -169,7 +169,7 @@ router.put("/:id", async (req, res) => {
 
 router.get("/all/getByGroupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
-    
+
     const criteria = {
         bookIssueLogId: req.query.bookIssueLogId,
         status: req.query.status,
@@ -404,6 +404,48 @@ router.post("/reserve-book", async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const bookIssueLogId = req.body.bookIssueLog;
+
+        if (!Array.isArray(bookIssueLogId) || bookIssueLogId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty bookIssueLogId array",
+            });
+        }
+
+        const numericIds = bookIssueLogId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${bookIssueLogId}`);
+            }
+            return num;
+        });
+
+        const result = await bookIssueLogModel.deleteMany({
+            groupId: groupId,
+            bookIssueLogId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

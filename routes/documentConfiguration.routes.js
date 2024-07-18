@@ -270,4 +270,46 @@ router.get(
         }
     }
 );
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const documntConfigurationId = req.body.documntConfiguration;
+
+        if (!Array.isArray(documntConfigurationId) || documntConfigurationId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty documntConfigurationId array",
+            });
+        }
+
+        const numericIds = documntConfigurationId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${documntConfigurationId}`);
+            }
+            return num;
+        });
+
+        const result = await documentConfigurationModel.deleteMany({
+            groupId: groupId,
+            documntConfigurationId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

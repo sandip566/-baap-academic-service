@@ -238,4 +238,46 @@ function createAssetRequestDataObject(headers, row) {
     return data;
 }
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const requestId = req.body.request;
+
+        if (!Array.isArray(requestId) || requestId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty requestId array",
+            });
+        }
+
+        const numericIds = requestId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${requestId}`);
+            }
+            return num;
+        });
+
+        const result = await AssetRequestModel.deleteMany({
+            groupId: groupId,
+            requestId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;
