@@ -16,4 +16,4 @@ functions:
   api:
     handler: app.handler
     events:
-      - httpApi: '*'
+      - httpApi: '*' 
