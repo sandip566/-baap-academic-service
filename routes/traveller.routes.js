@@ -15,13 +15,19 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const { userId, groupId } = req.body;
+        const existingVehicle = await service.findByUserId(groupId, userId);
+        if (existingVehicle) {
+            return res.status(400).json({ error: "This user is already exists" });
+        }
         const travellerId = +Date.now();
-        req.body.travellerId = travellerId
+        req.body.travellerId = travellerId;
 
         const serviceResponse = await service.create(req.body);
         requestResponsehelper.sendResponse(res, serviceResponse);
     }
 );
+
 
 router.post("/calculetFees", async (req, res) => {
     try {
