@@ -3,6 +3,7 @@ const BaseService = require("@baapcompany/core-api/services/base.service");
 const studentAddmissionModel = require("../schema/studentAdmission.schema.js");
 const hostelAddmissionModel=require("../schema/hosteladmission.schema.js")
 const roomModel=require("../schema/rooms.schema.js")
+const bedRoomModel=require("../schema/bedrooms.schema.js")
 
 class HostelService extends BaseService {
     constructor(dbModel, entityName) {
@@ -112,6 +113,10 @@ class HostelService extends BaseService {
                 hostelId: hostelId,
                 groupId: groupId,
             });
+            await bedRoomModel.deleteMany({
+                hostelId: hostelId,
+                groupId: groupId,
+            })
             return deleteData;
         } catch (error) {
             throw error;
