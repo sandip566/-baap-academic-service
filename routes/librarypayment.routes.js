@@ -6,6 +6,7 @@ const Payment = require("../schema/librarypayment.schema");
 const BookIssueLog = require("../schema/bookIssueLog.schema");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const libraryPaymentModel =require("../schema/librarypayment.schema")
 router.post(
     "/",
     checkSchema(require("../dto/librarypayment.dto")),
@@ -130,4 +131,46 @@ router.put(
         }
     }
 );
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const libraryPaymentId = req.body.libraryPayment;
+
+        if (!Array.isArray(libraryPaymentId) || libraryPaymentId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty libraryPaymentId array",
+            });
+        }
+
+        const numericIds = libraryPaymentId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${libraryPaymentId}`);
+            }
+            return num;
+        });
+
+        const result = await libraryPaymentModel.deleteMany({
+            groupId: groupId,
+            libraryPaymentId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

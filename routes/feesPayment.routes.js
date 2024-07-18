@@ -937,4 +937,46 @@ router.get("/feesDetails/groupId/:groupId/userId/:userId", async (req, res) => {
     }
 });
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const feesPaymentId = req.body.feesPayment;
+
+        if (!Array.isArray(feesPaymentId) || feesPaymentId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty feesPaymentId array",
+            });
+        }
+
+        const numericIds = feesPaymentId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${feesPaymentId}`);
+            }
+            return num;
+        });
+
+        const result = await feesPaymnetModel.deleteMany({
+            groupId: groupId,
+            feesPaymentId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

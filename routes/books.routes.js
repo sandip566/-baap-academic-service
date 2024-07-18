@@ -6,6 +6,7 @@ const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResp
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const shelfModel = require("../schema/shelf.schema");
 const PurchaseModel = require("../schema/purchase.schema");
+const booksModel = require("../schema/books.schema");
 router.post(
     "/",
     checkSchema(require("../dto/books.dto")),
@@ -153,6 +154,48 @@ router.get("/book-details/:groupId", async (req, res) => {
     };
     const searchFilter = await service.getBookDetails(groupId, criteria);
     requestResponsehelper.sendResponse(res, searchFilter);
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const bookId = req.body.book;
+
+        if (!Array.isArray(bookId) || bookId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty bookId array",
+            });
+        }
+
+        const numericIds = bookId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${bookId}`);
+            }
+            return num;
+        });
+
+        const result = await booksModel.deleteMany({
+            groupId: groupId,
+            bookId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 module.exports = router;

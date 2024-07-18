@@ -5,6 +5,7 @@ const service = require("../services/admissioncancel.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const admissionCancelModel=require("../schema/admissioncancel.schema")
 router.post(
     "/",
     checkSchema(require("../dto/admissioncancel.dto")),
@@ -80,6 +81,48 @@ router.get("/all", async (req, res) => {
     const serviceResponse = await service.getAllByCriteria({});
 
     requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const admissionCancelId = req.body.admissionCancel;
+
+        if (!Array.isArray(admissionCancelId) || admissionCancelId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty admissionCancelId array",
+            });
+        }
+
+        const numericIds = admissionCancelId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${admissionCancelId}`);
+            }
+            return num;
+        });
+
+        const result = await admissionCancelModel.deleteMany({
+            groupId: groupId,
+            admissionCancelId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 module.exports = router;

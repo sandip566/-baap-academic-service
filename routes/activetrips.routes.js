@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/activetrips.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const ActiveTripsModel = require("../schema/activetrips.schema");
 
 router.post(
     "/",
@@ -165,6 +166,48 @@ router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
     } catch (error) {
         console.log(error);
         res.status(500).json({ error: "Internal Server Error" });
+    }
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const tripId = req.body.trip;
+
+        if (!Array.isArray(tripId) || tripId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty tripId array",
+            });
+        }
+
+        const numericIds = tripId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${tripId}`);
+            }
+            return num;
+        });
+
+        const result = await ActiveTripsModel.deleteMany({
+            groupId: groupId,
+            tripId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

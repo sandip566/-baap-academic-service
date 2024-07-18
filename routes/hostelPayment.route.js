@@ -12,6 +12,7 @@ const TokenService = require("../services/token.services");
 const { findOne } = require("../schema/rooms.schema");
 const BedRoomsModel = require("../schema/bedrooms.schema");
 const roomModel = require("../schema/rooms.schema");
+const hostelPaymnetModel = require("../schema/hostelPayment.schema");
 
 
 router.post(
@@ -88,7 +89,7 @@ router.post(
                 await hostelfeesinstallmentService.getByInstallmentId(
                     req.body.hostelInstallmentId
                 );
-                console.log(installmentRecord);
+            console.log(installmentRecord);
             const studentInstallmentRecord =
                 await hosteladmissionService.getByInstallmentId(
                     req.body.hostelInstallmentId,
@@ -100,7 +101,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -177,7 +178,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -247,13 +248,13 @@ router.post(
                 });
 
             }
-            let datata=await HostelAdmissionModel.findOne({
-                hostelAdmissionId:req.body.hostelAdmissionId
+            let datata = await HostelAdmissionModel.findOne({
+                hostelAdmissionId: req.body.hostelAdmissionId
 
             })
-           
+
             const { hostelDetails } = datata;
-            for (const detail of hostelDetails ) {
+            for (const detail of hostelDetails) {
                 await BedRoomsModel.updateOne(
                     { 'beds.bedId': detail.bedId, hostelId: detail.hostelId, roomId: detail.roomId },
                     { $set: { 'beds.$.status': 'Confirm' } }
@@ -274,13 +275,13 @@ router.post(
                     } else {
                         newRoomStatus = 'available';
                     }
-    
 
-                   // Update the room status in RoomsModel
-                await roomModel.updateOne(
-                    { roomId: detail.roomId },
-                    { $set: { status: newRoomStatus } }
-                );
+
+                    // Update the room status in RoomsModel
+                    await roomModel.updateOne(
+                        { roomId: detail.roomId },
+                        { $set: { status: newRoomStatus } }
+                    );
                 }
             }
 
@@ -324,7 +325,7 @@ router.post(
                 await hostelfeesinstallmentService.getByInstallmentId(
                     req.body.hostelInstallmentId
                 );
-                console.log(installmentRecord);
+            console.log(installmentRecord);
             const AddmissioninstallmentRecord =
                 await hosteladmissionService.getByInstallmentId(
                     req.body.hostelInstallmentId
@@ -336,7 +337,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -413,7 +414,7 @@ router.post(
                         for (const reqInstallment of req.body.installment) {
                             if (
                                 installment.installmentNo ===
-                                    reqInstallment.installmentNo &&
+                                reqInstallment.installmentNo &&
                                 reqInstallment.radio
                             ) {
                                 installment.status = "paid";
@@ -481,13 +482,13 @@ router.post(
                     });
                 });
             }
-            let datata=await HostelAdmissionModel.findOne({
-                hostelAdmissionId:req.body.hostelAdmissionId
+            let datata = await HostelAdmissionModel.findOne({
+                hostelAdmissionId: req.body.hostelAdmissionId
 
             })
-           
+
             const { hostelDetails } = datata;
-            for (const detail of hostelDetails ) {
+            for (const detail of hostelDetails) {
                 await BedRoomsModel.updateOne(
                     { 'beds.bedId': detail.bedId, hostelId: detail.hostelId, roomId: detail.roomId },
                     { $set: { 'beds.$.status': 'Confirm' } }
@@ -508,13 +509,13 @@ router.post(
                     } else {
                         newRoomStatus = 'Available';
                     }
-    
 
-                   // Update the room status in RoomsModel
-                await roomModel.updateOne(
-                    { roomId: detail.roomId },
-                    { $set: { status: newRoomStatus } }
-                );
+
+                    // Update the room status in RoomsModel
+                    await roomModel.updateOne(
+                        { roomId: detail.roomId },
+                        { $set: { status: newRoomStatus } }
+                    );
                 }
             }
 
@@ -615,7 +616,7 @@ router.get("/getAllupdateHostelPayment/groupId/:groupId", async (req, res) => {
     const groupId = req.params.groupId;
     const criteria = {
         hostelPaymentId: req.query.hostelPaymentId,
-        hostelInstallmentId:req.query.hostelInstallmentId,
+        hostelInstallmentId: req.query.hostelInstallmentId,
         studentId: req.query.studentId,
         mmemberId: req.query.memberId,
         hostelId: req.query.hostelId,
@@ -677,4 +678,46 @@ router.put(
         }
     }
 );
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const hostelPaymentId = req.body.hostelPayment;
+
+        if (!Array.isArray(hostelPaymentId) || hostelPaymentId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty hostelPaymentId array",
+            });
+        }
+
+        const numericIds = hostelPaymentId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${hostelPaymentId}`);
+            }
+            return num;
+        });
+
+        const result = await hostelPaymnetModel.deleteMany({
+            groupId: groupId,
+            hostelPaymentId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;
