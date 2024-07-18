@@ -9,6 +9,17 @@ class TravellerService extends BaseService {
         super(dbModel, entityName);
     }
 
+    async findByUserId(groupId, userId) {
+        try {
+            const user = await TravellerModel.findOne({ groupId, userId });
+            return user;
+        } catch (error) {
+            console.error("Error finding user by userId:", error);
+            throw new Error("Error finding user by userId: " + error.message);
+        }
+    }
+    
+
     async calculateFees(groupId, routeId, startDate, endDate, totalFees) {
         const startDateParsed = new Date(startDate.split('/').reverse().join('-'));
         const endDateParsed = new Date(endDate.split('/').reverse().join('-'));
