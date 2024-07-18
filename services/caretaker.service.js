@@ -5,6 +5,16 @@ class CareTakerService extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
+    async findByUserId(groupId, empId) {
+        try {
+            const user = await CareTakerModel.findOne({ groupId, empId });
+            return user;
+        } catch (error) {
+            console.error("Error finding user by empId:", error);
+            throw new Error("Error finding user by empId: " + error.message);
+        }
+    }
     
     async getBycareTakerId(careTakerId) {
         return this.execute(() => {
