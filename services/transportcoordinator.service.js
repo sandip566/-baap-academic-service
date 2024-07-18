@@ -6,13 +6,23 @@ class transportcoordinatorervice extends BaseService {
         super(dbModel, entityName);
     }
 
+    async findByUserId(groupId, empId) {
+        try {
+            const user = await transportcoordinatorModel.findOne({ groupId, empId });
+            return user;
+        } catch (error) {
+            console.error("Error finding user by empId:", error);
+            throw new Error("Error finding user by empId: " + error.message);
+        }
+    }
+
     async getBytransportCoordinatorId(transportCoordinatorId) {
         return this.execute(() => {
             return this.model.findOne({ transportCoordinatorId: transportCoordinatorId });
         });
     }
 
-    
+
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
@@ -87,6 +97,6 @@ class transportcoordinatorervice extends BaseService {
         }
     }
 
-   
+
 }
 module.exports = new transportcoordinatorervice(transportcoordinatorModel, "transportcoordinator");

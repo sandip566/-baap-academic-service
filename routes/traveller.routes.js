@@ -16,8 +16,8 @@ router.post(
             return;
         }
         const { userId, groupId } = req.body;
-        const existingVehicle = await service.findByUserId(groupId, userId);
-        if (existingVehicle) {
+        const existingUser = await service.findByUserId(groupId, userId);
+        if (existingUser) {
             return res.status(400).json({ error: "This user is already exists" });
         }
         const travellerId = +Date.now();

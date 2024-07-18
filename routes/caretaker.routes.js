@@ -12,6 +12,11 @@ router.post(
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
         }
+        const { empId, groupId } = req.body;
+        const existingUser = await service.findByUserId(groupId, empId);
+        if (existingUser) {
+            return res.status(400).json({ error: "This user is already exists" });
+        }
         const careTakerId = +Date.now();
         req.body.careTakerId = careTakerId
         const serviceResponse = await service.create(req.body);

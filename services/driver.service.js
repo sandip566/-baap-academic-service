@@ -5,6 +5,17 @@ class driverervice extends BaseService {
     constructor(dbModel, entityName) {
         super(dbModel, entityName);
     }
+
+    async findByUserId(groupId, userId) {
+        try {
+            const user = await driverModel.findOne({ groupId, userId });
+            return user;
+        } catch (error) {
+            console.error("Error finding user by userId:", error);
+            throw new Error("Error finding user by userId: " + error.message);
+        }
+    }
+
     async getAllDataByGroupId(groupId, phoneNumber, name, search, page, limit) {
         try {
             const searchFilter = {
