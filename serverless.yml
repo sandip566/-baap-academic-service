@@ -1,18 +1,19 @@
 service: baap-academic-api
-frameworkVersion: "3"
+frameworkVersion: '3'
 
 plugins:
-    - serverless-offline
+  - serverless-offline
 
 provider:
-    name: aws
-    runtime: nodejs16.x
-    stage: ${opt:stage, 'prod'}
-    region: ap-south-1
-    memorySize: 256
+  name: aws
+  runtime: nodejs16.x
+  stage: ${opt:stage, 'prod'}
+  region: ap-south-1
+  memorySize: 256
+
 
 functions:
-    api:
-        handler: app.handler
-        events:
-            - httpApi: "*"
+  api:
+    handler: app.handler
+    events:
+      - httpApi: '*'
