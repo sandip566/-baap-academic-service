@@ -7,7 +7,7 @@
     "provider": {
       "name": "aws",
       "runtime": "nodejs16.x",
-      "stage": "dev",
+      "stage": "prod",
       "region": "ap-south-1",
       "memorySize": 256,
       "versionFunctions": true,
@@ -87,7 +87,7 @@
           "ApiLogGroup": {
             "Type": "AWS::Logs::LogGroup",
             "Properties": {
-              "LogGroupName": "/aws/lambda/baap-academic-api-dev-api"
+              "LogGroupName": "/aws/lambda/baap-academic-api-prod-api"
             }
           },
           "IamRoleLambdaExecution": {
@@ -116,7 +116,7 @@
                       "-",
                       [
                         "baap-academic-api",
-                        "dev",
+                        "prod",
                         "lambda"
                       ]
                     ]
@@ -133,7 +133,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/baap-academic-api-dev*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/baap-academic-api-prod*:*"
                           }
                         ]
                       },
@@ -144,7 +144,7 @@
                         ],
                         "Resource": [
                           {
-                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/baap-academic-api-dev*:*:*"
+                            "Fn::Sub": "arn:${AWS::Partition}:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/baap-academic-api-prod*:*:*"
                           }
                         ]
                       }
@@ -158,7 +158,7 @@
                   "-",
                   [
                     "baap-academic-api",
-                    "dev",
+                    "prod",
                     {
                       "Ref": "AWS::Region"
                     },
@@ -175,11 +175,11 @@
                 "S3Bucket": {
                   "Ref": "ServerlessDeploymentBucket"
                 },
-                "S3Key": "serverless/baap-academic-api/dev/1721208269366-2024-07-17T09:24:29.366Z/baap-academic-api.zip"
+                "S3Key": "serverless/baap-academic-api/prod/1721208039825-2024-07-17T09:20:39.825Z/baap-academic-api.zip"
               },
               "Handler": "app.handler",
               "Runtime": "nodejs16.x",
-              "FunctionName": "baap-academic-api-dev-api",
+              "FunctionName": "baap-academic-api-prod-api",
               "MemorySize": 256,
               "Timeout": 6,
               "Role": {
@@ -193,20 +193,20 @@
               "ApiLogGroup"
             ]
           },
-          "ApiLambdaVersion3RuItXyzYrDScx1tWHo7Sk2gTxyw7POOfdsqWLM": {
+          "ApiLambdaVersion2HLIaHwpkweXVugeEXeBd8k8lTqZCuo2VqbDTDryHK8": {
             "Type": "AWS::Lambda::Version",
             "DeletionPolicy": "Retain",
             "Properties": {
               "FunctionName": {
                 "Ref": "ApiLambdaFunction"
               },
-              "CodeSha256": "JyztbemPfLd9IGlIUSVBuLTnXJHpl8eWH9L/kgiY6Os="
+              "CodeSha256": "e2QIpn9ApikHGZTMO8NnR7dsL71XPE9Tl9AH5LWXqzY="
             }
           },
           "HttpApi": {
             "Type": "AWS::ApiGatewayV2::Api",
             "Properties": {
-              "Name": "dev-baap-academic-api",
+              "Name": "prod-baap-academic-api",
               "ProtocolType": "HTTP"
             }
           },
@@ -302,16 +302,16 @@
               "Ref": "ServerlessDeploymentBucket"
             },
             "Export": {
-              "Name": "sls-baap-academic-api-dev-ServerlessDeploymentBucketName"
+              "Name": "sls-baap-academic-api-prod-ServerlessDeploymentBucketName"
             }
           },
           "ApiLambdaFunctionQualifiedArn": {
             "Description": "Current Lambda function version",
             "Value": {
-              "Ref": "ApiLambdaVersion3RuItXyzYrDScx1tWHo7Sk2gTxyw7POOfdsqWLM"
+              "Ref": "ApiLambdaVersion2HLIaHwpkweXVugeEXeBd8k8lTqZCuo2VqbDTDryHK8"
             },
             "Export": {
-              "Name": "sls-baap-academic-api-dev-ApiLambdaFunctionQualifiedArn"
+              "Name": "sls-baap-academic-api-prod-ApiLambdaFunctionQualifiedArn"
             }
           },
           "HttpApiId": {
@@ -320,7 +320,7 @@
               "Ref": "HttpApi"
             },
             "Export": {
-              "Name": "sls-baap-academic-api-dev-HttpApiId"
+              "Name": "sls-baap-academic-api-prod-HttpApiId"
             }
           },
           "HttpApiUrl": {
@@ -345,7 +345,7 @@
               ]
             },
             "Export": {
-              "Name": "sls-baap-academic-api-dev-HttpApiUrl"
+              "Name": "sls-baap-academic-api-prod-HttpApiUrl"
             }
           }
         }
@@ -447,13 +447,13 @@
             "resolvedMethod": "ANY"
           }
         ],
-        "name": "baap-academic-api-dev-api",
+        "name": "baap-academic-api-prod-api",
         "package": {},
         "memory": 256,
         "timeout": 6,
         "runtime": "nodejs16.x",
         "vpc": {},
-        "versionLogicalId": "ApiLambdaVersion3RuItXyzYrDScx1tWHo7Sk2gTxyw7POOfdsqWLM"
+        "versionLogicalId": "ApiLambdaVersion2HLIaHwpkweXVugeEXeBd8k8lTqZCuo2VqbDTDryHK8"
       }
     },
     "configValidationMode": "warn",
@@ -476,7 +476,7 @@
     "artifact": "C:\\Users\\Rao Ghuge\\Desktop\\trainies app\\Academics\\baap-academic-service\\.serverless\\baap-academic-api.zip"
   },
   "package": {
-    "artifactDirectoryName": "serverless/baap-academic-api/dev/1721208269366-2024-07-17T09:24:29.366Z",
+    "artifactDirectoryName": "serverless/baap-academic-api/prod/1721208039825-2024-07-17T09:20:39.825Z",
     "artifact": "baap-academic-api.zip"
   }
 }
