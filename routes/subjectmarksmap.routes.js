@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/subjectmarksmap.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const subjectMarksMapIdModel = require("../schema/subjectmarksmap.schema")
 
 router.post(
     "/",
@@ -124,6 +125,48 @@ router.get("/getSubject/groupId/:groupId", async (req, res) => {
     };
     const serviceResponse = await service.getAllSubject(groupId, criteria);
     requestResponsehelper.sendResponse(res, serviceResponse);
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const subjectMarksMapId = req.body.subjectMarksMap;
+
+        if (!Array.isArray(subjectMarksMapId) || subjectMarksMapId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty subjectMarksMapId array",
+            });
+        }
+
+        const numericIds = subjectMarksMapId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${subjectMarksMapId}`);
+            }
+            return num;
+        });
+
+        const result = await subjectMarksMapIdModel.deleteMany({
+            groupId: groupId,
+            subjectMarksMapId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
 });
 
 module.exports = router;

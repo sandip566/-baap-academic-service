@@ -611,4 +611,48 @@ router.put("/assign-examRollNo/groupId/:groupId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const studentAdmissionId = req.body.studentAdmission;
+
+        if (!Array.isArray(studentAdmissionId) || studentAdmissionId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty studentAdmissionId array",
+            });
+        }
+
+        const numericIds = studentAdmissionId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${studentAdmissionId}`);
+            }
+            return num;
+        });
+
+        const result = await Student.deleteMany({
+            groupId: groupId,
+            studentAdmissionId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
+
 module.exports = router;

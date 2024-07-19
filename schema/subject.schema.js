@@ -5,6 +5,9 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
+        subjectId: {
+            type: Number
+        },
         courseId: {
             type: Number,
             required: false,
@@ -17,7 +20,7 @@ const SubjectSchema = new mongoose.Schema(
             type: Number,
             required: false,
         },
-        semesterId:{
+        semesterId: {
             type: Number,
             required: false,
         },
