@@ -11,7 +11,7 @@ const studentAdmissionServices = require("../services/studentAdmission.services"
 const StudentsAdmissionModel = require("../schema/studentAdmission.schema");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const TokenService = require("../services/token.services");
-const feesPaymnetModel = require("../services/feesPayment.services");
+const FeesPaymnetModel = require("../schema/feesPayment.schema");
 router.post(
     "/",
     checkSchema(require("../dto/feesPayment.dto")),
@@ -957,7 +957,7 @@ router.delete("/deleteAll/group/:groupId", async (req, res) => {
             return num;
         });
 
-        const result = await feesPaymnetModel.deleteMany({
+        const result = await FeesPaymnetModel.deleteMany({
             groupId: groupId,
             feesPaymentId: { $in: numericIds },
         });

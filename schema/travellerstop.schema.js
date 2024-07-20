@@ -5,6 +5,10 @@ const TravellerStopSchema = new mongoose.Schema(
         name: {
             type: String,
             required: true,
+        },
+        travellerStopId: {
+            type: Number,
+            required: false,
         }
     },
     { timestamps: true }

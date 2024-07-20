@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/transportcoordinator.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const TransportCoordinatorModel = require("../schema/transportcoordinator.schema")
 
 router.post(
     "/",
@@ -108,5 +109,46 @@ router.put("/groupId/:groupId/transportCoordinatorId/:transportCoordinatorId", a
     }
 });
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const transportCoordinatorId = req.body.transportCoordinator;
+
+        if (!Array.isArray(transportCoordinatorId) || transportCoordinatorId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty transportCoordinatorId array",
+            });
+        }
+
+        const numericIds = transportCoordinatorId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${transportCoordinatorId}`);
+            }
+            return num;
+        });
+
+        const result = await TransportCoordinatorModel.deleteMany({
+            groupId: groupId,
+            transportCoordinatorId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 module.exports = router;
