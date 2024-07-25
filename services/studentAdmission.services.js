@@ -10,6 +10,7 @@ const religionModel = require("../schema/religion.schema");
 const feesPaymentModel = require("../schema/feesPayment.schema");
 const SubjectModel = require("../schema/subjects.schema");
 const categoryModel = require("../schema/categories.schema");
+const DepartmentModel = require("../schema/department.schema")
 // const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const assetrequestModel = require("../schema/assetrequest.schema");
@@ -1789,11 +1790,13 @@ class StudentsAdmmisionService extends BaseService {
                 const CourseName = data.courseName;
                 const className = data.class;
                 const divisionName = data.division;
+                const departmentName = data.department
                 const groupId = data.groupId;
 
-                const { courseId, classId, divisionId } =
+                const { courseId, classId, divisionId, departmentId } =
                     await this.getIdsByCourseName(
                         groupId,
+                        departmentName,
                         CourseName,
                         className,
                         divisionName
@@ -1887,6 +1890,7 @@ class StudentsAdmmisionService extends BaseService {
                     ],
                     courseDetails: [
                         {
+                            departmentId: departmentId,
                             course_id: courseId,
                             class_id: classId,
                             division_id: divisionId,
@@ -1932,8 +1936,16 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async getIdsByCourseName(groupId, CourseName, className, divisionName) {
+    async getIdsByCourseName(groupId, departmentName, CourseName, className, divisionName) {
         try {
+
+            const department = await DepartmentModel.findOne({
+                groupId: groupId,
+                departmentName: departmentName
+            })
+
+            const departmentId = department ? department.departmentId : null
+
             const course = await courseModel.findOne({
                 groupId: groupId,
                 CourseName: CourseName,
@@ -1958,6 +1970,7 @@ class StudentsAdmmisionService extends BaseService {
             return {
                 courseId: courseId,
                 classId: classId,
+                departmentId: departmentId,
                 divisionId: divisionId,
             };
         } catch (error) {
