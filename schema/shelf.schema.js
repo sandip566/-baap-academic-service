@@ -1,10 +1,12 @@
 const mongoose = require("mongoose");
 const shelf = new mongoose.Schema(
   {
-    shelfId: Number,
     groupId: {
       type: Number,
       required: false
+    },
+    shelfId: {
+      type: Number
     },
     location: {
       type: String,

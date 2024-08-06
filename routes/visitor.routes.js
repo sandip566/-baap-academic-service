@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/visitor.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const VisitorModel = require("../schema/visitor.schema")
 
 router.post(
     "/",
@@ -91,4 +92,47 @@ router.put("/groupId/:groupId/visitorId/:visitorId", async (req, res) => {
         res.status(500).json({ error: "Internal Server Error" });
     }
 });
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const visitorId = req.body.visitor;
+
+        if (!Array.isArray(visitorId) || visitorId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty visitorId array",
+            });
+        }
+
+        const numericIds = visitorId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${visitorId}`);
+            }
+            return num;
+        });
+
+        const result = await VisitorModel.deleteMany({
+            groupId: groupId,
+            visitorId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

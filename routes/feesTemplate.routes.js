@@ -8,6 +8,7 @@ const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helpe
 const TokenService = require("../services/token.services");
 const FeesInstallmentModel = require("../schema/feesInstallment.schema");
 const StudentAdmissionModel = require("../schema/studentAdmission.schema");
+const feesTemplateModel = require("../schema/feesTemplate.schema");
 
 router.post(
     "/",
@@ -221,4 +222,46 @@ router.put(
         }
     }
 );
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const feesTemplateId = req.body.feesTemplate;
+
+        if (!Array.isArray(feesTemplateId) || feesTemplateId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty feesTemplateId array",
+            });
+        }
+
+        const numericIds = feesTemplateId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${feesTemplateId}`);
+            }
+            return num;
+        });
+
+        const result = await feesTemplateModel.deleteMany({
+            groupId: groupId,
+            feesTemplateId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

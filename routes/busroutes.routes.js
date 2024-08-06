@@ -5,6 +5,7 @@ const service = require("../services/busroutes.service");
 const { default: mongoose } = require("mongoose");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const BusRoutesModel = require("../schema/busroutes.schema");
 
 router.post(
     "/",
@@ -154,5 +155,45 @@ router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
     }
 });
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const routeId = req.body.route;
 
+        if (!Array.isArray(routeId) || routeId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty routeId array",
+            });
+        }
+
+        const numericIds = routeId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${routeId}`);
+            }
+            return num;
+        });
+
+        const result = await BusRoutesModel.deleteMany({
+            groupId: groupId,
+            routeId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

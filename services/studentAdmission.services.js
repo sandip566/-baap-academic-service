@@ -10,6 +10,7 @@ const religionModel = require("../schema/religion.schema");
 const feesPaymentModel = require("../schema/feesPayment.schema");
 const SubjectModel = require("../schema/subjects.schema");
 const categoryModel = require("../schema/categories.schema");
+const DepartmentModel = require("../schema/department.schema")
 // const FeesTemplateModel = require("../schema/feesTemplate.schema");
 const feesTemplateModel = require("../schema/feesTemplate.schema");
 const assetrequestModel = require("../schema/assetrequest.schema");
@@ -1350,9 +1351,9 @@ class StudentsAdmmisionService extends BaseService {
             const filteredData = servicesWithData.filter((data) => {
                 return (
                     data.groupId === parseInt(groupId) &&
-                        data.empId === query.empId &&
-                        data.academicYear == query.academicYear &&
-                        data.addmissionId == query.addmissionId,
+                    data.empId === query.empId &&
+                    data.academicYear == query.academicYear &&
+                    data.addmissionId == query.addmissionId,
                     true
                 );
             });
@@ -1789,11 +1790,13 @@ class StudentsAdmmisionService extends BaseService {
                 const CourseName = data.courseName;
                 const className = data.class;
                 const divisionName = data.division;
+                const departmentName = data.department
                 const groupId = data.groupId;
 
-                const { courseId, classId, divisionId } =
+                const { courseId, classId, divisionId, departmentId } =
                     await this.getIdsByCourseName(
                         groupId,
+                        departmentName,
                         CourseName,
                         className,
                         divisionName
@@ -1819,25 +1822,11 @@ class StudentsAdmmisionService extends BaseService {
                 );
 
                 const phoneNumber = String(data.phoneNumber).trim();
-                const phone = String(data.contactDetails_phone).trim();
-
-                if (
-                    !phoneNumber ||
-                    !phone ||
-                    phoneNumber.length !== 10 ||
-                    phone.length !== 10
-                ) {
-                    throw new Error("Invalid phone number");
-                }
 
                 const existingPhoneNumberRecord =
                     await studentAdmissionModel.findOne({
-                        $or: [{ phoneNumber: phoneNumber }, { phone: phone }],
+                        $or: [{ phoneNumber: phoneNumber }],
                     });
-
-                // if (existingPhoneNumberRecord) {
-                //     throw new Error("Phone number already exists");
-                // }
 
                 const studentAdmissionId =
                     Date.now() + Math.floor(Math.random() * 1000000);
@@ -1859,7 +1848,6 @@ class StudentsAdmmisionService extends BaseService {
                     password: data.password,
                     phoneNumber: phoneNumber,
                     profile_img: data.profile_img,
-                    // religion: data.religion,
                     religion: religionId,
                     roleId: data.roleId,
                     title: data.title,
@@ -1883,7 +1871,7 @@ class StudentsAdmmisionService extends BaseService {
                     ],
                     contactDetails: [
                         {
-                            phone: phone,
+                            phone: phoneNumber,
                             email: data.contactDetails_email,
                             whats_app: data.contactDetails_whats_app,
                             facebook: data.contactDetails_facebook,
@@ -1902,10 +1890,11 @@ class StudentsAdmmisionService extends BaseService {
                     ],
                     courseDetails: [
                         {
+                            departmentId: departmentId,
                             course_id: courseId,
                             class_id: classId,
                             division_id: divisionId,
-                            subjects: data.subjects.split(","),
+                            subjects: data.subjects//.split(",") || [],
                         },
                     ],
                     feesDetails: [
@@ -1947,8 +1936,16 @@ class StudentsAdmmisionService extends BaseService {
         }
     }
 
-    async getIdsByCourseName(groupId, CourseName, className, divisionName) {
+    async getIdsByCourseName(groupId, departmentName, CourseName, className, divisionName) {
         try {
+
+            const department = await DepartmentModel.findOne({
+                groupId: groupId,
+                departmentName: departmentName
+            })
+
+            const departmentId = department ? department.departmentId : null
+
             const course = await courseModel.findOne({
                 groupId: groupId,
                 CourseName: CourseName,
@@ -1957,7 +1954,6 @@ class StudentsAdmmisionService extends BaseService {
             const courseId = course ? course.courseId : null;
 
             const classInfo = await ClassModel.findOne({
-                // courseId:course.courseId,
                 groupId: groupId,
                 name: className,
             });
@@ -1974,6 +1970,7 @@ class StudentsAdmmisionService extends BaseService {
             return {
                 courseId: courseId,
                 classId: classId,
+                departmentId: departmentId,
                 divisionId: divisionId,
             };
         } catch (error) {
@@ -1984,18 +1981,12 @@ class StudentsAdmmisionService extends BaseService {
     async getReligionId(religion, groupId) {
         religion = religion;
         groupId = groupId;
-        console.log("data religion ,group", religion, groupId);
         let religionName = await religionModel.findOne({
             religion: { $regex: new RegExp(religion, "i") },
             groupId: groupId,
         });
 
-        if (!religionName) {
-            throw new Error(`Religion with provided criteria not found`);
-        }
-
-        console.log("religionName", religionName.religionId);
-        const religionId = religionName.religionId;
+        const religionId = religionName ? religionName.religionId : null;
         return {
             religionId,
         };
@@ -2003,17 +1994,12 @@ class StudentsAdmmisionService extends BaseService {
     async getCategoryId(name, groupId) {
         name = name;
         groupId = groupId;
-        console.log("name,groupId", name, groupId);
         let casteName = await CategoriesModel.findOne({
             name: { $regex: new RegExp(name, "i") },
             groupId: groupId,
         });
 
-        if (!casteName) {
-            throw new Error(`caste with provided criteria not found`);
-        }
-
-        const categoriseId = casteName.categoriseId;
+        const categoriseId = casteName ? casteName.categoriseId : null;
         return {
             categoriseId,
         };
@@ -2021,17 +2007,12 @@ class StudentsAdmmisionService extends BaseService {
     async getAcademicYear(year, groupId) {
         year = year;
         groupId = groupId;
-        console.log("year,groupId", year, groupId);
         let academicYearName = await AcademicYearModel.findOne({
             year: { $regex: new RegExp(year, "i") },
             groupId: groupId,
         });
 
-        if (!academicYearName) {
-            throw new Error(`academicYear with provided criteria not found`);
-        }
-
-        const academicYearId = academicYearName.academicYearId;
+        const academicYearId = academicYearName ? academicYearName.academicYearId : null;
         return {
             academicYearId,
         };
@@ -2182,7 +2163,7 @@ class StudentsAdmmisionService extends BaseService {
             throw error;
         }
     }
-    
+
     async assignExaminationNo(groupId, criteria, newData) {
         const groupIdNum = Number(groupId);
         const classIdNum = Number(criteria.classId);

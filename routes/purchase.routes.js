@@ -157,4 +157,46 @@ router.post("/bulkUpload", async (req, res, next) => {
     }
 });
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const purchaseId = req.body.purchase;
+
+        if (!Array.isArray(purchaseId) || purchaseId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty purchaseId array",
+            });
+        }
+
+        const numericIds = purchaseId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${purchaseId}`);
+            }
+            return num;
+        });
+
+        const result = await PurchaseModel.deleteMany({
+            groupId: groupId,
+            purchaseId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

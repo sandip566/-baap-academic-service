@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const verifyToken = require("../middleware/validateToken.middleware");
 const service = require("../services/communication.services");
+const communicationSchema = require("../schema/communication.schema");
 
 const validateChatData = (req, res, next) => {
     const { receiver, sender, message, groupId, senderId, receiverId } = req.body;
@@ -60,6 +61,48 @@ router.delete('/delete-chat/:chatId', async (req, res) => {
         res.json(deletedChat);
     } catch (error) {
         res.status(500).json({ error: error.message });
+    }
+});
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const communicationId = req.body.communication;
+
+        if (!Array.isArray(communicationId) || communicationId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty communicationId array",
+            });
+        }
+
+        const numericIds = communicationId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${communicationId}`);
+            }
+            return num;
+        });
+
+        const result = await communicationSchema.deleteMany({
+            groupId: groupId,
+            communicationId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
     }
 });
 

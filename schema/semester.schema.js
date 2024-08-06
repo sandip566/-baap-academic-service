@@ -6,6 +6,9 @@ const SemesterSchema = new mongoose.Schema(
             type: Number,
             required: true,
         },
+        semesterId: {
+            type: Number
+        },
         name: {
             type: String,
             required: true,

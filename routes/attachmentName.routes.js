@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/attachmentName.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const AttachmentNameModel = require("../schema/attachmentName.schema");
 
 router.post(
     "/",
@@ -102,6 +103,46 @@ router.put("/groupId/:groupId/attachmentId/:attachmentId", async (req, res) => {
 });
 
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const attachmentId = req.body.attachment;
 
+        if (!Array.isArray(attachmentId) || attachmentId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty attachmentId array",
+            });
+        }
+
+        const numericIds = attachmentId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${attachmentId}`);
+            }
+            return num;
+        });
+
+        const result = await AttachmentNameModel.deleteMany({
+            groupId: groupId,
+            attachmentId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 module.exports = router;

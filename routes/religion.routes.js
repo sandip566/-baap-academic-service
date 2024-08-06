@@ -5,6 +5,7 @@ const service = require("../services/religion.services");
 const requestResponseHelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const validationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const religionModel = require("../schema/religion.schema")
 
 router.post(
     "/",
@@ -137,4 +138,47 @@ router.get("/:id", async (req, res) => {
     const serviceResponse = await service.getById(req.params.id);
     requestResponseHelper.sendResponse(res, serviceResponse);
 });
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const religionId = req.body.religion;
+
+        if (!Array.isArray(religionId) || religionId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty religionId array",
+            });
+        }
+
+        const numericIds = religionId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${religionId}`);
+            }
+            return num;
+        });
+
+        const result = await religionModel.deleteMany({
+            groupId: groupId,
+            religionId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
+
 module.exports = router;

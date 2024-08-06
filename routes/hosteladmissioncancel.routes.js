@@ -5,6 +5,8 @@ const service = require("../services/hosteladmissioncancel.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
 const TokenService = require("../services/token.services");
+const HostelAdmissionModel = require("../schema/hosteladmissioncancel.schema");
+
 
 router.post(
     "/",
@@ -82,4 +84,45 @@ router.get("/all/hostelAdmissionCancel", async (req, res) => {
     requestResponsehelper.sendResponse(res, serviceResponse);
 });
 
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const hostelAdmissionCancelId = req.body.hostelAdmissionCancel;
+
+        if (!Array.isArray(hostelAdmissionCancelId) || hostelAdmissionCancelId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty hostelAdmissionCancelId array",
+            });
+        }
+
+        const numericIds = hostelAdmissionCancelId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${hostelAdmissionCancelId}`);
+            }
+            return num;
+        });
+
+        const result = await HostelAdmissionModel.deleteMany({
+            groupId: groupId,
+            hostelAdmissionCancelId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 module.exports = router;

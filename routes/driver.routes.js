@@ -4,6 +4,7 @@ const { checkSchema } = require("express-validator");
 const service = require("../services/driver.service");
 const requestResponsehelper = require("@baapcompany/core-api/helpers/requestResponse.helper");
 const ValidationHelper = require("@baapcompany/core-api/helpers/validation.helper");
+const DriverModel = require("../schema/driver.schema");
 
 router.post(
     "/",
@@ -11,6 +12,11 @@ router.post(
     async (req, res, next) => {
         if (ValidationHelper.requestValidationErrors(req, res)) {
             return;
+        }
+        const { userId, groupId } = req.body;
+        const existingUser = await service.findByUserId(groupId, userId);
+        if (existingUser) {
+            return res.status(400).json({ error: "This user is already exists" });
         }
         const driverId = +Date.now();
         req.body.driverId = driverId
@@ -96,5 +102,47 @@ router.get("/groupId/:groupId/userId/:userId", async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 })
+
+router.delete("/deleteAll/group/:groupId", async (req, res) => {
+    try {
+        let groupId = req.params.groupId;
+        const driverId = req.body.driver;
+
+        if (!Array.isArray(driverId) || driverId.length === 0) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid or empty driverId array",
+            });
+        }
+
+        const numericIds = driverId.map((id) => {
+            const num = parseFloat(id);
+            if (isNaN(num)) {
+                throw new Error(`Invalid numeric ID: ${driverId}`);
+            }
+            return num;
+        });
+
+        const result = await DriverModel.deleteMany({
+            groupId: groupId,
+            driverId: { $in: numericIds },
+        });
+
+        if (result.deletedCount === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No records found to delete",
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: `${result.deletedCount} records deleted successfully`,
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ success: false, message: error.message });
+    }
+});
 
 module.exports = router;
