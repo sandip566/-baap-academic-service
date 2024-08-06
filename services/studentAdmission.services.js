@@ -1375,14 +1375,14 @@ class StudentsAdmmisionService extends BaseService {
     }
     async getIndividualStudentData(groupId, query) {
         try {
-            const userId = query.userId;
-            const academicYear = query.academicYear;
-
+            const userId = Number(query.userId);
+            const academicYear = Number(query.academicYear);
+    
             let data = await StudentsAdmissionModel.aggregate([
                 {
                     $match: {
                         groupId: Number(groupId),
-                        userId: Number(userId),
+                        userId: userId
                     },
                 },
                 {
@@ -1438,26 +1438,16 @@ class StudentsAdmmisionService extends BaseService {
                         let: {
                             admissionId: "$addmissionId",
                             userId: "$userId",
-                            academicYear: academicYear,
+                            academicYear: { $toString: "$academicYear" }, // Convert academicYear to string for comparison
                         },
                         pipeline: [
                             {
                                 $match: {
                                     $expr: {
                                         $and: [
-                                            {
-                                                $eq: [
-                                                    "$addmissionId",
-                                                    "$$admissionId",
-                                                ],
-                                            },
+                                            { $eq: ["$addmissionId", "$$admissionId"] },
                                             { $eq: ["$userId", "$$userId"] },
-                                            {
-                                                $eq: [
-                                                    "$academicYear",
-                                                    "$$academicYear",
-                                                ],
-                                            },
+                                            { $eq: [{ $toString: "$academicYear" }, "$$academicYear"] }, // Compare as string
                                         ],
                                     },
                                 },
@@ -1483,10 +1473,7 @@ class StudentsAdmmisionService extends BaseService {
                         lastRemainingAmount: {
                             $ifNull: [
                                 {
-                                    $arrayElemAt: [
-                                        "$feespayments.remainingAmount",
-                                        0,
-                                    ],
+                                    $arrayElemAt: ["$feespayments.remainingAmount", 0],
                                 },
                                 0,
                             ],
@@ -1494,7 +1481,7 @@ class StudentsAdmmisionService extends BaseService {
                     },
                 },
             ]);
-
+    
             const response = {
                 status: "Success",
                 data: {
@@ -1502,13 +1489,14 @@ class StudentsAdmmisionService extends BaseService {
                     totalItemsCount: data.length,
                 },
             };
-
+    
             return response;
         } catch (error) {
             console.error("Error:", error);
             throw error;
         }
     }
+    
 
     async findLatestAdmission() {
         try {
